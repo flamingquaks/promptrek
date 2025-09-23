@@ -1,0 +1,294 @@
+# Advanced Template Features
+
+Agent Prompt Mapper supports powerful advanced template features that allow you to create flexible, maintainable prompt configurations.
+
+## Variable Substitution
+
+Variables allow you to create reusable templates that can be customized for different projects or contexts.
+
+### Basic Variable Syntax
+
+Use triple braces to define variable placeholders in your UPF files:
+
+```yaml
+metadata:
+  title: "{{{ PROJECT_NAME }}} Assistant"
+  description: "AI assistant for {{{ PROJECT_NAME }}}"
+
+instructions:
+  general:
+    - "Follow {{{ PROJECT_NAME }}} coding standards"
+    - "Contact {{{ AUTHOR_EMAIL }}} for questions"
+
+variables:
+  PROJECT_NAME: "MyProject" 
+  AUTHOR_EMAIL: "team@example.com"
+```
+
+### Environment Variables
+
+You can also reference environment variables using `${}` syntax:
+
+```yaml
+metadata:
+  author: "${AUTHOR_NAME}"
+  
+instructions:
+  general:
+    - "Deploy to ${ENVIRONMENT} environment"
+```
+
+### CLI Variable Overrides
+
+Override variables from the command line using `-V` or `--var`:
+
+```bash
+apm generate --editor claude --output ./output project.apm.yaml \
+  -V PROJECT_NAME="CustomProject" \
+  -V AUTHOR_EMAIL="custom@example.com"
+```
+
+## Conditional Instructions
+
+Conditional instructions allow you to provide different instructions based on the target editor or other conditions.
+
+### Basic Conditionals
+
+```yaml
+conditions:
+  - if: "EDITOR == \"claude\""
+    then:
+      instructions:
+        general:
+          - "Claude-specific: Provide detailed explanations"
+          - "Claude-specific: Focus on code clarity"
+      examples:
+        claude_example: "// Example optimized for Claude"
+
+  - if: "EDITOR == \"continue\""
+    then:
+      instructions:
+        general:
+          - "Continue-specific: Generate comprehensive completions"
+```
+
+### Supported Conditions
+
+- **Equality**: `EDITOR == "claude"`
+- **Inequality**: `EDITOR != "copilot"`  
+- **List membership**: `EDITOR in ["claude", "cursor"]`
+- **Boolean variables**: `DEBUG_MODE` (checks if variable is truthy)
+
+### Conditional Examples and Variables
+
+Conditionals can modify any part of your configuration:
+
+```yaml
+conditions:
+  - if: "PROJECT_TYPE == \"mobile\""
+    then:
+      examples:
+        mobile_component: "const Screen = () => <View><Text>Hello</Text></View>;"
+      variables:
+        PLATFORM: "React Native"
+
+  - if: "ENVIRONMENT == \"production\""
+    then:
+      instructions:
+        general:
+          - "Use production-safe coding practices"
+          - "Include comprehensive error handling"
+```
+
+## Import System
+
+The import system allows you to share common configurations across multiple projects.
+
+### Basic Import
+
+Create a base configuration file:
+
+```yaml
+# base-config.apm.yaml
+schema_version: "1.0.0"
+
+metadata:
+  title: "Base Configuration"
+  description: "Shared configuration"
+  version: "1.0.0"
+  author: "team@company.com"
+  created: "2024-01-01"
+  updated: "2024-01-01"
+
+targets:
+  - claude
+
+instructions:
+  general:
+    - "Follow clean code principles"
+    - "Use meaningful variable names"
+  code_style:
+    - "Use 2-space indentation"
+    - "Prefer const over let"
+
+examples:
+  util_function: "const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);"
+
+variables:
+  STYLE_GUIDE: "Company Standard"
+  INDENT_SIZE: "2"
+```
+
+Then import it in your main file:
+
+```yaml
+# project.apm.yaml
+schema_version: "1.0.0"
+
+metadata:
+  title: "My Project"
+  description: "Project with shared configuration"
+  # ... other metadata
+
+targets:
+  - claude
+
+imports:
+  - path: "base-config.apm.yaml"
+    prefix: "shared"
+
+instructions:
+  general:
+    - "Project-specific instruction"
+  testing:
+    - "Write comprehensive tests"
+```
+
+### Import with Prefix
+
+The `prefix` option namespaces imported content to avoid conflicts:
+
+- Instructions get prefixed: `[shared] Follow clean code principles`
+- Examples get prefixed: `shared_util_function`  
+- Variables get prefixed: `shared_STYLE_GUIDE`
+
+### Import Behavior
+
+- **Instructions**: Imported instructions are merged with existing ones
+- **Examples**: Imported examples are added with prefixed names
+- **Variables**: Imported variables are added with prefixed names (unless already present)
+- **Metadata**: Metadata from imported files is ignored (only the main file's metadata is used)
+
+### Relative Paths
+
+Import paths are relative to the importing file:
+
+```
+project/
+├── config/
+│   └── base.apm.yaml
+├── frontend/
+│   └── frontend.apm.yaml  # imports: path: "../config/base.apm.yaml"
+└── backend/
+    └── backend.apm.yaml   # imports: path: "../config/base.apm.yaml"
+```
+
+### Circular Import Protection
+
+The import system automatically detects and prevents circular imports:
+
+```yaml
+# file-a.apm.yaml
+imports:
+  - path: "file-b.apm.yaml"
+
+# file-b.apm.yaml  
+imports:
+  - path: "file-a.apm.yaml"  # This will cause an error
+```
+
+## Combining Features
+
+All advanced features work together seamlessly:
+
+```yaml
+# base.apm.yaml
+instructions:
+  general:
+    - "Use {{{ CODING_STYLE }}} coding style"
+
+conditions:
+  - if: "EDITOR == \"claude\""
+    then:
+      instructions:
+        general:
+          - "Claude: Use {{{ AI_APPROACH }}} approach"
+
+variables:
+  CODING_STYLE: "clean"
+  AI_APPROACH: "detailed"
+
+# main.apm.yaml
+imports:
+  - path: "base.apm.yaml"
+    prefix: "base"
+
+conditions:
+  - if: "EDITOR == \"claude\""
+    then:
+      instructions:
+        general:
+          - "Main: Use {{{ MAIN_APPROACH }}} methodology"
+
+variables:
+  PROJECT_NAME: "AdvancedProject"
+  MAIN_APPROACH: "comprehensive"
+```
+
+Generate with overrides:
+
+```bash
+apm generate --editor claude --output ./output main.apm.yaml \
+  -V PROJECT_NAME="CustomProject" \
+  -V base_CODING_STYLE="strict" \
+  -V base_AI_APPROACH="concise"
+```
+
+This will:
+1. Import base configuration with "base" prefix
+2. Apply variable substitution to both files
+3. Process conditionals for Claude editor
+4. Override variables via CLI
+5. Merge all instructions and content
+
+## Best Practices
+
+### Variables
+- Use UPPER_CASE for variable names
+- Provide sensible defaults in the `variables` section
+- Use descriptive variable names: `PROJECT_NAME` not `PN`
+
+### Conditionals  
+- Keep conditions simple and readable
+- Use editor-specific instructions sparingly - most instructions should be universal
+- Test your conditionals with different editors
+
+### Imports
+- Use prefixes to avoid naming conflicts
+- Keep shared configurations focused and minimal
+- Document your import structure in README files
+- Use relative paths for portability
+
+### Organization
+```
+project/
+├── shared/
+│   ├── base-coding-standards.apm.yaml
+│   ├── base-testing.apm.yaml
+│   └── base-typescript.apm.yaml
+├── frontend/
+│   └── frontend.apm.yaml
+├── backend/  
+│   └── backend.apm.yaml
+└── README.md  # Document your configuration structure
+```

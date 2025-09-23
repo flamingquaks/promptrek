@@ -52,7 +52,15 @@ class UPFParser:
         except Exception as e:
             raise UPFParsingError(f"Error reading file {file_path}: {e}")
         
-        return self.parse_dict(data, str(file_path))
+        prompt = self.parse_dict(data, str(file_path))
+        
+        # Process imports if present
+        if prompt.imports:
+            from ..utils import ImportProcessor
+            import_processor = ImportProcessor()
+            prompt = import_processor.process_imports(prompt, file_path.parent)
+        
+        return prompt
 
     def parse_dict(self, data: Dict[str, Any], source: str = "<dict>") -> UniversalPrompt:
         """

@@ -137,6 +137,76 @@ This project is actively developing! We welcome:
 
 See the [Implementation Roadmap](./docs/IMPLEMENTATION_ROADMAP.md) for planned features and current progress.
 
+## 📚 Documentation
+
+### Core Documentation
+- **[Getting Started Guide](./GETTING_STARTED.md)** - Comprehensive setup and usage guide
+- **[Advanced Template Features](./docs/ADVANCED_FEATURES.md)** - Variables, conditionals, and imports
+- **[Editor Adapters](./docs/ADAPTERS.md)** - Detailed guide to all supported AI editors
+- **[Implementation Roadmap](./docs/IMPLEMENTATION_ROADMAP.md)** - Development progress and plans
+
+### Key Features
+
+#### 🔄 Variable Substitution
+Use template variables to create reusable, customizable prompts:
+
+```yaml
+metadata:
+  title: "{{{ PROJECT_NAME }}} Assistant"
+  author: "{{{ AUTHOR_EMAIL }}}"
+
+variables:
+  PROJECT_NAME: "MyProject"
+  AUTHOR_EMAIL: "team@example.com"
+```
+
+Override variables from CLI:
+```bash
+apm generate --editor claude project.apm.yaml \
+  -V PROJECT_NAME="CustomProject" \
+  -V AUTHOR_EMAIL="custom@example.com"
+```
+
+#### 🎯 Conditional Instructions
+Provide editor-specific instructions:
+
+```yaml
+conditions:
+  - if: "EDITOR == \"claude\""
+    then:
+      instructions:
+        general:
+          - "Claude: Provide detailed explanations"
+  - if: "EDITOR == \"continue\""
+    then:
+      instructions:
+        general:
+          - "Continue: Generate comprehensive completions"
+```
+
+#### 📦 Import System
+Share common configurations across projects:
+
+```yaml
+imports:
+  - path: "shared/base-config.apm.yaml"
+    prefix: "shared"
+
+# Imported instructions get prefixed: [shared] Follow coding standards
+# Imported examples get prefixed: shared_example_name
+# Imported variables get prefixed: shared_VARIABLE_NAME
+```
+
+#### 🎨 Multiple Editor Support
+Generate optimized configurations for all major AI coding assistants:
+
+- **Claude Code** → `.claude/context.md`
+- **Continue** → `.continue/config.json` 
+- **Cline** → `.cline/config.json` + `cline-context.md`
+- **Codeium** → `.codeium/context.json` + `.codeiumrc`
+- **GitHub Copilot** → `.github/copilot-instructions.md`
+- **Cursor** → `.cursorrules`
+
 ## 📄 License
 
 MIT License - see [LICENSE](LICENSE) file for details.

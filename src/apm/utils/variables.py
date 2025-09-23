@@ -69,14 +69,14 @@ class VariableSubstitution:
         if additional_variables:
             variables.update(additional_variables)
         
-        # Create a copy of the prompt data
-        prompt_dict = prompt.model_dump()
+        # Create a copy of the prompt data using aliases for proper reconstruction
+        prompt_dict = prompt.model_dump(by_alias=True)
         
         # Substitute variables in all string fields recursively
         prompt_dict = self._substitute_dict_recursive(prompt_dict, variables, env_variables, strict)
         
         # Create a new prompt instance with substituted values
-        return UniversalPrompt(**prompt_dict)
+        return UniversalPrompt.model_validate(prompt_dict)
     
     def get_undefined_variables(self, content: str, variables: Dict[str, Any]) -> List[str]:
         """
