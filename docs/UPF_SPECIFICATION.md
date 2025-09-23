@@ -50,6 +50,14 @@ instructions:
   security: [string]               # Security considerations
   performance: [string]            # Performance guidelines
 
+# Workflows and automation (optional)
+workflows:
+  development: [string]            # Development workflow steps
+  review: [string]                 # Code review workflow
+  testing: [string]               # Testing workflow steps
+  deployment: [string]             # Deployment workflow
+  collaboration: [string]          # Team collaboration workflows
+
 # Code examples and templates (optional)
 examples:
   example_name: string             # Code example in markdown format
@@ -123,6 +131,9 @@ List of AI editors/tools that this prompt configuration supports.
 - `copilot`: GitHub Copilot
 - `cursor`: Cursor editor
 - `continue`: Continue extension
+- `claude_code`: Claude Code
+- `kiro`: Kiro AI assistant
+- `cline`: Cline terminal assistant
 - `codeium`: Codeium
 - `tabnine`: Tabnine
 - `amazon_q`: Amazon Q (formerly CodeWhisperer)
@@ -207,6 +218,51 @@ instructions:
     - "Sanitize all user inputs"
     - "Use parameterized queries for database operations"
     - "Implement proper authentication and authorization"
+```
+
+### workflows (optional)
+
+Defines development workflows and automation guidelines that AI assistants should understand and support.
+
+**Categories**:
+- `development`: Development workflow steps and practices
+- `review`: Code review workflow and standards
+- `testing`: Testing workflow and automation
+- `deployment`: Deployment workflow and procedures
+- `collaboration`: Team collaboration workflows
+
+**Example**:
+```yaml
+workflows:
+  development:
+    - "Start by creating a feature branch from main"
+    - "Write tests before implementing functionality (TDD)"
+    - "Make small, focused commits with descriptive messages"
+    - "Run linting and tests before pushing changes"
+  
+  review:
+    - "Create pull requests with clear descriptions and context"
+    - "Request reviews from at least two team members"
+    - "Address all review comments before merging"
+    - "Ensure CI/CD checks pass before merging"
+  
+  testing:
+    - "Run unit tests locally before committing"
+    - "Ensure integration tests pass in CI environment"
+    - "Perform manual testing for UI changes"
+    - "Update test documentation when adding new test scenarios"
+  
+  deployment:
+    - "Deploy to staging environment first"
+    - "Run smoke tests after deployment"
+    - "Monitor application logs and metrics"
+    - "Have rollback plan ready for production deployments"
+  
+  collaboration:
+    - "Use standardized commit message format"
+    - "Update team on progress during daily standups"
+    - "Document architectural decisions in ADRs"
+    - "Share knowledge through code comments and documentation"
 ```
 
 ### examples (optional)
@@ -368,8 +424,9 @@ imports:
 2. **Schema Version**: Must be a valid semantic version string
 3. **Targets**: Must contain at least one supported editor name
 4. **Instructions**: Must contain at least one instruction category with at least one instruction
-5. **Variables**: Variable names must be valid identifiers (alphanumeric + underscore)
-6. **Imports**: Imported files must exist and be valid UPF files
+5. **Workflows**: All workflow categories are optional, but if present, must contain at least one workflow step
+6. **Variables**: Variable names must be valid identifiers (alphanumeric + underscore)
+7. **Imports**: Imported files must exist and be valid UPF files
 
 ## Example Complete File
 
@@ -422,6 +479,25 @@ instructions:
     - "Separate concerns into different modules"
     - "Use custom hooks for reusable React logic"
     - "Keep components small and focused on a single responsibility"
+
+workflows:
+  development:
+    - "Create feature branches from main for new features"
+    - "Write component tests before implementing React components"
+    - "Use Storybook for component documentation and testing"
+    - "Run npm run lint and npm run test before committing"
+  
+  review:
+    - "Create detailed PR descriptions with screenshots for UI changes"
+    - "Ensure all TypeScript types are properly defined"
+    - "Check that new components are properly exported and documented"
+    - "Verify accessibility compliance for new UI components"
+  
+  testing:
+    - "Write unit tests for all business logic functions"
+    - "Create integration tests for user workflows"
+    - "Test components in isolation using React Testing Library"
+    - "Ensure e2e tests cover critical user paths"
 
 examples:
   react_component: |

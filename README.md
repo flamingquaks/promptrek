@@ -66,6 +66,9 @@ All planning documents are available in the [`docs/`](./docs/) directory:
 - **GitHub Copilot** - `.github/copilot-instructions.md`
 - **Cursor** - `.cursorrules`
 - **Continue** - `.continue/config.json`
+- **Claude Code** - Context-based prompts
+- **Kiro** - AI-powered code assistance
+- **Cline** - Terminal-based AI coding
 - **Codeium** - Context-based prompts
 - **Tabnine** - Team-specific configurations
 - **Amazon Q** - Comment-based prompts

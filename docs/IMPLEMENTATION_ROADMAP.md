@@ -114,6 +114,9 @@
 **Goal**: Support more editors and prepare for release
 
 #### 5.1 Additional Editor Support
+- [ ] Add Claude Code support
+- [ ] Add Kiro support
+- [ ] Add Cline support
 - [ ] Add Codeium support
 - [ ] Add Tabnine support
 - [ ] Add Amazon Q support
@@ -132,7 +135,7 @@
 - [ ] Record demo videos
 
 **Deliverables**:
-- Support for 6+ AI editors
+- Support for 10+ AI editors
 - Polished user experience
 - Complete documentation
 - Ready for public release
@@ -337,7 +340,7 @@ def init(template):
 ## Success Metrics
 
 ### Development Metrics
-- [ ] All planned editors supported (6+)
+- [ ] All planned editors supported (10+)
 - [ ] Test coverage >90%
 - [ ] Documentation coverage 100%
 - [ ] Zero critical bugs in release

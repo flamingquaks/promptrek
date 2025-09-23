@@ -161,6 +161,55 @@ This is a React application...
 - Code generation and explanation
 - Refactoring suggestions
 
+### 8. Claude Code
+
+**Description**: AI coding assistant powered by Anthropic's Claude
+**Prompt Format**:
+- Context-based prompts
+- Natural language instructions
+- Project-specific configurations
+
+**Features**:
+- Advanced reasoning capabilities
+- Code understanding and explanation
+- Multi-language support
+- Safety-focused AI assistance
+
+### 9. Kiro
+
+**Description**: AI-powered code assistance and automation
+**Prompt Format**:
+- Configuration-based prompts
+- Workflow automation rules
+- Context-aware suggestions
+
+**Features**:
+- Intelligent code suggestions
+- Automated code reviews
+- Development workflow integration
+- Team collaboration features
+
+### 10. Cline
+
+**Description**: Terminal-based AI coding assistant
+**Prompt Format**:
+- Command-line prompts
+- Terminal integration
+- Script-based configurations
+
+**Features**:
+- CLI-native interface
+- Terminal workflow integration
+- Script automation
+- Command-line productivity tools
+- IDE-integrated prompts
+
+**Features**:
+- Deep IDE integration
+- Language-specific assistance
+- Code generation and explanation
+- Refactoring suggestions
+
 ## Common Patterns
 
 ### File-Based Configuration
