@@ -17,6 +17,6 @@ from .core.validator import UPFValidator
 
 __all__ = [
     "UniversalPrompt",
-    "UPFParser", 
+    "UPFParser",
     "UPFValidator",
 ]

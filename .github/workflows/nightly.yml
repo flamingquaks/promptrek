@@ -1,0 +1,102 @@
+name: Nightly Tests
+
+on:
+  schedule:
+    # Run every night at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+jobs:
+  compatibility-test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ['3.8', '3.12']
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[dev]"
+    
+    - name: Run tests
+      run: |
+        python -m pytest tests/ -x --tb=short
+
+  dependency-check:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install with latest dependencies
+      run: |
+        python -m pip install --upgrade pip
+        # Install with latest versions of dependencies
+        pip install --upgrade click PyYAML Jinja2 pydantic
+        pip install -e ".[dev]"
+    
+    - name: Run tests with latest deps
+      run: |
+        python -m pytest tests/ --tb=short
+    
+    - name: Check for security vulnerabilities
+      run: |
+        pip install safety
+        safety check
+
+  performance-test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[dev]"
+        pip install memory-profiler
+    
+    - name: Performance test
+      run: |
+        echo "Running performance tests..."
+        # Test CLI performance with sample files
+        time python -m apm.cli.main --help
+        
+        # Create a large test file using here document
+        cat > large-test.apm.yaml << 'EOF'
+        schema_version: "1.0.0"
+        metadata:
+          title: "Large Test"
+          description: "Performance test"
+          version: "1.0.0"
+          author: "test@example.com"
+          created: "2024-01-01"
+          updated: "2024-01-01"
+        targets: ["copilot", "cursor", "continue"]
+        context:
+          project_type: "test"
+          technologies: ["python", "typescript", "javascript"]
+        instructions:
+          general: ["Write high-quality code", "Follow best practices", "Add comprehensive tests"]
+        EOF
+        
+        # Test parsing performance
+        time python -m apm.cli.main validate large-test.apm.yaml
+        time python -m apm.cli.main generate --all --dry-run large-test.apm.yaml

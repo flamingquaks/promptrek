@@ -53,6 +53,12 @@ htmlcov/
 .tox/
 .nox/
 
+# GitHub Actions artifacts
+coverage.xml
+bandit-report.json
+large-test.apm.yaml
+test-project.apm.yaml
+
 # Temporary files
 tmp/
 temp/

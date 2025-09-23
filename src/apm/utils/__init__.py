@@ -1,8 +1,8 @@
 """Utility functions for Agent Prompt Mapper."""
 
-from .variables import VariableSubstitution
 from .conditionals import ConditionalProcessor
 from .imports import ImportProcessor
+from .variables import VariableSubstitution
 
 __all__ = [
     "VariableSubstitution",

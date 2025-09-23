@@ -1,13 +1,13 @@
 """Editor adapters for Agent Prompt Mapper."""
 
 from .base import EditorAdapter
-from .registry import AdapterRegistry, registry
-from .copilot import CopilotAdapter
-from .cursor import CursorAdapter
-from .continue_adapter import ContinueAdapter
 from .claude import ClaudeAdapter
 from .cline import ClineAdapter
 from .codeium import CodeiumAdapter
+from .continue_adapter import ContinueAdapter
+from .copilot import CopilotAdapter
+from .cursor import CursorAdapter
+from .registry import AdapterRegistry, registry
 
 # Register built-in adapters
 registry.register_class("copilot", CopilotAdapter)
@@ -19,12 +19,12 @@ registry.register_class("codeium", CodeiumAdapter)
 
 __all__ = [
     "EditorAdapter",
-    "AdapterRegistry", 
+    "AdapterRegistry",
     "registry",
     "CopilotAdapter",
-    "CursorAdapter", 
+    "CursorAdapter",
     "ContinueAdapter",
     "ClaudeAdapter",
     "ClineAdapter",
-    "CodeiumAdapter"
+    "CodeiumAdapter",
 ]
