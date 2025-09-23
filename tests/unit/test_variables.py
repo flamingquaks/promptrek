@@ -145,3 +145,22 @@ class TestVariableSubstitution:
         assert result["title"] == "Project TestApp"
         assert result["config"]["author"] == "Developer"
         assert result["config"]["settings"][1] == "option2 for TestApp"
+    
+    def test_substitute_dict_recursive_with_non_string_values(self):
+        """Test substitution with non-string values."""
+        vs = VariableSubstitution()
+        
+        data = {
+            "number": 42,
+            "boolean": True,
+            "none_value": None,
+            "string": "Value {{{ VAR }}}"
+        }
+        
+        variables = {"VAR": "test"}
+        result = vs._substitute_dict_recursive(data, variables, False, False)
+        
+        assert result["number"] == 42
+        assert result["boolean"] is True
+        assert result["none_value"] is None
+        assert result["string"] == "Value test"
