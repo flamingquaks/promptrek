@@ -79,12 +79,12 @@ def generate_command(
             raise CLIError(f"Failed to generate for {target_editor}: {e}")
 
 
-def _generate_for_editor(prompt, editor: str, output_dir: Path, dry_run: bool, verbose: bool) -> None:
+def _generate_for_editor(prompt, editor: str, output_dir: Path, dry_run: bool, verbose: bool, variables: Optional[dict] = None) -> None:
     """Generate prompts for a specific editor using the adapter system."""
     
     try:
         adapter = registry.get(editor)
-        adapter.generate(prompt, output_dir, dry_run, verbose)
+        adapter.generate(prompt, output_dir, dry_run, verbose, variables)
     except AdapterNotFoundError:
         raise AdapterNotFoundError(f"Editor '{editor}' adapter not implemented yet")
 

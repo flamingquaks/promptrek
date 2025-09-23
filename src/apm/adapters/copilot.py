@@ -4,7 +4,7 @@ GitHub Copilot adapter implementation.
 
 import click
 from pathlib import Path
-from typing import List
+from typing import List, Optional, Dict, Any
 
 from .base import EditorAdapter
 from ..core.models import UniversalPrompt
@@ -24,11 +24,15 @@ class CopilotAdapter(EditorAdapter):
             file_patterns=self._file_patterns
         )
     
-    def generate(self, prompt: UniversalPrompt, output_dir: Path, dry_run: bool = False, verbose: bool = False) -> List[Path]:
+    def generate(self, prompt: UniversalPrompt, output_dir: Path, dry_run: bool = False, 
+                verbose: bool = False, variables: Optional[Dict[str, Any]] = None) -> List[Path]:
         """Generate GitHub Copilot instructions."""
         
+        # Apply variable substitution if supported
+        processed_prompt = self.substitute_variables(prompt, variables)
+        
         # Create content
-        content = self._build_content(prompt)
+        content = self._build_content(processed_prompt)
         
         # Determine output path
         github_dir = output_dir / '.github'

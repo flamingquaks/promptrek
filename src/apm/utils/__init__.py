@@ -1,3 +1,7 @@
 """Utility functions for Agent Prompt Mapper."""
 
-__all__ = []
+from .variables import VariableSubstitution
+
+__all__ = [
+    "VariableSubstitution",
+]

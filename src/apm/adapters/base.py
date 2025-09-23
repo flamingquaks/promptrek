@@ -8,6 +8,7 @@ from typing import List, Dict, Any, Optional
 
 from ..core.models import UniversalPrompt
 from ..core.exceptions import ValidationError
+from ..utils import VariableSubstitution
 
 
 class EditorAdapter(ABC):
@@ -25,9 +26,11 @@ class EditorAdapter(ABC):
         self.name = name
         self.description = description
         self.file_patterns = file_patterns
+        self._variable_substitution = VariableSubstitution()
     
     @abstractmethod
-    def generate(self, prompt: UniversalPrompt, output_dir: Path, dry_run: bool = False, verbose: bool = False) -> List[Path]:
+    def generate(self, prompt: UniversalPrompt, output_dir: Path, dry_run: bool = False, 
+                verbose: bool = False, variables: Optional[Dict[str, Any]] = None) -> List[Path]:
         """
         Generate editor-specific files from a universal prompt.
         
@@ -36,6 +39,7 @@ class EditorAdapter(ABC):
             output_dir: Directory to generate files in
             dry_run: If True, don't create files, just show what would be created
             verbose: Enable verbose output
+            variables: Additional variables for substitution
             
         Returns:
             List of file paths that were created (or would be created in dry run)
@@ -74,3 +78,22 @@ class EditorAdapter(ABC):
             List of variable names required
         """
         return []
+    
+    def substitute_variables(self, prompt: UniversalPrompt, 
+                           variables: Optional[Dict[str, Any]] = None) -> UniversalPrompt:
+        """
+        Apply variable substitution to a prompt if this adapter supports it.
+        
+        Args:
+            prompt: The universal prompt
+            variables: Additional variables to substitute
+            
+        Returns:
+            Prompt with variables substituted (or original if not supported)
+        """
+        if not self.supports_variables():
+            return prompt
+        
+        return self._variable_substitution.substitute_prompt(
+            prompt, variables, env_variables=True, strict=False
+        )
