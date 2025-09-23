@@ -8,7 +8,7 @@ from typing import List, Dict, Any, Optional
 
 from ..core.models import UniversalPrompt
 from ..core.exceptions import ValidationError
-from ..utils import VariableSubstitution
+from ..utils import VariableSubstitution, ConditionalProcessor
 
 
 class EditorAdapter(ABC):
@@ -27,6 +27,7 @@ class EditorAdapter(ABC):
         self.description = description
         self.file_patterns = file_patterns
         self._variable_substitution = VariableSubstitution()
+        self._conditional_processor = ConditionalProcessor()
     
     @abstractmethod
     def generate(self, prompt: UniversalPrompt, output_dir: Path, dry_run: bool = False, 
@@ -97,3 +98,24 @@ class EditorAdapter(ABC):
         return self._variable_substitution.substitute_prompt(
             prompt, variables, env_variables=True, strict=False
         )
+    
+    def process_conditionals(self, prompt: UniversalPrompt,
+                           variables: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """
+        Process conditional instructions if this adapter supports them.
+        
+        Args:
+            prompt: The universal prompt
+            variables: Variables for condition evaluation
+            
+        Returns:
+            Additional content from conditional processing
+        """
+        if not self.supports_conditionals():
+            return {}
+        
+        # Add editor name to variables for condition evaluation
+        eval_variables = variables.copy() if variables else {}
+        eval_variables["EDITOR"] = self.name
+        
+        return self._conditional_processor.process_conditions(prompt, eval_variables)

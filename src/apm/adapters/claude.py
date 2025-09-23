@@ -31,8 +31,11 @@ class ClaudeAdapter(EditorAdapter):
         # Apply variable substitution if supported
         processed_prompt = self.substitute_variables(prompt, variables)
         
+        # Process conditionals if supported
+        conditional_content = self.process_conditionals(processed_prompt, variables)
+        
         # Create content
-        content = self._build_content(processed_prompt)
+        content = self._build_content(processed_prompt, conditional_content)
         
         # Determine output path - Claude works well with context files in .claude directory
         claude_dir = output_dir / '.claude'
@@ -82,7 +85,7 @@ class ClaudeAdapter(EditorAdapter):
         """Claude supports conditional instructions."""
         return True
     
-    def _build_content(self, prompt: UniversalPrompt) -> str:
+    def _build_content(self, prompt: UniversalPrompt, conditional_content: Optional[Dict[str, Any]] = None) -> str:
         """Build Claude Code context content."""
         lines = []
         
@@ -107,42 +110,63 @@ class ClaudeAdapter(EditorAdapter):
             lines.append("")
         
         # Instructions organized for Claude's understanding
-        if prompt.instructions:
+        if prompt.instructions or (conditional_content and "instructions" in conditional_content):
             lines.append("## Development Guidelines")
             
-            if prompt.instructions.general:
+            # Combine original and conditional instructions
+            all_instructions = prompt.instructions if prompt.instructions else None
+            
+            if all_instructions and all_instructions.general:
                 lines.append("### General Principles")
-                for instruction in prompt.instructions.general:
+                for instruction in all_instructions.general:
+                    lines.append(f"- {instruction}")
+                    
+                # Add conditional general instructions
+                if conditional_content and "instructions" in conditional_content and "general" in conditional_content["instructions"]:
+                    for instruction in conditional_content["instructions"]["general"]:
+                        lines.append(f"- {instruction}")
+                lines.append("")
+            elif conditional_content and "instructions" in conditional_content and "general" in conditional_content["instructions"]:
+                lines.append("### General Principles")
+                for instruction in conditional_content["instructions"]["general"]:
                     lines.append(f"- {instruction}")
                 lines.append("")
             
-            if prompt.instructions.code_style:
+            if all_instructions and all_instructions.code_style:
                 lines.append("### Code Style Requirements")
-                for guideline in prompt.instructions.code_style:
+                for guideline in all_instructions.code_style:
                     lines.append(f"- {guideline}")
                 lines.append("")
             
-            if prompt.instructions.testing:
+            if all_instructions and all_instructions.testing:
                 lines.append("### Testing Standards")
-                for guideline in prompt.instructions.testing:
+                for guideline in all_instructions.testing:
                     lines.append(f"- {guideline}")
                 lines.append("")
             
             # Add architecture guidelines if present
-            if hasattr(prompt.instructions, 'architecture') and prompt.instructions.architecture:
+            if all_instructions and hasattr(all_instructions, 'architecture') and all_instructions.architecture:
                 lines.append("### Architecture Guidelines")
-                for guideline in prompt.instructions.architecture:
+                for guideline in all_instructions.architecture:
                     lines.append(f"- {guideline}")
                 lines.append("")
         
         # Examples are very useful for Claude
+        examples_to_show = {}
         if prompt.examples:
+            examples_to_show.update(prompt.examples)
+        
+        # Add conditional examples
+        if conditional_content and "examples" in conditional_content:
+            examples_to_show.update(conditional_content["examples"])
+        
+        if examples_to_show:
             lines.append("## Code Examples")
             lines.append("")
             lines.append("The following examples demonstrate the expected code patterns and style:")
             lines.append("")
             
-            for name, example in prompt.examples.items():
+            for name, example in examples_to_show.items():
                 lines.append(f"### {name.replace('_', ' ').title()}")
                 lines.append(example)
                 lines.append("")
