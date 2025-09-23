@@ -99,22 +99,28 @@ def generate(ctx: click.Context, file: Path, editor: str, output: Path, dry_run:
 @cli.command()
 def list_editors() -> None:
     """List supported editors."""
-    editors = [
+    from .commands.generate import registry
+    
+    # Get implemented editors from registry
+    implemented_editors = set(registry.list_adapters())
+    
+    # All editors we plan to support
+    all_editors = [
         ('copilot', 'GitHub Copilot (.github/copilot-instructions.md)'),
         ('cursor', 'Cursor (.cursorrules)'),
         ('continue', 'Continue (.continue/config.json)'),
         ('claude', 'Claude Code (context-based)'),
-        ('kiro', 'Kiro (AI-powered assistance)'),
         ('cline', 'Cline (terminal-based)'),
         ('codeium', 'Codeium (context-based)'),
+        ('kiro', 'Kiro (AI-powered assistance)'),
         ('tabnine', 'Tabnine (team configurations)'),
         ('amazon-q', 'Amazon Q (comment-based)'),
         ('jetbrains', 'JetBrains AI (IDE-integrated)'),
     ]
     
     click.echo("Supported editors:")
-    for name, description in editors:
-        status = "✅" if name in ['copilot', 'cursor', 'continue'] else "⏳"
+    for name, description in all_editors:
+        status = "✅" if name in implemented_editors else "⏳"
         click.echo(f"  {status} {name:12} - {description}")
     
     click.echo("\nLegend:")
