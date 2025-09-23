@@ -43,12 +43,16 @@ apm generate --all
 
 ## 📋 Project Status
 
-This project is currently in the **planning phase**. We are:
-- ✅ Researching different AI editors and their prompt formats
-- ✅ Designing the universal prompt format specification  
-- ✅ Creating the system architecture
-- ⏳ Planning the implementation roadmap
-- ⏳ Building the CLI tool and core functionality
+This project is currently in **active development** with core functionality implemented and working. Current status:
+
+- ✅ **Core Functionality Complete**: UPF parser, validation, and CLI interface
+- ✅ **Multi-Editor Support**: GitHub Copilot, Cursor, and Continue editors implemented
+- ✅ **Template System**: Built-in templates for common project types
+- ✅ **Comprehensive Testing**: 41 tests covering unit and integration scenarios
+- ✅ **Documentation**: Getting Started guide and comprehensive CLI help
+- ⏳ **Advanced Features**: Variable substitution, conditional templates, more editors
+
+**Ready for use!** The tool can create, validate, and generate editor-specific prompts for the three major AI editors.
 
 ## 📖 Documentation
 
@@ -61,11 +65,14 @@ All planning documents are available in the [`docs/`](./docs/) directory:
 - [Implementation Roadmap](./docs/IMPLEMENTATION_ROADMAP.md) - Development timeline and phases
 - [Project Structure](./docs/PROJECT_STRUCTURE.md) - Repository organization and conventions
 
-## 🎨 Supported Editors (Planned)
+## 🎨 Supported Editors
 
-- **GitHub Copilot** - `.github/copilot-instructions.md`
-- **Cursor** - `.cursorrules`
-- **Continue** - `.continue/config.json`
+### ✅ Implemented
+- **GitHub Copilot** - `.github/copilot-instructions.md` - Full project context, instructions, examples
+- **Cursor** - `.cursorrules` - Categorized instructions and guidelines  
+- **Continue** - `.continue/config.json` - System messages and configuration
+
+### ⏳ Planned
 - **Claude Code** - Context-based prompts
 - **Kiro** - AI-powered code assistance
 - **Cline** - Terminal-based AI coding
@@ -81,13 +88,54 @@ See the [`examples/`](./examples/) directory for sample configurations:
 - [React TypeScript Project](./examples/basic/react-typescript.apm.yaml)
 - [Node.js API Service](./examples/basic/node-api.apm.yaml)
 
+## 🚀 Installation & Quick Start
+
+### Installation
+
+```bash
+# Install from source (recommended for now)
+git clone https://github.com/flamingquaks/agent-prompt-mapper.git
+cd agent-prompt-mapper
+pip install -e .
+```
+
+### Quick Start
+
+```bash
+# 1. Initialize a new project (choose from basic, react, api templates)
+apm init --template react --output my-project.apm.yaml
+
+# 2. Validate your configuration
+apm validate my-project.apm.yaml
+
+# 3. Generate editor-specific prompts
+apm generate my-project.apm.yaml --all
+
+# 4. Your AI editor prompts are ready!
+ls .github/copilot-instructions.md
+ls .cursorrules  
+ls .continue/config.json
+```
+
+### Available Commands
+
+- `apm init` - Create a new universal prompt file with templates
+- `apm validate` - Check your configuration for errors
+- `apm generate` - Create editor-specific prompts
+- `apm list-editors` - Show supported editors and their status
+
+For detailed usage instructions, see [`GETTING_STARTED.md`](./GETTING_STARTED.md).
+
 ## 🤝 Contributing
 
-This project is in early planning stages. We welcome:
-- Feedback on the approach and architecture
-- Research on additional AI editors
-- Suggestions for the universal prompt format
-- Ideas for CLI tool features
+This project is actively developing! We welcome:
+- Bug reports and feature requests
+- Pull requests for additional editor support
+- Documentation improvements
+- Testing and feedback on the UPF format
+- Ideas for advanced features
+
+See the [Implementation Roadmap](./docs/IMPLEMENTATION_ROADMAP.md) for planned features and current progress.
 
 ## 📄 License
 

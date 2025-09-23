@@ -1,0 +1,76 @@
+# {{ metadata.title }}
+
+{{ metadata.description }}
+
+{% if context %}
+## Project Information
+{%- if context.project_type %}
+- Type: {{ context.project_type }}
+{%- endif %}
+{%- if context.technologies %}
+- Technologies: {{ context.technologies | join(', ') }}
+{%- endif %}
+{%- if context.description %}
+- Description: {{ context.description }}
+{%- endif %}
+
+{% endif %}
+{%- if instructions %}
+{%- if instructions.general %}
+## General Instructions
+{%- for instruction in instructions.general %}
+- {{ instruction }}
+{%- endfor %}
+
+{% endif %}
+{%- if instructions.code_style %}
+## Code Style Guidelines
+{%- for guideline in instructions.code_style %}
+- {{ guideline }}
+{%- endfor %}
+
+{% endif %}
+{%- if instructions.architecture %}
+## Architecture Guidelines
+{%- for guideline in instructions.architecture %}
+- {{ guideline }}
+{%- endfor %}
+
+{% endif %}
+{%- if instructions.testing %}
+## Testing Guidelines
+{%- for guideline in instructions.testing %}
+- {{ guideline }}
+{%- endfor %}
+
+{% endif %}
+{%- if instructions.security %}
+## Security Guidelines
+{%- for guideline in instructions.security %}
+- {{ guideline }}
+{%- endfor %}
+
+{% endif %}
+{%- if instructions.performance %}
+## Performance Guidelines
+{%- for guideline in instructions.performance %}
+- {{ guideline }}
+{%- endfor %}
+
+{% endif %}
+{%- endif %}
+{%- if examples %}
+## Examples
+{%- for name, example in examples.items() %}
+### {{ name.title() }}
+{{ example }}
+
+{% endfor %}
+{%- endif %}
+{%- if variables %}
+## Variables
+{%- for name, value in variables.items() %}
+- {{ name }}: {{ value }}
+{%- endfor %}
+
+{% endif %}
