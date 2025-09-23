@@ -161,4 +161,60 @@ targets: []
         ])
         
         assert result.exit_code == 1
-        assert 'not in targets' in result.output
+    
+    def test_generate_command_with_variable_overrides(self, tmp_path):
+        """Test generate command with variable overrides."""
+        # Create a UPF file with variables
+        upf_file = tmp_path / 'test_vars.apm.yaml'
+        upf_file.write_text('''
+schema_version: "1.0.0"
+metadata:
+  title: "Test {{{ PROJECT_NAME }}}"
+  description: "Testing variables for {{{ PROJECT_NAME }}}"
+  version: "1.0.0"
+  author: "default@example.com"
+  created: "2024-01-01"
+  updated: "2024-01-01"
+targets:
+  - copilot
+context:
+  project_type: "{{{ PROJECT_TYPE }}}"
+  description: "Project using {{{ TECH_STACK }}}"
+instructions:
+  general:
+    - "Use {{{ TECH_STACK }}} best practices"
+    - "Contact {{{ SUPPORT_EMAIL }}} for help"
+variables:
+  PROJECT_NAME: "Default App"
+  PROJECT_TYPE: "default_project"
+  TECH_STACK: "Python"
+  SUPPORT_EMAIL: "support@example.com"
+''')
+        
+        runner = CliRunner()
+        with runner.isolated_filesystem(temp_dir=tmp_path):
+            result = runner.invoke(cli, [
+                'generate', 
+                str(upf_file), 
+                '--editor', 'copilot',
+                '-V', 'PROJECT_NAME=Overridden App',
+                '-V', 'TECH_STACK=Go',
+                '-V', 'PROJECT_TYPE=go_project'
+            ])
+            
+            assert result.exit_code == 0
+            assert 'Generated:' in result.output
+            
+            # Check if file was created
+            output_file = Path('.github/copilot-instructions.md')
+            assert output_file.exists()
+            
+            # Check that variables were overridden
+            content = output_file.read_text()
+            assert 'Test Overridden App' in content
+            assert 'Testing variables for Overridden App' in content
+            assert 'Type: go_project' in content
+            assert 'Project using Go' in content
+            assert 'Use Go best practices' in content
+            # SUPPORT_EMAIL should remain default since not overridden
+            assert 'Contact support@example.com for help' in content

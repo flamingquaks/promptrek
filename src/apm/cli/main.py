@@ -72,11 +72,20 @@ def validate(ctx: click.Context, file: Path, strict: bool) -> None:
 @click.option('--output', '-o', type=click.Path(path_type=Path), help='Output directory')
 @click.option('--dry-run', is_flag=True, help='Show what would be generated without creating files')
 @click.option('--all', 'all_editors', is_flag=True, help='Generate for all target editors')
+@click.option('--var', '-V', 'variables', multiple=True, help='Override variables (e.g., -V KEY=value)')
 @click.pass_context
-def generate(ctx: click.Context, file: Path, editor: str, output: Path, dry_run: bool, all_editors: bool) -> None:
+def generate(ctx: click.Context, file: Path, editor: str, output: Path, dry_run: bool, all_editors: bool, variables: tuple) -> None:
     """Generate editor-specific prompts from universal prompt file."""
     try:
-        generate_command(ctx, file, editor, output, dry_run, all_editors)
+        # Parse variable overrides
+        var_dict = {}
+        for var in variables:
+            if '=' not in var:
+                raise click.BadParameter(f"Variable must be in format KEY=value, got: {var}")
+            key, value = var.split('=', 1)
+            var_dict[key.strip()] = value.strip()
+        
+        generate_command(ctx, file, editor, output, dry_run, all_editors, var_dict)
     except APMError as e:
         click.echo(f"Error: {e}", err=True)
         ctx.exit(1)

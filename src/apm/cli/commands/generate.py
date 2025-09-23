@@ -20,7 +20,8 @@ def generate_command(
     editor: Optional[str], 
     output: Optional[Path], 
     dry_run: bool, 
-    all_editors: bool
+    all_editors: bool,
+    variables: Optional[dict] = None
 ) -> None:
     """
     Generate editor-specific prompts from universal prompt file.
@@ -70,7 +71,7 @@ def generate_command(
     # Generate for each target editor
     for target_editor in target_editors:
         try:
-            _generate_for_editor(prompt, target_editor, output, dry_run, verbose)
+            _generate_for_editor(prompt, target_editor, output, dry_run, verbose, variables)
         except AdapterNotFoundError:
             click.echo(f"⚠️ Editor '{target_editor}' not yet implemented - skipping")
         except Exception as e:
