@@ -228,7 +228,7 @@ instructions:
     - "Base instruction for all editors"
 
 conditions:
-  - if: "EDITOR == \"claude\""
+  - if: 'EDITOR == "claude"'
     then:
       instructions:
         general:
@@ -237,14 +237,14 @@ conditions:
       examples:
         claude_example: "// Claude prefers detailed comments"
   
-  - if: "EDITOR == \"continue\""
+  - if: 'EDITOR == "continue"'
     then:
       instructions:
         general:
           - "Continue-specific: Generate comprehensive completions"
           - "Continue-specific: Suggest appropriate types"
   
-  - if: "EDITOR in [\"codeium\", \"copilot\"]"
+  - if: 'EDITOR in ["codeium", "copilot"]'
     then:
       instructions:
         general:
@@ -376,7 +376,7 @@ instructions:
     - "Use {{{ CODING_STYLE }}} coding style"
 
 conditions:
-  - if: "EDITOR == \"claude\""
+  - if: 'EDITOR == "claude"'
     then:
       instructions:
         general:
@@ -412,7 +412,7 @@ instructions:
     - "Project-specific: Follow {{{ PROJECT_NAME }}} guidelines"
 
 conditions:
-  - if: "EDITOR == \"claude\""
+  - if: 'EDITOR == "claude"'
     then:
       instructions:
         general:

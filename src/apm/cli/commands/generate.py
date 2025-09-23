@@ -68,6 +68,9 @@ def generate_command(
     if not output:
         output = Path.cwd()
 
+    # Ensure output directory exists
+    output.mkdir(parents=True, exist_ok=True)
+
     if dry_run:
         click.echo("🔍 Dry run mode - showing what would be generated:")
 
