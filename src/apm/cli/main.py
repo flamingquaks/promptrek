@@ -1,0 +1,117 @@
+"""
+Main CLI entry point for Agent Prompt Mapper.
+
+Provides the primary command-line interface for APM functionality.
+"""
+
+import click
+from pathlib import Path
+
+from ..core.parser import UPFParser
+from ..core.validator import UPFValidator
+from ..core.exceptions import APMError
+from .commands.init import init_command
+from .commands.validate import validate_command
+from .commands.generate import generate_command
+
+
+@click.group()
+@click.version_option(version="0.1.0")
+@click.option('--verbose', '-v', is_flag=True, help='Enable verbose output')
+@click.pass_context
+def cli(ctx: click.Context, verbose: bool) -> None:
+    """
+    Agent Prompt Mapper - Universal AI editor prompt management.
+    
+    APM allows you to create prompts in a universal format and generate
+    editor-specific prompts for GitHub Copilot, Cursor, Continue, and more.
+    """
+    ctx.ensure_object(dict)
+    ctx.obj['verbose'] = verbose
+
+
+@cli.command()
+@click.option('--template', '-t', type=str, help='Template to use for initialization')
+@click.option('--output', '-o', type=click.Path(), default='project.apm.yaml', help='Output file path')
+@click.pass_context
+def init(ctx: click.Context, template: str, output: str) -> None:
+    """Initialize a new universal prompt file."""
+    try:
+        init_command(ctx, template, output)
+    except APMError as e:
+        click.echo(f"Error: {e}", err=True)
+        ctx.exit(1)
+    except Exception as e:
+        if ctx.obj.get('verbose'):
+            raise
+        click.echo(f"Unexpected error: {e}", err=True)
+        ctx.exit(1)
+
+
+@cli.command()
+@click.argument('file', type=click.Path(exists=True, path_type=Path))
+@click.option('--strict', is_flag=True, help='Treat warnings as errors')
+@click.pass_context
+def validate(ctx: click.Context, file: Path, strict: bool) -> None:
+    """Validate a universal prompt file."""
+    try:
+        validate_command(ctx, file, strict)
+    except APMError as e:
+        click.echo(f"Error: {e}", err=True)
+        ctx.exit(1)
+    except Exception as e:
+        if ctx.obj.get('verbose'):
+            raise
+        click.echo(f"Unexpected error: {e}", err=True)
+        ctx.exit(1)
+
+
+@cli.command()
+@click.argument('file', type=click.Path(exists=True, path_type=Path))
+@click.option('--editor', '-e', type=str, help='Target editor (copilot, cursor, continue)')
+@click.option('--output', '-o', type=click.Path(path_type=Path), help='Output directory')
+@click.option('--dry-run', is_flag=True, help='Show what would be generated without creating files')
+@click.option('--all', 'all_editors', is_flag=True, help='Generate for all target editors')
+@click.pass_context
+def generate(ctx: click.Context, file: Path, editor: str, output: Path, dry_run: bool, all_editors: bool) -> None:
+    """Generate editor-specific prompts from universal prompt file."""
+    try:
+        generate_command(ctx, file, editor, output, dry_run, all_editors)
+    except APMError as e:
+        click.echo(f"Error: {e}", err=True)
+        ctx.exit(1)
+    except Exception as e:
+        if ctx.obj.get('verbose'):
+            raise
+        click.echo(f"Unexpected error: {e}", err=True)
+        ctx.exit(1)
+
+
+@cli.command()
+def list_editors() -> None:
+    """List supported editors."""
+    editors = [
+        ('copilot', 'GitHub Copilot (.github/copilot-instructions.md)'),
+        ('cursor', 'Cursor (.cursorrules)'),
+        ('continue', 'Continue (.continue/config.json)'),
+        ('claude', 'Claude Code (context-based)'),
+        ('kiro', 'Kiro (AI-powered assistance)'),
+        ('cline', 'Cline (terminal-based)'),
+        ('codeium', 'Codeium (context-based)'),
+        ('tabnine', 'Tabnine (team configurations)'),
+        ('amazon-q', 'Amazon Q (comment-based)'),
+        ('jetbrains', 'JetBrains AI (IDE-integrated)'),
+    ]
+    
+    click.echo("Supported editors:")
+    for name, description in editors:
+        status = "✅" if name in ['copilot', 'cursor', 'continue'] else "⏳"
+        click.echo(f"  {status} {name:12} - {description}")
+    
+    click.echo("\nLegend:")
+    click.echo("  ✅ Implemented")
+    click.echo("  ⏳ Planned")
+
+
+if __name__ == '__main__':
+    cli()
