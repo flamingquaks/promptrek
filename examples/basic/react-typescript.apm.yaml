@@ -15,6 +15,11 @@ targets:
   - copilot
   - cursor
   - continue
+  - claude
+  - cline
+  - codeium
+  - cline
+  - codeium
 
 context:
   project_type: "web_application"
