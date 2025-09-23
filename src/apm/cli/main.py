@@ -72,11 +72,20 @@ def validate(ctx: click.Context, file: Path, strict: bool) -> None:
 @click.option('--output', '-o', type=click.Path(path_type=Path), help='Output directory')
 @click.option('--dry-run', is_flag=True, help='Show what would be generated without creating files')
 @click.option('--all', 'all_editors', is_flag=True, help='Generate for all target editors')
+@click.option('--var', '-V', 'variables', multiple=True, help='Override variables (e.g., -V KEY=value)')
 @click.pass_context
-def generate(ctx: click.Context, file: Path, editor: str, output: Path, dry_run: bool, all_editors: bool) -> None:
+def generate(ctx: click.Context, file: Path, editor: str, output: Path, dry_run: bool, all_editors: bool, variables: tuple) -> None:
     """Generate editor-specific prompts from universal prompt file."""
     try:
-        generate_command(ctx, file, editor, output, dry_run, all_editors)
+        # Parse variable overrides
+        var_dict = {}
+        for var in variables:
+            if '=' not in var:
+                raise click.BadParameter(f"Variable must be in format KEY=value, got: {var}")
+            key, value = var.split('=', 1)
+            var_dict[key.strip()] = value.strip()
+        
+        generate_command(ctx, file, editor, output, dry_run, all_editors, var_dict)
     except APMError as e:
         click.echo(f"Error: {e}", err=True)
         ctx.exit(1)
@@ -90,22 +99,28 @@ def generate(ctx: click.Context, file: Path, editor: str, output: Path, dry_run:
 @cli.command()
 def list_editors() -> None:
     """List supported editors."""
-    editors = [
+    from .commands.generate import registry
+    
+    # Get implemented editors from registry
+    implemented_editors = set(registry.list_adapters())
+    
+    # All editors we plan to support
+    all_editors = [
         ('copilot', 'GitHub Copilot (.github/copilot-instructions.md)'),
         ('cursor', 'Cursor (.cursorrules)'),
         ('continue', 'Continue (.continue/config.json)'),
         ('claude', 'Claude Code (context-based)'),
-        ('kiro', 'Kiro (AI-powered assistance)'),
         ('cline', 'Cline (terminal-based)'),
         ('codeium', 'Codeium (context-based)'),
+        ('kiro', 'Kiro (AI-powered assistance)'),
         ('tabnine', 'Tabnine (team configurations)'),
         ('amazon-q', 'Amazon Q (comment-based)'),
         ('jetbrains', 'JetBrains AI (IDE-integrated)'),
     ]
     
     click.echo("Supported editors:")
-    for name, description in editors:
-        status = "✅" if name in ['copilot', 'cursor', 'continue'] else "⏳"
+    for name, description in all_editors:
+        status = "✅" if name in implemented_editors else "⏳"
         click.echo(f"  {status} {name:12} - {description}")
     
     click.echo("\nLegend:")

@@ -31,6 +31,24 @@ class UPFValidationError(UPFError):
     pass
 
 
+class ValidationError(APMError):
+    """Represents a validation error with field and message information."""
+    
+    def __init__(self, field: str, message: str, severity: str = "error"):
+        """
+        Initialize a validation error.
+        
+        Args:
+            field: The field that failed validation
+            message: The validation error message
+            severity: The severity level (error, warning)
+        """
+        self.field = field
+        self.message = message
+        self.severity = severity
+        super().__init__(f"{field}: {message}")
+
+
 class TemplateError(APMError):
     """Base exception for template-related errors."""
     pass
