@@ -71,7 +71,7 @@ jobs:
         python -m apm.cli.main list-editors
         
         # Test basic workflow
-        python -m apm.cli.main init test.apm.yaml --non-interactive
+        python -m apm.cli.main init --template basic --output test.apm.yaml
         python -m apm.cli.main validate test.apm.yaml
         python -m apm.cli.main generate --all --dry-run test.apm.yaml
 
