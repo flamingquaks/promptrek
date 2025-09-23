@@ -1,5 +1,11 @@
 # Agent Prompt Mapper
 
+[![CI](https://github.com/flamingquaks/agent-prompt-mapper/actions/workflows/ci.yml/badge.svg)](https://github.com/flamingquaks/agent-prompt-mapper/actions/workflows/ci.yml)
+[![PR Validation](https://github.com/flamingquaks/agent-prompt-mapper/actions/workflows/pr.yml/badge.svg)](https://github.com/flamingquaks/agent-prompt-mapper/actions/workflows/pr.yml)
+[![Test Matrix](https://github.com/flamingquaks/agent-prompt-mapper/actions/workflows/test-matrix.yml/badge.svg)](https://github.com/flamingquaks/agent-prompt-mapper/actions/workflows/test-matrix.yml)
+[![Python Versions](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-blue)](https://github.com/flamingquaks/agent-prompt-mapper)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 A universal AI Editor prompt storage solution that dynamically maps prompt data to a wide-range of agentic/AI editors and tools. This tool allows you to create generic prompts and workflows in a standardized format, then generate editor-specific prompts for your preferred AI coding assistant.
 
 ## 🎯 Problem It Solves
@@ -136,6 +142,48 @@ This project is actively developing! We welcome:
 - Ideas for advanced features
 
 See the [Implementation Roadmap](./docs/IMPLEMENTATION_ROADMAP.md) for planned features and current progress.
+
+## 🧪 Testing and Quality Assurance
+
+Agent Prompt Mapper maintains high quality standards with comprehensive testing:
+
+### Automated Testing
+- **Continuous Integration**: Tests run on every push and PR across multiple Python versions (3.8-3.12)
+- **Cross-Platform Testing**: Validates functionality on Linux, macOS, and Windows
+- **Security Scanning**: Automated security vulnerability detection
+- **Code Quality**: Enforced formatting (black), import sorting (isort), and linting (flake8)
+- **Coverage**: Maintains >80% test coverage with detailed reporting
+
+### Test Categories
+- **Unit Tests**: Test individual components and functions
+- **Integration Tests**: Test complete workflows and CLI functionality
+- **Performance Tests**: Monitor memory usage and execution speed
+- **Compatibility Tests**: Ensure compatibility across Python versions and platforms
+
+### Running Tests Locally
+
+```bash
+# Install development dependencies
+pip install -e ".[dev]"
+
+# Run all tests
+pytest
+
+# Run with coverage
+pytest --cov=src/apm --cov-report=html
+
+# Run specific test categories
+pytest tests/unit/        # Unit tests only
+pytest tests/integration/ # Integration tests only
+
+# Code quality checks
+black src/ tests/         # Format code
+isort src/ tests/         # Sort imports
+flake8 src/ tests/        # Lint code
+mypy src/                # Type checking
+```
+
+For contribution guidelines, see [CONTRIBUTING.md](./.github/CONTRIBUTING.md).
 
 ## 📚 Documentation
 

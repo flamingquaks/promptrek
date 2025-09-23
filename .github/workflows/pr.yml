@@ -1,0 +1,102 @@
+name: Pull Request Validation
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        # Fetch full history for better diffs
+        fetch-depth: 0
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[dev]"
+    
+    - name: Check code formatting
+      run: |
+        echo "Checking black formatting..."
+        black --check --diff src/ tests/
+    
+    - name: Check import sorting
+      run: |
+        echo "Checking import order..."
+        isort --check-only --diff src/ tests/
+    
+    - name: Run linter
+      run: |
+        echo "Running flake8..."
+        flake8 src/ tests/ --max-line-length=88 --statistics
+      continue-on-error: true
+    
+    - name: Run tests with coverage
+      run: |
+        echo "Running tests..."
+        python -m pytest tests/ --cov=src/apm --cov-report=term-missing --cov-fail-under=80
+    
+    - name: Test CLI functionality
+      run: |
+        echo "Testing CLI commands..."
+        # Test basic CLI commands work
+        python -m apm.cli.main --help
+        python -m apm.cli.main list-editors
+        
+        # Test init command
+        python -m apm.cli.main init test-project.apm.yaml --non-interactive
+        
+        # Test validate command
+        python -m apm.cli.main validate test-project.apm.yaml
+        
+        # Test generate command (dry-run)
+        python -m apm.cli.main generate --all --dry-run test-project.apm.yaml
+
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install security tools
+      run: |
+        python -m pip install --upgrade pip
+        pip install bandit safety
+    
+    - name: Security scan with bandit
+      run: |
+        bandit -r src/ -ll
+    
+    - name: Check for known vulnerabilities
+      run: |
+        safety check
+
+  docs-check:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Check documentation files
+      run: |
+        echo "Checking for required documentation files..."
+        test -f README.md || (echo "README.md missing" && exit 1)
+        test -f GETTING_STARTED.md || (echo "GETTING_STARTED.md missing" && exit 1)
+        test -d docs || (echo "docs directory missing" && exit 1)
+    
+    - name: Check for placeholder content
+      run: |
+        echo "Checking for placeholder content..."
+        ! grep -r "TODO" docs/ || (echo "Found TODO items in docs" && exit 1)
+        ! grep -r "FIXME" src/ tests/ || echo "Warning: Found FIXME items in code"

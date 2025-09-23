@@ -1,46 +1,36 @@
 """Test configuration for pytest."""
 
-import pytest
 from pathlib import Path
+
+import pytest
 
 
 @pytest.fixture
 def sample_upf_data():
     """Sample UPF data for testing."""
     return {
-        'schema_version': '1.0.0',
-        'metadata': {
-            'title': 'Test Project Assistant',
-            'description': 'AI assistant for testing',
-            'version': '1.0.0',
-            'author': 'Test Author <test@example.com>',
-            'created': '2024-01-01',
-            'updated': '2024-01-01',
-            'tags': ['test', 'sample']
+        "schema_version": "1.0.0",
+        "metadata": {
+            "title": "Test Project Assistant",
+            "description": "AI assistant for testing",
+            "version": "1.0.0",
+            "author": "Test Author <test@example.com>",
+            "created": "2024-01-01",
+            "updated": "2024-01-01",
+            "tags": ["test", "sample"],
         },
-        'targets': ['copilot', 'cursor'],
-        'context': {
-            'project_type': 'web_application',
-            'technologies': ['python', 'javascript'],
-            'description': 'A test project'
+        "targets": ["copilot", "cursor"],
+        "context": {
+            "project_type": "web_application",
+            "technologies": ["python", "javascript"],
+            "description": "A test project",
         },
-        'instructions': {
-            'general': [
-                'Write clean code',
-                'Follow conventions'
-            ],
-            'code_style': [
-                'Use meaningful names',
-                'Add comments'
-            ]
+        "instructions": {
+            "general": ["Write clean code", "Follow conventions"],
+            "code_style": ["Use meaningful names", "Add comments"],
         },
-        'examples': {
-            'function': '```python\ndef hello():\n    return "world"\n```'
-        },
-        'variables': {
-            'PROJECT_NAME': 'Test Project',
-            'AUTHOR': 'Test Author'
-        }
+        "examples": {"function": '```python\ndef hello():\n    return "world"\n```'},
+        "variables": {"PROJECT_NAME": "Test Project", "AUTHOR": "Test Author"},
     }
 
 
@@ -48,11 +38,11 @@ def sample_upf_data():
 def sample_upf_file(tmp_path, sample_upf_data):
     """Create a temporary UPF file for testing."""
     import yaml
-    
+
     file_path = tmp_path / "test.apm.yaml"
-    with open(file_path, 'w') as f:
+    with open(file_path, "w") as f:
         yaml.dump(sample_upf_data, f)
-    
+
     return file_path
 
 
@@ -60,14 +50,14 @@ def sample_upf_file(tmp_path, sample_upf_data):
 def invalid_upf_data():
     """Invalid UPF data for testing."""
     return {
-        'schema_version': '1.0.0',
-        'metadata': {
-            'title': '',  # Invalid: empty title
-            'description': 'Test description',
-            'version': '1.0.0',
-            'author': 'Test Author',
-            'created': '2024-01-01',
-            'updated': '2024-01-01'
+        "schema_version": "1.0.0",
+        "metadata": {
+            "title": "",  # Invalid: empty title
+            "description": "Test description",
+            "version": "1.0.0",
+            "author": "Test Author",
+            "created": "2024-01-01",
+            "updated": "2024-01-01",
         },
-        'targets': []  # Invalid: no targets
+        "targets": [],  # Invalid: no targets
     }
