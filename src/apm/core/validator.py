@@ -49,7 +49,7 @@ class UPFValidator:
     
     # Common project types
     KNOWN_PROJECT_TYPES = {
-        'web_application', 'api', 'library', 'mobile_app', 
+        'web_application', 'api', 'api_service', 'library', 'mobile_app', 
         'desktop_app', 'cli_tool', 'data_science', 'machine_learning'
     }
     
