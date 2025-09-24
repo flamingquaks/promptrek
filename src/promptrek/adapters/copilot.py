@@ -271,6 +271,39 @@ class CopilotAdapter(EditorAdapter):
 
         return created_files
 
+    def generate_merged(
+        self,
+        prompt_files: List[tuple[UniversalPrompt, Path]],
+        output_dir: Path,
+        dry_run: bool = False,
+        verbose: bool = False,
+        variables: Optional[Dict[str, Any]] = None,
+    ) -> List[Path]:
+        """Generate merged GitHub Copilot instructions from multiple prompt files."""
+        
+        # Build merged content
+        content = self._build_merged_content(prompt_files, variables)
+
+        # Determine output path
+        github_dir = output_dir / ".github"
+        output_file = github_dir / "copilot-instructions.md"
+
+        if dry_run:
+            click.echo(f"  📁 Would create merged: {output_file}")
+            if verbose:
+                click.echo("  📄 Merged content preview:")
+                preview = content[:300] + "..." if len(content) > 300 else content
+                click.echo(f"    {preview}")
+        else:
+            # Create directory and file
+            github_dir.mkdir(exist_ok=True)
+            with open(output_file, "w", encoding="utf-8") as f:
+                f.write(content)
+            source_files = [str(pf[1]) for pf in prompt_files]
+            click.echo(f"✅ Generated merged: {output_file} (from {len(prompt_files)} files)")
+
+        return [output_file]
+
     def validate(self, prompt: UniversalPrompt) -> List[ValidationError]:
         """Validate prompt for Copilot."""
         errors = []
