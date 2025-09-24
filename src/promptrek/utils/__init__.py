@@ -1,4 +1,4 @@
-"""Utility functions for Agent Prompt Mapper."""
+"""Utility functions for PromptTrek."""
 
 from .conditionals import ConditionalProcessor
 from .imports import ImportProcessor

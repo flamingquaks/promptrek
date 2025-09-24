@@ -1,3 +1,3 @@
-"""Core functionality for Agent Prompt Mapper."""
+"""Core functionality for PromptTrek."""
 
 __all__ = []

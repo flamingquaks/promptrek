@@ -16,7 +16,7 @@ class TestCLIIntegration:
         result = runner.invoke(cli, ["--help"])
 
         assert result.exit_code == 0
-        assert "Agent Prompt Mapper" in result.output
+        assert "PrompTrek" in result.output
         assert "init" in result.output
         assert "validate" in result.output
         assert "generate" in result.output

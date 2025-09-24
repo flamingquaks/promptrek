@@ -1,4 +1,4 @@
-"""Editor adapters for Agent Prompt Mapper."""
+"""Editor adapters for PromptTrek."""
 
 from .base import EditorAdapter
 from .claude import ClaudeAdapter

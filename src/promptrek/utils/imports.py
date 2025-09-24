@@ -1,5 +1,5 @@
 """
-Import processing utilities for Agent Prompt Mapper.
+Import processing utilities for PromptTrek.
 
 Handles importing and merging content from other UPF files.
 """

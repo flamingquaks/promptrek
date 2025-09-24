@@ -1,3 +1,3 @@
-"""CLI module for Agent Prompt Mapper."""
+"""CLI module for PromptTrek."""
 
 __all__ = []

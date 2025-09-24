@@ -117,7 +117,7 @@ variables:
         """Test CLI help command."""
         result = runner.invoke(cli, ["--help"])
         assert result.exit_code == 0
-        assert "Agent Prompt Mapper" in result.output
+        assert "PrompTrek" in result.output
         assert "generate" in result.output
         assert "validate" in result.output
         assert "list-editors" in result.output
