@@ -3,7 +3,7 @@
 import pytest
 from pydantic import ValidationError
 
-from apm.core.models import Instructions, PromptMetadata, UniversalPrompt
+from src.promptrek.core.models import Instructions, PromptMetadata, UniversalPrompt
 
 
 class TestPromptMetadata:

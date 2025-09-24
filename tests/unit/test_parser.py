@@ -3,9 +3,9 @@
 import pytest
 import yaml
 
-from apm.core.exceptions import UPFFileNotFoundError, UPFParsingError
-from apm.core.models import UniversalPrompt
-from apm.core.parser import UPFParser
+from src.promptrek.core.exceptions import UPFFileNotFoundError, UPFParsingError
+from src.promptrek.core.models import UniversalPrompt
+from src.promptrek.core.parser import UPFParser
 
 
 class TestUPFParser:

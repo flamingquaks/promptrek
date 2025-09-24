@@ -312,7 +312,7 @@ class TemplateEngine:
 @click.group()
 @click.version_option()
 def cli():
-    """Agent Prompt Mapper - Universal AI editor prompt management"""
+    """PrompTrek - Universal AI editor prompt management"""
     pass
 
 @cli.command()

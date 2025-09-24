@@ -60,7 +60,7 @@ jobs:
     
     - name: Run tests
       run: |
-        python -m pytest tests/ -v --tb=short --cov=src/apm --cov-report=term-missing
+        python -m pytest tests/ -v --tb=short --cov=src/promptrek --cov-report=term-missing
     
     - name: Test CLI installation and basic functionality
       shell: bash

@@ -1,10 +1,10 @@
-# Agent Prompt Mapper - Project Planning
+# PrompTrek - Project Planning
 
 ## 🎯 Project Status (Updated: September 2024)
 
 **STATUS: CORE FUNCTIONALITY COMPLETE ✅**
 
-The Agent Prompt Mapper project has successfully completed its initial implementation phases. The core vision has been realized with:
+The PrompTrek project has successfully completed its initial implementation phases. The core vision has been realized with:
 
 - ✅ **Universal Prompt Format (UPF)**: Fully implemented with comprehensive validation
 - ✅ **Multi-Editor Support**: GitHub Copilot, Cursor, and Continue editors supported  
@@ -18,7 +18,7 @@ The project is ready for real-world use and is actively being extended with addi
 
 ## Project Overview
 
-Agent Prompt Mapper is a universal AI Editor prompt storage solution that allows developers to:
+PrompTrek is a universal AI Editor prompt storage solution that allows developers to:
 1. Create prompts/workflows in a universal, standardized format
 2. Generate editor-specific prompts from the universal format using a CLI tool
 3. Support multiple AI editors and tools with different prompt formats

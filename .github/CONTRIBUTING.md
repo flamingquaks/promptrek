@@ -1,6 +1,6 @@
-# Contributing to Agent Prompt Mapper
+# Contributing to PrompTrek
 
-Thank you for your interest in contributing to Agent Prompt Mapper! This document provides guidelines for contributing to the project.
+Thank you for your interest in contributing to PrompTrek! This document provides guidelines for contributing to the project.
 
 ## Development Setup
 

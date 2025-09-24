@@ -6,7 +6,7 @@
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │  Universal      │    │   CLI Tool      │    │ Editor-Specific │
 │  Prompt Files   │───▶│  (Mapper)       │───▶│ Prompt Files    │
-│  (.apm.yaml)    │    │                 │    │                 │
+│  (.promptrek.yaml)    │    │                 │    │                 │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
                               │
                               ▼
@@ -22,7 +22,7 @@
 
 **Purpose**: Standardized format for storing prompts that can be converted to any editor format
 
-**File Extension**: `.apm.yaml` (Agent Prompt Mapper)
+**File Extension**: `.promptrek.yaml` (PrompTrek)
 
 **Structure**:
 ```yaml
@@ -116,24 +116,24 @@ editor_specific:
 **Commands**:
 ```bash
 # Initialize a new universal prompt file
-apm init
+promptrek init
 
 # Generate prompts for specific editor
-apm generate --editor copilot
-apm generate --editor cursor
-apm generate --editor continue
+promptrek generate --editor copilot
+promptrek generate --editor cursor
+promptrek generate --editor continue
 
 # Generate for all configured editors
-apm generate --all
+promptrek generate --all
 
 # List supported editors
-apm list-editors
+promptrek list-editors
 
 # Validate universal prompt file
-apm validate
+promptrek validate
 
 # Show generated output without writing files
-apm preview --editor copilot
+promptrek preview --editor copilot
 ```
 
 **Configuration File** (`.apm.config.json`):
@@ -253,7 +253,7 @@ class CopilotAdapter(EditorAdapter):
 
 ## Data Flow
 
-1. **Input**: User creates universal prompt file (`.apm.yaml`)
+1. **Input**: User creates universal prompt file (`.promptrek.yaml`)
 2. **Processing**: CLI tool reads the file and processes it
 3. **Template Resolution**: Template engine selects appropriate templates
 4. **Variable Substitution**: Replace variables with actual values
@@ -264,7 +264,7 @@ class CopilotAdapter(EditorAdapter):
 
 ```
 project-root/
-├── .apm.yaml                    # Universal prompt file
+├── .promptrek.yaml                    # Universal prompt file
 ├── .apm.config.json            # Project configuration
 ├── .github/
 │   └── copilot-instructions.md # Generated Copilot prompts
