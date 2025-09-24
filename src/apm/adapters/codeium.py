@@ -93,7 +93,10 @@ class CodeiumAdapter(EditorAdapter):
             errors.append(
                 ValidationError(
                     field="context.technologies",
-                    message="Codeium works best with specified technologies for better completions",
+                    message=(
+                        "Codeium works best with specified technologies for "
+                        "better completions"
+                    ),
                     severity="warning",
                 )
             )

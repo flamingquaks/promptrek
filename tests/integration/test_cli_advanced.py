@@ -229,7 +229,7 @@ variables:
         # Check that variables were overridden
         generated_file = temp_dir / ".claude" / "context.md"
         assert generated_file.exists()
-        content = generated_file.read_text()
+        # Verify file was generated
         # The content should include the overridden values if variable substitution is used
 
     def test_generate_with_conditionals(self, runner, conditional_upf_file, temp_dir):

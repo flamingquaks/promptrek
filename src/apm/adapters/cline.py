@@ -88,7 +88,10 @@ class ClineAdapter(EditorAdapter):
             errors.append(
                 ValidationError(
                     field="instructions.general",
-                    message="Cline needs clear general instructions for terminal operations",
+                    message=(
+                        "Cline needs clear general instructions for terminal "
+                        "operations"
+                    ),
                 )
             )
 
@@ -195,7 +198,8 @@ class ClineAdapter(EditorAdapter):
         lines.append("- Respect the project structure and conventions")
         if prompt.context and prompt.context.technologies:
             lines.append(
-                f"- Use appropriate tools for {', '.join(prompt.context.technologies)} development"
+                f"- Use appropriate tools for "
+                f"{', '.join(prompt.context.technologies)} development"
             )
         lines.append("")
 

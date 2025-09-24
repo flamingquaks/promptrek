@@ -52,7 +52,9 @@ instructions:
     - "Prefer const over let"
 
 examples:
-  util_function: "const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);"
+  util_function: |
+    const capitalize = (str: string) =>
+      str.charAt(0).toUpperCase() + str.slice(1);
 
 variables:
   STYLE_GUIDE: "Standard"
@@ -65,7 +67,7 @@ variables:
     @pytest.fixture
     def import_main_file(self, temp_dir, import_base_file):
         """Create main file that imports base file."""
-        main_content = f"""schema_version: "1.0.0"
+        main_content = """schema_version: "1.0.0"
 
 metadata:
   title: "Main Project with Imports"
@@ -236,14 +238,14 @@ conditions:
           - "Claude-specific: Focus on code clarity"
       examples:
         claude_example: "// Claude prefers detailed comments"
-  
+
   - if: 'EDITOR == "continue"'
     then:
       instructions:
         general:
           - "Continue-specific: Generate comprehensive completions"
           - "Continue-specific: Suggest appropriate types"
-  
+
   - if: 'EDITOR in ["codeium", "copilot"]'
     then:
       instructions:

@@ -95,7 +95,9 @@ class ContinueAdapter(EditorAdapter):
         """Build Continue configuration content."""
         config = {
             "models": [],
-            "systemMessage": f"{prompt.metadata.title}\n\n{prompt.metadata.description}",
+            "systemMessage": (
+                f"{prompt.metadata.title}\n\n{prompt.metadata.description}"
+            ),
             "completionOptions": {},
             "allowAnonymousTelemetry": False,
         }

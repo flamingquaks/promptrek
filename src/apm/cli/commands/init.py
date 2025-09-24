@@ -11,7 +11,6 @@ import click
 import yaml
 
 from ...core.exceptions import CLIError
-from ...core.models import UniversalPrompt
 
 
 def init_command(ctx: click.Context, template: Optional[str], output: str) -> None:
@@ -184,7 +183,7 @@ export const Button: React.FC<ButtonProps> = ({
   variant = 'primary'
 }) => {
   return (
-    <button 
+    <button
       className={`btn btn-${variant}`}
       onClick={onClick}
     >

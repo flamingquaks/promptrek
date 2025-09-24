@@ -44,7 +44,8 @@ class ClaudeAdapter(EditorAdapter):
         # Create content
         content = self._build_content(processed_prompt, conditional_content)
 
-        # Determine output path - Claude works well with context files in .claude directory
+        # Determine output path - Claude works well with context files
+        # in .claude directory
         claude_dir = output_dir / ".claude"
         output_file = claude_dir / "context.md"
 
@@ -72,7 +73,9 @@ class ClaudeAdapter(EditorAdapter):
             errors.append(
                 ValidationError(
                     field="context",
-                    message="Claude works best with detailed project context information",
+                    message=(
+                        "Claude works best with detailed project context " "information"
+                    ),
                     severity="warning",
                 )
             )
@@ -81,7 +84,9 @@ class ClaudeAdapter(EditorAdapter):
             errors.append(
                 ValidationError(
                     field="examples",
-                    message="Claude benefits from code examples for better understanding",
+                    message=(
+                        "Claude benefits from code examples for better " "understanding"
+                    ),
                     severity="warning",
                 )
             )
@@ -195,7 +200,8 @@ class ClaudeAdapter(EditorAdapter):
             lines.append("## Code Examples")
             lines.append("")
             lines.append(
-                "The following examples demonstrate the expected code patterns and style:"
+                "The following examples demonstrate the expected code patterns "
+                "and style:"
             )
             lines.append("")
 
@@ -211,7 +217,7 @@ class ClaudeAdapter(EditorAdapter):
         lines.append("- Follow the established patterns and conventions shown above")
         lines.append("- Maintain consistency with the existing codebase")
         lines.append(
-            "- Consider the project context and requirements in all suggestions"
+            "- Consider the project context and requirements in all " "suggestions"
         )
         lines.append("- Prioritize code quality, maintainability, and best practices")
         if prompt.context and prompt.context.technologies:
