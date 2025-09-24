@@ -1,10 +1,12 @@
-# Agent Prompt Mapper
+# PrompTrek
 
 [![CI](https://github.com/flamingquaks/agent-prompt-mapper/actions/workflows/ci.yml/badge.svg)](https://github.com/flamingquaks/agent-prompt-mapper/actions/workflows/ci.yml)
 [![PR Validation](https://github.com/flamingquaks/agent-prompt-mapper/actions/workflows/pr.yml/badge.svg)](https://github.com/flamingquaks/agent-prompt-mapper/actions/workflows/pr.yml)
 [![Test Matrix](https://github.com/flamingquaks/agent-prompt-mapper/actions/workflows/test-matrix.yml/badge.svg)](https://github.com/flamingquaks/agent-prompt-mapper/actions/workflows/test-matrix.yml)
 [![Python Versions](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-blue)](https://github.com/flamingquaks/agent-prompt-mapper)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+*Taking your coding prompts on a journey to every AI editor!*
 
 A universal AI Editor prompt storage solution that dynamically maps prompt data to a wide-range of agentic/AI editors and tools. This tool allows you to create generic prompts and workflows in a standardized format, then generate editor-specific prompts for your preferred AI coding assistant.
 
