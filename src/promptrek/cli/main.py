@@ -8,7 +8,6 @@ from pathlib import Path
 
 import click
 
-
 from ..core.exceptions import PrompTrekError
 from .commands.generate import generate_command
 from .commands.init import init_command
