@@ -75,19 +75,17 @@ All planning documents are available in the [`docs/`](./docs/) directory:
 
 ## 🎨 Supported Editors
 
-### ✅ Implemented
+### ✅ All Implemented
 - **GitHub Copilot** - `.github/copilot-instructions.md` - Full project context, instructions, examples
 - **Cursor** - `.cursorrules` - Categorized instructions and guidelines  
 - **Continue** - `.continue/config.json` - System messages and configuration
-
-### ⏳ Planned
-- **Claude Code** - Context-based prompts
-- **Kiro** - AI-powered code assistance
-- **Cline** - Terminal-based AI coding
-- **Codeium** - Context-based prompts
-- **Tabnine** - Team-specific configurations
-- **Amazon Q** - Comment-based prompts
-- **JetBrains AI** - IDE-integrated prompts
+- **Claude Code** - `.claude/context.md` - Context-based prompts with detailed project information
+- **Cline** - `.cline/config.json`, `cline-context.md` - Terminal-based AI coding assistance
+- **Codeium** - `.codeium/context.json`, `.codeiumrc` - Context-based prompts with team patterns
+- **Kiro** - `.kiro/config.json`, `.kiro/prompts.md` - AI-powered code assistance
+- **Tabnine** - `.tabnine/config.json`, `.tabnine/team.yaml` - Team-specific configurations
+- **Amazon Q** - `.amazonq/context.md`, `.amazonq/comments.template` - Comment-based prompts
+- **JetBrains AI** - `.idea/ai-assistant.xml`, `.jetbrains/config.json` - IDE-integrated prompts
 
 ## 🗂️ Example Configurations
 
