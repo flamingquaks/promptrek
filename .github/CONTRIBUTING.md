@@ -43,7 +43,7 @@ pytest tests/unit/
 pytest tests/integration/
 
 # Run all tests with coverage
-pytest --cov=src/apm --cov-fail-under=80
+pytest --cov=src/promptrek --cov-fail-under=80
 ```
 
 ## Commit Guidelines

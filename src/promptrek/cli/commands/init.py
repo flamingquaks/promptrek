@@ -30,8 +30,8 @@ def init_command(ctx: click.Context, template: Optional[str], output: str) -> No
             raise CLIError("Initialization cancelled")
 
     # Ensure output path has correct extension
-    if not output_path.name.endswith((".apm.yaml", ".apm.yml")):
-        output_path = output_path.with_suffix(".apm.yaml")
+    if not output_path.name.endswith((".promptrek.yaml")):
+        output_path = output_path.with_suffix(".promptrek.yaml")
 
     # Create basic template
     if template:

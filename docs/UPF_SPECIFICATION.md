@@ -6,7 +6,7 @@ The Universal Prompt Format (UPF) is a standardized YAML-based format for defini
 
 ## File Extension
 
-`.promptrek.yaml` or `.apm.yml` (PrompTrek)
+`.promptrek.yaml`
 
 ## Schema Version
 

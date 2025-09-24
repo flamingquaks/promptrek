@@ -109,7 +109,7 @@ editor_specific:
         prompt: "Suggest optimizations for this code"
 ```
 
-### 2. CLI Tool (apm)
+### 2. CLI Tool (promptrek)
 
 **Purpose**: Command-line interface for generating editor-specific prompts
 
@@ -136,12 +136,12 @@ promptrek validate
 promptrek preview --editor copilot
 ```
 
-**Configuration File** (`.apm.config.json`):
+**Configuration File** (`.promptrek.config.json`):
 ```json
 {
   "default_editors": ["copilot", "cursor"],
   "output_directory": ".ai-prompts",
-  "template_directory": "~/.apm/templates",
+  "template_directory": "~/.promptrek/templates",
   "variables": {
     "PROJECT_NAME": "My Project",
     "AUTHOR_NAME": "John Doe",
@@ -265,7 +265,7 @@ class CopilotAdapter(EditorAdapter):
 ```
 project-root/
 ├── .promptrek.yaml                    # Universal prompt file
-├── .apm.config.json            # Project configuration
+├── .promptrek.config.json            # Project configuration
 ├── .github/
 │   └── copilot-instructions.md # Generated Copilot prompts
 ├── .cursorrules                # Generated Cursor prompts
@@ -316,6 +316,6 @@ project-root/
 3. Plugin system for custom transformations
 
 ### Configuration Layers
-1. Global configuration (`~/.apm/config.json`)
-2. Project configuration (`.apm.config.json`)
+1. Global configuration (`~/.promptrek/config.json`)
+2. Project configuration (`.promptrek.config.json`)
 3. Command-line overrides

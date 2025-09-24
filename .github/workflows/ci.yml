@@ -110,7 +110,7 @@ jobs:
     
     - name: Test CLI help commands
       run: |
-        python -m apm.cli.main --help
-        python -m apm.cli.main init --help
-        python -m apm.cli.main validate --help
-        python -m apm.cli.main generate --help
+        python -m promptrek.cli.main --help
+        python -m promptrek.cli.main init --help
+        python -m promptrek.cli.main validate --help
+        python -m promptrek.cli.main generate --help

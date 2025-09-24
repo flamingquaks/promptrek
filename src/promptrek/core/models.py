@@ -113,7 +113,7 @@ class Condition(BaseModel):
 class ImportConfig(BaseModel):
     """Import configuration from other UPF files."""
 
-    path: str = Field(..., description="Relative path to another .apm.yaml file")
+    path: str = Field(..., description="Relative path to another .promptrek.yaml file")
     prefix: Optional[str] = Field(default=None, description="Optional namespace prefix")
 
 

@@ -121,8 +121,8 @@
 - [ ] Add custom filter support
 
 #### 4.2 Configuration Management
-- [ ] Implement global configuration (`~/.apm/config.json`)
-- [ ] Add project-level configuration (`.apm.config.json`)
+- [ ] Implement global configuration (`~/.promptrek/config.json`)
+- [ ] Add project-level configuration (`.promptrek.config.json`)
 - [ ] Create configuration merging logic
 - [ ] Add environment variable support
 
@@ -225,9 +225,9 @@ mypy>=1.0.0
 
 **Project Structure**:
 ```
-apm/
+promptrek/
 ├── src/
-│   └── apm/
+│   └── promptrek/
 │       ├── __init__.py
 │       ├── cli/
 │       │   ├── __init__.py

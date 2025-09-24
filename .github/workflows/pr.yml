@@ -49,17 +49,17 @@ jobs:
       run: |
         echo "Testing CLI commands..."
         # Test basic CLI commands work
-        python -m apm.cli.main --help
-        python -m apm.cli.main list-editors
+        python -m promptrek.cli.main --help
+        python -m promptrek.cli.main list-editors
         
         # Test init command with basic template and output
-        python -m apm.cli.main init --template basic --output test-project.apm.yaml
+        python -m promptrek.cli.main init --template basic --output test-project.promptrek.yaml
         
         # Test validate command
-        python -m apm.cli.main validate test-project.apm.yaml
+        python -m promptrek.cli.main validate test-project.promptrek.yaml
         
         # Test generate command (dry-run)
-        python -m apm.cli.main generate --all --dry-run test-project.apm.yaml
+        python -m promptrek.cli.main generate --all --dry-run test-project.promptrek.yaml
 
   security-scan:
     runs-on: ubuntu-latest

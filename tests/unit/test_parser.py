@@ -78,7 +78,7 @@ class TestUPFParser:
         parser = UPFParser()
 
         assert parser.validate_file_extension("test.promptrek.yaml") is True
-        assert parser.validate_file_extension("test.apm.yml") is True
+        assert parser.validate_file_extension("test.promptrek.yml") is True
         assert parser.validate_file_extension("test.yaml") is False
         assert parser.validate_file_extension("test.txt") is False
 
@@ -86,7 +86,7 @@ class TestUPFParser:
         """Test finding UPF files in directory."""
         # Create test files
         (tmp_path / "project.promptrek.yaml").write_text(yaml.dump(sample_upf_data))
-        (tmp_path / "config.apm.yml").write_text(yaml.dump(sample_upf_data))
+        (tmp_path / "config.promptrek.yml").write_text(yaml.dump(sample_upf_data))
         (tmp_path / "other.yaml").write_text("not upf")
 
         parser = UPFParser()
@@ -95,7 +95,7 @@ class TestUPFParser:
         assert len(upf_files) == 2
         file_names = [f.name for f in upf_files]
         assert "project.promptrek.yaml" in file_names
-        assert "config.apm.yml" in file_names
+        assert "config.promptrek.yml" in file_names
 
     def test_find_upf_files_recursive(self, tmp_path, sample_upf_data):
         """Test finding UPF files recursively."""

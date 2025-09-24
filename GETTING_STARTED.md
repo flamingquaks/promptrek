@@ -164,7 +164,7 @@ pytest tests/unit/
 pytest tests/integration/
 
 # Run all tests with coverage
-pytest --cov=src/apm
+pytest --cov=src/promptrek
 ```
 
 ### Code Quality
@@ -188,7 +188,7 @@ flake8 src/ tests/
 ### Common Issues
 
 1. **Import errors**: Make sure you installed with `pip install -e .`
-2. **Command not found**: Check that `apm` is in your PATH
+2. **Command not found**: Check that `promptrek` is in your PATH
 3. **Validation errors**: Use `promptrek validate --help` for validation options
 
 ### Getting Help

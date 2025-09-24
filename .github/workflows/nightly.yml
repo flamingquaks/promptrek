@@ -77,10 +77,10 @@ jobs:
       run: |
         echo "Running performance tests..."
         # Test CLI performance with sample files
-        time python -m apm.cli.main --help
+        time python -m promptrek.cli.main --help
         
         # Create a large test file using here document
-        cat > large-test.apm.yaml << 'EOF'
+        cat > large-test.promptrek.yaml << 'EOF'
         schema_version: "1.0.0"
         metadata:
           title: "Large Test"
@@ -98,5 +98,5 @@ jobs:
         EOF
         
         # Test parsing performance
-        time python -m apm.cli.main validate large-test.apm.yaml
-        time python -m apm.cli.main generate --all --dry-run large-test.apm.yaml
+        time python -m promptrek.cli.main validate large-test.promptrek.yaml
+        time python -m promptrek.cli.main generate --all --dry-run large-test.promptrek.yaml
