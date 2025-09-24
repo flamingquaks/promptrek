@@ -54,11 +54,14 @@ def generate_command(
 
     # Determine target editors
     if all_editors:
-        target_editors = prompt.targets
+        # Use all available adapters from registry, not just UPF targets
+        target_editors = registry.list_adapters()
     elif editor:
-        if editor not in prompt.targets:
+        # Check if the adapter exists in registry, not just in UPF targets
+        available_adapters = registry.list_adapters()
+        if editor not in available_adapters:
             raise CLIError(
-                f"Editor '{editor}' not in targets: {', '.join(prompt.targets)}"
+                f"Editor '{editor}' not available. Available editors: {', '.join(available_adapters)}"
             )
         target_editors = [editor]
     else:
