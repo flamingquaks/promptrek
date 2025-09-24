@@ -39,8 +39,13 @@ class CodeiumAdapter(EditorAdapter):
         # Apply variable substitution if supported
         processed_prompt = self.substitute_variables(prompt, variables)
 
+        # Process conditionals if supported
+        conditional_content = self.process_conditionals(processed_prompt, variables)
+
         # Create context content (JSON format for Codeium)
-        context_content = self._build_context_json(processed_prompt)
+        context_content = self._build_context_json(
+            processed_prompt, conditional_content
+        )
 
         # Create RC file content
         rc_content = self._build_rc_file(processed_prompt)
@@ -88,7 +93,10 @@ class CodeiumAdapter(EditorAdapter):
             errors.append(
                 ValidationError(
                     field="context.technologies",
-                    message="Codeium works best with specified technologies for better completions",
+                    message=(
+                        "Codeium works best with specified technologies for "
+                        "better completions"
+                    ),
                     severity="warning",
                 )
             )
@@ -103,7 +111,11 @@ class CodeiumAdapter(EditorAdapter):
         """Codeium supports conditional configuration."""
         return True
 
-    def _build_context_json(self, prompt: UniversalPrompt) -> str:
+    def _build_context_json(
+        self,
+        prompt: UniversalPrompt,
+        conditional_content: Optional[Dict[str, Any]] = None,
+    ) -> str:
         """Build Codeium context JSON content."""
         context = {
             "project": {
@@ -152,6 +164,31 @@ class CodeiumAdapter(EditorAdapter):
                     [
                         {"category": "testing", "rule": guideline}
                         for guideline in prompt.instructions.testing
+                    ]
+                )
+
+        # Add conditional instructions
+        if conditional_content and "instructions" in conditional_content:
+            cond_instructions = conditional_content["instructions"]
+            if "general" in cond_instructions:
+                context["guidelines"].extend(
+                    [
+                        {"category": "general", "rule": instruction}
+                        for instruction in cond_instructions["general"]
+                    ]
+                )
+            if "code_style" in cond_instructions:
+                context["guidelines"].extend(
+                    [
+                        {"category": "style", "rule": guideline}
+                        for guideline in cond_instructions["code_style"]
+                    ]
+                )
+            if "testing" in cond_instructions:
+                context["guidelines"].extend(
+                    [
+                        {"category": "testing", "rule": guideline}
+                        for guideline in cond_instructions["testing"]
                     ]
                 )
 

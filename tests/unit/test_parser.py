@@ -1,7 +1,5 @@
 """Unit tests for UPF parser."""
 
-from pathlib import Path
-
 import pytest
 import yaml
 

@@ -5,10 +5,8 @@ Provides comprehensive validation for Universal Prompt Format files
 beyond basic schema validation.
 """
 
-from pathlib import Path
-from typing import Any, Dict, List, Set
+from typing import List
 
-from .exceptions import UPFValidationError
 from .models import UniversalPrompt
 
 
@@ -106,7 +104,8 @@ class UPFValidator:
         # Check if it's a supported version
         if version != "1.0.0":
             result.add_warning(
-                f"Schema version '{version}' may not be fully supported. Current supported version: 1.0.0"
+                f"Schema version '{version}' may not be fully supported. "
+                f"Current supported version: 1.0.0"
             )
 
     def _validate_targets(
@@ -150,7 +149,7 @@ class UPFValidator:
         version = metadata.version
         if not version or not self._is_valid_semver(version):
             result.add_warning(
-                f"Metadata version '{version}' is not a valid semantic version"
+                f"Metadata version '{version}' is not a valid semantic " f"version"
             )
 
     def _validate_context(

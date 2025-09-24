@@ -6,8 +6,7 @@ Handles variable replacement in templates and UPF content.
 
 import os
 import re
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 from ..core.exceptions import TemplateError
 from ..core.models import UniversalPrompt
@@ -16,7 +15,7 @@ from ..core.models import UniversalPrompt
 class VariableSubstitution:
     """Handles variable substitution in templates and content."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize variable substitution system."""
         self.variable_pattern = re.compile(r"\{\{\{\s*(\w+)\s*\}\}\}")
         self.env_pattern = re.compile(r"\$\{(\w+)\}")
@@ -139,7 +138,7 @@ class VariableSubstitution:
     ) -> str:
         """Substitute template variables in content."""
 
-        def replace_var(match):
+        def replace_var(match) -> str:
             var_name = match.group(1)
             if var_name in variables:
                 return str(variables[var_name])
@@ -153,7 +152,7 @@ class VariableSubstitution:
     def _substitute_env_variables(self, content: str, strict: bool) -> str:
         """Substitute environment variables in content."""
 
-        def replace_env(match):
+        def replace_env(match) -> str:
             var_name = match.group(1)
             value = os.getenv(var_name)
             if value is not None:

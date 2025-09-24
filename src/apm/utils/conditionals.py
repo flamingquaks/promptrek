@@ -5,15 +5,15 @@ Handles conditional instructions and template logic in UPF content.
 """
 
 import re
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
-from ..core.models import Condition, UniversalPrompt
+from ..core.models import UniversalPrompt
 
 
 class ConditionalProcessor:
     """Processes conditional instructions in UPF prompts."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize conditional processor."""
         self.variable_pattern = re.compile(r"\{\{\{\s*(\w+)\s*\}\}\}")
 
@@ -39,7 +39,7 @@ class ConditionalProcessor:
             all_variables.update(variables)
 
         # Process each condition
-        additional_content = {}
+        additional_content: Dict[str, Any] = {}
         for condition in prompt.conditions:
             if self._evaluate_condition(condition.if_condition, all_variables):
                 if condition.then:

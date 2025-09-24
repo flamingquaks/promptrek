@@ -4,7 +4,6 @@ Universal Prompt Format (UPF) parser.
 Handles loading and parsing .apm.yaml files into UniversalPrompt objects.
 """
 
-import os
 from pathlib import Path
 from typing import Any, Dict, Union
 
@@ -41,7 +40,7 @@ class UPFParser:
         if not file_path.exists():
             raise UPFFileNotFoundError(f"UPF file not found: {file_path}")
 
-        if not file_path.suffix in [".yaml", ".yml"]:
+        if file_path.suffix not in [".yaml", ".yml"]:
             raise UPFParsingError(
                 f"File must have .yaml or .yml extension: {file_path}"
             )

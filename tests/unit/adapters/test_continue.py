@@ -9,7 +9,6 @@ from unittest.mock import mock_open, patch
 import pytest
 
 from src.apm.adapters.continue_adapter import ContinueAdapter
-from src.apm.core.exceptions import ValidationError
 from src.apm.core.models import PromptMetadata, UniversalPrompt
 
 from .base_test import TestAdapterBase

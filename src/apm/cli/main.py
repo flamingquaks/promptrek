@@ -9,8 +9,6 @@ from pathlib import Path
 import click
 
 from ..core.exceptions import APMError
-from ..core.parser import UPFParser
-from ..core.validator import UPFValidator
 from .commands.generate import generate_command
 from .commands.init import init_command
 from .commands.validate import validate_command

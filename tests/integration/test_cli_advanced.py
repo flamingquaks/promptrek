@@ -95,12 +95,12 @@ instructions:
     - "Write clean code"
 
 conditions:
-  - if: "EDITOR == \"claude\""
+  - if: 'EDITOR == "claude"'
     then:
       instructions:
         general:
           - "Claude-specific: Provide detailed explanations"
-  - if: "EDITOR == \"continue\""
+  - if: 'EDITOR == "continue"'
     then:
       instructions:
         general:
@@ -141,7 +141,7 @@ variables:
         """Test validate command with nonexistent file."""
         result = runner.invoke(cli, ["validate", "nonexistent.apm.yaml"])
         assert result.exit_code != 0
-        assert "not found" in result.output.lower()
+        assert "does not exist" in result.output.lower()
 
     def test_generate_single_editor_dry_run(self, runner, sample_upf_file, temp_dir):
         """Test generate command with single editor in dry run mode."""
@@ -229,7 +229,7 @@ variables:
         # Check that variables were overridden
         generated_file = temp_dir / ".claude" / "context.md"
         assert generated_file.exists()
-        content = generated_file.read_text()
+        # Verify file was generated
         # The content should include the overridden values if variable substitution is used
 
     def test_generate_with_conditionals(self, runner, conditional_upf_file, temp_dir):
@@ -313,7 +313,7 @@ variables:
         """Test init command basic functionality."""
         init_file = temp_dir / "init_test.apm.yaml"
         result = runner.invoke(
-            cli, ["init", str(init_file)], input="\n\n\n\n\n\n"
+            cli, ["init", "--output", str(init_file)], input="\n\n\n\n\n\n"
         )  # Accept all defaults
 
         assert result.exit_code == 0
@@ -328,7 +328,9 @@ variables:
     def test_init_command_with_template(self, runner, temp_dir):
         """Test init command with template."""
         init_file = temp_dir / "template_test.apm.yaml"
-        result = runner.invoke(cli, ["init", "--template", "basic", str(init_file)])
+        result = runner.invoke(
+            cli, ["init", "--template", "basic", "--output", str(init_file)]
+        )
 
         assert result.exit_code == 0
         assert init_file.exists()
