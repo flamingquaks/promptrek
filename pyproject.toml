@@ -3,14 +3,14 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "agent-prompt-mapper"
+name = "promptrek"
 version = "0.1.0"
 description = "Universal AI Editor prompt storage solution"
 readme = "README.md"
 requires-python = ">=3.8"
 license = {text = "MIT"}
 authors = [
-    {name = "Agent Prompt Mapper Team"},
+    {name = "PrompTrek Team"},
 ]
 keywords = ["ai", "prompts", "copilot", "cursor", "continue", "cli"]
 classifiers = [
@@ -46,13 +46,13 @@ dev = [
 ]
 
 [project.scripts]
-apm = "apm.cli.main:cli"
+promptrek = "promptrek.cli.main:cli"
 
 [project.urls]
-Homepage = "https://github.com/flamingquaks/agent-prompt-mapper"
-Repository = "https://github.com/flamingquaks/agent-prompt-mapper"
-Documentation = "https://github.com/flamingquaks/agent-prompt-mapper/tree/main/docs"
-Issues = "https://github.com/flamingquaks/agent-prompt-mapper/issues"
+Homepage = "https://github.com/flamingquaks/promptrek"
+Repository = "https://github.com/flamingquaks/promptrek"
+Documentation = "https://github.com/flamingquaks/promptrek/tree/main/docs"
+Issues = "https://github.com/flamingquaks/promptrek/issues"
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -102,14 +102,14 @@ python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
 addopts = [
-    "--cov=src/apm",
+    "--cov=src/promptrek",
     "--cov-report=html",
     "--cov-report=term-missing",
     "--cov-fail-under=80",
 ]
 
 [tool.coverage.run]
-source = ["src/apm"]
+source = ["src/promptrek"]
 omit = [
     "*/tests/*",
     "*/test_*",

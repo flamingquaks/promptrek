@@ -121,8 +121,8 @@
 - [ ] Add custom filter support
 
 #### 4.2 Configuration Management
-- [ ] Implement global configuration (`~/.apm/config.json`)
-- [ ] Add project-level configuration (`.apm.config.json`)
+- [ ] Implement global configuration (`~/.promptrek/config.json`)
+- [ ] Add project-level configuration (`.promptrek.config.json`)
 - [ ] Create configuration merging logic
 - [ ] Add environment variable support
 
@@ -225,9 +225,9 @@ mypy>=1.0.0
 
 **Project Structure**:
 ```
-apm/
+promptrek/
 ├── src/
-│   └── apm/
+│   └── promptrek/
 │       ├── __init__.py
 │       ├── cli/
 │       │   ├── __init__.py
@@ -312,7 +312,7 @@ class TemplateEngine:
 @click.group()
 @click.version_option()
 def cli():
-    """Agent Prompt Mapper - Universal AI editor prompt management"""
+    """PrompTrek - Universal AI editor prompt management"""
     pass
 
 @cli.command()

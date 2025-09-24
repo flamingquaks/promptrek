@@ -1,6 +1,6 @@
 # Editor Adapters
 
-Agent Prompt Mapper supports multiple AI-powered code editors and assistants. Each adapter generates editor-specific configuration files optimized for that particular tool.
+PrompTrek supports multiple AI-powered code editors and assistants. Each adapter generates editor-specific configuration files optimized for that particular tool.
 
 ## Supported Editors
 
@@ -130,22 +130,22 @@ Generates Cursor rules files that configure the Cursor AI editor with project-sp
 
 ### Generate for Single Editor
 ```bash
-apm generate --editor claude --output ./output project.apm.yaml
+promptrek generate --editor claude --output ./output project.promptrek.yaml
 ```
 
 ### Generate for All Target Editors
 ```bash
-apm generate --all --output ./output project.apm.yaml
+promptrek generate --all --output ./output project.promptrek.yaml
 ```
 
 ### Dry Run (Preview Mode)
 ```bash
-apm generate --editor claude --output ./output --dry-run project.apm.yaml
+promptrek generate --editor claude --output ./output --dry-run project.promptrek.yaml
 ```
 
 ### With Variable Overrides
 ```bash
-apm generate --editor claude --output ./output project.amp.yaml \
+promptrek generate --editor claude --output ./output project.amp.yaml \
   -V PROJECT_NAME="CustomProject" \
   -V AUTHOR="Custom Author"
 ```
@@ -321,7 +321,7 @@ Error: Editor 'claude' not in targets: copilot, cursor
 
 **File Generation Errors**: Ensure output directory exists and is writable:
 ```bash
-apm generate --editor claude --output ./output project.apm.yaml
+promptrek generate --editor claude --output ./output project.promptrek.yaml
 ```
 
 **Conditional Not Working**: Check condition syntax and variable names:
@@ -335,7 +335,7 @@ apm generate --editor claude --output ./output project.apm.yaml
 
 ### Getting Help
 
-- Use `apm list-editors` to see all supported editors
+- Use `promptrek list-editors` to see all supported editors
 - Use `--dry-run` to preview generated content
 - Use `--verbose` for detailed operation logs
 - Check the generated files match your editor's expected format

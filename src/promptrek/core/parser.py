@@ -1,7 +1,7 @@
 """
 Universal Prompt Format (UPF) parser.
 
-Handles loading and parsing .apm.yaml files into UniversalPrompt objects.
+Handles loading and parsing .promptrek.yaml files into UniversalPrompt objects.
 """
 
 from pathlib import Path
@@ -26,7 +26,7 @@ class UPFParser:
         Parse a UPF file from disk.
 
         Args:
-            file_path: Path to the .apm.yaml file
+            file_path: Path to the .promptrek.yaml file
 
         Returns:
             Parsed UniversalPrompt object
@@ -124,11 +124,11 @@ class UPFParser:
             file_path: Path to check
 
         Returns:
-            True if extension is valid (.apm.yaml or .apm.yml)
+            True if extension is valid (.promptrek.yaml or .promptrek.yml)
         """
         file_path = Path(file_path)
         name = file_path.name
-        return name.endswith(".apm.yaml") or name.endswith(".apm.yml")
+        return name.endswith(".promptrek.yaml") or name.endswith(".promptrek.yml")
 
     def find_upf_files(
         self, directory: Union[str, Path], recursive: bool = False
@@ -148,7 +148,7 @@ class UPFParser:
         if not directory.exists() or not directory.is_dir():
             return []
 
-        pattern = "**/*.apm.y*ml" if recursive else "*.apm.y*ml"
+        pattern = "**/*.promptrek.y*ml" if recursive else "*.promptrek.y*ml"
         return list(directory.glob(pattern))
 
     def _format_validation_error(self, error: ValidationError, source: str) -> str:

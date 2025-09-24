@@ -29,7 +29,7 @@ jobs:
     
     - name: Run full test suite
       run: |
-        python -m pytest tests/ --cov=src/apm --cov-fail-under=80
+        python -m pytest tests/ --cov=src/promptrek --cov-fail-under=80
 
   build:
     needs: test

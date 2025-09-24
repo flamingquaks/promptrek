@@ -4,9 +4,9 @@ Unit tests for adapter registry.
 
 import pytest
 
-from src.apm.adapters.base import EditorAdapter
-from src.apm.adapters.registry import AdapterRegistry
-from src.apm.core.exceptions import AdapterNotFoundError
+from src.promptrek.adapters.base import EditorAdapter
+from src.promptrek.adapters.registry import AdapterRegistry
+from src.promptrek.core.exceptions import AdapterNotFoundError
 
 
 class MockAdapter(EditorAdapter):

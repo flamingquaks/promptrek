@@ -30,8 +30,8 @@ def init_command(ctx: click.Context, template: Optional[str], output: str) -> No
             raise CLIError("Initialization cancelled")
 
     # Ensure output path has correct extension
-    if not output_path.name.endswith((".apm.yaml", ".apm.yml")):
-        output_path = output_path.with_suffix(".apm.yaml")
+    if not output_path.name.endswith((".promptrek.yaml")):
+        output_path = output_path.with_suffix(".promptrek.yaml")
 
     # Create basic template
     if template:
@@ -56,8 +56,8 @@ def init_command(ctx: click.Context, template: Optional[str], output: str) -> No
         raise CLIError(f"Failed to write file {output_path}: {e}")
 
     click.echo(f"✅ Initialized universal prompt file: {output_path}")
-    click.echo("📝 Edit the file to customize your prompt configuration")
-    click.echo(f"🔍 Run 'apm validate {output_path}' to check your configuration")
+    click.echo(f"📝 Edit the file to customize your prompt configuration")
+    click.echo(f"🔍 Run 'promptrek validate {output_path}' to check your configuration")
 
 
 def _get_basic_template() -> dict:

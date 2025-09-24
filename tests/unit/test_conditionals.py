@@ -4,8 +4,8 @@ Unit tests for conditional processing.
 
 import pytest
 
-from src.apm.core.models import Condition, PromptMetadata, UniversalPrompt
-from src.apm.utils.conditionals import ConditionalProcessor
+from src.promptrek.core.models import Condition, PromptMetadata, UniversalPrompt
+from src.promptrek.utils.conditionals import ConditionalProcessor
 
 
 class TestConditionalProcessor:

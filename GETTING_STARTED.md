@@ -1,6 +1,6 @@
 # Development Setup and Getting Started
 
-This guide explains how to set up and use the Agent Prompt Mapper CLI tool.
+This guide explains how to set up and use the PrompTrek CLI tool.
 
 ## Installation
 
@@ -24,7 +24,7 @@ pip install -e .
 
 3. Verify installation:
 ```bash
-apm --help
+promptrek --help
 ```
 
 ## Quick Start
@@ -35,11 +35,11 @@ Create a new universal prompt file:
 
 ```bash
 # Basic initialization
-apm init --output my-project.apm.yaml
+promptrek init --output my-project.promptrek.yaml
 
 # Use a template
-apm init --template react --output my-react-app.apm.yaml
-apm init --template api --output my-api.apm.yaml
+promptrek init --template react --output my-react-app.promptrek.yaml
+promptrek init --template api --output my-api.promptrek.yaml
 ```
 
 Available templates:
@@ -50,37 +50,37 @@ Available templates:
 ### 2. Validate Your Configuration
 
 ```bash
-apm validate my-project.apm.yaml
+promptrek validate my-project.promptrek.yaml
 ```
 
 Use `--strict` to treat warnings as errors:
 ```bash
-apm validate my-project.apm.yaml --strict
+promptrek validate my-project.promptrek.yaml --strict
 ```
 
 ### 3. Generate Editor-Specific Prompts
 
 Generate for a specific editor:
 ```bash
-apm generate my-project.apm.yaml --editor copilot
-apm generate my-project.apm.yaml --editor cursor
-apm generate my-project.apm.yaml --editor continue
+promptrek generate my-project.promptrek.yaml --editor copilot
+promptrek generate my-project.promptrek.yaml --editor cursor
+promptrek generate my-project.promptrek.yaml --editor continue
 ```
 
 Generate for all target editors:
 ```bash
-apm generate my-project.apm.yaml --all
+promptrek generate my-project.promptrek.yaml --all
 ```
 
 Preview what would be generated (dry run):
 ```bash
-apm generate my-project.apm.yaml --editor copilot --dry-run
+promptrek generate my-project.promptrek.yaml --editor copilot --dry-run
 ```
 
 ### 4. List Supported Editors
 
 ```bash
-apm list-editors
+promptrek list-editors
 ```
 
 ## Generated Files
@@ -95,16 +95,16 @@ The tool generates the following files for each editor:
 
 ```bash
 # 1. Create a new React project configuration
-apm init --template react --output my-react-app.apm.yaml
+promptrek init --template react --output my-react-app.promptrek.yaml
 
 # 2. Edit the file to customize your project
-# (Edit my-react-app.apm.yaml with your favorite editor)
+# (Edit my-react-app.promptrek.yaml with your favorite editor)
 
 # 3. Validate the configuration
-apm validate my-react-app.apm.yaml
+promptrek validate my-react-app.promptrek.yaml
 
 # 4. Generate prompts for all editors
-apm generate my-react-app.apm.yaml --all
+promptrek generate my-react-app.promptrek.yaml --all
 
 # 5. Your AI editor prompts are ready!
 ls .github/copilot-instructions.md
@@ -114,7 +114,7 @@ ls .continue/config.json
 
 ## Universal Prompt Format (UPF)
 
-The `.apm.yaml` files use a standardized format. Here's a minimal example:
+The `.promptrek.yaml` files use a standardized format. Here's a minimal example:
 
 ```yaml
 schema_version: "1.0.0"
@@ -164,7 +164,7 @@ pytest tests/unit/
 pytest tests/integration/
 
 # Run all tests with coverage
-pytest --cov=src/apm
+pytest --cov=src/promptrek
 ```
 
 ### Code Quality
@@ -188,13 +188,13 @@ flake8 src/ tests/
 ### Common Issues
 
 1. **Import errors**: Make sure you installed with `pip install -e .`
-2. **Command not found**: Check that `apm` is in your PATH
-3. **Validation errors**: Use `apm validate --help` for validation options
+2. **Command not found**: Check that `promptrek` is in your PATH
+3. **Validation errors**: Use `promptrek validate --help` for validation options
 
 ### Getting Help
 
-- Use `apm --help` for general help
-- Use `apm <command> --help` for command-specific help
+- Use `promptrek --help` for general help
+- Use `promptrek <command> --help` for command-specific help
 - Check the examples in `examples/basic/` directory
 - Enable verbose output with `--verbose` for debugging
 

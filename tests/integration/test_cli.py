@@ -4,7 +4,7 @@ from pathlib import Path
 
 from click.testing import CliRunner
 
-from apm.cli.main import cli
+from src.promptrek.cli.main import cli
 
 
 class TestCLIIntegration:
@@ -16,7 +16,7 @@ class TestCLIIntegration:
         result = runner.invoke(cli, ["--help"])
 
         assert result.exit_code == 0
-        assert "Agent Prompt Mapper" in result.output
+        assert "PrompTrek" in result.output
         assert "init" in result.output
         assert "validate" in result.output
         assert "generate" in result.output
@@ -24,7 +24,7 @@ class TestCLIIntegration:
     def test_init_command(self, tmp_path):
         """Test init command creates file."""
         runner = CliRunner()
-        output_file = tmp_path / "test.apm.yaml"
+        output_file = tmp_path / "test.promptrek.yaml"
 
         result = runner.invoke(cli, ["init", "--output", str(output_file)])
 
@@ -35,7 +35,7 @@ class TestCLIIntegration:
     def test_init_command_with_template(self, tmp_path):
         """Test init command with template."""
         runner = CliRunner()
-        output_file = tmp_path / "react.apm.yaml"
+        output_file = tmp_path / "react.promptrek.yaml"
 
         result = runner.invoke(
             cli, ["init", "--template", "react", "--output", str(output_file)]
@@ -59,7 +59,7 @@ class TestCLIIntegration:
 
     def test_validate_command_invalid_file(self, tmp_path):
         """Test validate command with invalid file."""
-        invalid_file = tmp_path / "invalid.apm.yaml"
+        invalid_file = tmp_path / "invalid.promptrek.yaml"
         invalid_file.write_text(
             """
 schema_version: "1.0.0"
@@ -160,7 +160,7 @@ targets: []
     def test_generate_command_with_variable_overrides(self, tmp_path):
         """Test generate command with variable overrides."""
         # Create a UPF file with variables
-        upf_file = tmp_path / "test_vars.apm.yaml"
+        upf_file = tmp_path / "test_vars.promptrek.yaml"
         upf_file.write_text(
             """
 schema_version: "1.0.0"

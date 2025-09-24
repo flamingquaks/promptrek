@@ -1,7 +1,9 @@
 """Unit tests for UPF validator."""
 
-from apm.core.models import UniversalPrompt
-from apm.core.validator import UPFValidator, ValidationResult
+import pytest
+
+from src.promptrek.core.models import UniversalPrompt
+from src.promptrek.core.validator import UPFValidator, ValidationResult
 
 
 class TestValidationResult:

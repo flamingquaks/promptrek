@@ -8,8 +8,9 @@ from unittest.mock import mock_open, patch
 
 import pytest
 
-from src.apm.adapters.continue_adapter import ContinueAdapter
-from src.apm.core.models import PromptMetadata, UniversalPrompt
+from src.promptrek.adapters.continue_adapter import ContinueAdapter
+from src.promptrek.core.exceptions import ValidationError
+from src.promptrek.core.models import PromptMetadata, UniversalPrompt
 
 from .base_test import TestAdapterBase
 

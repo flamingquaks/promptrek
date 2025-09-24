@@ -1,14 +1,14 @@
 """
-Main CLI entry point for Agent Prompt Mapper.
+Main CLI entry point for PrompTrek.
 
-Provides the primary command-line interface for APM functionality.
+Provides the primary command-line interface for PrompTrek functionality.
 """
 
 from pathlib import Path
 
 import click
 
-from ..core.exceptions import APMError
+from ..core.exceptions import PrompTrekError
 from .commands.generate import generate_command
 from .commands.init import init_command
 from .commands.validate import validate_command
@@ -20,9 +20,9 @@ from .commands.validate import validate_command
 @click.pass_context
 def cli(ctx: click.Context, verbose: bool) -> None:
     """
-    Agent Prompt Mapper - Universal AI editor prompt management.
+    PrompTrek - Universal AI editor prompt management.
 
-    APM allows you to create prompts in a universal format and generate
+    PrompTrek allows you to create prompts in a universal format and generate
     editor-specific prompts for GitHub Copilot, Cursor, Continue, and more.
     """
     ctx.ensure_object(dict)
@@ -35,7 +35,7 @@ def cli(ctx: click.Context, verbose: bool) -> None:
     "--output",
     "-o",
     type=click.Path(),
-    default="project.apm.yaml",
+    default="project.promptrek.yaml",
     help="Output file path",
 )
 @click.pass_context
@@ -43,7 +43,7 @@ def init(ctx: click.Context, template: str, output: str) -> None:
     """Initialize a new universal prompt file."""
     try:
         init_command(ctx, template, output)
-    except APMError as e:
+    except PrompTrekError as e:
         click.echo(f"Error: {e}", err=True)
         ctx.exit(1)
     except Exception as e:
@@ -61,7 +61,7 @@ def validate(ctx: click.Context, file: Path, strict: bool) -> None:
     """Validate a universal prompt file."""
     try:
         validate_command(ctx, file, strict)
-    except APMError as e:
+    except PrompTrekError as e:
         click.echo(f"Error: {e}", err=True)
         ctx.exit(1)
     except Exception as e:
@@ -117,7 +117,7 @@ def generate(
             var_dict[key.strip()] = value.strip()
 
         generate_command(ctx, file, editor, output, dry_run, all_editors, var_dict)
-    except APMError as e:
+    except PrompTrekError as e:
         click.echo(f"Error: {e}", err=True)
         ctx.exit(1)
     except Exception as e:

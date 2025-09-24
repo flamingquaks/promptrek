@@ -4,7 +4,7 @@ Unit tests for Cursor adapter.
 
 import pytest
 
-from src.apm.adapters.cursor import CursorAdapter
+from src.promptrek.adapters.cursor import CursorAdapter
 
 from .base_test import TestAdapterBase
 

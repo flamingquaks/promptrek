@@ -1,6 +1,6 @@
 # Advanced Template Features
 
-Agent Prompt Mapper supports powerful advanced template features that allow you to create flexible, maintainable prompt configurations.
+PrompTrek supports powerful advanced template features that allow you to create flexible, maintainable prompt configurations.
 
 ## Variable Substitution
 
@@ -43,7 +43,7 @@ instructions:
 Override variables from the command line using `-V` or `--var`:
 
 ```bash
-apm generate --editor claude --output ./output project.apm.yaml \
+promptrek generate --editor claude --output ./output project.promptrek.yaml \
   -V PROJECT_NAME="CustomProject" \
   -V AUTHOR_EMAIL="custom@example.com"
 ```
@@ -109,7 +109,7 @@ The import system allows you to share common configurations across multiple proj
 Create a base configuration file:
 
 ```yaml
-# base-config.apm.yaml
+# base-config.promptrek.yaml
 schema_version: "1.0.0"
 
 metadata:
@@ -142,7 +142,7 @@ variables:
 Then import it in your main file:
 
 ```yaml
-# project.apm.yaml
+# project.promptrek.yaml
 schema_version: "1.0.0"
 
 metadata:
@@ -154,7 +154,7 @@ targets:
   - claude
 
 imports:
-  - path: "base-config.apm.yaml"
+  - path: "base-config.promptrek.yaml"
     prefix: "shared"
 
 instructions:
@@ -186,11 +186,11 @@ Import paths are relative to the importing file:
 ```
 project/
 ├── config/
-│   └── base.apm.yaml
+│   └── base.promptrek.yaml
 ├── frontend/
-│   └── frontend.apm.yaml  # imports: path: "../config/base.apm.yaml"
+│   └── frontend.promptrek.yaml  # imports: path: "../config/base.promptrek.yaml"
 └── backend/
-    └── backend.apm.yaml   # imports: path: "../config/base.apm.yaml"
+    └── backend.promptrek.yaml   # imports: path: "../config/base.promptrek.yaml"
 ```
 
 ### Circular Import Protection
@@ -198,13 +198,13 @@ project/
 The import system automatically detects and prevents circular imports:
 
 ```yaml
-# file-a.apm.yaml
+# file-a.promptrek.yaml
 imports:
-  - path: "file-b.apm.yaml"
+  - path: "file-b.promptrek.yaml"
 
-# file-b.apm.yaml  
+# file-b.promptrek.yaml  
 imports:
-  - path: "file-a.apm.yaml"  # This will cause an error
+  - path: "file-a.promptrek.yaml"  # This will cause an error
 ```
 
 ## Combining Features
@@ -212,7 +212,7 @@ imports:
 All advanced features work together seamlessly:
 
 ```yaml
-# base.apm.yaml
+# base.promptrek.yaml
 instructions:
   general:
     - "Use {{{ CODING_STYLE }}} coding style"
@@ -228,9 +228,9 @@ variables:
   CODING_STYLE: "clean"
   AI_APPROACH: "detailed"
 
-# main.apm.yaml
+# main.promptrek.yaml
 imports:
-  - path: "base.apm.yaml"
+  - path: "base.promptrek.yaml"
     prefix: "base"
 
 conditions:
@@ -248,7 +248,7 @@ variables:
 Generate with overrides:
 
 ```bash
-apm generate --editor claude --output ./output main.apm.yaml \
+promptrek generate --editor claude --output ./output main.promptrek.yaml \
   -V PROJECT_NAME="CustomProject" \
   -V base_CODING_STYLE="strict" \
   -V base_AI_APPROACH="concise"
@@ -283,12 +283,12 @@ This will:
 ```
 project/
 ├── shared/
-│   ├── base-coding-standards.apm.yaml
-│   ├── base-testing.apm.yaml
-│   └── base-typescript.apm.yaml
+│   ├── base-coding-standards.promptrek.yaml
+│   ├── base-testing.promptrek.yaml
+│   └── base-typescript.promptrek.yaml
 ├── frontend/
-│   └── frontend.apm.yaml
+│   └── frontend.promptrek.yaml
 ├── backend/  
-│   └── backend.apm.yaml
+│   └── backend.promptrek.yaml
 └── README.md  # Document your configuration structure
 ```

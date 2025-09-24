@@ -1,9 +1,9 @@
 # PrompTrek
 
-[![CI](https://github.com/flamingquaks/agent-prompt-mapper/actions/workflows/ci.yml/badge.svg)](https://github.com/flamingquaks/agent-prompt-mapper/actions/workflows/ci.yml)
-[![PR Validation](https://github.com/flamingquaks/agent-prompt-mapper/actions/workflows/pr.yml/badge.svg)](https://github.com/flamingquaks/agent-prompt-mapper/actions/workflows/pr.yml)
-[![Test Matrix](https://github.com/flamingquaks/agent-prompt-mapper/actions/workflows/test-matrix.yml/badge.svg)](https://github.com/flamingquaks/agent-prompt-mapper/actions/workflows/test-matrix.yml)
-[![Python Versions](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-blue)](https://github.com/flamingquaks/agent-prompt-mapper)
+[![CI](https://github.com/flamingquaks/promptrek/actions/workflows/ci.yml/badge.svg)](https://github.com/flamingquaks/promptrek/actions/workflows/ci.yml)
+[![PR Validation](https://github.com/flamingquaks/promptrek/actions/workflows/pr.yml/badge.svg)](https://github.com/flamingquaks/promptrek/actions/workflows/pr.yml)
+[![Test Matrix](https://github.com/flamingquaks/promptrek/actions/workflows/test-matrix.yml/badge.svg)](https://github.com/flamingquaks/promptrek/actions/workflows/test-matrix.yml)
+[![Python Versions](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-blue)](https://github.com/flamingquaks/promptrek)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 *Taking your coding prompts on a journey to every AI editor!*
@@ -12,7 +12,7 @@ A universal AI Editor prompt storage solution that dynamically maps prompt data 
 
 ## 🎯 Problem It Solves
 
-AI coding assistants like GitHub Copilot, Cursor, Continue, and others all use different prompt formats and configuration methods. When working across teams or switching between editors, you have to maintain separate prompt configurations for each tool. Agent Prompt Mapper solves this by:
+AI coding assistants like GitHub Copilot, Cursor, Continue, and others all use different prompt formats and configuration methods. When working across teams or switching between editors, you have to maintain separate prompt configurations for each tool. PrompTrek solves this by:
 
 - **Universal Format**: Create prompts once in a standardized format
 - **Multi-Editor Support**: Generate prompts for any supported AI editor
@@ -21,7 +21,7 @@ AI coding assistants like GitHub Copilot, Cursor, Continue, and others all use d
 
 ## 🚀 Quick Example
 
-1. Create a universal prompt file (`.apm.yaml`):
+1. Create a universal prompt file (`.promptrek.yaml`):
 ```yaml
 schema_version: "1.0.0"
 metadata:
@@ -38,13 +38,13 @@ instructions:
 2. Generate editor-specific prompts:
 ```bash
 # Generate for GitHub Copilot
-apm generate --editor copilot
+promptrek generate --editor copilot
 
 # Generate for Cursor
-apm generate --editor cursor
+promptrek generate --editor cursor
 
 # Generate for all configured editors
-apm generate --all
+promptrek generate --all
 ```
 
 3. Use the generated prompts in your preferred editor!
@@ -93,8 +93,8 @@ All planning documents are available in the [`docs/`](./docs/) directory:
 
 See the [`examples/`](./examples/) directory for sample configurations:
 
-- [React TypeScript Project](./examples/basic/react-typescript.apm.yaml)
-- [Node.js API Service](./examples/basic/node-api.apm.yaml)
+- [React TypeScript Project](./examples/basic/react-typescript.promptrek.yaml)
+- [Node.js API Service](./examples/basic/node-api.promptrek.yaml)
 
 ## 🚀 Installation & Quick Start
 
@@ -102,8 +102,8 @@ See the [`examples/`](./examples/) directory for sample configurations:
 
 ```bash
 # Install from source (recommended for now)
-git clone https://github.com/flamingquaks/agent-prompt-mapper.git
-cd agent-prompt-mapper
+git clone https://github.com/flamingquaks/promptrek.git
+cd promptrek
 pip install -e .
 ```
 
@@ -111,13 +111,13 @@ pip install -e .
 
 ```bash
 # 1. Initialize a new project (choose from basic, react, api templates)
-apm init --template react --output my-project.apm.yaml
+promptrek init --template react --output my-project.promptrek.yaml
 
 # 2. Validate your configuration
-apm validate my-project.apm.yaml
+promptrek validate my-project.promptrek.yaml
 
 # 3. Generate editor-specific prompts
-apm generate my-project.apm.yaml --all
+promptrek generate my-project.promptrek.yaml --all
 
 # 4. Your AI editor prompts are ready!
 ls .github/copilot-instructions.md
@@ -127,10 +127,10 @@ ls .continue/config.json
 
 ### Available Commands
 
-- `apm init` - Create a new universal prompt file with templates
-- `apm validate` - Check your configuration for errors
-- `apm generate` - Create editor-specific prompts
-- `apm list-editors` - Show supported editors and their status
+- `promptrek init` - Create a new universal prompt file with templates
+- `promptrek validate` - Check your configuration for errors
+- `promptrek generate` - Create editor-specific prompts
+- `promptrek list-editors` - Show supported editors and their status
 
 For detailed usage instructions, see [`GETTING_STARTED.md`](./GETTING_STARTED.md).
 
@@ -147,7 +147,7 @@ See the [Implementation Roadmap](./docs/IMPLEMENTATION_ROADMAP.md) for planned f
 
 ## 🧪 Testing and Quality Assurance
 
-Agent Prompt Mapper maintains high quality standards with comprehensive testing:
+PrompTrek maintains high quality standards with comprehensive testing:
 
 ### Automated Testing
 - **Continuous Integration**: Tests run on every push and PR across multiple Python versions (3.8-3.12)
@@ -172,7 +172,7 @@ pip install -e ".[dev]"
 pytest
 
 # Run with coverage
-pytest --cov=src/apm --cov-report=html
+pytest --cov=src/promptrek --cov-report=html
 
 # Run specific test categories
 pytest tests/unit/        # Unit tests only
@@ -212,7 +212,7 @@ variables:
 
 Override variables from CLI:
 ```bash
-apm generate --editor claude project.apm.yaml \
+promptrek generate --editor claude project.promptrek.yaml \
   -V PROJECT_NAME="CustomProject" \
   -V AUTHOR_EMAIL="custom@example.com"
 ```
@@ -239,7 +239,7 @@ Share common configurations across projects:
 
 ```yaml
 imports:
-  - path: "shared/base-config.apm.yaml"
+  - path: "shared/base-config.promptrek.yaml"
     prefix: "shared"
 
 # Imported instructions get prefixed: [shared] Follow coding standards
