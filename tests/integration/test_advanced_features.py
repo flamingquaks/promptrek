@@ -464,8 +464,8 @@ variables:
         # Check imported instructions with prefix (note: prefixed variable substitution is not yet implemented)
         assert "[base] Use {{{ CODING_STYLE }}} coding style" in content
 
-        # Check conditional instructions from main file 
+        # Check conditional instructions from main file
         assert "Main: Use agile methodology" in content
-        
+
         # Note: Conditional instructions from imported files are not yet fully supported
         # This is an advanced feature that would require complex import + conditional processing

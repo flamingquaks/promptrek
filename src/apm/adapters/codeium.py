@@ -43,7 +43,9 @@ class CodeiumAdapter(EditorAdapter):
         conditional_content = self.process_conditionals(processed_prompt, variables)
 
         # Create context content (JSON format for Codeium)
-        context_content = self._build_context_json(processed_prompt, conditional_content)
+        context_content = self._build_context_json(
+            processed_prompt, conditional_content
+        )
 
         # Create RC file content
         rc_content = self._build_rc_file(processed_prompt)
@@ -106,7 +108,11 @@ class CodeiumAdapter(EditorAdapter):
         """Codeium supports conditional configuration."""
         return True
 
-    def _build_context_json(self, prompt: UniversalPrompt, conditional_content: Optional[Dict[str, Any]] = None) -> str:
+    def _build_context_json(
+        self,
+        prompt: UniversalPrompt,
+        conditional_content: Optional[Dict[str, Any]] = None,
+    ) -> str:
         """Build Codeium context JSON content."""
         context = {
             "project": {

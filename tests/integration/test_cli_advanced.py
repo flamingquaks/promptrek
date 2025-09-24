@@ -328,7 +328,9 @@ variables:
     def test_init_command_with_template(self, runner, temp_dir):
         """Test init command with template."""
         init_file = temp_dir / "template_test.apm.yaml"
-        result = runner.invoke(cli, ["init", "--template", "basic", "--output", str(init_file)])
+        result = runner.invoke(
+            cli, ["init", "--template", "basic", "--output", str(init_file)]
+        )
 
         assert result.exit_code == 0
         assert init_file.exists()

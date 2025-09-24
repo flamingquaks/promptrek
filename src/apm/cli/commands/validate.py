@@ -8,7 +8,7 @@ from pathlib import Path
 
 import click
 
-from ...core.exceptions import UPFParsingError, UPFValidationError
+from ...core.exceptions import UPFParsingError
 from ...core.parser import UPFParser
 from ...core.validator import UPFValidator
 
@@ -31,7 +31,7 @@ def validate_command(ctx: click.Context, file: Path, strict: bool) -> None:
     try:
         prompt = parser.parse_file(file)
         if verbose:
-            click.echo(f"✅ File parsed successfully")
+            click.echo("✅ File parsed successfully")
     except UPFParsingError as e:
         click.echo(f"❌ Parsing failed: {e}", err=True)
         ctx.exit(1)

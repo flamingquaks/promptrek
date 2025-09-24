@@ -5,10 +5,7 @@ Provides comprehensive validation for Universal Prompt Format files
 beyond basic schema validation.
 """
 
-from pathlib import Path
-from typing import Any, Dict, List, Set
-
-from .exceptions import UPFValidationError
+from typing import List
 from .models import UniversalPrompt
 
 

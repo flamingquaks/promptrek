@@ -2,10 +2,8 @@
 Adapter registry for managing and discovering editor adapters.
 """
 
-import importlib
-import pkgutil
 from pathlib import Path
-from typing import Dict, List, Optional, Type
+from typing import Dict, List, Type
 
 from ..core.exceptions import AdapterNotFoundError
 from .base import EditorAdapter

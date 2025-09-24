@@ -2,8 +2,6 @@
 Unit tests for adapter registry.
 """
 
-from unittest.mock import Mock
-
 import pytest
 
 from src.apm.adapters.base import EditorAdapter

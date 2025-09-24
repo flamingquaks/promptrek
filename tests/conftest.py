@@ -1,7 +1,5 @@
 """Test configuration for pytest."""
 
-from pathlib import Path
-
 import pytest
 
 

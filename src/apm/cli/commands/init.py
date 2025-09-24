@@ -11,7 +11,7 @@ import click
 import yaml
 
 from ...core.exceptions import CLIError
-from ...core.models import PromptMetadata, UniversalPrompt
+from ...core.models import UniversalPrompt
 
 
 def init_command(ctx: click.Context, template: Optional[str], output: str) -> None:
@@ -57,7 +57,7 @@ def init_command(ctx: click.Context, template: Optional[str], output: str) -> No
         raise CLIError(f"Failed to write file {output_path}: {e}")
 
     click.echo(f"✅ Initialized universal prompt file: {output_path}")
-    click.echo(f"📝 Edit the file to customize your prompt configuration")
+    click.echo("📝 Edit the file to customize your prompt configuration")
     click.echo(f"🔍 Run 'apm validate {output_path}' to check your configuration")
 
 
@@ -101,10 +101,10 @@ def _get_basic_template() -> dict:
             "function": '''```python
 def calculate_total(items: list[float]) -> float:
     """Calculate the total sum of items.
-    
+
     Args:
         items: List of numeric values to sum
-        
+
     Returns:
         Total sum of all items
     """
@@ -178,10 +178,10 @@ interface ButtonProps {
   variant?: 'primary' | 'secondary';
 }
 
-export const Button: React.FC<ButtonProps> = ({ 
-  title, 
-  onClick, 
-  variant = 'primary' 
+export const Button: React.FC<ButtonProps> = ({
+  title,
+  onClick,
+  variant = 'primary'
 }) => {
   return (
     <button 
