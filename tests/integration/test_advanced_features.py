@@ -9,7 +9,7 @@ from pathlib import Path
 import pytest
 from click.testing import CliRunner
 
-from src.apm.cli.main import cli
+from src.promptrek.cli.main import cli
 
 
 class TestAdvancedFeatures:
@@ -60,7 +60,7 @@ variables:
   STYLE_GUIDE: "Standard"
   INDENT_SIZE: "2"
 """
-        base_file = temp_dir / "base.apm.yaml"
+        base_file = temp_dir / "base.promptrek.yaml"
         base_file.write_text(base_content)
         return base_file
 
@@ -81,7 +81,7 @@ targets:
   - claude
 
 imports:
-  - path: "base.apm.yaml"
+  - path: "base.promptrek.yaml"
     prefix: "shared"
 
 instructions:
@@ -96,7 +96,7 @@ examples:
 variables:
   PROJECT_NAME: "ImportTestProject"
 """
-        main_file = temp_dir / "main.apm.yaml"
+        main_file = temp_dir / "main.promptrek.yaml"
         main_file.write_text(main_content)
         return main_file
 
@@ -169,7 +169,7 @@ variables:
   PROJECT_TYPE: "web application"
   TECH_STACK: "React and TypeScript"
 """
-        var_file = temp_dir / "variables.apm.yaml"
+        var_file = temp_dir / "variables.promptrek.yaml"
         var_file.write_text(var_content)
 
         # Test with variable overrides
@@ -255,7 +255,7 @@ conditions:
 variables:
   BASE_CONFIG: "shared"
 """
-        conditional_file = temp_dir / "conditional.apm.yaml"
+        conditional_file = temp_dir / "conditional.promptrek.yaml"
         conditional_file.write_text(conditional_content)
 
         # Test Claude generation
@@ -388,7 +388,7 @@ variables:
   CODING_STYLE: "clean"
   AI_APPROACH: "detailed"
 """
-        base_file = temp_dir / "base_advanced.apm.yaml"
+        base_file = temp_dir / "base_advanced.promptrek.yaml"
         base_file.write_text(base_content)
 
         # Create main file that imports and overrides
@@ -406,7 +406,7 @@ targets:
   - claude
 
 imports:
-  - path: "base_advanced.apm.yaml"
+  - path: "base_advanced.promptrek.yaml"
     prefix: "base"
 
 instructions:
@@ -425,7 +425,7 @@ variables:
   AUTHOR: "Advanced Tester"
   MAIN_APPROACH: "comprehensive"
 """
-        main_file = temp_dir / "main_advanced.apm.yaml"
+        main_file = temp_dir / "main_advanced.promptrek.yaml"
         main_file.write_text(main_content)
 
         # Test with variable overrides

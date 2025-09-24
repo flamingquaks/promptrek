@@ -8,8 +8,8 @@ from unittest.mock import mock_open, patch
 
 import pytest
 
-from src.apm.adapters.cline import ClineAdapter
-from src.apm.core.models import PromptMetadata, UniversalPrompt
+from src.promptrek.adapters.cline import ClineAdapter
+from src.promptrek.core.models import PromptMetadata, UniversalPrompt
 
 from .base_test import TestAdapterBase
 
