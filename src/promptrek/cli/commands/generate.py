@@ -216,9 +216,8 @@ def _generate_for_editor_multiple(
                 click.echo(f"✅ Generated {editor} files from {source_file}")
         else:
             # Multiple files - check adapter capabilities
-            if (
-                hasattr(adapter, "generate_multiple")
-                and registry.has_capability(editor, AdapterCapability.MULTIPLE_FILE_GENERATION)
+            if hasattr(adapter, "generate_multiple") and registry.has_capability(
+                editor, AdapterCapability.MULTIPLE_FILE_GENERATION
             ):
                 # Adapter supports generating separate files for each prompt
                 adapter.generate_multiple(
