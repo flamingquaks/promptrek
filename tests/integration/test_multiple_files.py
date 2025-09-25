@@ -164,7 +164,7 @@ metadata:
   created: '2024-01-01'
   updated: '2024-01-01'
 targets:
-  - cursor
+  - continue
 instructions:
   general:
     - Write clean code
@@ -180,7 +180,7 @@ metadata:
   created: '2024-01-01'
   updated: '2024-01-01'
 targets:
-  - cursor
+  - continue
 instructions:
   general:
     - Follow git workflow
@@ -192,7 +192,7 @@ instructions:
         runner = CliRunner()
         result = runner.invoke(
             cli,
-            ["generate", "--editor", "cursor", str(file1), str(file2)],
+            ["generate", "--editor", "continue", str(file1), str(file2)],
         )
         
         assert result.exit_code == 0
