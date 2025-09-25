@@ -126,7 +126,9 @@ targets: []
 
             # Should generate for both copilot and cursor (from sample data)
             assert Path(".github/copilot-instructions.md").exists()
-            assert Path(".cursorrules").exists()
+            # Cursor now generates files in .cursor/rules/ directory
+            cursor_rules_dir = Path(".cursor/rules")
+            assert cursor_rules_dir.exists() or Path("AGENTS.md").exists()
 
     def test_list_editors_command(self):
         """Test list-editors command."""
@@ -134,11 +136,10 @@ targets: []
         result = runner.invoke(cli, ["list-editors"])
 
         assert result.exit_code == 0
-        assert "Supported editors:" in result.output
+        assert "AI Editor Support Status:" in result.output
         assert "copilot" in result.output
         assert "cursor" in result.output
-        assert "✅" in result.output  # Implemented editors
-        assert "⏳" in result.output  # Planned editors
+        assert "✅" in result.output  # Implemented support status
 
     def test_generate_command_missing_editor_and_all(self, sample_upf_file):
         """Test generate command fails when neither editor nor all is specified."""

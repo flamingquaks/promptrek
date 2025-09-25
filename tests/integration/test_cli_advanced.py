@@ -128,7 +128,7 @@ variables:
         assert result.exit_code == 0
         assert "claude" in result.output
         assert "continue" in result.output
-        assert "codeium" in result.output
+        assert "windsurf" in result.output  # codeium was renamed to windsurf
         assert "copilot" in result.output
 
     def test_validate_valid_file(self, runner, sample_upf_file):
@@ -292,7 +292,7 @@ variables:
             cli, ["generate", "--editor", "nonexistent", str(sample_upf_file)]
         )
         assert result.exit_code != 0
-        assert "not in targets" in result.output
+        assert "not available" in result.output
 
     def test_generate_no_editor_or_all(self, runner, sample_upf_file):
         """Test generate command without specifying editor or --all."""
@@ -349,3 +349,27 @@ variables:
         content = init_file.read_text()
         assert "schema_version" in content
         assert "targets" in content
+
+    def test_validate_command_with_errors(self, runner, temp_dir):
+        """Test validate command with a file containing errors."""
+        # Create an invalid UPF file
+        invalid_content = """schema_version: "1.0.0"
+metadata:
+  title: ""  # Invalid: empty title
+  description: "Test description"
+  version: "1.0.0"
+  author: "Test Author"
+targets: []  # Invalid: no targets
+"""
+        invalid_file = temp_dir / "invalid.promptrek.yaml"
+        invalid_file.write_text(invalid_content)
+        
+        result = runner.invoke(cli, ["validate", str(invalid_file)])
+        assert result.exit_code != 0
+        assert "error" in result.output.lower() or "invalid" in result.output.lower()
+
+    def test_validate_command_verbose(self, runner, sample_upf_file):
+        """Test validate command with verbose output."""
+        result = runner.invoke(cli, ["-v", "validate", str(sample_upf_file)])
+        assert result.exit_code == 0
+        assert "valid" in result.output.lower()
