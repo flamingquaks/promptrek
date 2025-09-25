@@ -206,9 +206,11 @@ variables:
         assert ".claude/context.md" in result.output
         assert "config.yaml" in result.output or ".continue/rules/" in result.output
         # Codeium now generates windsurf-related files or may not generate files
-        assert (".codeium" in result.output or 
-                "windsurf" in result.output or 
-                "global configuration" in result.output)
+        assert (
+            ".codeium" in result.output
+            or "windsurf" in result.output
+            or "global configuration" in result.output
+        )
 
     def test_generate_with_variable_overrides(self, runner, sample_upf_file, temp_dir):
         """Test generate command with variable overrides."""
@@ -276,7 +278,8 @@ variables:
         if continue_config.exists():
             continue_content = continue_config.read_text()
             assert (
-                "Continue-specific: Generate comprehensive completions" in continue_content
+                "Continue-specific: Generate comprehensive completions"
+                in continue_content
             )
             assert "Claude-specific" not in continue_content
         else:
@@ -363,7 +366,7 @@ targets: []  # Invalid: no targets
 """
         invalid_file = temp_dir / "invalid.promptrek.yaml"
         invalid_file.write_text(invalid_content)
-        
+
         result = runner.invoke(cli, ["validate", str(invalid_file)])
         assert result.exit_code != 0
         assert "error" in result.output.lower() or "invalid" in result.output.lower()

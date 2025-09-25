@@ -307,7 +307,7 @@ variables:
         # Check for new Continue format
         continue_config = temp_dir / "continue_test" / "config.yaml"
         continue_rules_dir = temp_dir / "continue_test" / ".continue" / "rules"
-        
+
         # Either config.yaml should exist or rules directory should exist
         if continue_config.exists():
             continue_content = continue_config.read_text()
