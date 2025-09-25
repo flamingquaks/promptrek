@@ -3,7 +3,7 @@ Claude Code adapter implementation.
 """
 
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 import click
 
@@ -66,7 +66,7 @@ class ClaudeAdapter(EditorAdapter):
 
     def generate_multiple(
         self,
-        prompt_files: List[tuple[UniversalPrompt, Path]],
+        prompt_files: List[Tuple[UniversalPrompt, Path]],
         output_dir: Path,
         dry_run: bool = False,
         verbose: bool = False,

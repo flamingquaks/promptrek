@@ -1,0 +1,43 @@
+schema_version: 1.0.0
+metadata:
+  title: My Project Assistant
+  description: AI assistant configuration for my project
+  version: 1.0.0
+  author: Your Name <your.email@example.com>
+  created: '2024-01-01'
+  updated: '2024-01-01'
+  tags:
+  - project
+  - ai-assistant
+targets:
+- copilot
+- cursor
+- continue
+context:
+  project_type: web_application
+  technologies:
+  - python
+  - javascript
+  - react
+  description: A sample project using modern web technologies
+instructions:
+  general:
+  - Write clean, readable, and maintainable code
+  - Follow existing code patterns and conventions
+  - Add appropriate comments for complex logic
+  code_style:
+  - Use meaningful and descriptive variable names
+  - Follow the existing linting and formatting rules
+  - Prefer explicit over implicit code
+  testing:
+  - Write unit tests for new functions
+  - Ensure tests are clear and well-documented
+  - Aim for good test coverage
+examples:
+  function: "```python\ndef calculate_total(items: list[float]) -> float:\n    \"\"\
+    \"Calculate the total sum of items.\n\n    Args:\n        items: List of numeric\
+    \ values to sum\n\n    Returns:\n        Total sum of all items\n    \"\"\"\n\
+    \    return sum(items)\n```"
+variables:
+  PROJECT_NAME: My Project
+  AUTHOR_EMAIL: your.email@example.com
