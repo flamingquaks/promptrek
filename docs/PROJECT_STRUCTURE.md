@@ -275,20 +275,30 @@ type(scope): description
 [optional footer]
 ```
 
-**Types**: feat, fix, docs, style, refactor, test, chore
-**Scopes**: cli, core, adapters, templates, docs
+**Types**: feat, fix, docs, style, refactor, test, chore, ci, build, perf, revert
+**Scopes**: cli, core, adapters, templates, docs, parser, validator, utils, tests, deps, changelog
 
 **Examples**:
 ```
 feat(adapters): add Cursor editor support
 fix(parser): handle empty instructions gracefully
 docs(guides): add Copilot setup instructions
+chore(deps): update dependencies to latest versions
+ci(changelog): add automated changelog generation
 ```
+
+### Automated Changelog Generation
+The project uses conventional commits to automatically generate changelogs:
+- **Changelog format**: Based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
+- **Automation**: GitHub Actions automatically update `CHANGELOG.md` on releases
+- **Commit validation**: Pull requests validate commit message format with commitlint
+- **Configuration**: `.commitlintrc.json` and `.conventional-changelog.json` define rules
 
 ### Release Versioning
 - **Semantic Versioning**: MAJOR.MINOR.PATCH
 - **Pre-release**: alpha, beta, rc suffixes
 - **Tags**: v1.0.0, v1.1.0-beta.1
+- **Automated releases**: Release workflow generates changelog and creates GitHub releases
 
 ## Performance and Scalability
 

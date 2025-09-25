@@ -1,0 +1,46 @@
+{
+  "preset": "angular",
+  "releaseCount": 0,
+  "skipUnstable": false,
+  "outputUnreleased": true,
+  "sameSemver": false,
+  "debug": false,
+  "verbose": false,
+  "context": {
+    "version": null,
+    "previousTag": null,
+    "currentTag": null,
+    "linkCompare": true,
+    "repository": "https://github.com/flamingquaks/promptrek",
+    "repoUrl": "https://github.com/flamingquaks/promptrek",
+    "host": "https://github.com",
+    "owner": "flamingquaks",
+    "repository": "promptrek"
+  },
+  "gitRawCommitsOpts": {
+    "merges": null
+  },
+  "parserOpts": {
+    "mergePattern": "^Merge pull request #(.*) from (.*)$",
+    "mergeCorrespondence": ["id", "source"]
+  },
+  "writerOpts": {
+    "transform": {
+      "feat": "Features",
+      "fix": "Bug Fixes", 
+      "perf": "Performance Improvements",
+      "revert": "Reverts",
+      "docs": "Documentation",
+      "style": "Styles",
+      "refactor": "Code Refactoring",
+      "test": "Tests",
+      "build": "Build System",
+      "ci": "Continuous Integration",
+      "chore": "Chores"
+    },
+    "groupBy": "type",
+    "commitGroupsSort": "title",
+    "commitsSort": ["scope", "subject"],
+    "noteGroupsSort": "title"
+  }
+}

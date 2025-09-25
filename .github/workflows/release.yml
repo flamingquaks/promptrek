@@ -69,7 +69,28 @@ jobs:
       packages: write
     steps:
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
     
+    - name: Setup Node.js for changelog
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install conventional-changelog
+      run: |
+        npm install -g conventional-changelog-cli conventional-commits-parser
+
+    - name: Update changelog for release
+      run: |
+        # Generate changelog from git history using conventional commits
+        conventional-changelog -p angular -i CHANGELOG.md -s -r 0
+        
+        # Extract release notes for this version
+        VERSION=${GITHUB_REF#refs/tags/}
+        sed -n "/## \[${VERSION#v}\]/,/## \[/p" CHANGELOG.md | sed '$ d' > RELEASE_NOTES.md || echo "No specific release notes found" > RELEASE_NOTES.md
+
     - name: Download build artifacts
       uses: actions/download-artifact@v3
       with:
@@ -80,11 +101,21 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         files: dist/*
-        generate_release_notes: true
+        body_path: RELEASE_NOTES.md
         draft: false
         prerelease: ${{ contains(github.ref, 'alpha') || contains(github.ref, 'beta') || contains(github.ref, 'rc') }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Commit updated changelog
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        if [ -n "$(git status --porcelain)" ]; then
+          git add CHANGELOG.md
+          git commit -m "docs(changelog): update changelog for release ${GITHUB_REF#refs/tags/}"
+          git push
+        fi
 
   publish-pypi:
     needs: [test, build]
