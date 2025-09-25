@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 
 from src.promptrek.adapters.amazon_q import AmazonQAdapter
-from src.promptrek.core.models import UniversalPrompt, PromptMetadata, Instructions
+from src.promptrek.core.models import Instructions, PromptMetadata, UniversalPrompt
 
 
 class TestAmazonQAdapter:

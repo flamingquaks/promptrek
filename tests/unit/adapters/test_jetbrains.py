@@ -9,7 +9,7 @@ from unittest.mock import mock_open, patch
 import pytest
 
 from src.promptrek.adapters.jetbrains import JetBrainsAdapter
-from src.promptrek.core.models import UniversalPrompt, PromptMetadata, Instructions
+from src.promptrek.core.models import Instructions, PromptMetadata, UniversalPrompt
 
 
 class TestJetBrainsAdapter:
