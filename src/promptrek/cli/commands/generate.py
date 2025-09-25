@@ -216,8 +216,12 @@ def _generate_for_editor_multiple(
                 click.echo(f"✅ Generated {editor} files from {source_file}")
         else:
             # Multiple files - check adapter capabilities
-            if hasattr(adapter, "generate_multiple") and editor == "claude":
-                # Claude uses separate files for each prompt
+            if (
+                hasattr(adapter, "generate_multiple")
+                and hasattr(adapter, "capabilities")
+                and AdapterCapability.MULTIPLE_FILE_GENERATION in getattr(adapter, "capabilities", [])
+            ):
+                # Adapter supports generating separate files for each prompt
                 adapter.generate_multiple(
                     prompt_files, output_dir, dry_run, verbose, variables
                 )
