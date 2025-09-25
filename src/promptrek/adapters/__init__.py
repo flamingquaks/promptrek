@@ -16,59 +16,81 @@ from .tabnine import TabnineAdapter
 # Register built-in adapters with their capabilities
 
 # Tools that generate project-level configuration files
-registry.register_class("copilot", CopilotAdapter, [
-    AdapterCapability.GENERATES_PROJECT_FILES,
-    AdapterCapability.SUPPORTS_VARIABLES,
-    AdapterCapability.SUPPORTS_CONDITIONALS
-])
+registry.register_class(
+    "copilot",
+    CopilotAdapter,
+    [
+        AdapterCapability.GENERATES_PROJECT_FILES,
+        AdapterCapability.SUPPORTS_VARIABLES,
+        AdapterCapability.SUPPORTS_CONDITIONALS,
+    ],
+)
 
-registry.register_class("cursor", CursorAdapter, [
-    AdapterCapability.GENERATES_PROJECT_FILES,
-    AdapterCapability.SUPPORTS_VARIABLES,
-    AdapterCapability.SUPPORTS_CONDITIONALS
-])
+registry.register_class(
+    "cursor",
+    CursorAdapter,
+    [
+        AdapterCapability.GENERATES_PROJECT_FILES,
+        AdapterCapability.SUPPORTS_VARIABLES,
+        AdapterCapability.SUPPORTS_CONDITIONALS,
+    ],
+)
 
-registry.register_class("continue", ContinueAdapter, [
-    AdapterCapability.GENERATES_PROJECT_FILES,
-    AdapterCapability.SUPPORTS_VARIABLES,
-    AdapterCapability.SUPPORTS_CONDITIONALS
-])
+registry.register_class(
+    "continue",
+    ContinueAdapter,
+    [
+        AdapterCapability.GENERATES_PROJECT_FILES,
+        AdapterCapability.SUPPORTS_VARIABLES,
+        AdapterCapability.SUPPORTS_CONDITIONALS,
+    ],
+)
 
-registry.register_class("claude", ClaudeAdapter, [
-    AdapterCapability.GENERATES_PROJECT_FILES,
-    AdapterCapability.SUPPORTS_VARIABLES,
-    AdapterCapability.SUPPORTS_CONDITIONALS
-])
+registry.register_class(
+    "claude",
+    ClaudeAdapter,
+    [
+        AdapterCapability.GENERATES_PROJECT_FILES,
+        AdapterCapability.SUPPORTS_VARIABLES,
+        AdapterCapability.SUPPORTS_CONDITIONALS,
+    ],
+)
 
-registry.register_class("cline", ClineAdapter, [
-    AdapterCapability.GENERATES_PROJECT_FILES,
-    AdapterCapability.SUPPORTS_VARIABLES,
-    AdapterCapability.SUPPORTS_CONDITIONALS
-])
+registry.register_class(
+    "cline",
+    ClineAdapter,
+    [
+        AdapterCapability.GENERATES_PROJECT_FILES,
+        AdapterCapability.SUPPORTS_VARIABLES,
+        AdapterCapability.SUPPORTS_CONDITIONALS,
+    ],
+)
 
-registry.register_class("kiro", KiroAdapter, [
-    AdapterCapability.GENERATES_PROJECT_FILES,
-    AdapterCapability.SUPPORTS_VARIABLES,
-    AdapterCapability.SUPPORTS_CONDITIONALS
-])
+registry.register_class(
+    "kiro",
+    KiroAdapter,
+    [
+        AdapterCapability.GENERATES_PROJECT_FILES,
+        AdapterCapability.SUPPORTS_VARIABLES,
+        AdapterCapability.SUPPORTS_CONDITIONALS,
+    ],
+)
 
 # Tools that only support global configuration (don't generate project files)
-registry.register_class("amazon-q", AmazonQAdapter, [
-    AdapterCapability.GLOBAL_CONFIG_ONLY
-])
+registry.register_class(
+    "amazon-q", AmazonQAdapter, [AdapterCapability.GLOBAL_CONFIG_ONLY]
+)
 
-registry.register_class("jetbrains", JetBrainsAdapter, [
-    AdapterCapability.IDE_PLUGIN_ONLY
-])
+registry.register_class(
+    "jetbrains", JetBrainsAdapter, [AdapterCapability.IDE_PLUGIN_ONLY]
+)
 
-registry.register_class("tabnine", TabnineAdapter, [
-    AdapterCapability.GLOBAL_CONFIG_ONLY
-])
+registry.register_class(
+    "tabnine", TabnineAdapter, [AdapterCapability.GLOBAL_CONFIG_ONLY]
+)
 
 # Windsurf (replaces Codeium) - IDE-based configuration only
-registry.register_class("windsurf", CodeiumAdapter, [
-    AdapterCapability.IDE_PLUGIN_ONLY
-])
+registry.register_class("windsurf", CodeiumAdapter, [AdapterCapability.IDE_PLUGIN_ONLY])
 
 __all__ = [
     "EditorAdapter",

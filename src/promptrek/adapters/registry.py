@@ -12,6 +12,7 @@ from .base import EditorAdapter
 
 class AdapterCapability(Enum):
     """Capabilities that an adapter can have."""
+
     GENERATES_PROJECT_FILES = "generates_project_files"
     GLOBAL_CONFIG_ONLY = "global_config_only"
     IDE_PLUGIN_ONLY = "ide_plugin_only"
@@ -27,17 +28,19 @@ class AdapterRegistry:
         self._adapter_classes: Dict[str, Type[EditorAdapter]] = {}
         self._capabilities: Dict[str, Set[AdapterCapability]] = {}
 
-    def register(self, adapter: EditorAdapter, capabilities: List[AdapterCapability] = None) -> None:
+    def register(
+        self, adapter: EditorAdapter, capabilities: List[AdapterCapability] = None
+    ) -> None:
         """Register an adapter instance with its capabilities."""
         self._adapters[adapter.name] = adapter
         if capabilities:
             self._capabilities[adapter.name] = set(capabilities)
 
     def register_class(
-        self, 
-        name: str, 
+        self,
+        name: str,
         adapter_class: Type[EditorAdapter],
-        capabilities: List[AdapterCapability] = None
+        capabilities: List[AdapterCapability] = None,
     ) -> None:
         """Register an adapter class that will be instantiated on demand."""
         self._adapter_classes[name] = adapter_class
@@ -91,10 +94,7 @@ class AdapterRegistry:
 
     def get_adapters_by_capability(self, capability: AdapterCapability) -> List[str]:
         """Get list of adapter names that have a specific capability."""
-        return [
-            name for name, caps in self._capabilities.items()
-            if capability in caps
-        ]
+        return [name for name, caps in self._capabilities.items() if capability in caps]
 
     def has_capability(self, adapter_name: str, capability: AdapterCapability) -> bool:
         """Check if an adapter has a specific capability."""
@@ -102,7 +102,9 @@ class AdapterRegistry:
 
     def get_project_file_adapters(self) -> List[str]:
         """Get adapters that generate project-level configuration files."""
-        return self.get_adapters_by_capability(AdapterCapability.GENERATES_PROJECT_FILES)
+        return self.get_adapters_by_capability(
+            AdapterCapability.GENERATES_PROJECT_FILES
+        )
 
     def get_global_config_adapters(self) -> List[str]:
         """Get adapters that only support global configuration."""

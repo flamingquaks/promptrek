@@ -18,10 +18,10 @@ class KiroAdapter(EditorAdapter):
 
     _description = "Kiro (.kiro/steering/, .kiro/specs/, custom steering files)"
     _file_patterns = [
-        ".kiro/steering/*.md", 
+        ".kiro/steering/*.md",
         ".kiro/specs/*/requirements.md",
-        ".kiro/specs/*/design.md", 
-        ".kiro/specs/*/tasks.md"
+        ".kiro/specs/*/design.md",
+        ".kiro/specs/*/tasks.md",
     ]
 
     def __init__(self):
@@ -50,15 +50,21 @@ class KiroAdapter(EditorAdapter):
         created_files = []
 
         # Generate steering system
-        steering_files = self._generate_steering_system(processed_prompt, output_dir, dry_run, verbose)
+        steering_files = self._generate_steering_system(
+            processed_prompt, output_dir, dry_run, verbose
+        )
         created_files.extend(steering_files)
 
         # Generate specifications system
-        specs_files = self._generate_specs_system(processed_prompt, output_dir, dry_run, verbose)
+        specs_files = self._generate_specs_system(
+            processed_prompt, output_dir, dry_run, verbose
+        )
         created_files.extend(specs_files)
 
         # Generate custom steering files
-        custom_files = self._generate_custom_steering(processed_prompt, output_dir, dry_run, verbose)
+        custom_files = self._generate_custom_steering(
+            processed_prompt, output_dir, dry_run, verbose
+        )
         created_files.extend(custom_files)
 
         return created_files
@@ -77,11 +83,15 @@ class KiroAdapter(EditorAdapter):
         # Generate product overview
         product_file = steering_dir / "product.md"
         product_content = self._build_product_steering(prompt)
-        
+
         if dry_run:
             click.echo(f"  📁 Would create: {product_file}")
             if verbose:
-                preview = product_content[:200] + "..." if len(product_content) > 200 else product_content
+                preview = (
+                    product_content[:200] + "..."
+                    if len(product_content) > 200
+                    else product_content
+                )
                 click.echo(f"    {preview}")
         else:
             steering_dir.mkdir(parents=True, exist_ok=True)
@@ -94,11 +104,15 @@ class KiroAdapter(EditorAdapter):
         if prompt.context and prompt.context.technologies:
             tech_file = steering_dir / "tech.md"
             tech_content = self._build_tech_steering(prompt)
-            
+
             if dry_run:
                 click.echo(f"  📁 Would create: {tech_file}")
                 if verbose:
-                    preview = tech_content[:200] + "..." if len(tech_content) > 200 else tech_content
+                    preview = (
+                        tech_content[:200] + "..."
+                        if len(tech_content) > 200
+                        else tech_content
+                    )
                     click.echo(f"    {preview}")
             else:
                 steering_dir.mkdir(parents=True, exist_ok=True)
@@ -110,11 +124,15 @@ class KiroAdapter(EditorAdapter):
         # Generate project structure steering
         structure_file = steering_dir / "structure.md"
         structure_content = self._build_structure_steering(prompt)
-        
+
         if dry_run:
             click.echo(f"  📁 Would create: {structure_file}")
             if verbose:
-                preview = structure_content[:200] + "..." if len(structure_content) > 200 else structure_content
+                preview = (
+                    structure_content[:200] + "..."
+                    if len(structure_content) > 200
+                    else structure_content
+                )
                 click.echo(f"    {preview}")
         else:
             steering_dir.mkdir(parents=True, exist_ok=True)
@@ -139,15 +157,19 @@ class KiroAdapter(EditorAdapter):
         # Create a main spec based on the project
         spec_name = prompt.metadata.title.lower().replace(" ", "-")
         spec_dir = specs_dir / spec_name
-        
+
         # Generate requirements.md
         requirements_file = spec_dir / "requirements.md"
         requirements_content = self._build_requirements_spec(prompt)
-        
+
         if dry_run:
             click.echo(f"  📁 Would create: {requirements_file}")
             if verbose:
-                preview = requirements_content[:200] + "..." if len(requirements_content) > 200 else requirements_content
+                preview = (
+                    requirements_content[:200] + "..."
+                    if len(requirements_content) > 200
+                    else requirements_content
+                )
                 click.echo(f"    {preview}")
         else:
             spec_dir.mkdir(parents=True, exist_ok=True)
@@ -159,11 +181,15 @@ class KiroAdapter(EditorAdapter):
         # Generate design.md
         design_file = spec_dir / "design.md"
         design_content = self._build_design_spec(prompt)
-        
+
         if dry_run:
             click.echo(f"  📁 Would create: {design_file}")
             if verbose:
-                preview = design_content[:200] + "..." if len(design_content) > 200 else design_content
+                preview = (
+                    design_content[:200] + "..."
+                    if len(design_content) > 200
+                    else design_content
+                )
                 click.echo(f"    {preview}")
         else:
             spec_dir.mkdir(parents=True, exist_ok=True)
@@ -175,11 +201,15 @@ class KiroAdapter(EditorAdapter):
         # Generate tasks.md
         tasks_file = spec_dir / "tasks.md"
         tasks_content = self._build_tasks_spec(prompt)
-        
+
         if dry_run:
             click.echo(f"  📁 Would create: {tasks_file}")
             if verbose:
-                preview = tasks_content[:200] + "..." if len(tasks_content) > 200 else tasks_content
+                preview = (
+                    tasks_content[:200] + "..."
+                    if len(tasks_content) > 200
+                    else tasks_content
+                )
                 click.echo(f"    {preview}")
         else:
             spec_dir.mkdir(parents=True, exist_ok=True)
@@ -202,14 +232,25 @@ class KiroAdapter(EditorAdapter):
         created_files = []
 
         # Generate API standards steering (if applicable)
-        if prompt.context and prompt.context.technologies and any(tech.lower() in ['api', 'rest', 'graphql', 'node', 'express', 'fastapi'] for tech in prompt.context.technologies):
+        if (
+            prompt.context
+            and prompt.context.technologies
+            and any(
+                tech.lower() in ["api", "rest", "graphql", "node", "express", "fastapi"]
+                for tech in prompt.context.technologies
+            )
+        ):
             api_file = steering_dir / "api-standards.md"
             api_content = self._build_api_standards_steering(prompt)
-            
+
             if dry_run:
                 click.echo(f"  📁 Would create: {api_file}")
                 if verbose:
-                    preview = api_content[:200] + "..." if len(api_content) > 200 else api_content
+                    preview = (
+                        api_content[:200] + "..."
+                        if len(api_content) > 200
+                        else api_content
+                    )
                     click.echo(f"    {preview}")
             else:
                 steering_dir.mkdir(parents=True, exist_ok=True)
@@ -218,15 +259,27 @@ class KiroAdapter(EditorAdapter):
                 click.echo(f"✅ Generated: {api_file}")
                 created_files.append(api_file)
 
-        # Generate frontend standards (if applicable)  
-        if prompt.context and prompt.context.technologies and any(tech.lower() in ['react', 'vue', 'angular', 'svelte', 'typescript', 'javascript'] for tech in prompt.context.technologies):
+        # Generate frontend standards (if applicable)
+        if (
+            prompt.context
+            and prompt.context.technologies
+            and any(
+                tech.lower()
+                in ["react", "vue", "angular", "svelte", "typescript", "javascript"]
+                for tech in prompt.context.technologies
+            )
+        ):
             frontend_file = steering_dir / "frontend-standards.md"
             frontend_content = self._build_frontend_standards_steering(prompt)
-            
+
             if dry_run:
                 click.echo(f"  📁 Would create: {frontend_file}")
                 if verbose:
-                    preview = frontend_content[:200] + "..." if len(frontend_content) > 200 else frontend_content
+                    preview = (
+                        frontend_content[:200] + "..."
+                        if len(frontend_content) > 200
+                        else frontend_content
+                    )
                     click.echo(f"    {preview}")
             else:
                 steering_dir.mkdir(parents=True, exist_ok=True)
@@ -260,11 +313,15 @@ class KiroAdapter(EditorAdapter):
             click.echo(f"  📁 Would create: {config_file} (legacy compatibility)")
             click.echo(f"  📁 Would create: {prompts_file} (legacy compatibility)")
             if verbose:
-                preview = config_content[:200] + "..." if len(config_content) > 200 else config_content
+                preview = (
+                    config_content[:200] + "..."
+                    if len(config_content) > 200
+                    else config_content
+                )
                 click.echo(f"    {preview}")
         else:
             kiro_dir.mkdir(exist_ok=True)
-            
+
             with open(config_file, "w", encoding="utf-8") as f:
                 f.write(config_content)
             created_files.append(config_file)
@@ -416,7 +473,7 @@ class KiroAdapter(EditorAdapter):
     def _build_product_steering(self, prompt: UniversalPrompt) -> str:
         """Build product overview steering content."""
         lines = []
-        
+
         lines.append("---")
         lines.append("inclusion: always")
         lines.append("---")
@@ -426,18 +483,18 @@ class KiroAdapter(EditorAdapter):
         lines.append("## Product Description")
         lines.append(prompt.metadata.description)
         lines.append("")
-        
+
         if prompt.context:
             if prompt.context.project_type:
                 lines.append("## Project Type")
                 lines.append(f"{prompt.context.project_type}")
                 lines.append("")
-            
+
             if prompt.context.description:
                 lines.append("## Detailed Description")
                 lines.append(prompt.context.description)
                 lines.append("")
-        
+
         lines.append("## Product Goals")
         if prompt.instructions and prompt.instructions.general:
             for instruction in prompt.instructions.general[:3]:  # Take first 3 as goals
@@ -446,26 +503,26 @@ class KiroAdapter(EditorAdapter):
             lines.append("- Deliver high-quality, maintainable code")
             lines.append("- Follow industry best practices")
             lines.append("- Ensure scalable architecture")
-        
+
         return "\n".join(lines)
 
     def _build_tech_steering(self, prompt: UniversalPrompt) -> str:
         """Build technology stack steering content."""
         lines = []
-        
+
         lines.append("---")
         lines.append("inclusion: always")
         lines.append("---")
         lines.append("")
         lines.append("# Technology Stack")
         lines.append("")
-        
+
         if prompt.context and prompt.context.technologies:
             lines.append("## Core Technologies")
             for tech in prompt.context.technologies:
                 lines.append(f"- **{tech}**: Primary technology for implementation")
             lines.append("")
-            
+
             lines.append("## Technology Guidelines")
             for tech in prompt.context.technologies:
                 lines.append(f"### {tech}")
@@ -473,18 +530,18 @@ class KiroAdapter(EditorAdapter):
                 for guideline in tech_guidelines:
                     lines.append(f"- {guideline}")
                 lines.append("")
-        
+
         if prompt.instructions and prompt.instructions.code_style:
             lines.append("## Code Style Requirements")
             for guideline in prompt.instructions.code_style:
                 lines.append(f"- {guideline}")
-        
+
         return "\n".join(lines)
 
     def _build_structure_steering(self, prompt: UniversalPrompt) -> str:
         """Build project structure steering content."""
         lines = []
-        
+
         lines.append("---")
         lines.append("inclusion: always")
         lines.append("---")
@@ -492,10 +549,14 @@ class KiroAdapter(EditorAdapter):
         lines.append("# Project Structure")
         lines.append("")
         lines.append("## Architecture Overview")
-        
+
         if prompt.context and prompt.context.project_type:
-            project_structure = self._get_project_structure(prompt.context.project_type.lower())
-            lines.append(f"This is a {prompt.context.project_type} project with the following structure:")
+            project_structure = self._get_project_structure(
+                prompt.context.project_type.lower()
+            )
+            lines.append(
+                f"This is a {prompt.context.project_type} project with the following structure:"
+            )
             lines.append("")
             for item in project_structure:
                 lines.append(f"- {item}")
@@ -503,20 +564,20 @@ class KiroAdapter(EditorAdapter):
             lines.append("- Organized modular architecture")
             lines.append("- Clear separation of concerns")
             lines.append("- Scalable file organization")
-        
+
         lines.append("")
         lines.append("## Organization Principles")
         lines.append("- Follow established project conventions")
-        lines.append("- Maintain clear directory structure") 
+        lines.append("- Maintain clear directory structure")
         lines.append("- Use consistent naming patterns")
         lines.append("- Keep related files grouped together")
-        
+
         return "\n".join(lines)
 
     def _build_api_standards_steering(self, prompt: UniversalPrompt) -> str:
         """Build API standards steering content with file matching."""
         lines = []
-        
+
         lines.append("---")
         lines.append("inclusion: fileMatch")
         lines.append('fileMatchPattern: "app/api/**/*"')
@@ -536,19 +597,22 @@ class KiroAdapter(EditorAdapter):
         lines.append("- Use HTTPS for all communications")
         lines.append("- Follow OWASP security guidelines")
         lines.append("")
-        
+
         if prompt.instructions and prompt.instructions.general:
             lines.append("## Additional API Guidelines")
             for instruction in prompt.instructions.general:
-                if any(keyword in instruction.lower() for keyword in ['api', 'endpoint', 'request', 'response']):
+                if any(
+                    keyword in instruction.lower()
+                    for keyword in ["api", "endpoint", "request", "response"]
+                ):
                     lines.append(f"- {instruction}")
-        
+
         return "\n".join(lines)
 
     def _build_frontend_standards_steering(self, prompt: UniversalPrompt) -> str:
         """Build frontend standards steering content."""
         lines = []
-        
+
         lines.append("---")
         lines.append("inclusion: fileMatch")
         lines.append('fileMatchPattern: "src/**/*.{tsx,jsx,ts,js,vue,svelte}"')
@@ -556,10 +620,14 @@ class KiroAdapter(EditorAdapter):
         lines.append("")
         lines.append("# Frontend Standards")
         lines.append("")
-        
+
         # Determine frontend framework
         if prompt.context and prompt.context.technologies:
-            frameworks = [tech for tech in prompt.context.technologies if tech.lower() in ['react', 'vue', 'angular', 'svelte']]
+            frameworks = [
+                tech
+                for tech in prompt.context.technologies
+                if tech.lower() in ["react", "vue", "angular", "svelte"]
+            ]
             if frameworks:
                 framework = frameworks[0]
                 lines.append(f"## {framework} Guidelines")
@@ -567,7 +635,7 @@ class KiroAdapter(EditorAdapter):
                 for guideline in framework_guidelines:
                     lines.append(f"- {guideline}")
                 lines.append("")
-        
+
         lines.append("## Component Development")
         lines.append("- Create reusable, modular components")
         lines.append("- Follow single responsibility principle")
@@ -579,19 +647,19 @@ class KiroAdapter(EditorAdapter):
         lines.append("- Implement code splitting where appropriate")
         lines.append("- Use lazy loading for non-critical components")
         lines.append("- Follow accessibility best practices")
-        
+
         return "\n".join(lines)
 
     def _build_requirements_spec(self, prompt: UniversalPrompt) -> str:
         """Build requirements specification content."""
         lines = []
-        
+
         lines.append(f"# {prompt.metadata.title} - Requirements")
         lines.append("")
         lines.append("## Project Overview")
         lines.append(prompt.metadata.description)
         lines.append("")
-        
+
         if prompt.context:
             lines.append("## Functional Requirements")
             if prompt.instructions and prompt.instructions.general:
@@ -604,7 +672,7 @@ class KiroAdapter(EditorAdapter):
                     lines.append("- [ ] Code follows project standards")
                     lines.append("- [ ] Testing coverage is adequate")
                     lines.append("")
-            
+
             lines.append("## Non-Functional Requirements")
             lines.append("### Performance")
             lines.append("- System should respond within acceptable time limits")
@@ -614,59 +682,59 @@ class KiroAdapter(EditorAdapter):
             lines.append("- Code should be maintainable and readable")
             lines.append("- Proper error handling should be implemented")
             lines.append("- Documentation should be comprehensive")
-        
+
         return "\n".join(lines)
 
     def _build_design_spec(self, prompt: UniversalPrompt) -> str:
         """Build design specification content."""
         lines = []
-        
+
         lines.append(f"# {prompt.metadata.title} - Technical Design")
         lines.append("")
         lines.append("## Architecture Overview")
         lines.append(prompt.metadata.description)
         lines.append("")
-        
+
         if prompt.context:
             if prompt.context.technologies:
                 lines.append("## Technology Stack")
                 for tech in prompt.context.technologies:
                     lines.append(f"- **{tech}**: {self._get_tech_role(tech.lower())}")
                 lines.append("")
-            
+
             lines.append("## System Architecture")
             lines.append("### Component Design")
             lines.append("- Modular architecture with clear separation of concerns")
             lines.append("- Reusable components following established patterns")
             lines.append("- Scalable and maintainable code structure")
             lines.append("")
-            
+
             if prompt.instructions and prompt.instructions.code_style:
                 lines.append("### Design Principles")
                 for principle in prompt.instructions.code_style:
                     lines.append(f"- {principle}")
                 lines.append("")
-        
+
         lines.append("## Implementation Guidelines")
         lines.append("- Follow established coding standards")
         lines.append("- Implement proper error handling")
         lines.append("- Include comprehensive logging")
         lines.append("- Ensure testability and modularity")
-        
+
         return "\n".join(lines)
 
     def _build_tasks_spec(self, prompt: UniversalPrompt) -> str:
         """Build tasks specification content."""
         lines = []
-        
+
         lines.append(f"# {prompt.metadata.title} - Implementation Tasks")
         lines.append("")
         lines.append("## Task Breakdown")
         lines.append("")
-        
+
         if prompt.instructions:
             task_num = 1
-            
+
             if prompt.instructions.general:
                 lines.append("### Core Implementation Tasks")
                 for instruction in prompt.instructions.general:
@@ -680,7 +748,7 @@ class KiroAdapter(EditorAdapter):
                     lines.append("- [ ] Tests implemented and passing")
                     lines.append("")
                     task_num += 1
-            
+
             if prompt.instructions.testing:
                 lines.append("### Testing Tasks")
                 for test_instruction in prompt.instructions.testing:
@@ -692,13 +760,13 @@ class KiroAdapter(EditorAdapter):
                     lines.append("- [ ] Test coverage meets requirements")
                     lines.append("")
                     task_num += 1
-        
+
         lines.append("## Progress Tracking")
         lines.append("- **Total Tasks:** TBD")
         lines.append("- **Completed:** 0")
-        lines.append("- **In Progress:** 0") 
+        lines.append("- **In Progress:** 0")
         lines.append("- **Not Started:** TBD")
-        
+
         return "\n".join(lines)
 
     def _get_tech_guidelines(self, tech: str) -> List[str]:
@@ -706,26 +774,28 @@ class KiroAdapter(EditorAdapter):
         guidelines = {
             "typescript": [
                 "Use strict TypeScript configuration",
-                "Prefer interfaces over types for object shapes", 
-                "Include proper type annotations"
+                "Prefer interfaces over types for object shapes",
+                "Include proper type annotations",
             ],
             "react": [
                 "Use functional components with hooks",
                 "Implement proper prop validation",
-                "Follow React best practices"
+                "Follow React best practices",
             ],
             "python": [
                 "Follow PEP 8 style guidelines",
                 "Use type hints for function signatures",
-                "Implement proper error handling"
+                "Implement proper error handling",
             ],
             "node": [
                 "Use async/await for asynchronous operations",
                 "Implement proper error handling middleware",
-                "Follow Node.js best practices"
-            ]
+                "Follow Node.js best practices",
+            ],
         }
-        return guidelines.get(tech, ["Follow established best practices", "Maintain code consistency"])
+        return guidelines.get(
+            tech, ["Follow established best practices", "Maintain code consistency"]
+        )
 
     def _get_project_structure(self, project_type: str) -> List[str]:
         """Get project structure based on type."""
@@ -734,22 +804,25 @@ class KiroAdapter(EditorAdapter):
                 "src/ - Source code directory",
                 "public/ - Static assets",
                 "tests/ - Test files",
-                "docs/ - Documentation"
+                "docs/ - Documentation",
             ],
             "api": [
                 "src/ - Source code",
-                "routes/ - API route definitions", 
+                "routes/ - API route definitions",
                 "middleware/ - Custom middleware",
-                "tests/ - API tests"
+                "tests/ - API tests",
             ],
             "library": [
                 "src/ - Library source code",
                 "lib/ - Compiled output",
                 "examples/ - Usage examples",
-                "docs/ - API documentation"
-            ]
+                "docs/ - API documentation",
+            ],
         }
-        return structures.get(project_type, ["src/ - Source code", "tests/ - Test files", "docs/ - Documentation"])
+        return structures.get(
+            project_type,
+            ["src/ - Source code", "tests/ - Test files", "docs/ - Documentation"],
+        )
 
     def _get_frontend_guidelines(self, framework: str) -> List[str]:
         """Get frontend framework guidelines."""
@@ -757,20 +830,23 @@ class KiroAdapter(EditorAdapter):
             "react": [
                 "Use functional components with hooks",
                 "Implement proper state management",
-                "Use React.memo for optimization when needed"
+                "Use React.memo for optimization when needed",
             ],
             "vue": [
                 "Use Vue 3 Composition API",
                 "Implement proper reactive data patterns",
-                "Follow Vue style guide conventions"
+                "Follow Vue style guide conventions",
             ],
             "angular": [
-                "Use Angular CLI for project structure", 
+                "Use Angular CLI for project structure",
                 "Implement proper dependency injection",
-                "Follow Angular style guide"
-            ]
+                "Follow Angular style guide",
+            ],
         }
-        return guidelines.get(framework, ["Follow framework best practices", "Implement proper component patterns"])
+        return guidelines.get(
+            framework,
+            ["Follow framework best practices", "Implement proper component patterns"],
+        )
 
     def _get_tech_role(self, tech: str) -> str:
         """Get the role description for a technology."""
@@ -781,6 +857,6 @@ class KiroAdapter(EditorAdapter):
             "node": "Backend runtime environment",
             "python": "Backend development and scripting",
             "go": "High-performance backend services",
-            "rust": "Systems programming and performance-critical code"
+            "rust": "Systems programming and performance-critical code",
         }
         return roles.get(tech, "Development technology")

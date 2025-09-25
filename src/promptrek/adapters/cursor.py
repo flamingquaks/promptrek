@@ -41,15 +41,21 @@ class CursorAdapter(EditorAdapter):
         created_files = []
 
         # Generate modern .cursor/rules/ system
-        rules_files = self._generate_rules_system(processed_prompt, output_dir, dry_run, verbose)
+        rules_files = self._generate_rules_system(
+            processed_prompt, output_dir, dry_run, verbose
+        )
         created_files.extend(rules_files)
 
         # Generate AGENTS.md for simple agent instructions
-        agents_file = self._generate_agents_file(processed_prompt, output_dir, dry_run, verbose)
+        agents_file = self._generate_agents_file(
+            processed_prompt, output_dir, dry_run, verbose
+        )
         created_files.extend(agents_file)
 
         # Generate ignore files for better indexing control
-        ignore_files = self._generate_ignore_files(processed_prompt, output_dir, dry_run, verbose)
+        ignore_files = self._generate_ignore_files(
+            processed_prompt, output_dir, dry_run, verbose
+        )
         created_files.extend(ignore_files)
 
         return created_files
@@ -72,13 +78,17 @@ class CursorAdapter(EditorAdapter):
                 "Coding Standards",
                 prompt.instructions.code_style,
                 "**/*.{ts,tsx,js,jsx,py,java,go,rs,cpp,c,h}",
-                "Apply coding standards to all source files"
+                "Apply coding standards to all source files",
             )
-            
+
             if dry_run:
                 click.echo(f"  📁 Would create: {coding_file}")
                 if verbose:
-                    preview = coding_content[:200] + "..." if len(coding_content) > 200 else coding_content
+                    preview = (
+                        coding_content[:200] + "..."
+                        if len(coding_content) > 200
+                        else coding_content
+                    )
                     click.echo(f"    {preview}")
                 created_files.append(coding_file)
             else:
@@ -95,13 +105,17 @@ class CursorAdapter(EditorAdapter):
                 "Testing Guidelines",
                 prompt.instructions.testing,
                 "**/*.{test,spec}.{ts,tsx,js,jsx,py}",
-                "Apply testing guidelines to test files"
+                "Apply testing guidelines to test files",
             )
-            
+
             if dry_run:
                 click.echo(f"  📁 Would create: {testing_file}")
                 if verbose:
-                    preview = testing_content[:200] + "..." if len(testing_content) > 200 else testing_content
+                    preview = (
+                        testing_content[:200] + "..."
+                        if len(testing_content) > 200
+                        else testing_content
+                    )
                     click.echo(f"    {preview}")
                 created_files.append(testing_file)
             else:
@@ -116,11 +130,15 @@ class CursorAdapter(EditorAdapter):
             for tech in prompt.context.technologies[:3]:  # Limit to 3 main technologies
                 tech_file = rules_dir / f"{tech.lower()}-guidelines.mdc"
                 tech_content = self._build_tech_mdc_content(tech, prompt)
-                
+
                 if dry_run:
                     click.echo(f"  📁 Would create: {tech_file}")
                     if verbose:
-                        preview = tech_content[:200] + "..." if len(tech_content) > 200 else tech_content
+                        preview = (
+                            tech_content[:200] + "..."
+                            if len(tech_content) > 200
+                            else tech_content
+                        )
                         click.echo(f"    {preview}")
                     created_files.append(tech_file)
                 else:
@@ -208,36 +226,32 @@ class CursorAdapter(EditorAdapter):
         return True
 
     def _build_mdc_content(
-        self, 
-        title: str, 
-        instructions: List[str], 
-        globs: str, 
-        description: str
+        self, title: str, instructions: List[str], globs: str, description: str
     ) -> str:
         """Build .mdc file content with YAML frontmatter."""
         lines = []
-        
+
         # YAML frontmatter
         lines.append("---")
         lines.append(f"description: {description}")
-        lines.append(f"globs: \"{globs}\"")
+        lines.append(f'globs: "{globs}"')
         lines.append("alwaysApply: false")
         lines.append("---")
         lines.append("")
-        
+
         # Content
         lines.append(f"# {title}")
         lines.append("")
-        
+
         for instruction in instructions:
             lines.append(f"- {instruction}")
-        
+
         return "\n".join(lines)
 
     def _build_tech_mdc_content(self, tech: str, prompt: UniversalPrompt) -> str:
         """Build technology-specific .mdc content."""
         lines = []
-        
+
         # Determine file patterns based on technology
         tech_patterns = {
             "typescript": "**/*.{ts,tsx}",
@@ -250,28 +264,28 @@ class CursorAdapter(EditorAdapter):
             "java": "**/*.java",
             "cpp": "**/*.{cpp,c,h}",
         }
-        
+
         pattern = tech_patterns.get(tech.lower(), "**/*")
-        
+
         # YAML frontmatter
         lines.append("---")
         lines.append(f"description: {tech} specific guidelines")
-        lines.append(f"globs: \"{pattern}\"")
+        lines.append(f'globs: "{pattern}"')
         lines.append("alwaysApply: false")
         lines.append("---")
         lines.append("")
-        
+
         # Content
         lines.append(f"# {tech.title()} Guidelines")
         lines.append("")
-        
+
         # Add general instructions that apply to this tech
         if prompt.instructions and prompt.instructions.general:
             lines.append("## General Guidelines")
             for instruction in prompt.instructions.general:
                 lines.append(f"- {instruction}")
             lines.append("")
-        
+
         # Add tech-specific best practices
         lines.append(f"## {tech.title()} Best Practices")
         tech_practices = {
@@ -291,14 +305,14 @@ class CursorAdapter(EditorAdapter):
                 "Implement proper error handling with try/except blocks",
             ],
         }
-        
+
         if tech.lower() in tech_practices:
             for practice in tech_practices[tech.lower()]:
                 lines.append(f"- {practice}")
         else:
             lines.append(f"- Follow {tech} best practices and conventions")
             lines.append(f"- Maintain consistency with existing {tech} code")
-            
+
         return "\n".join(lines)
 
     def _build_agents_content(self, prompt: UniversalPrompt) -> str:
@@ -316,7 +330,9 @@ class CursorAdapter(EditorAdapter):
             if prompt.context.project_type:
                 lines.append(f"**Type:** {prompt.context.project_type}")
             if prompt.context.technologies:
-                lines.append(f"**Technologies:** {', '.join(prompt.context.technologies)}")
+                lines.append(
+                    f"**Technologies:** {', '.join(prompt.context.technologies)}"
+                )
             if prompt.context.description:
                 lines.append("")
                 lines.append("**Description:**")
@@ -354,15 +370,19 @@ class CursorAdapter(EditorAdapter):
     ) -> List[Path]:
         """Generate Cursor ignore files for better indexing control."""
         created_files = []
-        
+
         # Generate .cursorignore for files to ignore completely
         cursorignore_content = self._build_cursorignore_content(prompt)
         cursorignore_file = output_dir / ".cursorignore"
-        
+
         if dry_run:
             click.echo(f"  📁 Would create: {cursorignore_file}")
             if verbose:
-                preview = cursorignore_content[:200] + "..." if len(cursorignore_content) > 200 else cursorignore_content
+                preview = (
+                    cursorignore_content[:200] + "..."
+                    if len(cursorignore_content) > 200
+                    else cursorignore_content
+                )
                 click.echo(f"    {preview}")
             created_files.append(cursorignore_file)
         else:
@@ -374,11 +394,15 @@ class CursorAdapter(EditorAdapter):
         # Generate .cursorindexingignore for indexing control
         indexignore_content = self._build_indexing_ignore_content(prompt)
         indexignore_file = output_dir / ".cursorindexingignore"
-        
+
         if dry_run:
             click.echo(f"  📁 Would create: {indexignore_file}")
             if verbose:
-                preview = indexignore_content[:200] + "..." if len(indexignore_content) > 200 else indexignore_content
+                preview = (
+                    indexignore_content[:200] + "..."
+                    if len(indexignore_content) > 200
+                    else indexignore_content
+                )
                 click.echo(f"    {preview}")
             created_files.append(indexignore_file)
         else:
@@ -392,11 +416,11 @@ class CursorAdapter(EditorAdapter):
     def _build_cursorignore_content(self, prompt: UniversalPrompt) -> str:
         """Build .cursorignore content for files to exclude from Cursor."""
         lines = []
-        
+
         lines.append("# Cursor ignore file - files to exclude from analysis")
         lines.append("# Generated by PrompTrek")
         lines.append("")
-        
+
         # Standard ignore patterns
         lines.append("# Dependencies")
         lines.append("node_modules/")
@@ -406,61 +430,63 @@ class CursorAdapter(EditorAdapter):
         lines.append("env/")
         lines.append(".env")
         lines.append("")
-        
+
         lines.append("# Build outputs")
         lines.append("dist/")
         lines.append("build/")
         lines.append("*.min.js")
         lines.append("*.map")
         lines.append("")
-        
+
         lines.append("# IDE and editor files")
         lines.append(".vscode/settings.json")
         lines.append(".idea/")
         lines.append("*.swp")
         lines.append("*.swo")
         lines.append("")
-        
+
         lines.append("# Logs and temporary files")
         lines.append("*.log")
         lines.append("*.tmp")
         lines.append("tmp/")
         lines.append("temp/")
         lines.append("")
-        
+
         # Technology-specific ignore patterns
         if prompt.context and prompt.context.technologies:
             for tech in prompt.context.technologies:
                 tech_lower = tech.lower()
-                if tech_lower in ['react', 'typescript', 'javascript', 'node']:
+                if tech_lower in ["react", "typescript", "javascript", "node"]:
                     lines.append("# JavaScript/Node.js specific")
                     lines.append("coverage/")
                     lines.append("*.tsbuildinfo")
                     lines.append("npm-debug.log*")
                     lines.append("")
-                elif tech_lower == 'python':
+                elif tech_lower == "python":
                     lines.append("# Python specific")
                     lines.append("*.egg-info/")
                     lines.append(".pytest_cache/")
                     lines.append(".coverage")
                     lines.append("")
-                elif tech_lower in ['java', 'kotlin']:
+                elif tech_lower in ["java", "kotlin"]:
                     lines.append("# Java/Kotlin specific")
                     lines.append("target/")
                     lines.append("*.class")
                     lines.append("*.jar")
                     lines.append("")
-        
+
         return "\n".join(lines)
 
     def _build_indexing_ignore_content(self, prompt: UniversalPrompt) -> str:
         """Build .cursorindexingignore content for indexing control."""
         lines = []
-        
-        lines.append("# Cursor indexing ignore - files to exclude from indexing but not analysis")
+
+        lines.append(
+            "# Cursor indexing ignore - files to exclude from indexing but not analysis"
+        )
         lines.append("# Generated by PrompTrek")
         lines.append("")
-        
+
         # Large files and generated content
         lines.append("# Large files and generated content")
         lines.append("*.lock")
@@ -469,7 +495,7 @@ class CursorAdapter(EditorAdapter):
         lines.append("Pipfile.lock")
         lines.append("poetry.lock")
         lines.append("")
-        
+
         lines.append("# Documentation and assets")
         lines.append("docs/")
         lines.append("*.pdf")
@@ -479,13 +505,13 @@ class CursorAdapter(EditorAdapter):
         lines.append("*.gif")
         lines.append("*.svg")
         lines.append("")
-        
+
         lines.append("# Third-party libraries")
         lines.append("vendor/")
         lines.append("lib/")
         lines.append("libs/")
         lines.append("")
-        
+
         return "\n".join(lines)
 
     def _build_legacy_content(self, prompt: UniversalPrompt) -> str:

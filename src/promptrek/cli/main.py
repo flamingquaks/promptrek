@@ -136,21 +136,27 @@ def list_editors() -> None:
     # Get editors by capability
     project_file_adapters = registry.get_project_file_adapters()
     global_config_adapters = registry.get_global_config_adapters()
-    ide_plugin_adapters = registry.get_adapters_by_capability(AdapterCapability.IDE_PLUGIN_ONLY)
+    ide_plugin_adapters = registry.get_adapters_by_capability(
+        AdapterCapability.IDE_PLUGIN_ONLY
+    )
 
     click.echo("AI Editor Support Status:")
     click.echo()
 
     if project_file_adapters:
         click.echo("✅ Project Configuration File Support:")
-        click.echo("   These editors support project-level configuration files that PrompTrek can generate:")
-        
+        click.echo(
+            "   These editors support project-level configuration files that PrompTrek can generate:"
+        )
+
         for adapter_name in sorted(project_file_adapters):
             try:
                 info = registry.get_adapter_info(adapter_name)
                 description = info.get("description", "No description")
                 file_patterns = info.get("file_patterns", [])
-                files_str = ", ".join(file_patterns) if file_patterns else "configuration files"
+                files_str = (
+                    ", ".join(file_patterns) if file_patterns else "configuration files"
+                )
                 click.echo(f"   • {adapter_name:12} - {description} → {files_str}")
             except Exception:
                 click.echo(f"   • {adapter_name:12} - Available")
@@ -158,13 +164,17 @@ def list_editors() -> None:
 
     if global_config_adapters:
         click.echo("ℹ️  Global Configuration Only:")
-        click.echo("   These tools use global settings (no project-level files generated):")
-        
+        click.echo(
+            "   These tools use global settings (no project-level files generated):"
+        )
+
         for adapter_name in sorted(global_config_adapters):
             try:
                 info = registry.get_adapter_info(adapter_name)
                 description = info.get("description", "No description")
-                click.echo(f"   • {adapter_name:12} - Configure through global settings or admin panel")
+                click.echo(
+                    f"   • {adapter_name:12} - Configure through global settings or admin panel"
+                )
             except Exception:
                 click.echo(f"   • {adapter_name:12} - Global configuration only")
         click.echo()
@@ -172,11 +182,13 @@ def list_editors() -> None:
     if ide_plugin_adapters:
         click.echo("🔧 IDE Configuration Only:")
         click.echo("   These tools are configured through IDE interface:")
-        
+
         for adapter_name in sorted(ide_plugin_adapters):
             try:
                 info = registry.get_adapter_info(adapter_name)
-                click.echo(f"   • {adapter_name:12} - Configure through IDE settings/preferences")
+                click.echo(
+                    f"   • {adapter_name:12} - Configure through IDE settings/preferences"
+                )
             except Exception:
                 click.echo(f"   • {adapter_name:12} - IDE configuration only")
         click.echo()
@@ -185,12 +197,20 @@ def list_editors() -> None:
     click.echo("Usage Examples:")
     if project_file_adapters:
         example_editor = sorted(project_file_adapters)[0]
-        click.echo(f"  Generate for specific editor:  promptrek generate config.yaml --editor {example_editor}")
-        click.echo(f"  Generate for all supported:    promptrek generate config.yaml --all")
+        click.echo(
+            f"  Generate for specific editor:  promptrek generate config.yaml --editor {example_editor}"
+        )
+        click.echo(
+            f"  Generate for all supported:    promptrek generate config.yaml --all"
+        )
     click.echo()
-    
-    click.echo("Note: Only editors with 'Project Configuration File Support' will generate files.")
-    click.echo("      Other editors require manual configuration through their respective interfaces.")
+
+    click.echo(
+        "Note: Only editors with 'Project Configuration File Support' will generate files."
+    )
+    click.echo(
+        "      Other editors require manual configuration through their respective interfaces."
+    )
 
 
 if __name__ == "__main__":

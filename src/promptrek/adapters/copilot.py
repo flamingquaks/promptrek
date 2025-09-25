@@ -17,12 +17,12 @@ class CopilotAdapter(EditorAdapter):
 
     _description = "GitHub Copilot (.github/copilot-instructions.md, path-specific instructions, agent files)"
     _file_patterns = [
-        ".github/copilot-instructions.md", 
+        ".github/copilot-instructions.md",
         ".github/instructions/*.instructions.md",
         ".github/prompts/*.prompt.md",
         "AGENTS.md",
-        "CLAUDE.md", 
-        "GEMINI.md"
+        "CLAUDE.md",
+        "GEMINI.md",
     ]
 
     def __init__(self):
@@ -48,19 +48,27 @@ class CopilotAdapter(EditorAdapter):
         created_files = []
 
         # Generate repository-wide instructions
-        copilot_file = self._generate_copilot_instructions(processed_prompt, output_dir, dry_run, verbose)
+        copilot_file = self._generate_copilot_instructions(
+            processed_prompt, output_dir, dry_run, verbose
+        )
         created_files.extend(copilot_file)
 
         # Generate path-specific instructions
-        path_files = self._generate_path_specific_instructions(processed_prompt, output_dir, dry_run, verbose)
+        path_files = self._generate_path_specific_instructions(
+            processed_prompt, output_dir, dry_run, verbose
+        )
         created_files.extend(path_files)
 
         # Generate agent instructions
-        agent_files = self._generate_agent_instructions(processed_prompt, output_dir, dry_run, verbose)
+        agent_files = self._generate_agent_instructions(
+            processed_prompt, output_dir, dry_run, verbose
+        )
         created_files.extend(agent_files)
 
         # Generate experimental prompt files
-        prompt_files = self._generate_prompt_files(processed_prompt, output_dir, dry_run, verbose)
+        prompt_files = self._generate_prompt_files(
+            processed_prompt, output_dir, dry_run, verbose
+        )
         created_files.extend(prompt_files)
 
         return created_files
@@ -109,13 +117,17 @@ class CopilotAdapter(EditorAdapter):
             code_content = self._build_path_specific_content(
                 "Code Style Guidelines",
                 prompt.instructions.code_style,
-                "**/*.{ts,tsx,js,jsx,py,java,go,rs,cpp,c,h}"
+                "**/*.{ts,tsx,js,jsx,py,java,go,rs,cpp,c,h}",
             )
-            
+
             if dry_run:
                 click.echo(f"  📁 Would create: {code_file}")
                 if verbose:
-                    preview = code_content[:200] + "..." if len(code_content) > 200 else code_content
+                    preview = (
+                        code_content[:200] + "..."
+                        if len(code_content) > 200
+                        else code_content
+                    )
                     click.echo(f"    {preview}")
             else:
                 instructions_dir.mkdir(parents=True, exist_ok=True)
@@ -128,15 +140,19 @@ class CopilotAdapter(EditorAdapter):
         if prompt.instructions and prompt.instructions.testing:
             test_file = instructions_dir / "testing.instructions.md"
             test_content = self._build_path_specific_content(
-                "Testing Guidelines", 
+                "Testing Guidelines",
                 prompt.instructions.testing,
-                "**/*.{test,spec}.{ts,tsx,js,jsx,py}"
+                "**/*.{test,spec}.{ts,tsx,js,jsx,py}",
             )
-            
+
             if dry_run:
                 click.echo(f"  📁 Would create: {test_file}")
                 if verbose:
-                    preview = test_content[:200] + "..." if len(test_content) > 200 else test_content
+                    preview = (
+                        test_content[:200] + "..."
+                        if len(test_content) > 200
+                        else test_content
+                    )
                     click.echo(f"    {preview}")
             else:
                 instructions_dir.mkdir(parents=True, exist_ok=True)
@@ -150,11 +166,15 @@ class CopilotAdapter(EditorAdapter):
             for tech in prompt.context.technologies[:2]:  # Limit to 2 main technologies
                 tech_file = instructions_dir / f"{tech.lower()}.instructions.md"
                 tech_content = self._build_tech_specific_content(tech, prompt)
-                
+
                 if dry_run:
                     click.echo(f"  📁 Would create: {tech_file}")
                     if verbose:
-                        preview = tech_content[:200] + "..." if len(tech_content) > 200 else tech_content
+                        preview = (
+                            tech_content[:200] + "..."
+                            if len(tech_content) > 200
+                            else tech_content
+                        )
                         click.echo(f"    {preview}")
                 else:
                     instructions_dir.mkdir(parents=True, exist_ok=True)
@@ -178,11 +198,15 @@ class CopilotAdapter(EditorAdapter):
         # Generate general AGENTS.md
         agents_file = output_dir / "AGENTS.md"
         agents_content = self._build_agents_content(prompt)
-        
+
         if dry_run:
             click.echo(f"  📁 Would create: {agents_file}")
             if verbose:
-                preview = agents_content[:200] + "..." if len(agents_content) > 200 else agents_content
+                preview = (
+                    agents_content[:200] + "..."
+                    if len(agents_content) > 200
+                    else agents_content
+                )
                 click.echo(f"    {preview}")
         else:
             with open(agents_file, "w", encoding="utf-8") as f:
@@ -193,11 +217,15 @@ class CopilotAdapter(EditorAdapter):
         # Generate CLAUDE.md for Claude-specific instructions
         claude_file = output_dir / "CLAUDE.md"
         claude_content = self._build_claude_content(prompt)
-        
+
         if dry_run:
             click.echo(f"  📁 Would create: {claude_file}")
             if verbose:
-                preview = claude_content[:200] + "..." if len(claude_content) > 200 else claude_content
+                preview = (
+                    claude_content[:200] + "..."
+                    if len(claude_content) > 200
+                    else claude_content
+                )
                 click.echo(f"    {preview}")
         else:
             with open(claude_file, "w", encoding="utf-8") as f:
@@ -221,11 +249,15 @@ class CopilotAdapter(EditorAdapter):
         # Generate general coding prompt
         coding_prompt_file = prompts_dir / "coding.prompt.md"
         coding_prompt_content = self._build_coding_prompt_content(prompt)
-        
+
         if dry_run:
             click.echo(f"  📁 Would create: {coding_prompt_file} (experimental)")
             if verbose:
-                preview = coding_prompt_content[:200] + "..." if len(coding_prompt_content) > 200 else coding_prompt_content
+                preview = (
+                    coding_prompt_content[:200] + "..."
+                    if len(coding_prompt_content) > 200
+                    else coding_prompt_content
+                )
                 click.echo(f"    {preview}")
         else:
             prompts_dir.mkdir(parents=True, exist_ok=True)
@@ -313,33 +345,30 @@ class CopilotAdapter(EditorAdapter):
         return "\n".join(lines)
 
     def _build_path_specific_content(
-        self, 
-        title: str, 
-        instructions: List[str], 
-        apply_to: str
+        self, title: str, instructions: List[str], apply_to: str
     ) -> str:
         """Build path-specific instruction content with frontmatter."""
         lines = []
-        
+
         # YAML frontmatter
         lines.append("---")
-        lines.append(f"applyTo: \"{apply_to}\"")
+        lines.append(f'applyTo: "{apply_to}"')
         lines.append("---")
         lines.append("")
-        
+
         # Content
         lines.append(f"# {title}")
         lines.append("")
-        
+
         for instruction in instructions:
             lines.append(f"- {instruction}")
-        
+
         return "\n".join(lines)
 
     def _build_tech_specific_content(self, tech: str, prompt: UniversalPrompt) -> str:
         """Build technology-specific instruction content."""
         lines = []
-        
+
         # Determine file patterns based on technology
         tech_patterns = {
             "typescript": "**/*.{ts,tsx}",
@@ -352,26 +381,26 @@ class CopilotAdapter(EditorAdapter):
             "java": "**/*.java",
             "cpp": "**/*.{cpp,c,h}",
         }
-        
+
         pattern = tech_patterns.get(tech.lower(), f"**/*.{tech.lower()}")
-        
+
         # YAML frontmatter
         lines.append("---")
-        lines.append(f"applyTo: \"{pattern}\"")
+        lines.append(f'applyTo: "{pattern}"')
         lines.append("---")
         lines.append("")
-        
+
         # Content
         lines.append(f"# {tech.title()} Guidelines")
         lines.append("")
-        
+
         # Add general instructions that apply to this tech
         if prompt.instructions and prompt.instructions.general:
             lines.append("## General Guidelines")
             for instruction in prompt.instructions.general:
                 lines.append(f"- {instruction}")
             lines.append("")
-        
+
         # Add tech-specific best practices
         lines.append(f"## {tech.title()} Best Practices")
         tech_practices = {
@@ -400,7 +429,7 @@ class CopilotAdapter(EditorAdapter):
                 "Implement proper error handling",
             ],
         }
-        
+
         if tech.lower() in tech_practices:
             for practice in tech_practices[tech.lower()]:
                 lines.append(f"- {practice}")
@@ -408,7 +437,7 @@ class CopilotAdapter(EditorAdapter):
             lines.append(f"- Follow {tech} best practices and conventions")
             lines.append(f"- Maintain consistency with existing {tech} code")
             lines.append(f"- Use {tech} idioms and patterns appropriately")
-            
+
         return "\n".join(lines)
 
     def _build_agents_content(self, prompt: UniversalPrompt) -> str:
@@ -426,7 +455,9 @@ class CopilotAdapter(EditorAdapter):
             if prompt.context.project_type:
                 lines.append(f"**Project Type:** {prompt.context.project_type}")
             if prompt.context.technologies:
-                lines.append(f"**Technologies:** {', '.join(prompt.context.technologies)}")
+                lines.append(
+                    f"**Technologies:** {', '.join(prompt.context.technologies)}"
+                )
             if prompt.context.description:
                 lines.append("")
                 lines.append("**Project Description:**")
@@ -459,7 +490,7 @@ class CopilotAdapter(EditorAdapter):
         # AI-specific guidance
         lines.append("### AI Assistance Guidelines")
         lines.append("- Provide clear, well-documented code solutions")
-        lines.append("- Explain complex logic and design decisions") 
+        lines.append("- Explain complex logic and design decisions")
         lines.append("- Suggest best practices and improvements")
         lines.append("- Consider security and performance implications")
         if prompt.context and prompt.context.technologies:
@@ -483,7 +514,9 @@ class CopilotAdapter(EditorAdapter):
             if prompt.context.project_type:
                 lines.append(f"- **Project Type:** {prompt.context.project_type}")
             if prompt.context.technologies:
-                lines.append(f"- **Technologies:** {', '.join(prompt.context.technologies)}")
+                lines.append(
+                    f"- **Technologies:** {', '.join(prompt.context.technologies)}"
+                )
             lines.append("")
 
         # Claude-specific instructions
@@ -543,14 +576,22 @@ class CopilotAdapter(EditorAdapter):
         if prompt.context and prompt.context.technologies:
             lines.append("### Technology-Specific Guidance")
             for tech in prompt.context.technologies:
-                lines.append(f"- **{tech}:** Follow {tech} best practices and conventions")
+                lines.append(
+                    f"- **{tech}:** Follow {tech} best practices and conventions"
+                )
             lines.append("")
 
         # Common prompts
         lines.append("### Common Coding Tasks")
-        lines.append("- **Function Creation:** Generate well-documented functions with proper typing")
-        lines.append("- **Code Review:** Analyze code for bugs, performance, and maintainability")
-        lines.append("- **Refactoring:** Suggest improvements while maintaining functionality")
+        lines.append(
+            "- **Function Creation:** Generate well-documented functions with proper typing"
+        )
+        lines.append(
+            "- **Code Review:** Analyze code for bugs, performance, and maintainability"
+        )
+        lines.append(
+            "- **Refactoring:** Suggest improvements while maintaining functionality"
+        )
         lines.append("- **Testing:** Generate appropriate unit tests and test cases")
         lines.append("")
 

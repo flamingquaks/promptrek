@@ -70,9 +70,7 @@ class ClineAdapter(EditorAdapter):
             errors.append(
                 ValidationError(
                     field="instructions.general",
-                    message=(
-                        "Cline needs clear general instructions for coding tasks"
-                    ),
+                    message=("Cline needs clear general instructions for coding tasks"),
                 )
             )
 
@@ -125,7 +123,9 @@ class ClineAdapter(EditorAdapter):
             and "instructions" in conditional_content
             and "general" in conditional_content["instructions"]
         ):
-            all_general_instructions.extend(conditional_content["instructions"]["general"])
+            all_general_instructions.extend(
+                conditional_content["instructions"]["general"]
+            )
 
         # General instructions
         if all_general_instructions:
@@ -142,9 +142,11 @@ class ClineAdapter(EditorAdapter):
             lines.append("")
 
         # Testing instructions if available
-        if (prompt.instructions and 
-            hasattr(prompt.instructions, 'testing') and 
-            prompt.instructions.testing):
+        if (
+            prompt.instructions
+            and hasattr(prompt.instructions, "testing")
+            and prompt.instructions.testing
+        ):
             lines.append("## Testing Standards")
             for test_rule in prompt.instructions.testing:
                 lines.append(f"- {test_rule}")

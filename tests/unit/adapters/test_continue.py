@@ -66,6 +66,7 @@ class TestContinueAdapter(TestAdapterBase):
 
         # Parse as YAML to verify structure
         import yaml
+
         config = yaml.safe_load(content)
 
         assert "name" in config
@@ -88,7 +89,7 @@ class TestContinueAdapter(TestAdapterBase):
         assert len(files) >= 1
         config_file = output_dir / "config.yaml"
         assert config_file in files
-        
+
         # Check that mkdir and file operations were called
         assert mock_mkdir.called
         assert mock_file.called

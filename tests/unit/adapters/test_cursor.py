@@ -36,6 +36,7 @@ class TestCursorAdapter(TestAdapterBase):
     def test_validate_missing_instructions(self, adapter):
         """Test validation with missing instructions."""
         from src.promptrek.core.models import PromptMetadata, UniversalPrompt
+
         prompt = UniversalPrompt(
             schema_version="1.0.0",
             metadata=PromptMetadata(
@@ -56,15 +57,15 @@ class TestCursorAdapter(TestAdapterBase):
         """Test MDF file content generation."""
         instructions = ["Follow TypeScript best practices", "Use strict mode"]
         content = adapter._build_mdc_content(
-            "TypeScript Rules", 
-            instructions, 
-            "**/*.{ts,tsx}", 
-            "TypeScript coding guidelines"
+            "TypeScript Rules",
+            instructions,
+            "**/*.{ts,tsx}",
+            "TypeScript coding guidelines",
         )
-        
+
         assert "---" in content  # YAML frontmatter
         assert "description: TypeScript coding guidelines" in content
-        assert "globs: \"**/*.{ts,tsx}\"" in content
+        assert 'globs: "**/*.{ts,tsx}"' in content
         assert "alwaysApply: false" in content
         assert "# TypeScript Rules" in content
         assert "- Follow TypeScript best practices" in content
@@ -72,7 +73,7 @@ class TestCursorAdapter(TestAdapterBase):
     def test_build_agents_content(self, adapter, sample_prompt):
         """Test AGENTS.md content generation."""
         content = adapter._build_agents_content(sample_prompt)
-        
+
         assert sample_prompt.metadata.title in content
         assert sample_prompt.metadata.description in content
         assert "## Project Context" in content
@@ -85,6 +86,7 @@ class TestCursorAdapter(TestAdapterBase):
     def test_generate_actual_files(self, mock_mkdir, mock_file, adapter, sample_prompt):
         """Test actual file generation."""
         from pathlib import Path
+
         output_dir = Path("/tmp/test")
         files = adapter.generate(sample_prompt, output_dir, dry_run=False)
 
@@ -92,7 +94,7 @@ class TestCursorAdapter(TestAdapterBase):
         assert len(files) >= 1
         agents_file = output_dir / "AGENTS.md"
         assert agents_file in files
-        
+
         # Check that mkdir and file operations were called
         assert mock_mkdir.called
         assert mock_file.called
@@ -100,6 +102,7 @@ class TestCursorAdapter(TestAdapterBase):
     def test_generate_dry_run(self, adapter, sample_prompt, capsys):
         """Test dry run generation."""
         from pathlib import Path
+
         output_dir = Path("/tmp/test")
         files = adapter.generate(sample_prompt, output_dir, dry_run=True)
 

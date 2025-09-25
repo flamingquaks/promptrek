@@ -45,11 +45,15 @@ class ContinueAdapter(EditorAdapter):
         created_files = []
 
         # Generate main config.yaml
-        config_file = self._generate_main_config(processed_prompt, conditional_content, output_dir, dry_run, verbose)
+        config_file = self._generate_main_config(
+            processed_prompt, conditional_content, output_dir, dry_run, verbose
+        )
         created_files.extend(config_file)
 
         # Generate advanced rules directory system
-        rules_files = self._generate_rules_system(processed_prompt, output_dir, dry_run, verbose)
+        rules_files = self._generate_rules_system(
+            processed_prompt, output_dir, dry_run, verbose
+        )
         created_files.extend(rules_files)
 
         return created_files
@@ -94,14 +98,17 @@ class ContinueAdapter(EditorAdapter):
         if prompt.instructions and prompt.instructions.general:
             general_file = rules_dir / "general.md"
             general_content = self._build_rules_content(
-                "General Coding Rules",
-                prompt.instructions.general
+                "General Coding Rules", prompt.instructions.general
             )
-            
+
             if dry_run:
                 click.echo(f"  📁 Would create: {general_file}")
                 if verbose:
-                    preview = general_content[:200] + "..." if len(general_content) > 200 else general_content
+                    preview = (
+                        general_content[:200] + "..."
+                        if len(general_content) > 200
+                        else general_content
+                    )
                     click.echo(f"    {preview}")
                 created_files.append(general_file)
             else:
@@ -115,14 +122,17 @@ class ContinueAdapter(EditorAdapter):
         if prompt.instructions and prompt.instructions.code_style:
             style_file = rules_dir / "code-style.md"
             style_content = self._build_rules_content(
-                "Code Style Rules",
-                prompt.instructions.code_style
+                "Code Style Rules", prompt.instructions.code_style
             )
-            
+
             if dry_run:
                 click.echo(f"  📁 Would create: {style_file}")
                 if verbose:
-                    preview = style_content[:200] + "..." if len(style_content) > 200 else style_content
+                    preview = (
+                        style_content[:200] + "..."
+                        if len(style_content) > 200
+                        else style_content
+                    )
                     click.echo(f"    {preview}")
                 created_files.append(style_file)
             else:
@@ -136,14 +146,17 @@ class ContinueAdapter(EditorAdapter):
         if prompt.instructions and prompt.instructions.testing:
             testing_file = rules_dir / "testing.md"
             testing_content = self._build_rules_content(
-                "Testing Rules",
-                prompt.instructions.testing
+                "Testing Rules", prompt.instructions.testing
             )
-            
+
             if dry_run:
                 click.echo(f"  📁 Would create: {testing_file}")
                 if verbose:
-                    preview = testing_content[:200] + "..." if len(testing_content) > 200 else testing_content
+                    preview = (
+                        testing_content[:200] + "..."
+                        if len(testing_content) > 200
+                        else testing_content
+                    )
                     click.echo(f"    {preview}")
                 created_files.append(testing_file)
             else:
@@ -158,11 +171,15 @@ class ContinueAdapter(EditorAdapter):
             for tech in prompt.context.technologies[:2]:  # Limit to 2 main technologies
                 tech_file = rules_dir / f"{tech.lower()}-rules.md"
                 tech_content = self._build_tech_rules_content(tech, prompt)
-                
+
                 if dry_run:
                     click.echo(f"  📁 Would create: {tech_file}")
                     if verbose:
-                        preview = tech_content[:200] + "..." if len(tech_content) > 200 else tech_content
+                        preview = (
+                            tech_content[:200] + "..."
+                            if len(tech_content) > 200
+                            else tech_content
+                        )
                         click.echo(f"    {preview}")
                     created_files.append(tech_file)
                 else:
@@ -271,45 +288,47 @@ class ContinueAdapter(EditorAdapter):
         # Add project-specific context if available
         if prompt.context:
             if prompt.context.technologies:
-                config["context"].append({
-                    "provider": "docs",
-                    "query": f"documentation for {', '.join(prompt.context.technologies)}"
-                })
+                config["context"].append(
+                    {
+                        "provider": "docs",
+                        "query": f"documentation for {', '.join(prompt.context.technologies)}",
+                    }
+                )
 
         return yaml.dump(config, default_flow_style=False, sort_keys=False)
 
     def _build_rules_content(self, title: str, instructions: List[str]) -> str:
         """Build markdown rules content for .continue/rules/ files."""
         lines = []
-        
+
         lines.append(f"# {title}")
         lines.append("")
-        
+
         for instruction in instructions:
             lines.append(f"- {instruction}")
-        
+
         lines.append("")
         lines.append("## Additional Guidelines")
         lines.append("- Follow project-specific patterns and conventions")
         lines.append("- Maintain consistency with existing codebase")
         lines.append("- Consider performance and security implications")
-        
+
         return "\n".join(lines)
 
     def _build_tech_rules_content(self, tech: str, prompt: UniversalPrompt) -> str:
         """Build technology-specific rules content."""
         lines = []
-        
+
         lines.append(f"# {tech.title()} Rules")
         lines.append("")
-        
+
         # Add general instructions that apply to this tech
         if prompt.instructions and prompt.instructions.general:
             lines.append("## General Guidelines")
             for instruction in prompt.instructions.general:
                 lines.append(f"- {instruction}")
             lines.append("")
-        
+
         # Add tech-specific best practices
         lines.append(f"## {tech.title()} Best Practices")
         tech_practices = {
@@ -344,7 +363,7 @@ class ContinueAdapter(EditorAdapter):
                 "Use environment variables for configuration",
             ],
         }
-        
+
         if tech.lower() in tech_practices:
             for practice in tech_practices[tech.lower()]:
                 lines.append(f"- {practice}")
@@ -358,7 +377,7 @@ class ContinueAdapter(EditorAdapter):
         lines.append(f"- Generate {tech} code that follows established patterns")
         lines.append(f"- Include appropriate {tech} documentation and comments")
         lines.append(f"- Consider {tech} performance optimization techniques")
-        
+
         return "\n".join(lines)
 
     def _build_legacy_rules_content(self, prompt: UniversalPrompt) -> str:
@@ -376,7 +395,9 @@ class ContinueAdapter(EditorAdapter):
             if prompt.context.project_type:
                 lines.append(f"**Type:** {prompt.context.project_type}")
             if prompt.context.technologies:
-                lines.append(f"**Technologies:** {', '.join(prompt.context.technologies)}")
+                lines.append(
+                    f"**Technologies:** {', '.join(prompt.context.technologies)}"
+                )
             if prompt.context.description:
                 lines.append("")
                 lines.append("**Description:**")
