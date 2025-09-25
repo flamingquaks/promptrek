@@ -18,6 +18,7 @@ class AdapterCapability(Enum):
     IDE_PLUGIN_ONLY = "ide_plugin_only"
     SUPPORTS_VARIABLES = "supports_variables"
     SUPPORTS_CONDITIONALS = "supports_conditionals"
+    MULTIPLE_FILE_GENERATION = "multiple_file_generation"
 
 
 class AdapterRegistry:

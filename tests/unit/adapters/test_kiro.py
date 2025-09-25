@@ -27,6 +27,8 @@ class TestKiroAdapter(TestAdapterBase):
         assert "Kiro" in adapter.description
         assert ".kiro/steering/*.md" in adapter.file_patterns
         assert ".kiro/specs/*/requirements.md" in adapter.file_patterns
+        assert ".kiro/specs/*/design.md" in adapter.file_patterns
+        assert ".kiro/specs/*/tasks.md" in adapter.file_patterns
 
     def test_supports_variables(self, adapter):
         """Test variable support."""
@@ -42,17 +44,13 @@ class TestKiroAdapter(TestAdapterBase):
         # Should only have warnings, no critical errors
         assert all(error.severity == "warning" for error in errors)
 
-    def test_build_config_content(self, adapter, sample_prompt):
-        """Test config generation."""
-        content = adapter._build_config(sample_prompt)
+    def test_build_product_steering_content(self, adapter, sample_prompt):
+        """Test product steering generation."""
+        content = adapter._build_product_steering(sample_prompt)
 
-        # Parse as JSON to verify structure
-        config = json.loads(content)
-
-        assert "name" in config
-        assert "description" in config
-        assert "settings" in config
-        assert config["name"] == sample_prompt.metadata.title
+        assert sample_prompt.metadata.title in content
+        assert "Product Overview" in content
+        assert "inclusion: always" in content
 
     @patch("builtins.open", new_callable=mock_open)
     @patch("pathlib.Path.mkdir")
@@ -61,14 +59,17 @@ class TestKiroAdapter(TestAdapterBase):
         output_dir = Path("/tmp/test")
         files = adapter.generate(sample_prompt, output_dir, dry_run=False)
 
-        # Kiro adapter generates multiple steering and spec files
-        expected_min_files = 6  # At least 6 files should be generated
-        assert len(files) >= expected_min_files
-        assert any(".kiro/steering/" in str(f) for f in files)
-        assert any(".kiro/specs/" in str(f) for f in files)
-        # Multiple directories are created (steering, specs)
-        assert mock_mkdir.call_count >= 1
-        assert mock_file.call_count >= expected_min_files
+        # Should generate steering files and specs files
+        assert (
+            len(files) >= 3
+        )  # At least product.md, structure.md, requirements.md, design.md, tasks.md
+        assert any("steering/product.md" in str(f) for f in files)
+        assert any("steering/structure.md" in str(f) for f in files)
+        assert any("requirements.md" in str(f) for f in files)
+        assert any("design.md" in str(f) for f in files)
+        assert any("tasks.md" in str(f) for f in files)
+        assert mock_mkdir.call_count >= 2  # At least steering and specs directories
+        assert mock_file.call_count >= 3
 
     def test_generate_dry_run(self, adapter, sample_prompt, capsys):
         """Test dry run generation."""
@@ -76,5 +77,7 @@ class TestKiroAdapter(TestAdapterBase):
         files = adapter.generate(sample_prompt, output_dir, dry_run=True)
 
         captured = capsys.readouterr()
-        # In dry run mode, files list may be empty but output should show what would be created
-        assert "Would create" in captured.out or len(files) > 0
+        assert "Would create" in captured.out
+        assert (
+            len(files) == 0
+        )  # Dry run doesn't create actual files, returns empty list

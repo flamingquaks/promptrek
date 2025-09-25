@@ -64,6 +64,55 @@ class ClaudeAdapter(EditorAdapter):
 
         return [output_file]
 
+    def generate_multiple(
+        self,
+        prompt_files: List[tuple[UniversalPrompt, Path]],
+        output_dir: Path,
+        dry_run: bool = False,
+        verbose: bool = False,
+        variables: Optional[Dict[str, Any]] = None,
+    ) -> List[Path]:
+        """Generate separate Claude context files for each prompt file."""
+
+        claude_dir = output_dir / ".claude"
+        generated_files = []
+
+        for prompt, source_file in prompt_files:
+            # Apply variable substitution if supported
+            processed_prompt = self.substitute_variables(prompt, variables)
+
+            # Process conditionals if supported
+            conditional_content = self.process_conditionals(processed_prompt, variables)
+
+            # Create content
+            content = self._build_content(processed_prompt, conditional_content)
+
+            # Generate filename based on source file name
+            # Remove .promptrek.yaml and add .md extension
+            base_name = source_file.stem
+            if base_name.endswith(".promptrek"):
+                base_name = base_name.removesuffix(
+                    ".promptrek"
+                )  # Remove .promptrek suffix
+            output_file = claude_dir / f"{base_name}.md"
+
+            if dry_run:
+                click.echo(f"  📁 Would create: {output_file}")
+                if verbose:
+                    click.echo("  📄 Content preview:")
+                    preview = content[:200] + "..." if len(content) > 200 else content
+                    click.echo(f"    {preview}")
+            else:
+                # Create directory and file
+                claude_dir.mkdir(exist_ok=True)
+                with open(output_file, "w", encoding="utf-8") as f:
+                    f.write(content)
+                click.echo(f"✅ Generated: {output_file}")
+
+            generated_files.append(output_file)
+
+        return generated_files
+
     def validate(self, prompt: UniversalPrompt) -> List[ValidationError]:
         """Validate prompt for Claude."""
         errors = []

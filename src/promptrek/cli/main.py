@@ -72,7 +72,16 @@ def validate(ctx: click.Context, file: Path, strict: bool) -> None:
 
 
 @cli.command()
-@click.argument("file", type=click.Path(exists=True, path_type=Path))
+@click.argument("files", nargs=-1, type=click.Path(exists=True, path_type=Path))
+@click.option(
+    "--directory",
+    "-d",
+    type=click.Path(exists=True, file_okay=False, path_type=Path),
+    help="Directory to search for .promptrek.yaml files",
+)
+@click.option(
+    "--recursive", "-r", is_flag=True, help="Search recursively in directories"
+)
 @click.option(
     "--editor", "-e", type=str, help="Target editor (copilot, cursor, continue)"
 )
@@ -97,14 +106,16 @@ def validate(ctx: click.Context, file: Path, strict: bool) -> None:
 @click.pass_context
 def generate(
     ctx: click.Context,
-    file: Path,
+    files: tuple[Path, ...],
+    directory: Path,
+    recursive: bool,
     editor: str,
     output: Path,
     dry_run: bool,
     all_editors: bool,
     variables: tuple,
 ) -> None:
-    """Generate editor-specific prompts from universal prompt file."""
+    """Generate editor-specific prompts from universal prompt files."""
     try:
         # Parse variable overrides
         var_dict = {}
@@ -116,7 +127,17 @@ def generate(
             key, value = var.split("=", 1)
             var_dict[key.strip()] = value.strip()
 
-        generate_command(ctx, file, editor, output, dry_run, all_editors, var_dict)
+        generate_command(
+            ctx,
+            files,
+            directory,
+            recursive,
+            editor,
+            output,
+            dry_run,
+            all_editors,
+            var_dict,
+        )
     except PrompTrekError as e:
         click.echo(f"Error: {e}", err=True)
         ctx.exit(1)

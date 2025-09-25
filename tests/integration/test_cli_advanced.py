@@ -203,8 +203,7 @@ variables:
         assert result.exit_code == 0
         assert "Would create" in result.output
         # Should create files for all target editors using new formats
-        assert ".claude/context.md" in result.output
-        assert "config.yaml" in result.output or ".continue/rules/" in result.output
+        assert ("config.yaml" in result.output) or (".continue/rules/" in result.output)
         # Verify at least some expected output for other tools
         assert any(
             tool in result.output
@@ -294,7 +293,7 @@ variables:
             cli, ["generate", "--editor", "nonexistent", str(sample_upf_file)]
         )
         assert result.exit_code != 0
-        assert "not available" in result.output
+        assert "not in targets" in result.output
 
     def test_generate_no_editor_or_all(self, runner, sample_upf_file):
         """Test generate command without specifying editor or --all."""

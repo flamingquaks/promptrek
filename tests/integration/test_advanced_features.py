@@ -224,6 +224,7 @@ targets:
   - claude
   - continue
   - codeium
+  - copilot
 
 instructions:
   general:
@@ -319,16 +320,19 @@ variables:
         else:
             raise AssertionError("Neither config.yaml nor .continue/rules/ found")
 
-        # Check base instruction
-        assert "Base instruction for all editors" in continue_content
-        # Check Continue-specific instructions
-        assert (
-            "Continue-specific: Generate comprehensive completions" in continue_content
-        )
-        assert "Continue-specific: Suggest appropriate types" in continue_content
+        # Also check the rules file
+        rules_file = temp_dir / "continue_test" / ".continue" / "rules" / "general.md"
+        assert rules_file.exists()
+        rules_content = rules_file.read_text()
+
+        # Check base instruction in rules content
+        assert "Base instruction for all editors" in rules_content
+        # Check Continue-specific instructions in rules content
+        assert "Continue-specific: Generate comprehensive completions" in rules_content
+        assert "Continue-specific: Suggest appropriate types" in rules_content
         # Should not have other editor instructions
-        assert "Claude-specific" not in continue_content
-        assert "AI Assistant: Focus on performance" not in continue_content
+        assert "Claude-specific" not in rules_content
+        assert "AI Assistant: Focus on performance" not in rules_content
 
         # Test Copilot generation (should get the "in list" condition)
         result = runner.invoke(
@@ -351,9 +355,11 @@ variables:
 
         # Check base instruction
         assert "Base instruction for all editors" in copilot_content
-        # The test just needs to verify the file was generated correctly
-        # Complex conditional processing can be tested separately
-        assert "Conditional Instructions Test" in copilot_content
+        # Check list condition instruction
+        assert "AI Assistant: Focus on performance optimization" in copilot_content
+        # Should not have other editor specific instructions
+        assert "Claude-specific" not in copilot_content
+        assert "Continue-specific" not in copilot_content
 
     def test_combined_features(self, runner, temp_dir):
         """Test combination of imports, conditionals, and variables."""
