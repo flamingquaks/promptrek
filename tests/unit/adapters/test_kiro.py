@@ -44,10 +44,10 @@ class TestKiroAdapter(TestAdapterBase):
     def test_build_config_content(self, adapter, sample_prompt):
         """Test config generation."""
         content = adapter._build_config(sample_prompt)
-        
+
         # Parse as JSON to verify structure
         config = json.loads(content)
-        
+
         assert "name" in config
         assert "description" in config
         assert "settings" in config

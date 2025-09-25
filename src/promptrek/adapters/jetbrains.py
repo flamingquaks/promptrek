@@ -59,9 +59,7 @@ class JetBrainsAdapter(EditorAdapter):
             if verbose:
                 click.echo("  📄 XML config preview:")
                 preview = (
-                    xml_content[:200] + "..."
-                    if len(xml_content) > 200
-                    else xml_content
+                    xml_content[:200] + "..." if len(xml_content) > 200 else xml_content
                 )
                 click.echo(f"    {preview}")
         else:
@@ -110,50 +108,60 @@ class JetBrainsAdapter(EditorAdapter):
 
         # XML header
         lines.append('<?xml version="1.0" encoding="UTF-8"?>')
-        lines.append('<application>')
+        lines.append("<application>")
         lines.append('  <component name="AIAssistant">')
-        lines.append(f'    <option name="projectName" value="{prompt.metadata.title}" />')
-        lines.append(f'    <option name="projectDescription" value="{prompt.metadata.description}" />')
+        lines.append(
+            f'    <option name="projectName" value="{prompt.metadata.title}" />'
+        )
+        lines.append(
+            f'    <option name="projectDescription" value="{prompt.metadata.description}" />'
+        )
         lines.append('    <option name="aiAssistanceEnabled" value="true" />')
         lines.append('    <option name="smartCompletions" value="true" />')
         lines.append('    <option name="contextAware" value="true" />')
-        lines.append('')
+        lines.append("")
 
         # Project settings
         if prompt.context:
-            lines.append('    <projectSettings>')
+            lines.append("    <projectSettings>")
             if prompt.context.project_type:
-                lines.append(f'      <option name="projectType" value="{prompt.context.project_type}" />')
+                lines.append(
+                    f'      <option name="projectType" value="{prompt.context.project_type}" />'
+                )
             if prompt.context.technologies:
-                lines.append('      <technologies>')
+                lines.append("      <technologies>")
                 for tech in prompt.context.technologies:
                     lines.append(f'        <technology name="{tech}" enabled="true" />')
-                lines.append('      </technologies>')
-            lines.append('    </projectSettings>')
-            lines.append('')
+                lines.append("      </technologies>")
+            lines.append("    </projectSettings>")
+            lines.append("")
 
         # Code style settings
         if prompt.instructions and prompt.instructions.code_style:
-            lines.append('    <codeStyle>')
+            lines.append("    <codeStyle>")
             for guideline in prompt.instructions.code_style:
-                escaped_guideline = guideline.replace('"', '&quot;').replace('<', '&lt;').replace('>', '&gt;')
+                escaped_guideline = (
+                    guideline.replace('"', "&quot;")
+                    .replace("<", "&lt;")
+                    .replace(">", "&gt;")
+                )
                 lines.append(f'      <rule description="{escaped_guideline}" />')
-            lines.append('    </codeStyle>')
-            lines.append('')
+            lines.append("    </codeStyle>")
+            lines.append("")
 
         # AI behavior settings
-        lines.append('    <aiBehavior>')
+        lines.append("    <aiBehavior>")
         lines.append('      <option name="suggestionLevel" value="medium" />')
         lines.append('      <option name="autoImports" value="true" />')
         lines.append('      <option name="refactoringHints" value="true" />')
         lines.append('      <option name="codeGeneration" value="true" />')
         lines.append('      <option name="testGeneration" value="true" />')
-        lines.append('    </aiBehavior>')
-        lines.append('')
+        lines.append("    </aiBehavior>")
+        lines.append("")
 
         # Close XML
-        lines.append('  </component>')
-        lines.append('</application>')
+        lines.append("  </component>")
+        lines.append("</application>")
 
         return "\n".join(lines)
 
@@ -198,13 +206,13 @@ class JetBrainsAdapter(EditorAdapter):
         # Add development guidelines
         if prompt.instructions:
             config["guidelines"] = {}
-            
+
             if prompt.instructions.general:
                 config["guidelines"]["general"] = prompt.instructions.general
-            
+
             if prompt.instructions.code_style:
                 config["guidelines"]["code_style"] = prompt.instructions.code_style
-            
+
             if prompt.instructions.testing:
                 config["guidelines"]["testing"] = prompt.instructions.testing
 

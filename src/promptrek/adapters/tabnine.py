@@ -150,10 +150,10 @@ class TabnineAdapter(EditorAdapter):
 
         # Team settings
         lines.append("team:")
-        lines.append(f"  name: \"{prompt.metadata.title}\"")
-        lines.append(f"  description: \"{prompt.metadata.description}\"")
+        lines.append(f'  name: "{prompt.metadata.title}"')
+        lines.append(f'  description: "{prompt.metadata.description}"')
         if prompt.metadata.author:
-            lines.append(f"  contact: \"{prompt.metadata.author}\"")
+            lines.append(f'  contact: "{prompt.metadata.author}"')
         lines.append("")
 
         # Code standards
@@ -162,19 +162,19 @@ class TabnineAdapter(EditorAdapter):
             if prompt.instructions.general:
                 lines.append("  general:")
                 for instruction in prompt.instructions.general:
-                    lines.append(f"    - \"{instruction}\"")
+                    lines.append(f'    - "{instruction}"')
                 lines.append("")
 
             if prompt.instructions.code_style:
                 lines.append("  code_style:")
                 for guideline in prompt.instructions.code_style:
-                    lines.append(f"    - \"{guideline}\"")
+                    lines.append(f'    - "{guideline}"')
                 lines.append("")
 
             if prompt.instructions.testing:
                 lines.append("  testing:")
                 for guideline in prompt.instructions.testing:
-                    lines.append(f"    - \"{guideline}\"")
+                    lines.append(f'    - "{guideline}"')
                 lines.append("")
 
         # Project patterns

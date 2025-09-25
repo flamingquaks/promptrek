@@ -211,9 +211,11 @@ class AmazonQAdapter(EditorAdapter):
                 tech_upper = tech.upper()
                 lines.append(f"# === {tech_upper} SPECIFIC ===")
                 lines.append("")
-                
+
                 if tech.lower() in ["javascript", "typescript", "node.js"]:
-                    lines.append("# Q: Create an async function with proper error handling")
+                    lines.append(
+                        "# Q: Create an async function with proper error handling"
+                    )
                     lines.append("# Q: Optimize this for better performance in Node.js")
                     lines.append("# Q: Add TypeScript types to this function")
                 elif tech.lower() in ["python"]:
@@ -221,7 +223,9 @@ class AmazonQAdapter(EditorAdapter):
                     lines.append("# Q: Add type hints and docstrings to this function")
                     lines.append("# Q: Optimize this code for better performance")
                 elif tech.lower() in ["react", "vue", "angular"]:
-                    lines.append("# Q: Create a reusable component for this functionality")
+                    lines.append(
+                        "# Q: Create a reusable component for this functionality"
+                    )
                     lines.append("# Q: Add proper state management to this component")
                     lines.append("# Q: Optimize this component for performance")
                 elif tech.lower() in ["sql", "postgresql", "mysql"]:
@@ -232,7 +236,7 @@ class AmazonQAdapter(EditorAdapter):
                     lines.append(f"# Q: Implement {tech} best practices in this code")
                     lines.append(f"# Q: Optimize this {tech} implementation")
                     lines.append(f"# Q: Add {tech}-specific error handling")
-                
+
                 lines.append("")
 
         # Testing templates
