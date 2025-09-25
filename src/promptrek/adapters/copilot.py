@@ -597,7 +597,3 @@ class CopilotAdapter(EditorAdapter):
 
         return "\n".join(lines)
 
-    # Keep legacy method for backward compatibility
-    def _build_content(self, prompt: UniversalPrompt) -> str:
-        """Build GitHub Copilot instructions content (legacy method)."""
-        return self._build_repository_content(prompt)
