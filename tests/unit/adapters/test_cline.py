@@ -25,9 +25,8 @@ class TestClineAdapter(TestAdapterBase):
     def test_init(self, adapter):
         """Test adapter initialization."""
         assert adapter.name == "cline"
-        assert adapter.description == "Cline (terminal-based)"
-        assert ".cline/config.json" in adapter.file_patterns
-        assert "cline-context.md" in adapter.file_patterns
+        assert adapter.description == "Cline (.cline-rules/default-rules.md)"
+        assert ".cline-rules/default-rules.md" in adapter.file_patterns
 
     def test_supports_features(self, adapter):
         """Test feature support."""
@@ -57,36 +56,29 @@ class TestClineAdapter(TestAdapterBase):
         assert len(errors) == 1
         assert errors[0].field == "instructions.general"
 
-    def test_build_config(self, adapter, sample_prompt):
-        """Test configuration generation."""
-        config_content = adapter._build_config(sample_prompt)
-        config = json.loads(config_content)
-
-        assert config["name"] == sample_prompt.metadata.title
-        assert config["description"] == sample_prompt.metadata.description
-        assert config["contextFile"] == "cline-context.md"
-        assert "settings" in config
-        assert "project" in config
-
-    def test_build_context(self, adapter, sample_prompt):
-        """Test context generation."""
-        content = adapter._build_context(sample_prompt)
+    def test_build_content(self, adapter, sample_prompt):
+        """Test content generation."""
+        content = adapter._build_content(sample_prompt)
 
         assert sample_prompt.metadata.title in content
-        assert "## Project Information" in content
-        assert "## Development Instructions" in content
-        assert "## Terminal Operations" in content
-        assert "typescript, react, nodejs" in content
+        assert "## Project Overview" in content
+        assert "## Coding Guidelines" in content
+        assert sample_prompt.metadata.description in content
 
     @patch("builtins.open", new_callable=mock_open)
     @patch("pathlib.Path.mkdir")
-    def test_generate_multiple_files(
+    def test_generate_single_file(
         self, mock_mkdir, mock_file, adapter, sample_prompt
     ):
-        """Test generation of multiple files."""
+        """Test generation of single rules file."""
         output_dir = Path("/tmp/test")
         files = adapter.generate(sample_prompt, output_dir, dry_run=False)
 
-        assert len(files) == 2
-        assert output_dir / ".cline" / "config.json" in files
-        assert output_dir / "cline-context.md" in files
+        assert len(files) == 1
+        assert output_dir / ".cline-rules" / "default-rules.md" in files
+        
+        # Verify directory creation was called
+        mock_mkdir.assert_called_once()
+        
+        # Verify file was written
+        mock_file.assert_called_once()

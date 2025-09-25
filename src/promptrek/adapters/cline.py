@@ -15,8 +15,8 @@ from .base import EditorAdapter
 class ClineAdapter(EditorAdapter):
     """Adapter for Cline terminal-based AI assistant."""
 
-    _description = "Cline (.clinerules)"
-    _file_patterns = [".clinerules"]
+    _description = "Cline (.cline-rules/default-rules.md)"
+    _file_patterns = [".cline-rules/default-rules.md"]
 
     def __init__(self):
         super().__init__(
@@ -44,17 +44,22 @@ class ClineAdapter(EditorAdapter):
         # Create content
         content = self._build_content(processed_prompt, conditional_content)
 
-        # Determine output path - Cline uses .clinerules in root
-        output_file = output_dir / ".clinerules"
+        # Determine output path - Cline uses .cline-rules/default-rules.md
+        cline_rules_dir = output_dir / ".cline-rules"
+        output_file = cline_rules_dir / "default-rules.md"
 
         if dry_run:
+            click.echo(f"  📁 Would create directory: {cline_rules_dir}")
             click.echo(f"  📁 Would create: {output_file}")
             if verbose:
                 click.echo("  📄 Content preview:")
                 preview = content[:200] + "..." if len(content) > 200 else content
                 click.echo(f"    {preview}")
         else:
-            # Create file directly in output directory
+            # Create .cline-rules directory if it doesn't exist
+            cline_rules_dir.mkdir(parents=True, exist_ok=True)
+            
+            # Create default-rules.md file
             with open(output_file, "w", encoding="utf-8") as f:
                 f.write(content)
             click.echo(f"✅ Generated: {output_file}")
