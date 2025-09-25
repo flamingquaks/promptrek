@@ -58,7 +58,7 @@ class ClineAdapter(EditorAdapter):
         else:
             # Create .cline-rules directory if it doesn't exist
             cline_rules_dir.mkdir(parents=True, exist_ok=True)
-            
+
             # Create default-rules.md file
             with open(output_file, "w", encoding="utf-8") as f:
                 f.write(content)

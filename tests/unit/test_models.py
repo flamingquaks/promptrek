@@ -38,9 +38,9 @@ class TestPromptMetadata:
         """Test metadata can be created without dates."""
         metadata = PromptMetadata(
             title="Test Title",
-            description="Test description", 
+            description="Test description",
             version="1.0.0",
-            author="Test Author"
+            author="Test Author",
         )
         assert metadata.created is None
         assert metadata.updated is None
@@ -51,9 +51,9 @@ class TestPromptMetadata:
         metadata = PromptMetadata(
             title="Test Title",
             description="Test description",
-            version="1.0.0", 
+            version="1.0.0",
             author="Test Author",
-            created="2024-01-01"
+            created="2024-01-01",
         )
         assert metadata.created == "2024-01-01"
         assert metadata.updated is None

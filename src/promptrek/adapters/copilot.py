@@ -596,4 +596,3 @@ class CopilotAdapter(EditorAdapter):
         lines.append("")
 
         return "\n".join(lines)
-

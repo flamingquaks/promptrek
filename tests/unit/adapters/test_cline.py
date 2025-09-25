@@ -67,18 +67,16 @@ class TestClineAdapter(TestAdapterBase):
 
     @patch("builtins.open", new_callable=mock_open)
     @patch("pathlib.Path.mkdir")
-    def test_generate_single_file(
-        self, mock_mkdir, mock_file, adapter, sample_prompt
-    ):
+    def test_generate_single_file(self, mock_mkdir, mock_file, adapter, sample_prompt):
         """Test generation of single rules file."""
         output_dir = Path("/tmp/test")
         files = adapter.generate(sample_prompt, output_dir, dry_run=False)
 
         assert len(files) == 1
         assert output_dir / ".cline-rules" / "default-rules.md" in files
-        
+
         # Verify directory creation was called
         mock_mkdir.assert_called_once()
-        
+
         # Verify file was written
         mock_file.assert_called_once()

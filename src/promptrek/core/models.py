@@ -18,8 +18,12 @@ class PromptMetadata(BaseModel):
     description: str = Field(..., description="Brief description of purpose")
     version: str = Field(..., description="Semantic version of this prompt")
     author: str = Field(..., description="Author name or email")
-    created: Optional[str] = Field(default=None, description="ISO 8601 date (YYYY-MM-DD)")
-    updated: Optional[str] = Field(default=None, description="ISO 8601 date (YYYY-MM-DD)")
+    created: Optional[str] = Field(
+        default=None, description="ISO 8601 date (YYYY-MM-DD)"
+    )
+    updated: Optional[str] = Field(
+        default=None, description="ISO 8601 date (YYYY-MM-DD)"
+    )
     tags: Optional[List[str]] = Field(
         default=None, description="Optional tags for categorization"
     )
