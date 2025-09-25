@@ -39,7 +39,6 @@ jobs:
         uv run pytest tests/ -v --tb=short --cov=src/promptrek --cov-report=term-missing
     
     - name: Test CLI installation and basic functionality
-      shell: bash
       run: |
         # Test that the CLI is properly installed
         uv run python -c "import promptrek; print('Import successful')"

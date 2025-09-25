@@ -62,8 +62,10 @@ class TestTabnineAdapter(TestAdapterBase):
         files = adapter.generate(sample_prompt, output_dir, dry_run=False)
 
         assert len(files) == 2
-        assert any(".tabnine/config.json" in str(f) for f in files)
-        assert any(".tabnine/team.yaml" in str(f) for f in files)
+        # Use cross-platform path checks
+        file_strs = [str(f) for f in files]
+        assert any(".tabnine" in f and "config.json" in f for f in file_strs)
+        assert any(".tabnine" in f and "team.yaml" in f for f in file_strs)
         assert mock_mkdir.call_count == 1
         assert mock_file.call_count == 2
 

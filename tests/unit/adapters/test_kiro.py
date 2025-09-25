@@ -63,11 +63,13 @@ class TestKiroAdapter(TestAdapterBase):
         assert (
             len(files) >= 3
         )  # At least product.md, structure.md, requirements.md, design.md, tasks.md
-        assert any("steering/product.md" in str(f) for f in files)
-        assert any("steering/structure.md" in str(f) for f in files)
-        assert any("requirements.md" in str(f) for f in files)
-        assert any("design.md" in str(f) for f in files)
-        assert any("tasks.md" in str(f) for f in files)
+        # Use cross-platform path checks
+        file_strs = [str(f) for f in files]
+        assert any("steering" in f and "product.md" in f for f in file_strs)
+        assert any("steering" in f and "structure.md" in f for f in file_strs)
+        assert any("requirements.md" in f for f in file_strs)
+        assert any("design.md" in f for f in file_strs)
+        assert any("tasks.md" in f for f in file_strs)
         assert mock_mkdir.call_count >= 2  # At least steering and specs directories
         assert mock_file.call_count >= 3
 
