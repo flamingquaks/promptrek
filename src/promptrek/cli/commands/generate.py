@@ -209,8 +209,15 @@ def _generate_for_editor_multiple(
             if verbose:
                 click.echo(f"✅ Generated {editor} files from {source_file}")
         else:
-            # Multiple files - check if adapter supports merging
-            if hasattr(adapter, 'generate_merged'):
+            # Multiple files - check adapter capabilities
+            if hasattr(adapter, 'generate_multiple') and editor == 'claude':
+                # Claude uses separate files for each prompt
+                adapter.generate_multiple(prompt_files, output_dir, dry_run, verbose, variables)
+                if verbose:
+                    source_files = [str(pf[1]) for pf in prompt_files]
+                    click.echo(f"✅ Generated separate {editor} files from: {', '.join(source_files)}")
+            elif hasattr(adapter, 'generate_merged'):
+                # Other adapters use merged files
                 adapter.generate_merged(prompt_files, output_dir, dry_run, verbose, variables)
                 if verbose:
                     source_files = [str(pf[1]) for pf in prompt_files]
