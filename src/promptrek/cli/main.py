@@ -129,34 +129,88 @@ def generate(
 
 @cli.command()
 def list_editors() -> None:
-    """List supported editors."""
+    """List supported editors and their capabilities."""
+    from ..adapters.registry import AdapterCapability
     from .commands.generate import registry
 
-    # Get implemented editors from registry
-    implemented_editors = set(registry.list_adapters())
+    # Get editors by capability
+    project_file_adapters = registry.get_project_file_adapters()
+    global_config_adapters = registry.get_global_config_adapters()
+    ide_plugin_adapters = registry.get_adapters_by_capability(
+        AdapterCapability.IDE_PLUGIN_ONLY
+    )
 
-    # All editors we plan to support
-    all_editors = [
-        ("copilot", "GitHub Copilot (.github/copilot-instructions.md)"),
-        ("cursor", "Cursor (.cursorrules)"),
-        ("continue", "Continue (.continue/config.json)"),
-        ("claude", "Claude Code (context-based)"),
-        ("cline", "Cline (terminal-based)"),
-        ("codeium", "Codeium (context-based)"),
-        ("kiro", "Kiro (AI-powered assistance)"),
-        ("tabnine", "Tabnine (team configurations)"),
-        ("amazon-q", "Amazon Q (comment-based)"),
-        ("jetbrains", "JetBrains AI (IDE-integrated)"),
-    ]
+    click.echo("AI Editor Support Status:")
+    click.echo()
 
-    click.echo("Supported editors:")
-    for name, description in all_editors:
-        status = "✅" if name in implemented_editors else "⏳"
-        click.echo(f"  {status} {name:12} - {description}")
+    if project_file_adapters:
+        click.echo("✅ Project Configuration File Support:")
+        click.echo(
+            "   These editors support project-level configuration files that PrompTrek can generate:"
+        )
 
-    click.echo("\nLegend:")
-    click.echo("  ✅ Implemented")
-    click.echo("  ⏳ Planned")
+        for adapter_name in sorted(project_file_adapters):
+            try:
+                info = registry.get_adapter_info(adapter_name)
+                description = info.get("description", "No description")
+                file_patterns = info.get("file_patterns", [])
+                files_str = (
+                    ", ".join(file_patterns) if file_patterns else "configuration files"
+                )
+                click.echo(f"   • {adapter_name:12} - {description} → {files_str}")
+            except Exception:
+                click.echo(f"   • {adapter_name:12} - Available")
+        click.echo()
+
+    if global_config_adapters:
+        click.echo("ℹ️  Global Configuration Only:")
+        click.echo(
+            "   These tools use global settings (no project-level files generated):"
+        )
+
+        for adapter_name in sorted(global_config_adapters):
+            try:
+                info = registry.get_adapter_info(adapter_name)
+                description = info.get("description", "No description")
+                click.echo(
+                    f"   • {adapter_name:12} - Configure through global settings or admin panel"
+                )
+            except Exception:
+                click.echo(f"   • {adapter_name:12} - Global configuration only")
+        click.echo()
+
+    if ide_plugin_adapters:
+        click.echo("🔧 IDE Configuration Only:")
+        click.echo("   These tools are configured through IDE interface:")
+
+        for adapter_name in sorted(ide_plugin_adapters):
+            try:
+                info = registry.get_adapter_info(adapter_name)
+                click.echo(
+                    f"   • {adapter_name:12} - Configure through IDE settings/preferences"
+                )
+            except Exception:
+                click.echo(f"   • {adapter_name:12} - IDE configuration only")
+        click.echo()
+
+    # Usage examples
+    click.echo("Usage Examples:")
+    if project_file_adapters:
+        example_editor = sorted(project_file_adapters)[0]
+        click.echo(
+            f"  Generate for specific editor:  promptrek generate config.yaml --editor {example_editor}"
+        )
+        click.echo(
+            f"  Generate for all supported:    promptrek generate config.yaml --all"
+        )
+    click.echo()
+
+    click.echo(
+        "Note: Only editors with 'Project Configuration File Support' will generate files."
+    )
+    click.echo(
+        "      Other editors require manual configuration through their respective interfaces."
+    )
 
 
 if __name__ == "__main__":

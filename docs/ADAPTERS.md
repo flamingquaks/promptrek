@@ -42,43 +42,61 @@ When working on this project:
 ```
 
 ### ✅ Continue
-**Generated Files**: `.continue/config.json`  
-**Features**: Variable substitution, Conditional instructions
+**Generated Files**: `config.yaml`, `.continue/rules/*.md`  
+**Features**: Variable substitution, Conditional instructions, Technology-specific rules
 
-Continue adapter generates JSON configuration files that integrate with Continue's VS Code extension for AI-powered code completion and chat.
+Continue adapter generates modern YAML configuration with organized rule files for enhanced AI-powered code completion and chat.
 
-**Example Output**:
-```json
-{
-  "models": [],
-  "systemMessage": "My Project\n\nA modern web application\n\nGeneral Instructions:\n- Write clean code\n- Follow best practices\n",
-  "completionOptions": {},
-  "allowAnonymousTelemetry": false
-}
+**Main Configuration (config.yaml)**:
+```yaml
+name: My Project
+version: 0.0.1
+schema: v1
+models: []
+systemMessage: "My Project\n\nA modern web application"
+completionOptions: {}
+allowAnonymousTelemetry: false
+rules:
+  - "Write clean, maintainable code"
+  - "Follow TypeScript best practices"
+context:
+  - provider: file
+  - provider: code
+  - provider: docs
+    query: "documentation for typescript, react"
 ```
 
+**Rule Files (.continue/rules/)**:
+- `general.md` - General coding guidelines
+- `code-style.md` - Code style rules
+- `testing.md` - Testing guidelines  
+- `{technology}-rules.md` - Technology-specific rules (typescript-rules.md, react-rules.md)
+
 ### ✅ Cline (Terminal-based AI)
-**Generated Files**: `.cline/config.json`, `cline-context.md`  
+**Generated Files**: `.clinerules`  
 **Features**: Variable substitution, Conditional instructions
 
-Cline adapter generates both configuration and context files for terminal-based AI assistance, including safety settings and project context.
+Cline adapter generates markdown-based rules file for terminal-based AI assistance with project context and coding guidelines.
 
-**Configuration Example**:
-```json
-{
-  "name": "My Project",
-  "description": "Project description",
-  "contextFile": "cline-context.md",
-  "settings": {
-    "autoSuggest": true,
-    "verboseLogging": false,
-    "safeMode": true
-  },
-  "project": {
-    "type": "web_application",
-    "technologies": ["typescript", "react"]
-  }
-}
+**Example Output (.clinerules)**:
+```markdown
+# My Project
+
+## Project Overview
+A modern web application built with React and TypeScript.
+
+## Project Context
+- **Project Type:** web_application
+- **Technologies:** typescript, react, vite
+
+## Coding Guidelines
+- Write clean, readable code
+- Follow existing patterns
+- Use TypeScript for all new files
+
+## Code Style
+- Use meaningful variable names
+- Add appropriate comments
 ```
 
 ### ✅ Codeium
@@ -115,16 +133,63 @@ Codeium adapter generates structured JSON context files and RC configuration fil
 ```
 
 ### ✅ GitHub Copilot
-**Generated Files**: `.github/copilot-instructions.md`  
-**Features**: Variable substitution, Conditional instructions
+**Generated Files**: `.github/copilot-instructions.md`, `.github/instructions/*.instructions.md`, `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`  
+**Features**: Variable substitution, Conditional instructions, Path-specific instructions, Agent-specific configurations
 
-Generates GitHub Copilot instruction files that provide context and guidelines for AI-assisted development.
+GitHub Copilot adapter generates sophisticated instruction systems with repository-wide and path-specific configurations.
+
+**Repository Instructions (.github/copilot-instructions.md)**:
+```markdown
+# My Project
+
+A modern web application built with React and TypeScript.
+
+## Project Information
+- Type: web_application
+- Technologies: typescript, react, vite
+
+## General Instructions
+- Write clean, readable code
+- Follow existing patterns
+```
+
+**Path-Specific Instructions (.github/instructions/typescript.instructions.md)**:
+```yaml
+---
+applyTo: "**/*.{ts,tsx}"
+---
+
+# TypeScript Guidelines
+
+- Use strict TypeScript configuration
+- Prefer interfaces over types for object shapes
+- Use proper typing for all function parameters
+```
 
 ### ✅ Cursor
-**Generated Files**: `.cursorrules`  
-**Features**: Variable substitution, Conditional instructions
+**Generated Files**: `.cursor/rules/*.mdc`, `AGENTS.md`, `.cursorignore`, `.cursorindexingignore`  
+**Features**: Variable substitution, Conditional instructions, Technology-specific rules, Advanced file targeting, Ignore systems
 
-Generates Cursor rules files that configure the Cursor AI editor with project-specific instructions and guidelines.
+Cursor adapter generates modern rules system with YAML frontmatter, technology-specific guidelines, and indexing control.
+
+**Rule Files (.cursor/rules/)**:
+```yaml
+---
+description: Apply coding standards to all source files
+globs: "**/*.{ts,tsx,js,jsx,py,java,go,rs,cpp,c,h}"
+alwaysApply: false
+---
+
+# Coding Standards
+
+- Use meaningful variable names
+- Add appropriate comments
+- Follow project conventions
+```
+
+**Ignore Files**:
+- `.cursorignore` - Files to exclude from analysis
+- `.cursorindexingignore` - Files to exclude from indexing
 
 ## Using Adapters
 
@@ -284,14 +349,35 @@ project/
 ├── .claude/
 │   └── context.md
 ├── .continue/
-│   └── config.json
-├── .codeium/
-│   ├── context.json
-│   └── .codeiumrc
+│   ├── rules/
+│   │   ├── general.md
+│   │   ├── code-style.md
+│   │   ├── testing.md
+│   │   └── typescript-rules.md
+├── config.yaml
+├── .cursor/
+│   └── rules/
+│       ├── coding-standards.mdc
+│       ├── testing-guidelines.mdc
+│       └── typescript-guidelines.mdc
+├── .cursorignore
+├── .cursorindexingignore
 ├── .github/
-│   └── copilot-instructions.md
-├── .cursorrules
-└── cline-context.md
+│   ├── copilot-instructions.md
+│   └── instructions/
+│       ├── typescript.instructions.md
+│       └── testing.instructions.md
+├── .kiro/
+│   ├── steering/
+│   │   ├── product.md
+│   │   ├── tech.md
+│   │   └── structure.md
+│   └── specs/
+│       ├── requirements.md
+│       └── design.md
+├── AGENTS.md
+├── CLAUDE.md
+└── .clinerules
 ```
 
 ### Version Control

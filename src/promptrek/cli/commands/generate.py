@@ -10,6 +10,7 @@ from typing import Optional
 import click
 
 from ...adapters import registry
+from ...adapters.registry import AdapterCapability
 from ...core.exceptions import AdapterNotFoundError, CLIError, UPFParsingError
 from ...core.parser import UPFParser
 from ...core.validator import UPFValidator
@@ -54,12 +55,56 @@ def generate_command(
 
     # Determine target editors
     if all_editors:
-        target_editors = prompt.targets
+        # Get all adapters but separate by capability
+        project_file_adapters = registry.get_project_file_adapters()
+        global_config_adapters = registry.get_global_config_adapters()
+        ide_plugin_adapters = registry.get_adapters_by_capability(
+            AdapterCapability.IDE_PLUGIN_ONLY
+        )
+
+        target_editors = project_file_adapters
+
+        # Show information about non-project-file tools
+        if global_config_adapters or ide_plugin_adapters:
+            click.echo("ℹ️  Note: Some tools use global configuration only:")
+            for adapter_name in global_config_adapters:
+                click.echo(f"  - {adapter_name}: Configure through global settings")
+            for adapter_name in ide_plugin_adapters:
+                click.echo(f"  - {adapter_name}: Configure through IDE interface")
+            click.echo()
     elif editor:
-        if editor not in prompt.targets:
+        # Check if the adapter exists and what capabilities it has
+        available_adapters = registry.list_adapters()
+        if editor not in available_adapters:
             raise CLIError(
-                f"Editor '{editor}' not in targets: {', '.join(prompt.targets)}"
+                f"Editor '{editor}' not available. Available editors: {', '.join(available_adapters)}"
             )
+
+        # Check if this adapter supports project files
+        if not registry.has_capability(
+            editor, AdapterCapability.GENERATES_PROJECT_FILES
+        ):
+            # Provide helpful information instead of generating files
+            adapter_info = registry.get_adapter_info(editor)
+            capabilities = adapter_info.get("capabilities", [])
+
+            if AdapterCapability.GLOBAL_CONFIG_ONLY.value in capabilities:
+                click.echo(f"ℹ️  {editor} uses global configuration only.")
+                click.echo(
+                    f"   Configure {editor} through its global settings or admin panel."
+                )
+            elif AdapterCapability.IDE_PLUGIN_ONLY.value in capabilities:
+                click.echo(f"ℹ️  {editor} is configured through IDE interface only.")
+                click.echo(
+                    f"   Configure {editor} through your IDE's settings or preferences."
+                )
+            else:
+                click.echo(
+                    f"ℹ️  {editor} does not support project-level configuration files."
+                )
+
+            return  # Exit early without generating files
+
         target_editors = [editor]
     else:
         raise CLIError("Must specify either --editor or --all")
@@ -74,7 +119,10 @@ def generate_command(
     if dry_run:
         click.echo("🔍 Dry run mode - showing what would be generated:")
 
-    # Generate for each target editor
+    if target_editors:
+        click.echo("Generating project configuration files for:")
+
+    # Generate for each target editor that supports project files
     for target_editor in target_editors:
         try:
             _generate_for_editor(

@@ -34,6 +34,30 @@ class TestPromptMetadata:
                 updated="2024-01-01",
             )
 
+    def test_optional_dates(self):
+        """Test metadata can be created without dates."""
+        metadata = PromptMetadata(
+            title="Test Title",
+            description="Test description",
+            version="1.0.0",
+            author="Test Author",
+        )
+        assert metadata.created is None
+        assert metadata.updated is None
+        assert metadata.title == "Test Title"
+
+    def test_partial_dates(self):
+        """Test metadata can have only one date field."""
+        metadata = PromptMetadata(
+            title="Test Title",
+            description="Test description",
+            version="1.0.0",
+            author="Test Author",
+            created="2024-01-01",
+        )
+        assert metadata.created == "2024-01-01"
+        assert metadata.updated is None
+
 
 class TestUniversalPrompt:
     """Test UniversalPrompt model."""
@@ -80,6 +104,23 @@ class TestUniversalPrompt:
         assert prompt.context is None
         assert prompt.instructions is None
         assert prompt.examples is None
+
+    def test_metadata_without_dates(self):
+        """Test UniversalPrompt works with metadata that has no dates."""
+        minimal_data = {
+            "schema_version": "1.0.0",
+            "metadata": {
+                "title": "Test Without Dates",
+                "description": "Test description",
+                "version": "1.0.0",
+                "author": "Test Author",
+            },
+            "targets": ["copilot"],
+        }
+        prompt = UniversalPrompt(**minimal_data)
+        assert prompt.metadata.created is None
+        assert prompt.metadata.updated is None
+        assert prompt.metadata.title == "Test Without Dates"
 
 
 class TestInstructions:

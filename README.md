@@ -75,19 +75,17 @@ All planning documents are available in the [`docs/`](./docs/) directory:
 
 ## 🎨 Supported Editors
 
-### ✅ Implemented
-- **GitHub Copilot** - `.github/copilot-instructions.md` - Full project context, instructions, examples
-- **Cursor** - `.cursorrules` - Categorized instructions and guidelines  
-- **Continue** - `.continue/config.json` - System messages and configuration
-
-### ⏳ Planned
-- **Claude Code** - Context-based prompts
-- **Kiro** - AI-powered code assistance
-- **Cline** - Terminal-based AI coding
-- **Codeium** - Context-based prompts
-- **Tabnine** - Team-specific configurations
-- **Amazon Q** - Comment-based prompts
-- **JetBrains AI** - IDE-integrated prompts
+### ✅ All Implemented
+- **GitHub Copilot** - `.github/copilot-instructions.md`, `.github/instructions/*.instructions.md`, `AGENTS.md` - Path-specific instructions with YAML frontmatter
+- **Cursor** - `.cursor/rules/*.mdc`, `AGENTS.md` - Modern rules system with technology-specific guidelines
+- **Continue** - `config.yaml`, `.continue/rules/*.md` - Modern YAML configuration with advanced rules directory
+- **Kiro** - `.kiro/steering/*.md`, `.kiro/specs/*.md` - Comprehensive steering and specs system with YAML frontmatter
+- **Cline** - `.clinerules` - Simple rules-based configuration
+- **Claude Code** - `.claude/context.md` - Context-based prompts with detailed project information
+- **Codeium** - `.codeium/context.json`, `.codeiumrc` - Context-based prompts with team patterns
+- **Tabnine** - `.tabnine/config.json`, `.tabnine/team.yaml` - Team-specific configurations
+- **Amazon Q** - `.amazonq/context.md`, `.amazonq/comments.template` - Comment-based prompts
+- **JetBrains AI** - `.idea/ai-assistant.xml`, `.jetbrains/config.json` - IDE-integrated prompts
 
 ## 🗂️ Example Configurations
 
@@ -250,12 +248,13 @@ imports:
 #### 🎨 Multiple Editor Support
 Generate optimized configurations for all major AI coding assistants:
 
+- **GitHub Copilot** → `.github/copilot-instructions.md` + path-specific instructions
+- **Cursor** → `.cursor/rules/*.mdc` + `AGENTS.md` with technology-specific rules
+- **Continue** → `config.yaml` + `.continue/rules/*.md` with advanced rule system
+- **Kiro** → `.kiro/steering/*.md` + `.kiro/specs/*.md` with comprehensive guidance
+- **Cline** → `.clinerules` with project-specific rules
 - **Claude Code** → `.claude/context.md`
-- **Continue** → `.continue/config.json` 
-- **Cline** → `.cline/config.json` + `cline-context.md`
 - **Codeium** → `.codeium/context.json` + `.codeiumrc`
-- **GitHub Copilot** → `.github/copilot-instructions.md`
-- **Cursor** → `.cursorrules`
 
 ## 📄 License
 

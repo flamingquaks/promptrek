@@ -45,6 +45,21 @@ def sample_upf_file(tmp_path, sample_upf_data):
 
 
 @pytest.fixture
+def minimal_upf_data():
+    """Minimal UPF data without optional fields like dates."""
+    return {
+        "schema_version": "1.0.0",
+        "metadata": {
+            "title": "Minimal Test Project",
+            "description": "Minimal AI assistant for testing",
+            "version": "1.0.0",
+            "author": "Test Author <test@example.com>",
+        },
+        "targets": ["copilot", "cursor"],
+    }
+
+
+@pytest.fixture
 def invalid_upf_data():
     """Invalid UPF data for testing."""
     return {

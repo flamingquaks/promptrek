@@ -2,7 +2,6 @@
 Cline (terminal-based AI assistant) adapter implementation.
 """
 
-import json
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -16,8 +15,8 @@ from .base import EditorAdapter
 class ClineAdapter(EditorAdapter):
     """Adapter for Cline terminal-based AI assistant."""
 
-    _description = "Cline (terminal-based)"
-    _file_patterns = [".cline/config.json", "cline-context.md"]
+    _description = "Cline (.cline-rules/default-rules.md)"
+    _file_patterns = [".cline-rules/default-rules.md"]
 
     def __init__(self):
         super().__init__(
@@ -34,50 +33,38 @@ class ClineAdapter(EditorAdapter):
         verbose: bool = False,
         variables: Optional[Dict[str, Any]] = None,
     ) -> List[Path]:
-        """Generate Cline configuration and context files."""
+        """Generate Cline rules file."""
 
         # Apply variable substitution if supported
         processed_prompt = self.substitute_variables(prompt, variables)
 
-        # Create configuration content
-        config_content = self._build_config(processed_prompt)
+        # Process conditionals if supported
+        conditional_content = self.process_conditionals(processed_prompt, variables)
 
-        # Create context content
-        context_content = self._build_context(processed_prompt)
+        # Create content
+        content = self._build_content(processed_prompt, conditional_content)
 
-        # Determine output paths
-        cline_dir = output_dir / ".cline"
-        config_file = cline_dir / "config.json"
-        context_file = output_dir / "cline-context.md"
-
-        created_files = []
+        # Determine output path - Cline uses .cline-rules/default-rules.md
+        cline_rules_dir = output_dir / ".cline-rules"
+        output_file = cline_rules_dir / "default-rules.md"
 
         if dry_run:
-            click.echo(f"  📁 Would create: {config_file}")
-            click.echo(f"  📁 Would create: {context_file}")
+            click.echo(f"  📁 Would create directory: {cline_rules_dir}")
+            click.echo(f"  📁 Would create: {output_file}")
             if verbose:
-                click.echo("  📄 Config preview:")
-                preview = (
-                    config_content[:200] + "..."
-                    if len(config_content) > 200
-                    else config_content
-                )
+                click.echo("  📄 Content preview:")
+                preview = content[:200] + "..." if len(content) > 200 else content
                 click.echo(f"    {preview}")
         else:
-            # Create directory and config file
-            cline_dir.mkdir(exist_ok=True)
-            with open(config_file, "w", encoding="utf-8") as f:
-                f.write(config_content)
-            created_files.append(config_file)
-            click.echo(f"✅ Generated: {config_file}")
+            # Create .cline-rules directory if it doesn't exist
+            cline_rules_dir.mkdir(parents=True, exist_ok=True)
 
-            # Create context file
-            with open(context_file, "w", encoding="utf-8") as f:
-                f.write(context_content)
-            created_files.append(context_file)
-            click.echo(f"✅ Generated: {context_file}")
+            # Create default-rules.md file
+            with open(output_file, "w", encoding="utf-8") as f:
+                f.write(content)
+            click.echo(f"✅ Generated: {output_file}")
 
-        return created_files or [config_file, context_file]
+        return [output_file]
 
     def validate(self, prompt: UniversalPrompt) -> List[ValidationError]:
         """Validate prompt for Cline."""
@@ -88,10 +75,7 @@ class ClineAdapter(EditorAdapter):
             errors.append(
                 ValidationError(
                     field="instructions.general",
-                    message=(
-                        "Cline needs clear general instructions for terminal "
-                        "operations"
-                    ),
+                    message=("Cline needs clear general instructions for coding tasks"),
                 )
             )
 
@@ -105,53 +89,16 @@ class ClineAdapter(EditorAdapter):
         """Cline supports conditional configuration."""
         return True
 
-    def _build_config(self, prompt: UniversalPrompt) -> str:
-        """Build Cline configuration content."""
-        config = {
-            "name": prompt.metadata.title,
-            "description": prompt.metadata.description,
-            "version": prompt.metadata.version,
-            "contextFile": "cline-context.md",
-            "settings": {
-                "autoSuggest": True,
-                "verboseLogging": False,
-                "safeMode": True,
-                "maxHistoryLength": 100,
-            },
-        }
-
-        # Add project-specific settings
-        if prompt.context:
-            config["project"] = {}
-            if prompt.context.project_type:
-                config["project"]["type"] = prompt.context.project_type
-            if prompt.context.technologies:
-                config["project"]["technologies"] = prompt.context.technologies
-
-        # Add custom commands if available from editor_specific config
-        if prompt.editor_specific and "cline" in prompt.editor_specific:
-            cline_config = prompt.editor_specific["cline"]
-            if (
-                hasattr(cline_config, "custom_commands")
-                and cline_config.custom_commands
-            ):
-                config["customCommands"] = [
-                    {
-                        "name": cmd.name,
-                        "description": cmd.description,
-                        "prompt": cmd.prompt,
-                    }
-                    for cmd in cline_config.custom_commands
-                ]
-
-        return json.dumps(config, indent=2)
-
-    def _build_context(self, prompt: UniversalPrompt) -> str:
-        """Build Cline context markdown content."""
+    def _build_content(
+        self,
+        prompt: UniversalPrompt,
+        conditional_content: Optional[Dict[str, Any]] = None,
+    ) -> str:
+        """Build Cline rules content in markdown format."""
         lines = []
 
         # Header
-        lines.append(f"# {prompt.metadata.title} - Cline Context")
+        lines.append(f"# {prompt.metadata.title}")
         lines.append("")
         lines.append("## Project Overview")
         lines.append(prompt.metadata.description)
@@ -159,56 +106,66 @@ class ClineAdapter(EditorAdapter):
 
         # Project Information
         if prompt.context:
-            lines.append("## Project Information")
+            lines.append("## Project Context")
             if prompt.context.project_type:
-                lines.append(f"**Type:** {prompt.context.project_type}")
+                lines.append(f"- **Project Type:** {prompt.context.project_type}")
             if prompt.context.technologies:
                 lines.append(
-                    f"**Technologies:** {', '.join(prompt.context.technologies)}"
+                    f"- **Technologies:** {', '.join(prompt.context.technologies)}"
                 )
             if prompt.context.description:
-                lines.append("")
-                lines.append("**Details:**")
-                lines.append(prompt.context.description)
+                lines.append(f"- **Details:** {prompt.context.description}")
             lines.append("")
 
-        # Terminal and Development Instructions
-        if prompt.instructions:
-            lines.append("## Development Instructions")
+        # Collect all instructions (original + conditional)
+        all_general_instructions = []
+        if prompt.instructions and prompt.instructions.general:
+            all_general_instructions.extend(prompt.instructions.general)
 
-            if prompt.instructions.general:
-                lines.append("### General Guidelines")
-                for instruction in prompt.instructions.general:
-                    lines.append(f"- {instruction}")
-                lines.append("")
-
-            if prompt.instructions.code_style:
-                lines.append("### Code Standards")
-                for guideline in prompt.instructions.code_style:
-                    lines.append(f"- {guideline}")
-                lines.append("")
-
-        # Terminal-specific guidance
-        lines.append("## Terminal Operations")
-        lines.append("")
-        lines.append("When performing terminal operations:")
-        lines.append("- Always confirm destructive operations before executing")
-        lines.append("- Use safe commands and check file permissions")
-        lines.append("- Provide clear explanations for complex command sequences")
-        lines.append("- Respect the project structure and conventions")
-        if prompt.context and prompt.context.technologies:
-            lines.append(
-                f"- Use appropriate tools for "
-                f"{', '.join(prompt.context.technologies)} development"
+        # Add conditional general instructions
+        if (
+            conditional_content
+            and "instructions" in conditional_content
+            and "general" in conditional_content["instructions"]
+        ):
+            all_general_instructions.extend(
+                conditional_content["instructions"]["general"]
             )
-        lines.append("")
+
+        # General instructions
+        if all_general_instructions:
+            lines.append("## Coding Guidelines")
+            for instruction in all_general_instructions:
+                lines.append(f"- {instruction}")
+            lines.append("")
+
+        # Code style instructions
+        if prompt.instructions and prompt.instructions.code_style:
+            lines.append("## Code Style")
+            for guideline in prompt.instructions.code_style:
+                lines.append(f"- {guideline}")
+            lines.append("")
+
+        # Testing instructions if available
+        if (
+            prompt.instructions
+            and hasattr(prompt.instructions, "testing")
+            and prompt.instructions.testing
+        ):
+            lines.append("## Testing Standards")
+            for test_rule in prompt.instructions.testing:
+                lines.append(f"- {test_rule}")
+            lines.append("")
 
         # Examples if available
         if prompt.examples:
             lines.append("## Code Examples")
+            lines.append("")
             for name, example in prompt.examples.items():
                 lines.append(f"### {name.replace('_', ' ').title()}")
+                lines.append("```")
                 lines.append(example)
+                lines.append("```")
                 lines.append("")
 
         return "\n".join(lines)

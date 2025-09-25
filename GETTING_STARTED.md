@@ -13,8 +13,8 @@ This guide explains how to set up and use the PrompTrek CLI tool.
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/flamingquaks/agent-prompt-mapper.git
-cd agent-prompt-mapper
+git clone https://github.com/flamingquaks/promptrek.git
+cd promptrek
 ```
 
 2. Install in development mode:
@@ -85,11 +85,28 @@ promptrek list-editors
 
 ## Generated Files
 
-The tool generates the following files for each editor:
+The tool generates sophisticated configuration systems for each editor:
 
-- **GitHub Copilot**: `.github/copilot-instructions.md`
-- **Cursor**: `.cursorrules`
-- **Continue**: `.continue/config.json`
+- **GitHub Copilot**: 
+  - `.github/copilot-instructions.md` (repository-wide instructions)
+  - `.github/instructions/*.instructions.md` (path-specific instructions with YAML frontmatter)
+  - `AGENTS.md`, `CLAUDE.md`, `GEMINI.md` (agent-specific instructions)
+  
+- **Cursor**: 
+  - `.cursor/rules/*.mdc` (modern rules with YAML frontmatter and glob patterns)
+  - `AGENTS.md` (simple agent instructions)
+  - `.cursorignore` (files to exclude from analysis)
+  - `.cursorindexingignore` (indexing control)
+  
+- **Continue**: 
+  - `config.yaml` (main configuration in modern YAML format)
+  - `.continue/rules/*.md` (organized rule files by category and technology)
+  
+- **Kiro**: 
+  - `.kiro/steering/*.md` (steering files: product.md, tech.md, structure.md)
+  - `.kiro/specs/*.md` (spec files: requirements.md, design.md, tasks.md)
+  
+- **Cline**: `.clinerules` (markdown-based rules)
 
 ## Example Workflow
 
@@ -108,8 +125,8 @@ promptrek generate my-react-app.promptrek.yaml --all
 
 # 5. Your AI editor prompts are ready!
 ls .github/copilot-instructions.md
-ls .cursorrules
-ls .continue/config.json
+ls .cursor/rules/
+ls config.yaml .continue/rules/
 ```
 
 ## Universal Prompt Format (UPF)
@@ -203,18 +220,24 @@ flake8 src/ tests/
 ✅ **Core Features**:
 - Universal Prompt Format (UPF) parsing and validation
 - CLI interface with init, validate, generate commands
-- Basic template system
-- GitHub Copilot support (`.github/copilot-instructions.md`)
-- Cursor support (`.cursorrules`)
-- Continue support (`.continue/config.json`)
+- Advanced template system with technology detection
+- **GitHub Copilot**: Path-specific instructions with YAML frontmatter + agent files
+- **Cursor**: Modern `.cursor/rules/*.mdc` system with technology-specific rules + ignore files
+- **Continue**: Modern `config.yaml` + advanced `.continue/rules/` system
+- **Kiro**: Comprehensive steering and specs system
+- **Cline**: Modern `.clinerules` configuration
+- Variable substitution and conditional instructions
+- Technology-specific rule generation
+- Advanced glob pattern matching
+- Ignore file systems for optimal AI editor performance
 
-⏳ **Planned Features**:
-- Advanced template engine with Jinja2
-- More editor adapters (Claude, Kiro, Cline, etc.)
-- Variable substitution
-- Import/include system
-- Configuration management
-- Plugin architecture
+✅ **Advanced Features**:
+- YAML frontmatter support for precise file targeting
+- Dynamic rule generation based on project technologies (TypeScript, React, Python, etc.)
+- Comprehensive ignore patterns (.cursorignore, .cursorindexingignore)
+- Agent-specific instruction files
+- Path-specific configurations with glob patterns
+- Technology detection and best practices integration
 
 ## Contributing
 

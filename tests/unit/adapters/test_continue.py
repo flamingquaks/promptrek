@@ -26,8 +26,8 @@ class TestContinueAdapter(TestAdapterBase):
     def test_init(self, adapter):
         """Test adapter initialization."""
         assert adapter.name == "continue"
-        assert adapter.description == "Continue (.continue/config.json)"
-        assert adapter.file_patterns == [".continue/config.json"]
+        assert adapter.description == "Continue (config.yaml, .continue/rules/)"
+        assert adapter.file_patterns == ["config.yaml", ".continue/rules/*.md"]
 
     def test_supports_variables(self, adapter):
         """Test variable support."""
@@ -64,17 +64,19 @@ class TestContinueAdapter(TestAdapterBase):
         """Test content generation."""
         content = adapter._build_content(sample_prompt)
 
-        # Parse as JSON to verify structure
-        config = json.loads(content)
+        # Parse as YAML to verify structure
+        import yaml
 
-        assert "models" in config
+        config = yaml.safe_load(content)
+
+        assert "name" in config
         assert "systemMessage" in config
         assert "completionOptions" in config
         assert "allowAnonymousTelemetry" in config
 
+        assert sample_prompt.metadata.title == config["name"]
         assert sample_prompt.metadata.title in config["systemMessage"]
         assert sample_prompt.metadata.description in config["systemMessage"]
-        assert "General Instructions:" in config["systemMessage"]
 
     @patch("builtins.open", new_callable=mock_open)
     @patch("pathlib.Path.mkdir")
@@ -83,10 +85,14 @@ class TestContinueAdapter(TestAdapterBase):
         output_dir = Path("/tmp/test")
         files = adapter.generate(sample_prompt, output_dir, dry_run=False)
 
-        assert len(files) == 1
-        assert files[0] == output_dir / ".continue" / "config.json"
-        mock_mkdir.assert_called_once()
-        mock_file.assert_called_once()
+        # Should generate config.yaml + rules files
+        assert len(files) >= 1
+        config_file = output_dir / "config.yaml"
+        assert config_file in files
+
+        # Check that mkdir and file operations were called
+        assert mock_mkdir.called
+        assert mock_file.called
 
     def test_generate_dry_run(self, adapter, sample_prompt, capsys):
         """Test dry run generation."""
@@ -95,4 +101,4 @@ class TestContinueAdapter(TestAdapterBase):
 
         captured = capsys.readouterr()
         assert "Would create" in captured.out
-        assert len(files) == 1
+        assert len(files) >= 1  # Should generate multiple files

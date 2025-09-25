@@ -18,16 +18,22 @@ class PromptMetadata(BaseModel):
     description: str = Field(..., description="Brief description of purpose")
     version: str = Field(..., description="Semantic version of this prompt")
     author: str = Field(..., description="Author name or email")
-    created: str = Field(..., description="ISO 8601 date (YYYY-MM-DD)")
-    updated: str = Field(..., description="ISO 8601 date (YYYY-MM-DD)")
+    created: Optional[str] = Field(
+        default=None, description="ISO 8601 date (YYYY-MM-DD)"
+    )
+    updated: Optional[str] = Field(
+        default=None, description="ISO 8601 date (YYYY-MM-DD)"
+    )
     tags: Optional[List[str]] = Field(
         default=None, description="Optional tags for categorization"
     )
 
     @field_validator("created", "updated")
     @classmethod
-    def validate_dates(cls, v: str) -> str:
-        """Validate date format."""
+    def validate_dates(cls, v: Optional[str]) -> Optional[str]:
+        """Validate date format when provided."""
+        if v is None:
+            return v
         try:
             datetime.fromisoformat(v)
         except ValueError:
