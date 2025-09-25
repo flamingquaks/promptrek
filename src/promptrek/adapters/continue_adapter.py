@@ -301,10 +301,11 @@ class ContinueAdapter(EditorAdapter):
         # Add project-specific context if available
         if prompt.context:
             if prompt.context.technologies:
+                tech_list = ", ".join(prompt.context.technologies)
                 config["context"].append(
                     {
                         "provider": "docs",
-                        "query": f"documentation for {', '.join(prompt.context.technologies)}",
+                        "query": f"documentation for {tech_list}",
                     }
                 )
 

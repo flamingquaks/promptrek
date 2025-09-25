@@ -86,7 +86,10 @@ class AmazonQAdapter(EditorAdapter):
             errors.append(
                 ValidationError(
                     field="examples",
-                    message="Amazon Q benefits from code examples for better comment-based assistance",
+                    message=(
+                        "Amazon Q benefits from code examples for better "
+                        "comment-based assistance"
+                    ),
                     severity="warning",
                 )
             )
@@ -118,9 +121,8 @@ class AmazonQAdapter(EditorAdapter):
             if prompt.context.project_type:
                 lines.append(f"**Project Type:** {prompt.context.project_type}")
             if prompt.context.technologies:
-                lines.append(
-                    f"**Technologies:** {', '.join(prompt.context.technologies)}"
-                )
+                tech_list = ", ".join(prompt.context.technologies)
+                lines.append(f"**Technologies:** {tech_list}")
             if prompt.context.description:
                 lines.append("")
                 lines.append("**Description:**")
