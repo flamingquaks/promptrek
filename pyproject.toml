@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "Universal AI Editor prompt storage solution"
 readme = "README.md"
 requires-python = ">=3.8"
-license = {text = "MIT"}
+license = "MIT"
 authors = [
     {name = "PrompTrek Team"},
 ]
@@ -16,7 +16,6 @@ keywords = ["ai", "prompts", "copilot", "cursor", "continue", "cli"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.8",
@@ -24,7 +23,7 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
-    "Topic :: Software Development :: Tools",
+    "Topic :: Software Development",
     "Topic :: Utilities",
 ]
 
@@ -101,8 +100,9 @@ testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
+pythonpath = ["src"]
 addopts = [
-    "--cov=src/promptrek",
+    "--cov=promptrek",
     "--cov-report=html",
     "--cov-report=term-missing",
     "--cov-fail-under=80",
@@ -126,3 +126,20 @@ exclude_lines = [
     "if 0:",
     "if __name__ == .__main__.:",
 ]
+
+[dependency-groups]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "black>=22.0.0",
+    "flake8>=5.0.0",
+    "mypy>=1.0.0",
+    "isort>=5.0.0",
+]
+
+[tool.uv.workspace]
+# Mark this as the root of a uv workspace
+
+[tool.uv]
+# uv-specific configuration and shortcuts
+package = true

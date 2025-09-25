@@ -98,6 +98,20 @@ See the [`examples/`](./examples/) directory for sample configurations:
 
 ### Installation
 
+#### Option 1: Using uv (Recommended)
+
+```bash
+# Install uv if you haven't already
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Install from source with uv
+git clone https://github.com/flamingquaks/promptrek.git
+cd promptrek
+uv sync --group dev
+```
+
+#### Option 2: Traditional pip
+
 ```bash
 # Install from source (recommended for now)
 git clone https://github.com/flamingquaks/promptrek.git
@@ -109,13 +123,14 @@ pip install -e .
 
 ```bash
 # 1. Initialize a new project (choose from basic, react, api templates)
-promptrek init --template react --output my-project.promptrek.yaml
+uv run promptrek init --template react --output my-project.promptrek.yaml
+# or with traditional pip: promptrek init --template react --output my-project.promptrek.yaml
 
 # 2. Validate your configuration
-promptrek validate my-project.promptrek.yaml
+uv run promptrek validate my-project.promptrek.yaml
 
 # 3. Generate editor-specific prompts
-promptrek generate my-project.promptrek.yaml --all
+uv run promptrek generate my-project.promptrek.yaml --all
 
 # 4. Your AI editor prompts are ready!
 ls .github/copilot-instructions.md
@@ -178,6 +193,28 @@ PrompTrek maintains high quality standards with comprehensive testing:
 
 ### Running Tests Locally
 
+#### Using uv (Recommended)
+
+```bash
+# Install development dependencies
+uv sync --group dev
+
+# Run all tests
+make test-fast  # Fast tests without coverage
+make test       # All tests with coverage
+
+# Run specific test categories
+uv run python -m pytest tests/unit/        # Unit tests only
+uv run python -m pytest tests/integration/ # Integration tests only
+
+# Code quality checks
+make format     # Format code
+make lint       # Run linters
+make typecheck  # Type checking
+```
+
+#### Using pip (Traditional)
+
 ```bash
 # Install development dependencies
 pip install -e ".[dev]"
@@ -198,6 +235,8 @@ isort src/ tests/         # Sort imports
 flake8 src/ tests/        # Lint code
 mypy src/                # Type checking
 ```
+
+For detailed uv workflows, see [UV Workflows Guide](./docs/UV_WORKFLOWS.md).
 
 For contribution guidelines, see [CONTRIBUTING.md](./.github/CONTRIBUTING.md).
 

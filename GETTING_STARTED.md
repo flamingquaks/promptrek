@@ -7,9 +7,32 @@ This guide explains how to set up and use the PrompTrek CLI tool.
 ### Prerequisites
 
 - Python 3.8 or higher
-- pip (Python package manager)
+- pip (Python package manager) OR uv (recommended)
 
-### Install from Source
+### Install from Source with uv (Recommended)
+
+1. Install uv if you haven't already:
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+2. Clone the repository:
+```bash
+git clone https://github.com/flamingquaks/promptrek.git
+cd promptrek
+```
+
+3. Set up development environment:
+```bash
+uv sync --group dev
+```
+
+4. Verify installation:
+```bash
+uv run promptrek --help
+```
+
+### Install from Source with pip (Traditional)
 
 1. Clone the repository:
 ```bash
@@ -170,6 +193,25 @@ examples:
 
 ### Running Tests
 
+#### Using uv (Recommended)
+
+```bash
+# Install development dependencies
+uv sync --group dev
+
+# Run unit tests
+uv run python -m pytest tests/unit/
+
+# Run integration tests  
+uv run python -m pytest tests/integration/
+
+# Run all tests with coverage
+make test
+# or manually: uv run python -m pytest --cov=src/promptrek
+```
+
+#### Using pip (Traditional)
+
 ```bash
 # Install development dependencies
 pip install -e ".[dev]"
@@ -186,6 +228,27 @@ pytest --cov=src/promptrek
 
 ### Code Quality
 
+#### Using uv (Recommended)
+
+```bash
+# Format code
+make format
+# or manually: uv run black src/ tests/
+
+# Sort imports
+uv run isort src/ tests/
+
+# Type checking
+make typecheck
+# or manually: uv run mypy src/
+
+# Linting
+make lint
+# or manually: uv run flake8 src/ tests/
+```
+
+#### Using pip (Traditional)
+
 ```bash
 # Format code
 black src/ tests/
@@ -199,6 +262,10 @@ mypy src/
 # Linting
 flake8 src/ tests/
 ```
+
+### Development Workflows
+
+For comprehensive development workflows using uv, see [UV Workflows Guide](./docs/UV_WORKFLOWS.md).
 
 ## Troubleshooting
 
