@@ -219,7 +219,8 @@ def _generate_for_editor_multiple(
             if (
                 hasattr(adapter, "generate_multiple")
                 and hasattr(adapter, "capabilities")
-                and AdapterCapability.MULTIPLE_FILE_GENERATION in getattr(adapter, "capabilities", [])
+                and AdapterCapability.MULTIPLE_FILE_GENERATION
+                in getattr(adapter, "capabilities", [])
             ):
                 # Adapter supports generating separate files for each prompt
                 adapter.generate_multiple(

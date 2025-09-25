@@ -91,7 +91,9 @@ class ClaudeAdapter(EditorAdapter):
             # Remove .promptrek.yaml and add .md extension
             base_name = source_file.stem
             if base_name.endswith(".promptrek"):
-                base_name = base_name.removesuffix(".promptrek")  # Remove .promptrek suffix
+                base_name = base_name.removesuffix(
+                    ".promptrek"
+                )  # Remove .promptrek suffix
             output_file = claude_dir / f"{base_name}.md"
 
             if dry_run:
