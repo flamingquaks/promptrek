@@ -62,12 +62,13 @@ class TestKiroAdapter(TestAdapterBase):
         files = adapter.generate(sample_prompt, output_dir, dry_run=False)
 
         # Kiro adapter generates multiple steering and spec files
-        assert len(files) >= 6  # At least 6 files should be generated
+        expected_min_files = 6  # At least 6 files should be generated
+        assert len(files) >= expected_min_files
         assert any(".kiro/steering/" in str(f) for f in files)
         assert any(".kiro/specs/" in str(f) for f in files)
         # Multiple directories are created (steering, specs)
         assert mock_mkdir.call_count >= 1
-        assert mock_file.call_count >= 6
+        assert mock_file.call_count >= expected_min_files
 
     def test_generate_dry_run(self, adapter, sample_prompt, capsys):
         """Test dry run generation."""

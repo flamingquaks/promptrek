@@ -85,8 +85,8 @@ jobs:
 
   comprehensive-tests:
     runs-on: ubuntu-latest
-    # Only run comprehensive tests on changes to core files
-    if: contains(github.event.pull_request.changed_files, 'src/') || contains(github.event.pull_request.changed_files, 'tests/')
+    # Run comprehensive tests for all PRs to ensure quality
+    if: github.event_name == 'pull_request'
     steps:
     - uses: actions/checkout@v4
     
