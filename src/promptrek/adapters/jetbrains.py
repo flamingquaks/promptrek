@@ -140,10 +140,13 @@ class JetBrainsAdapter(EditorAdapter):
         if prompt.instructions and prompt.instructions.code_style:
             lines.append("    <codeStyle>")
             for guideline in prompt.instructions.code_style:
+                # Proper XML escaping: & must be escaped first to avoid double-escaping
                 escaped_guideline = (
-                    guideline.replace('"', "&quot;")
+                    guideline.replace("&", "&amp;")
                     .replace("<", "&lt;")
                     .replace(">", "&gt;")
+                    .replace('"', "&quot;")
+                    .replace("'", "&apos;")
                 )
                 lines.append(f'      <rule description="{escaped_guideline}" />')
             lines.append("    </codeStyle>")
@@ -246,7 +249,7 @@ class JetBrainsAdapter(EditorAdapter):
             for name, example in prompt.examples.items():
                 config["templates"][name] = {
                     "description": f"Template for {name.replace('_', ' ')}",
-                    "content": example[:500] + "..." if len(example) > 500 else example,
+                    "content": example,  # Include full content without truncation
                     "type": "code_snippet",
                 }
 
