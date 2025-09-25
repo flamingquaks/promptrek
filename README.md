@@ -141,6 +141,22 @@ This project is actively developing! We welcome:
 - Testing and feedback on the UPF format
 - Ideas for advanced features
 
+### Conventional Commits & Changelog
+
+PrompTrek uses [Conventional Commits](https://www.conventionalcommits.org/) for automated changelog generation:
+
+```bash
+# Commit format
+type(scope): description
+
+# Examples
+feat(adapters): add support for new editor
+fix(parser): handle edge case in YAML parsing
+docs(readme): update installation instructions
+```
+
+All commit messages are validated in CI. See [CHANGELOG_PROCESS.md](./docs/CHANGELOG_PROCESS.md) for detailed guidelines.
+
 See the [Implementation Roadmap](./docs/IMPLEMENTATION_ROADMAP.md) for planned features and current progress.
 
 ## 🧪 Testing and Quality Assurance

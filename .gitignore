@@ -71,6 +71,8 @@ logs/
 
 # Node.js (for any JS tooling)
 node_modules/
+package-lock.json
+yarn.lock
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

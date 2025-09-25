@@ -69,7 +69,23 @@ jobs:
       packages: write
     steps:
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
     
+    - name: Setup Node.js for changelog
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+
+    - name: Install conventional-changelog
+      run: |
+        npm install -g conventional-changelog-cli conventional-commits-parser
+
+    - name: Generate release notes
+      run: |
+        # Generate release notes from git history using conventional commits
+        conventional-changelog -p angular -s -r 1 > RELEASE_NOTES.md || echo "Release notes generated from conventional commits" > RELEASE_NOTES.md
+
     - name: Download build artifacts
       uses: actions/download-artifact@v3
       with:
@@ -80,7 +96,7 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         files: dist/*
-        generate_release_notes: true
+        body_path: RELEASE_NOTES.md
         draft: false
         prerelease: ${{ contains(github.ref, 'alpha') || contains(github.ref, 'beta') || contains(github.ref, 'rc') }}
       env:
