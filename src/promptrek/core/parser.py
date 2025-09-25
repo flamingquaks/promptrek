@@ -5,7 +5,7 @@ Handles loading and parsing .promptrek.yaml files into UniversalPrompt objects.
 """
 
 from pathlib import Path
-from typing import Any, Dict, Union
+from typing import Any, Dict, List, Union
 
 import yaml
 from pydantic import ValidationError
@@ -132,7 +132,7 @@ class UPFParser:
 
     def find_upf_files(
         self, directory: Union[str, Path], recursive: bool = False
-    ) -> list[Path]:
+    ) -> List[Path]:
         """
         Find all UPF files in a directory.
 

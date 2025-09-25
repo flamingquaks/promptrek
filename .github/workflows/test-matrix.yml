@@ -81,7 +81,7 @@ jobs:
     - name: Test with minimal dependencies
       run: |
         # Test that the package works with only required dependencies
-        uv add click PyYAML Jinja2 pydantic --no-group
+        uv add click PyYAML Jinja2 pydantic
         uv run python -c "import promptrek; print('Minimal dependencies work')"
     
     - name: Test large files
