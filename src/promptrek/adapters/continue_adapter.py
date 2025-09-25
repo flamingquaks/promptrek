@@ -52,7 +52,7 @@ class ContinueAdapter(EditorAdapter):
 
         # Generate advanced rules directory system
         rules_files = self._generate_rules_system(
-            processed_prompt, output_dir, dry_run, verbose
+            processed_prompt, conditional_content, output_dir, dry_run, verbose
         )
         created_files.extend(rules_files)
 
@@ -86,6 +86,7 @@ class ContinueAdapter(EditorAdapter):
     def _generate_rules_system(
         self,
         prompt: UniversalPrompt,
+        conditional_content: Optional[Dict[str, Any]],
         output_dir: Path,
         dry_run: bool,
         verbose: bool,
@@ -95,10 +96,22 @@ class ContinueAdapter(EditorAdapter):
         created_files = []
 
         # Generate general coding rules
+        # Collect all instructions (original + conditional)
+        all_instructions = []
         if prompt.instructions and prompt.instructions.general:
+            all_instructions.extend(prompt.instructions.general)
+        # Add conditional general instructions
+        if (
+            conditional_content
+            and "instructions" in conditional_content
+            and "general" in conditional_content["instructions"]
+        ):
+            all_instructions.extend(conditional_content["instructions"]["general"])
+
+        if all_instructions:
             general_file = rules_dir / "general.md"
             general_content = self._build_rules_content(
-                "General Coding Rules", prompt.instructions.general
+                "General Coding Rules", all_instructions
             )
 
             if dry_run:
