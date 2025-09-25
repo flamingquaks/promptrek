@@ -9,6 +9,7 @@ from unittest.mock import mock_open, patch
 import pytest
 
 from src.promptrek.adapters.tabnine import TabnineAdapter
+
 from .base_test import TestAdapterBase
 
 

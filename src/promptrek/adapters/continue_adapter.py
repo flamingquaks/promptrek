@@ -2,11 +2,11 @@
 Continue editor adapter implementation.
 """
 
-import yaml
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import click
+import yaml
 
 from ..core.exceptions import ValidationError
 from ..core.models import UniversalPrompt

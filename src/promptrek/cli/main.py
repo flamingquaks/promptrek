@@ -130,8 +130,8 @@ def generate(
 @cli.command()
 def list_editors() -> None:
     """List supported editors and their capabilities."""
-    from .commands.generate import registry
     from ..adapters.registry import AdapterCapability
+    from .commands.generate import registry
 
     # Get editors by capability
     project_file_adapters = registry.get_project_file_adapters()

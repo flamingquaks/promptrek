@@ -4,7 +4,7 @@ Adapter registry for managing and discovering editor adapters.
 
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Type, Set
+from typing import Dict, List, Set, Type
 
 from ..core.exceptions import AdapterNotFoundError
 from .base import EditorAdapter

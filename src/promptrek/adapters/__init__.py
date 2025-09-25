@@ -10,7 +10,7 @@ from .copilot import CopilotAdapter
 from .cursor import CursorAdapter
 from .jetbrains import JetBrainsAdapter
 from .kiro import KiroAdapter
-from .registry import AdapterRegistry, AdapterCapability, registry
+from .registry import AdapterCapability, AdapterRegistry, registry
 from .tabnine import TabnineAdapter
 
 # Register built-in adapters with their capabilities
