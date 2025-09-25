@@ -206,7 +206,10 @@ variables:
         assert ".claude/context.md" in result.output
         assert "config.yaml" in result.output or ".continue/rules/" in result.output
         # Verify at least some expected output for other tools
-        assert any(tool in result.output for tool in ["windsurf", "global configuration", "Note:", "Would create"])
+        assert any(
+            tool in result.output
+            for tool in ["windsurf", "global configuration", "Note:", "Would create"]
+        )
 
     def test_generate_with_variable_overrides(self, runner, sample_upf_file, temp_dir):
         """Test generate command with variable overrides."""
