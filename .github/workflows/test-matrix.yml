@@ -20,9 +20,9 @@ jobs:
           # Test on older Ubuntu for compatibility
           - os: ubuntu-20.04
             python-version: '3.8'
-          # Test development version of Python
+          # Test latest stable version of Python
           - os: ubuntu-latest
-            python-version: '3.13-dev'
+            python-version: '3.13'
         exclude:
           # Reduce matrix size by excluding some combinations
           - os: windows-latest
