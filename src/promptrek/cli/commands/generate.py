@@ -218,19 +218,13 @@ def _generate_for_editor_multiple(
             # Multiple files - check adapter capabilities
             if (
                 hasattr(adapter, "generate_multiple")
-                and hasattr(adapter, "capabilities")
-                and AdapterCapability.MULTIPLE_FILE_GENERATION
-                in getattr(adapter, "capabilities", [])
+                and registry.has_capability(editor, AdapterCapability.MULTIPLE_FILE_GENERATION)
             ):
                 # Adapter supports generating separate files for each prompt
                 adapter.generate_multiple(
                     prompt_files, output_dir, dry_run, verbose, variables
                 )
-                if verbose:
-                    source_files = [str(pf[1]) for pf in prompt_files]
-                    click.echo(
-                        f"✅ Generated separate {editor} files from: {', '.join(source_files)}"
-                    )
+                click.echo(f"Generated separate {editor} files")
             elif hasattr(adapter, "generate_merged"):
                 # Other adapters use merged files
                 adapter.generate_merged(

@@ -53,6 +53,7 @@ registry.register_class(
         AdapterCapability.GENERATES_PROJECT_FILES,
         AdapterCapability.SUPPORTS_VARIABLES,
         AdapterCapability.SUPPORTS_CONDITIONALS,
+        AdapterCapability.MULTIPLE_FILE_GENERATION,
     ],
 )
 
