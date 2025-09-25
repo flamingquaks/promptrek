@@ -161,7 +161,11 @@ variables:
         assert "Would create" in result.output
         # Use Path to handle cross-platform path separators
         expected_path = str(Path(".claude") / "context.md")
-        assert expected_path in result.output or ".claude" in result.output and "context.md" in result.output
+        assert (
+            expected_path in result.output
+            or ".claude" in result.output
+            and "context.md" in result.output
+        )
 
     def test_generate_single_editor_actual(self, runner, sample_upf_file, temp_dir):
         """Test generate command with single editor actual generation."""
