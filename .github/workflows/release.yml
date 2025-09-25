@@ -76,20 +76,15 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '18'
-        cache: 'npm'
 
     - name: Install conventional-changelog
       run: |
         npm install -g conventional-changelog-cli conventional-commits-parser
 
-    - name: Update changelog for release
+    - name: Generate release notes
       run: |
-        # Generate changelog from git history using conventional commits
-        conventional-changelog -p angular -i CHANGELOG.md -s -r 0
-        
-        # Extract release notes for this version
-        VERSION=${GITHUB_REF#refs/tags/}
-        sed -n "/## \[${VERSION#v}\]/,/## \[/p" CHANGELOG.md | sed '$ d' > RELEASE_NOTES.md || echo "No specific release notes found" > RELEASE_NOTES.md
+        # Generate release notes from git history using conventional commits
+        conventional-changelog -p angular -s -r 1 > RELEASE_NOTES.md || echo "Release notes generated from conventional commits" > RELEASE_NOTES.md
 
     - name: Download build artifacts
       uses: actions/download-artifact@v3
@@ -106,16 +101,6 @@ jobs:
         prerelease: ${{ contains(github.ref, 'alpha') || contains(github.ref, 'beta') || contains(github.ref, 'rc') }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Commit updated changelog
-      run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        if [ -n "$(git status --porcelain)" ]; then
-          git add CHANGELOG.md
-          git commit -m "docs(changelog): update changelog for release ${GITHUB_REF#refs/tags/}"
-          git push
-        fi
 
   publish-pypi:
     needs: [test, build]
