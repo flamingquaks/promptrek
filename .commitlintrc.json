@@ -19,7 +19,7 @@
       ]
     ],
     "scope-enum": [
-      2,
+      1,
       "always",
       [
         "cli",
@@ -32,7 +32,11 @@
         "utils",
         "tests",
         "deps",
-        "changelog"
+        "changelog",
+        "readme",
+        "config",
+        "scripts",
+        "workflows"
       ]
     ],
     "subject-case": [2, "never", ["start-case", "pascal-case", "upper-case"]],
@@ -40,6 +44,7 @@
     "subject-full-stop": [2, "never", "."],
     "type-case": [2, "always", "lower-case"],
     "type-empty": [2, "never"],
-    "scope-case": [2, "always", "lower-case"]
+    "scope-case": [2, "always", "lower-case"],
+    "scope-empty": [0]
   }
 }
