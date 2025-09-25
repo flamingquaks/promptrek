@@ -29,30 +29,27 @@ The commitlint configuration is defined in `.commitlintrc.json` at the project r
 - `chore`: Other changes that don't modify src or test files
 - `revert`: Reverts a previous commit
 
-### Optional Scopes
+### Scopes (Optional)
 
-Scopes are optional but encouraged for better organization:
+Scopes are optional but encouraged for better organization. **Any lowercase scope is allowed** - you're not restricted to a predefined list.
 
-- `cli`: Command-line interface changes
-- `core`: Core functionality changes
-- `adapters`: AI editor adapter changes
-- `templates`: Template changes
-- `docs`: Documentation changes
-- `parser`: Parser-related changes
-- `validator`: Validation logic changes
-- `utils`: Utility function changes
-- `tests`: Test-related changes
-- `deps`: Dependency updates
-- `changelog`: Changelog updates
-- `config`: Configuration changes
-- `scripts`: Script changes
-- `workflows`: GitHub Actions workflow changes
+**Common examples:**
+- `cli`, `core`, `adapters`, `templates`, `docs`
+- `parser`, `validator`, `utils`, `tests`, `deps`
+- `changelog`, `config`, `scripts`, `workflows`
+- `api/auth`, `ui/components`, `db/migrations` (nested scopes)
+
+**Scope Guidelines:**
+- Use lowercase only
+- Keep scopes short and descriptive
+- Use forward slashes for nested areas (e.g., `api/auth`)
+- Consistent naming helps with changelog generation
 
 ### Rules
 
 - **Subject**: Must not be empty, no period at the end, not start/pascal/upper case
 - **Type**: Must be lowercase and from the allowed list above
-- **Scope**: Optional, must be lowercase if provided
+- **Scope**: Optional, any lowercase scope allowed
 - **Format**: `type(scope): description` or `type: description`
 
 ## Usage

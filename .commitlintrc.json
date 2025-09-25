@@ -19,25 +19,7 @@
       ]
     ],
     "scope-enum": [
-      1,
-      "always",
-      [
-        "cli",
-        "core", 
-        "adapters",
-        "templates",
-        "docs",
-        "parser",
-        "validator",
-        "utils",
-        "tests",
-        "deps",
-        "changelog",
-        "readme",
-        "config",
-        "scripts",
-        "workflows"
-      ]
+      0
     ],
     "subject-case": [2, "never", ["start-case", "pascal-case", "upper-case"]],
     "subject-empty": [2, "never"],
