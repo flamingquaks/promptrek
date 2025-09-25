@@ -70,14 +70,6 @@ BREAKING CHANGE: The old `generatePrompt` method has been removed. Use `generate
 
 ## Automation
 
-### Continuous Integration
-
-The CI pipeline automatically validates commit messages using [commitlint](https://commitlint.js.org/):
-
-- **File**: `.github/workflows/ci.yml`
-- **Config**: `.commitlintrc.json`
-- **Trigger**: On pull requests to main/develop branches
-
 ### Changelog Generation
 
 Changelogs are automatically generated and updated:
@@ -88,23 +80,10 @@ Changelogs are automatically generated and updated:
 
 ### Configuration Files
 
-- **`.commitlintrc.json`**: Commitlint configuration
 - **`.conventional-changelog.json`**: Changelog generation settings
 - **`CHANGELOG.md`**: The main changelog file
 
 ## Local Development
-
-### Validating Commits
-
-Before committing, you can validate your commit message:
-
-```bash
-# Install commitlint (if not already installed)
-npm install -g @commitlint/cli @commitlint/config-conventional
-
-# Validate last commit
-npx commitlint --from HEAD~1 --to HEAD --verbose
-```
 
 ### Generating Changelog Locally
 

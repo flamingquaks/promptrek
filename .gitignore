@@ -69,7 +69,7 @@ temp/
 *.log
 logs/
 
-# Node.js (for commitlint and other JS tooling)
+# Node.js (for any JS tooling)
 node_modules/
 package-lock.json
 yarn.lock
