@@ -15,7 +15,7 @@ class TestMultipleFilesIntegration:
         # Create multiple test files
         file1 = tmp_path / "project.promptrek.yaml"
         file2 = tmp_path / "workflow.promptrek.yaml"
-        
+
         file1_content = """
 schema_version: 1.0.0
 metadata:
@@ -32,7 +32,7 @@ instructions:
     - Write clean code
     - Follow conventions
 """
-        
+
         file2_content = """
 schema_version: 1.0.0
 metadata:
@@ -49,17 +49,17 @@ instructions:
     - Follow git workflow
     - Create feature branches
 """
-        
+
         file1.write_text(file1_content)
         file2.write_text(file2_content)
-        
+
         runner = CliRunner()
         with runner.isolated_filesystem():
             result = runner.invoke(
                 cli,
                 ["generate", "--editor", "copilot", str(file1), str(file2)],
             )
-        
+
         assert result.exit_code == 0
         assert "Generated merged" in result.output
         assert "from 2 files" in result.output
@@ -69,7 +69,7 @@ instructions:
         # Create multiple test files in directory
         file1 = tmp_path / "project.promptrek.yaml"
         file2 = tmp_path / "workflow.promptrek.yaml"
-        
+
         file1_content = """
 schema_version: 1.0.0
 metadata:
@@ -85,7 +85,7 @@ instructions:
   general:
     - Write clean code
 """
-        
+
         file2_content = """
 schema_version: 1.0.0
 metadata:
@@ -101,16 +101,23 @@ instructions:
   general:
     - Follow git workflow
 """
-        
+
         file1.write_text(file1_content)
         file2.write_text(file2_content)
-        
+
         runner = CliRunner()
         result = runner.invoke(
             cli,
-            ["--verbose", "generate", "--editor", "copilot", "--directory", str(tmp_path)],
+            [
+                "--verbose",
+                "generate",
+                "--editor",
+                "copilot",
+                "--directory",
+                str(tmp_path),
+            ],
         )
-        
+
         assert result.exit_code == 0
         assert "Found 2 UPF files" in result.output
         assert "Generated merged" in result.output
@@ -118,7 +125,7 @@ instructions:
     def test_single_file_backward_compatibility(self, tmp_path):
         """Test that single file generation still works (backward compatibility)."""
         file1 = tmp_path / "project.promptrek.yaml"
-        
+
         file1_content = """
 schema_version: 1.0.0
 metadata:
@@ -134,15 +141,15 @@ instructions:
   general:
     - Write clean code
 """
-        
+
         file1.write_text(file1_content)
-        
+
         runner = CliRunner()
         result = runner.invoke(
             cli,
             ["generate", "--editor", "copilot", str(file1)],
         )
-        
+
         assert result.exit_code == 0
         assert "Generated:" in result.output
         # Should not mention merging for single file
@@ -153,7 +160,7 @@ instructions:
         # Create multiple test files
         file1 = tmp_path / "project.promptrek.yaml"
         file2 = tmp_path / "workflow.promptrek.yaml"
-        
+
         file1_content = """
 schema_version: 1.0.0
 metadata:
@@ -169,7 +176,7 @@ instructions:
   general:
     - Write clean code
 """
-        
+
         file2_content = """
 schema_version: 1.0.0
 metadata:
@@ -185,16 +192,16 @@ instructions:
   general:
     - Follow git workflow
 """
-        
+
         file1.write_text(file1_content)
         file2.write_text(file2_content)
-        
+
         runner = CliRunner()
         result = runner.invoke(
             cli,
             ["generate", "--editor", "continue", str(file1), str(file2)],
         )
-        
+
         assert result.exit_code == 0
         assert "doesn't support merging" in result.output
         assert "other files ignored" in result.output
@@ -204,13 +211,13 @@ instructions:
         # Create empty directory
         empty_dir = tmp_path / "empty"
         empty_dir.mkdir()
-        
+
         runner = CliRunner()
         result = runner.invoke(
             cli,
             ["generate", "--editor", "copilot", "--directory", str(empty_dir)],
         )
-        
+
         assert result.exit_code == 1
         assert "No UPF files found" in result.output
 
@@ -220,7 +227,7 @@ instructions:
         file1 = tmp_path / "copilot-only.promptrek.yaml"
         file2 = tmp_path / "cursor-only.promptrek.yaml"
         file3 = tmp_path / "both.promptrek.yaml"
-        
+
         file1_content = """
 schema_version: 1.0.0
 metadata:
@@ -236,7 +243,7 @@ instructions:
   general:
     - Copilot instruction
 """
-        
+
         file2_content = """
 schema_version: 1.0.0
 metadata:
@@ -252,7 +259,7 @@ instructions:
   general:
     - Cursor instruction
 """
-        
+
         file3_content = """
 schema_version: 1.0.0
 metadata:
@@ -269,17 +276,24 @@ instructions:
   general:
     - Shared instruction
 """
-        
+
         file1.write_text(file1_content)
         file2.write_text(file2_content)
         file3.write_text(file3_content)
-        
+
         runner = CliRunner()
         result = runner.invoke(
             cli,
-            ["--verbose", "generate", "--editor", "copilot", "--directory", str(tmp_path)],
+            [
+                "--verbose",
+                "generate",
+                "--editor",
+                "copilot",
+                "--directory",
+                str(tmp_path),
+            ],
         )
-        
+
         assert result.exit_code == 0
         # Should process file1 and file3, but skip file2 (cursor-only)
         assert "Generated merged" in result.output
@@ -290,7 +304,7 @@ instructions:
         # Create multiple test files for Claude
         file1 = tmp_path / "main.promptrek.yaml"
         file2 = tmp_path / "workflows.promptrek.yaml"
-        
+
         file1_content = """
 schema_version: 1.0.0
 metadata:
@@ -317,7 +331,7 @@ examples:
     function test() { return true; }
     ```
 """
-        
+
         file2_content = """
 schema_version: 1.0.0
 metadata:
@@ -339,17 +353,17 @@ instructions:
     - Follow git workflow
     - Create detailed PRs
 """
-        
+
         file1.write_text(file1_content)
         file2.write_text(file2_content)
-        
+
         runner = CliRunner()
         with runner.isolated_filesystem():
             result = runner.invoke(
                 cli,
                 ["--verbose", "generate", "--editor", "claude", str(file1), str(file2)],
             )
-        
+
         assert result.exit_code == 0
         assert "Generated separate claude files" in result.output
         # Should mention both source files

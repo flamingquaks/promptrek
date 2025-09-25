@@ -74,7 +74,10 @@ def validate(ctx: click.Context, file: Path, strict: bool) -> None:
 @cli.command()
 @click.argument("files", nargs=-1, type=click.Path(exists=True, path_type=Path))
 @click.option(
-    "--directory", "-d", type=click.Path(exists=True, file_okay=False, path_type=Path), help="Directory to search for .promptrek.yaml files"
+    "--directory",
+    "-d",
+    type=click.Path(exists=True, file_okay=False, path_type=Path),
+    help="Directory to search for .promptrek.yaml files",
 )
 @click.option(
     "--recursive", "-r", is_flag=True, help="Search recursively in directories"
@@ -124,7 +127,17 @@ def generate(
             key, value = var.split("=", 1)
             var_dict[key.strip()] = value.strip()
 
-        generate_command(ctx, files, directory, recursive, editor, output, dry_run, all_editors, var_dict)
+        generate_command(
+            ctx,
+            files,
+            directory,
+            recursive,
+            editor,
+            output,
+            dry_run,
+            all_editors,
+            var_dict,
+        )
     except PrompTrekError as e:
         click.echo(f"Error: {e}", err=True)
         ctx.exit(1)

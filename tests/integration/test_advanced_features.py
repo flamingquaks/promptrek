@@ -328,9 +328,7 @@ variables:
         # Check base instruction in rules content
         assert "Base instruction for all editors" in rules_content
         # Check Continue-specific instructions in rules content
-        assert (
-            "Continue-specific: Generate comprehensive completions" in rules_content
-        )
+        assert "Continue-specific: Generate comprehensive completions" in rules_content
         assert "Continue-specific: Suggest appropriate types" in rules_content
         # Should not have other editor instructions
         assert "Claude-specific" not in rules_content

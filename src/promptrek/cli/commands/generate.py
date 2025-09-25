@@ -43,13 +43,13 @@ def generate_command(
         variables: Variable overrides
     """
     verbose = ctx.obj.get("verbose", False)
-    
+
     # Collect all files to process
     files_to_process = []
-    
+
     # Add explicitly specified files
     files_to_process.extend(files)
-    
+
     # Add files from directory if specified
     if directory:
         parser = UPFParser()
@@ -57,7 +57,7 @@ def generate_command(
         files_to_process.extend(found_files)
         if verbose:
             click.echo(f"Found {len(found_files)} UPF files in {directory}")
-    
+
     # If no files specified and no directory, look in current directory
     if not files_to_process and not directory:
         parser = UPFParser()
@@ -66,7 +66,7 @@ def generate_command(
             files_to_process.extend(found_files)
             if verbose:
                 click.echo(f"Found {len(found_files)} UPF files in current directory")
-    
+
     # Remove duplicates while preserving order
     seen = set()
     unique_files = []
@@ -74,33 +74,35 @@ def generate_command(
         if file_path not in seen:
             seen.add(file_path)
             unique_files.append(file_path)
-    
+
     if not unique_files:
-        raise CLIError("No UPF files found. Specify files directly or use --directory option.")
-    
+        raise CLIError(
+            "No UPF files found. Specify files directly or use --directory option."
+        )
+
     if verbose:
         click.echo(f"Processing {len(unique_files)} file(s):")
         for file_path in unique_files:
             click.echo(f"  - {file_path}")
-    
+
     # Set default output directory
     if not output:
         output = Path.cwd()
-    
+
     # Ensure output directory exists
     output.mkdir(parents=True, exist_ok=True)
-    
+
     if dry_run:
         click.echo("🔍 Dry run mode - showing what would be generated:")
-    
+
     # Process each file and collect prompts by editor
     prompts_by_editor = {}  # editor -> list of (prompt, source_file) tuples
     processing_errors = []
-    
+
     for file_path in unique_files:
         try:
             file_prompts = _parse_and_validate_file(ctx, file_path)
-            
+
             # Determine target editors for this file
             if all_editors:
                 target_editors = file_prompts.targets
@@ -113,19 +115,21 @@ def generate_command(
                         )
                     # For multiple files, just skip with a warning
                     if verbose:
-                        click.echo(f"⚠️ Editor '{editor}' not in targets for {file_path}, skipping")
+                        click.echo(
+                            f"⚠️ Editor '{editor}' not in targets for {file_path}, skipping"
+                        )
                     continue
                 target_editors = [editor]
             else:
                 # This is a critical error that should stop processing
                 raise CLIError("Must specify either --editor or --all")
-            
+
             # Add to prompts by editor
             for target_editor in target_editors:
                 if target_editor not in prompts_by_editor:
                     prompts_by_editor[target_editor] = []
                 prompts_by_editor[target_editor].append((file_prompts, file_path))
-                
+
         except CLIError:
             # Re-raise CLIError immediately (these are critical errors)
             raise
@@ -138,13 +142,13 @@ def generate_command(
             else:
                 click.echo(f"❌ Error processing {file_path}: {e}", err=True)
                 continue
-    
+
     # Check if we had processing errors but no successful files
     if processing_errors and not prompts_by_editor:
         # All files failed, report the first error
         first_error_file, first_error_msg = processing_errors[0]
         raise CLIError(f"Failed to process {first_error_file}: {first_error_msg}")
-    
+
     # Generate for each editor with all collected prompts
     generation_errors = []
     for target_editor, prompt_files in prompts_by_editor.items():
@@ -160,17 +164,19 @@ def generate_command(
                 raise
             click.echo(f"❌ Failed to generate for {target_editor}: {e}", err=True)
             # Continue with other editors
-    
+
     # If we had generation errors but no successful generations, report error
     if generation_errors and not any(prompts_by_editor.values()):
         first_error_editor, first_error_msg = generation_errors[0]
-        raise CLIError(f"Failed to generate for {first_error_editor}: {first_error_msg}")
+        raise CLIError(
+            f"Failed to generate for {first_error_editor}: {first_error_msg}"
+        )
 
 
 def _parse_and_validate_file(ctx: click.Context, file_path: Path) -> UniversalPrompt:
     """Parse and validate a single UPF file."""
     verbose = ctx.obj.get("verbose", False)
-    
+
     # Parse the file
     parser = UPFParser()
     try:
@@ -185,7 +191,7 @@ def _parse_and_validate_file(ctx: click.Context, file_path: Path) -> UniversalPr
     result = validator.validate(prompt)
     if result.errors:
         raise CLIError(f"Validation failed for {file_path}: {'; '.join(result.errors)}")
-    
+
     return prompt
 
 
@@ -198,10 +204,10 @@ def _generate_for_editor_multiple(
     variables: Optional[dict] = None,
 ) -> None:
     """Generate prompts for a specific editor from multiple UPF files."""
-    
+
     try:
         adapter = registry.get(editor)
-        
+
         if len(prompt_files) == 1:
             # Single file - use existing logic
             prompt, source_file = prompt_files[0]
@@ -210,25 +216,35 @@ def _generate_for_editor_multiple(
                 click.echo(f"✅ Generated {editor} files from {source_file}")
         else:
             # Multiple files - check adapter capabilities
-            if hasattr(adapter, 'generate_multiple') and editor == 'claude':
+            if hasattr(adapter, "generate_multiple") and editor == "claude":
                 # Claude uses separate files for each prompt
-                adapter.generate_multiple(prompt_files, output_dir, dry_run, verbose, variables)
+                adapter.generate_multiple(
+                    prompt_files, output_dir, dry_run, verbose, variables
+                )
                 if verbose:
                     source_files = [str(pf[1]) for pf in prompt_files]
-                    click.echo(f"✅ Generated separate {editor} files from: {', '.join(source_files)}")
-            elif hasattr(adapter, 'generate_merged'):
+                    click.echo(
+                        f"✅ Generated separate {editor} files from: {', '.join(source_files)}"
+                    )
+            elif hasattr(adapter, "generate_merged"):
                 # Other adapters use merged files
-                adapter.generate_merged(prompt_files, output_dir, dry_run, verbose, variables)
+                adapter.generate_merged(
+                    prompt_files, output_dir, dry_run, verbose, variables
+                )
                 if verbose:
                     source_files = [str(pf[1]) for pf in prompt_files]
-                    click.echo(f"✅ Generated merged {editor} files from: {', '.join(source_files)}")
+                    click.echo(
+                        f"✅ Generated merged {editor} files from: {', '.join(source_files)}"
+                    )
             else:
                 # Fallback: generate from last file with warning
                 prompt, source_file = prompt_files[-1]
                 adapter.generate(prompt, output_dir, dry_run, verbose, variables)
                 source_files = [str(pf[1]) for pf in prompt_files]
-                click.echo(f"⚠️ {editor} adapter doesn't support merging. Generated from {source_file}, other files ignored: {', '.join(source_files[:-1])}")
-                
+                click.echo(
+                    f"⚠️ {editor} adapter doesn't support merging. Generated from {source_file}, other files ignored: {', '.join(source_files[:-1])}"
+                )
+
     except AdapterNotFoundError:
         raise AdapterNotFoundError(f"Editor '{editor}' adapter not implemented yet")
 
@@ -244,7 +260,7 @@ def _process_single_file(
 ) -> None:
     """Process a single UPF file."""
     verbose = ctx.obj.get("verbose", False)
-    
+
     prompt = _parse_and_validate_file(ctx, file_path)
 
     # Determine target editors
@@ -327,7 +343,9 @@ def _process_single_file(
         except Exception as e:
             if verbose:
                 raise
-            raise CLIError(f"Failed to generate for {target_editor} from {file_path}: {e}")
+            raise CLIError(
+                f"Failed to generate for {target_editor} from {file_path}: {e}"
+            )
 
 
 def _generate_for_editor(
@@ -344,7 +362,7 @@ def _generate_for_editor(
     try:
         adapter = registry.get(editor)
         adapter.generate(prompt, output_dir, dry_run, verbose, variables)
-        
+
         if verbose and source_file:
             click.echo(f"✅ Generated {editor} files from {source_file}")
     except AdapterNotFoundError:

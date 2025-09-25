@@ -60,7 +60,9 @@ class TestKiroAdapter(TestAdapterBase):
         files = adapter.generate(sample_prompt, output_dir, dry_run=False)
 
         # Should generate steering files and specs files
-        assert len(files) >= 3  # At least product.md, structure.md, requirements.md, design.md, tasks.md
+        assert (
+            len(files) >= 3
+        )  # At least product.md, structure.md, requirements.md, design.md, tasks.md
         assert any("steering/product.md" in str(f) for f in files)
         assert any("steering/structure.md" in str(f) for f in files)
         assert any("requirements.md" in str(f) for f in files)
@@ -76,4 +78,6 @@ class TestKiroAdapter(TestAdapterBase):
 
         captured = capsys.readouterr()
         assert "Would create" in captured.out
-        assert len(files) == 0  # Dry run doesn't create actual files, returns empty list
+        assert (
+            len(files) == 0
+        )  # Dry run doesn't create actual files, returns empty list

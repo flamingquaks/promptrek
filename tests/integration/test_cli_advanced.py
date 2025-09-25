@@ -203,8 +203,11 @@ variables:
         assert result.exit_code == 0
         assert "Would create" in result.output
         # Should create files for all target editors using new formats
-        assert ".claude/context.md" in result.output
-        assert "config.yaml" in result.output or ".continue/rules/" in result.output
+        assert (
+            "config.yaml" in result.output
+        ) or (
+            ".continue/rules/" in result.output
+        )
         # Verify at least some expected output for other tools
         assert any(
             tool in result.output

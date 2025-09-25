@@ -211,7 +211,7 @@ class CursorAdapter(EditorAdapter):
         variables: Optional[Dict[str, Any]] = None,
     ) -> List[Path]:
         """Generate merged Cursor rules from multiple prompt files."""
-        
+
         # Build merged content
         content = self._build_merged_content(prompt_files, variables)
 
@@ -227,7 +227,9 @@ class CursorAdapter(EditorAdapter):
         else:
             with open(output_file, "w", encoding="utf-8") as f:
                 f.write(content)
-            click.echo(f"✅ Generated merged: {output_file} (from {len(prompt_files)} files)")
+            click.echo(
+                f"✅ Generated merged: {output_file} (from {len(prompt_files)} files)"
+            )
 
         return [output_file]
 
@@ -569,27 +571,35 @@ class CursorAdapter(EditorAdapter):
 
         return "\n".join(lines)
 
-    def _build_merged_content(self, prompt_files: List[tuple[UniversalPrompt, Path]], variables: Optional[Dict[str, Any]] = None) -> str:
+    def _build_merged_content(
+        self,
+        prompt_files: List[tuple[UniversalPrompt, Path]],
+        variables: Optional[Dict[str, Any]] = None,
+    ) -> str:
         """Build merged Cursor rules content from multiple prompt files."""
         lines = []
 
         # Header with summary
         lines.append("# AI Assistant Rules")
         lines.append("")
-        lines.append(f"This document contains merged AI assistant rules from {len(prompt_files)} configuration files.")
+        lines.append(
+            f"This document contains merged AI assistant rules from {len(prompt_files)} configuration files."
+        )
         lines.append("")
 
         # Configuration files list
         lines.append("## Configuration Sources")
         for i, (prompt, source_file) in enumerate(prompt_files, 1):
-            lines.append(f"{i}. **{prompt.metadata.title}** (`{source_file.name}`) - {prompt.metadata.description}")
+            lines.append(
+                f"{i}. **{prompt.metadata.title}** (`{source_file.name}`) - {prompt.metadata.description}"
+            )
         lines.append("")
 
         # Process each file
         for i, (prompt, source_file) in enumerate(prompt_files, 1):
             # Apply variable substitution if supported
             processed_prompt = self.substitute_variables(prompt, variables)
-            
+
             lines.append(f"## {i}. {processed_prompt.metadata.title}")
             lines.append("")
             lines.append(f"*Source: `{source_file.name}`*")
@@ -605,7 +615,7 @@ class CursorAdapter(EditorAdapter):
                 instruction_data = processed_prompt.instructions.model_dump()
                 for category, instructions in instruction_data.items():
                     if instructions:  # Only include non-empty categories
-                        category_title = category.replace('_', ' ').title()
+                        category_title = category.replace("_", " ").title()
                         lines.append(f"#### {category_title}")
                         for instruction in instructions:
                             lines.append(f"- {instruction}")

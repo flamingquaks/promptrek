@@ -284,7 +284,7 @@ class CopilotAdapter(EditorAdapter):
         variables: Optional[Dict[str, Any]] = None,
     ) -> List[Path]:
         """Generate merged GitHub Copilot instructions from multiple prompt files."""
-        
+
         # Build merged content
         content = self._build_merged_content(prompt_files, variables)
 
@@ -304,24 +304,34 @@ class CopilotAdapter(EditorAdapter):
             with open(output_file, "w", encoding="utf-8") as f:
                 f.write(content)
             source_files = [str(pf[1]) for pf in prompt_files]
-            click.echo(f"✅ Generated merged: {output_file} (from {len(prompt_files)} files)")
+            click.echo(
+                f"✅ Generated merged: {output_file} (from {len(prompt_files)} files)"
+            )
 
         return [output_file]
 
-    def _build_merged_content(self, prompt_files: List[Tuple[UniversalPrompt, Path]], variables: Optional[Dict[str, Any]] = None) -> str:
+    def _build_merged_content(
+        self,
+        prompt_files: List[Tuple[UniversalPrompt, Path]],
+        variables: Optional[Dict[str, Any]] = None,
+    ) -> str:
         """Build merged GitHub Copilot instructions from multiple prompt files."""
         lines = []
 
         # Header with summary
         lines.append("# GitHub Copilot Instructions")
         lines.append("")
-        lines.append(f"This document contains merged GitHub Copilot instructions from {len(prompt_files)} configuration files.")
+        lines.append(
+            f"This document contains merged GitHub Copilot instructions from {len(prompt_files)} configuration files."
+        )
         lines.append("")
 
         # Configuration files list
         lines.append("## Configuration Sources")
         for i, (prompt, source_file) in enumerate(prompt_files, 1):
-            lines.append(f"{i}. **{prompt.metadata.title}** (`{source_file.name}`) - {prompt.metadata.description}")
+            lines.append(
+                f"{i}. **{prompt.metadata.title}** (`{source_file.name}`) - {prompt.metadata.description}"
+            )
         lines.append("")
 
         # Process each file
@@ -343,7 +353,7 @@ class CopilotAdapter(EditorAdapter):
                 instruction_data = processed_prompt.instructions.model_dump()
                 for category, instructions in instruction_data.items():
                     if instructions:  # Only include non-empty categories
-                        category_title = category.replace('_', ' ').title()
+                        category_title = category.replace("_", " ").title()
                         lines.append(f"#### {category_title}")
                         for instruction in instructions:
                             lines.append(f"- {instruction}")
@@ -379,7 +389,11 @@ class CopilotAdapter(EditorAdapter):
         """Copilot supports conditional instructions."""
         return True
 
-    def _build_repository_content(self, prompt: UniversalPrompt, conditional_content: Optional[Dict[str, Any]] = None) -> str:
+    def _build_repository_content(
+        self,
+        prompt: UniversalPrompt,
+        conditional_content: Optional[Dict[str, Any]] = None,
+    ) -> str:
         """Build repository-wide GitHub Copilot instructions content."""
         lines = []
 

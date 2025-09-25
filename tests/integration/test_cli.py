@@ -98,7 +98,8 @@ targets: []
         """Test validate command with warnings in strict mode."""
         # Create a file that generates warnings
         warning_file = tmp_path / "warning.promptrek.yaml"
-        warning_file.write_text("""
+        warning_file.write_text(
+            """
 schema_version: "1.0.0"
 metadata:
   title: "Test"
@@ -110,7 +111,8 @@ metadata:
 targets:
   - claude
 # Missing instructions field which might generate warnings
-""")
+"""
+        )
 
         runner = CliRunner()
         result = runner.invoke(cli, ["validate", str(warning_file), "--strict"])
@@ -124,7 +126,8 @@ targets:
         """Test validate command with warnings in non-strict mode."""
         # Create a file that generates warnings
         warning_file = tmp_path / "warning.promptrek.yaml"
-        warning_file.write_text("""
+        warning_file.write_text(
+            """
 schema_version: "1.0.0"
 metadata:
   title: "Test"
@@ -136,7 +139,8 @@ metadata:
 targets:
   - claude
 # Missing instructions field which might generate warnings
-""")
+"""
+        )
 
         runner = CliRunner()
         result = runner.invoke(cli, ["validate", str(warning_file)])
@@ -151,12 +155,14 @@ targets:
         """Test validate command with parsing errors."""
         # Create an invalid YAML file
         invalid_yaml = tmp_path / "invalid.promptrek.yaml"
-        invalid_yaml.write_text("""
+        invalid_yaml.write_text(
+            """
 schema_version: "1.0.0"
 metadata:
   title: "Test
   # Invalid YAML - unclosed quote
-""")
+"""
+        )
 
         runner = CliRunner()
         result = runner.invoke(cli, ["validate", str(invalid_yaml)])
@@ -170,7 +176,8 @@ metadata:
         with runner.isolated_filesystem():
             # Create a UPF file in the current working directory (inside isolated filesystem)
             upf_file = Path("test.promptrek.yaml")
-            upf_file.write_text("""
+            upf_file.write_text(
+                """
 schema_version: "1.0.0"
 metadata:
   title: "Auto Discovery Test"
@@ -184,7 +191,8 @@ targets:
 instructions:
   general:
     - "Test instruction"
-""")
+"""
+            )
 
             result = runner.invoke(cli, ["--verbose", "generate", "--editor", "claude"])
 
@@ -204,7 +212,8 @@ instructions:
 
         for i in range(2):
             upf_file = test_dir / f"test{i}.promptrek.yaml"
-            upf_file.write_text(f"""
+            upf_file.write_text(
+                f"""
 schema_version: "1.0.0"
 metadata:
   title: "Test {i}"
@@ -218,10 +227,21 @@ targets:
 instructions:
   general:
     - "Test instruction {i}"
-""")
+"""
+            )
 
         runner = CliRunner()
-        result = runner.invoke(cli, ["--verbose", "generate", "--editor", "claude", "--directory", str(test_dir)])
+        result = runner.invoke(
+            cli,
+            [
+                "--verbose",
+                "generate",
+                "--editor",
+                "claude",
+                "--directory",
+                str(test_dir),
+            ],
+        )
 
         assert result.exit_code == 0
         assert "Found 2 UPF files" in result.output
@@ -246,7 +266,8 @@ instructions:
 
         for i, directory in enumerate([base_dir, nested_dir]):
             upf_file = directory / f"test{i}.promptrek.yaml"
-            upf_file.write_text(f"""
+            upf_file.write_text(
+                f"""
 schema_version: "1.0.0"
 metadata:
   title: "Test {i}"
@@ -260,13 +281,26 @@ targets:
 instructions:
   general:
     - "Test instruction {i}"
-""")
+"""
+            )
 
         runner = CliRunner()
-        result = runner.invoke(cli, ["--verbose", "generate", "--editor", "claude", "--directory", str(base_dir)])
+        result = runner.invoke(
+            cli,
+            [
+                "--verbose",
+                "generate",
+                "--editor",
+                "claude",
+                "--directory",
+                str(base_dir),
+            ],
+        )
 
         assert result.exit_code == 0
-        assert "Found 1 UPF files" in result.output  # Non-recursive search finds only base directory file
+        assert (
+            "Found 1 UPF files" in result.output
+        )  # Non-recursive search finds only base directory file
 
     def test_generate_command_copilot(self, sample_upf_file, tmp_path):
         """Test generate command for Copilot."""

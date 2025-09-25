@@ -54,9 +54,11 @@ class TestJetBrainsAdapter:
 
         assert "<?xml version" in content
         assert "<application>" in content
-        assert "<component name=\"AIAssistant\">" in content
+        assert '<component name="AIAssistant">' in content
         assert sample_prompt.metadata.title in content
-        assert "Use proper formatting" in content  # This should be in code_style section
+        assert (
+            "Use proper formatting" in content
+        )  # This should be in code_style section
         assert "Add comments" in content
 
     def test_build_json_config(self, adapter, sample_prompt):
