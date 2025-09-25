@@ -277,7 +277,7 @@ class CopilotAdapter(EditorAdapter):
 
     def generate_merged(
         self,
-        prompt_files: List[tuple[UniversalPrompt, Path]],
+        prompt_files: List[Tuple[UniversalPrompt, Path]],
         output_dir: Path,
         dry_run: bool = False,
         verbose: bool = False,

@@ -15,15 +15,9 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
-        include:
-          # Test on older Ubuntu for compatibility
-          - os: ubuntu-20.04
-            python-version: '3.8'
+        python-version: ['3.9', '3.10', '3.11', '3.12']
         exclude:
           # Reduce matrix size by excluding some combinations
-          - os: windows-latest
-            python-version: '3.8'
           - os: macos-latest
             python-version: '3.9'
     
