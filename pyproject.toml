@@ -128,6 +128,17 @@ exclude_lines = [
     "if __name__ == .__main__.:",
 ]
 
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "black>=22.0.0",
+    "flake8>=5.0.0",
+    "mypy>=1.0.0",
+    "isort>=5.0.0",
+    "types-pyyaml>=6.0.12.20241230",
+]
+
 [dependency-groups]
 dev = [
     "pytest>=7.0.0",

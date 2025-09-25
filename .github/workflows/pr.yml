@@ -21,7 +21,7 @@ jobs:
     
     - name: Install dependencies
       run: |
-        uv sync --group dev
+        uv sync --extra dev
     
     - name: Check code formatting
       run: |
@@ -73,8 +73,8 @@ jobs:
     
     - name: Install security tools
       run: |
-        uv add --group dev bandit safety
-        uv sync --group dev
+        uv add --extra dev bandit safety
+        uv sync --extra dev
     
     - name: Security scan with bandit
       run: |
@@ -99,7 +99,7 @@ jobs:
     
     - name: Install dependencies
       run: |
-        uv sync --group dev
+        uv sync --extra dev
     
     - name: Run comprehensive test matrix (single platform)
       run: |
@@ -126,7 +126,7 @@ jobs:
     
     - name: Install dependencies (for CLI testing)
       run: |
-        uv sync --group dev
+        uv sync --extra dev
     
     - name: Check documentation files
       run: |

@@ -41,7 +41,7 @@ jobs:
     
     - name: Install dependencies
       run: |
-        uv sync --group dev
+        uv sync --extra dev
     
     - name: Run tests
       run: |
@@ -76,7 +76,7 @@ jobs:
     
     - name: Install dependencies
       run: |
-        uv sync --group dev
+        uv sync --extra dev
     
     - name: Test with minimal dependencies
       run: |
@@ -126,8 +126,8 @@ jobs:
     - name: Test memory usage
       run: |
         # Test that memory usage is reasonable
-        uv add --group dev psutil
-        uv sync --group dev
+        uv add --extra dev psutil
+        uv sync --extra dev
         echo 'Testing memory usage is reasonable...'
         echo 'Memory test simplified for CI compatibility'
 
@@ -144,8 +144,8 @@ jobs:
     
     - name: Install dependencies
       run: |
-        uv add --group dev pytest-benchmark
-        uv sync --group dev
+        uv add --extra dev pytest-benchmark
+        uv sync --extra dev
     
     - name: Run benchmarks
       run: |

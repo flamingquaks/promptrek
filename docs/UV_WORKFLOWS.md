@@ -26,7 +26,7 @@ git clone https://github.com/flamingquaks/promptrek.git
 cd promptrek
 
 # Install project with development dependencies
-uv sync --group dev
+uv sync --extra dev
 ```
 
 ### 2. Available Commands
@@ -133,7 +133,7 @@ make clean
 
 | Task | uv Command | Make Command | Script Command |
 |------|------------|--------------|----------------|
-| Install deps | `uv sync --group dev` | `make install` | `./script.sh setup` |
+| Install deps | `uv sync --extra dev` | `make install` | `./script.sh setup` |
 | Run tests | `uv run pytest` | `make test` | `./script.sh test` |
 | Format code | `uv run black src/ tests/` | `make format` | `./script.sh format` |
 | Build package | `uv build` | `make build` | `./script.sh build` |
@@ -198,7 +198,7 @@ jobs:
         run: uv python install ${{ matrix.python-version }}
       
       - name: Install dependencies
-        run: uv sync --group dev
+        run: uv sync --extra dev
       
       - name: Run tests
         run: uv run pytest tests/ --cov=src/promptrek
@@ -230,8 +230,8 @@ jobs:
       
       - name: Install security tools
         run: |
-          uv add --group dev bandit safety
-          uv sync --group dev
+          uv add --extra dev bandit safety
+          uv sync --extra dev
       
       - name: Run security checks
         run: |
@@ -260,7 +260,7 @@ jobs:
         run: uv python install 3.11
       
       - name: Install dependencies
-        run: uv sync --group dev
+        run: uv sync --extra dev
       
       - name: Run tests
         run: uv run pytest tests/ --cov-fail-under=80
@@ -348,7 +348,7 @@ If migrating from pip-based workflow:
 pip install -e .[dev]
 
 # Use:
-uv sync --group dev
+uv sync --extra dev
 
 # Instead of:
 source venv/bin/activate
