@@ -14,8 +14,7 @@
     "repository": "https://github.com/flamingquaks/promptrek",
     "repoUrl": "https://github.com/flamingquaks/promptrek",
     "host": "https://github.com",
-    "owner": "flamingquaks",
-    "repository": "promptrek"
+    "owner": "flamingquaks"
   },
   "gitRawCommitsOpts": {
     "merges": null
