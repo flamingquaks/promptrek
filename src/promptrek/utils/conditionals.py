@@ -1,5 +1,5 @@
 """
-Conditional processing utilities for Agent Prompt Mapper.
+Conditional processing utilities for PromptTrek.
 
 Handles conditional instructions and template logic in UPF content.
 """

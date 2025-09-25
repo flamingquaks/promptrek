@@ -4,8 +4,8 @@ Unit tests for Claude adapter.
 
 import pytest
 
-from src.apm.adapters.claude import ClaudeAdapter
-from src.apm.core.models import PromptMetadata, UniversalPrompt
+from src.promptrek.adapters.claude import ClaudeAdapter
+from src.promptrek.core.models import PromptMetadata, UniversalPrompt
 
 from .base_test import TestAdapterBase
 

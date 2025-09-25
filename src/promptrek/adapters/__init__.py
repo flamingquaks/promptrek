@@ -1,4 +1,4 @@
-"""Editor adapters for Agent Prompt Mapper."""
+"""Editor adapters for PromptTrek."""
 
 from .amazon_q import AmazonQAdapter
 from .base import EditorAdapter

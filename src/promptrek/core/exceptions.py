@@ -1,18 +1,18 @@
 """
-Custom exceptions for Agent Prompt Mapper.
+Custom exceptions for PrompTrek.
 
 Defines specific exception types for different error conditions
 to provide better error handling and user feedback.
 """
 
 
-class APMError(Exception):
-    """Base exception for all APM errors."""
+class PrompTrekError(Exception):
+    """Base exception for all PrompTrek errors."""
 
     pass
 
 
-class UPFError(APMError):
+class UPFError(PrompTrekError):
     """Base exception for UPF-related errors."""
 
     pass
@@ -36,7 +36,7 @@ class UPFValidationError(UPFError):
     pass
 
 
-class ValidationError(APMError):
+class ValidationError(PrompTrekError):
     """Represents a validation error with field and message information."""
 
     def __init__(self, field: str, message: str, severity: str = "error"):
@@ -54,7 +54,7 @@ class ValidationError(APMError):
         super().__init__(f"{field}: {message}")
 
 
-class TemplateError(APMError):
+class TemplateError(PrompTrekError):
     """Base exception for template-related errors."""
 
     pass
@@ -72,7 +72,7 @@ class TemplateRenderingError(TemplateError):
     pass
 
 
-class AdapterError(APMError):
+class AdapterError(PrompTrekError):
     """Base exception for adapter-related errors."""
 
     pass
@@ -90,13 +90,13 @@ class AdapterGenerationError(AdapterError):
     pass
 
 
-class ConfigurationError(APMError):
+class ConfigurationError(PrompTrekError):
     """Raised when configuration is invalid or missing."""
 
     pass
 
 
-class CLIError(APMError):
+class CLIError(PrompTrekError):
     """Raised for CLI-specific errors."""
 
     pass

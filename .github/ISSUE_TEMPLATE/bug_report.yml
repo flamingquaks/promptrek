@@ -29,7 +29,7 @@ body:
     id: version
     attributes:
       label: Version
-      description: What version of APM are you running?
+      description: What version of PrompTrek are you running?
       placeholder: v0.1.0
     validations:
       required: true

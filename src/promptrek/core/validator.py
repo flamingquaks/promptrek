@@ -296,9 +296,9 @@ class UPFValidator:
                 continue
 
             # Check if path looks like a valid file path
-            if not path.endswith((".apm.yaml", ".apm.yml")):
+            if not path.endswith((".promptrek.yaml", ".promptrek.yml")):
                 result.add_warning(
-                    f"Import {i+1} path should end with .apm.yaml or .apm.yml: {path}"
+                    f"Import {i+1} path should end with .promptrek.yaml or .promptrek.yml: {path}"
                 )
 
     def _is_valid_semver(self, version: str) -> bool:

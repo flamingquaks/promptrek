@@ -1,5 +1,5 @@
 """
-Variable substitution utilities for Agent Prompt Mapper.
+Variable substitution utilities for PromptTrek.
 
 Handles variable replacement in templates and UPF content.
 """

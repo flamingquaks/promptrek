@@ -6,7 +6,7 @@ The Universal Prompt Format (UPF) is a standardized YAML-based format for defini
 
 ## File Extension
 
-`.apm.yaml` or `.apm.yml` (Agent Prompt Mapper)
+`.promptrek.yaml`
 
 ## Schema Version
 
@@ -92,7 +92,7 @@ conditions:
 
 # Import other prompt files (optional)
 imports:
-  - path: string                   # Relative path to another .apm.yaml file
+  - path: string                   # Relative path to another .promptrek.yaml file
     prefix: string                 # Optional namespace prefix
 ```
 
@@ -413,9 +413,9 @@ Import configurations from other UPF files for modularity and reusability.
 **Example**:
 ```yaml
 imports:
-  - path: "../shared/typescript-standards.apm.yaml"
+  - path: "../shared/typescript-standards.promptrek.yaml"
     prefix: "ts"
-  - path: "./team-conventions.apm.yaml"
+  - path: "./team-conventions.promptrek.yaml"
 ```
 
 ## Validation Rules

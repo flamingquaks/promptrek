@@ -56,8 +56,8 @@ htmlcov/
 # GitHub Actions artifacts
 coverage.xml
 bandit-report.json
-large-test.apm.yaml
-test-project.apm.yaml
+large-test.promptrek.yaml
+test-project.promptrek.yaml
 
 # Temporary files
 tmp/

@@ -37,7 +37,7 @@ def sample_upf_file(tmp_path, sample_upf_data):
     """Create a temporary UPF file for testing."""
     import yaml
 
-    file_path = tmp_path / "test.apm.yaml"
+    file_path = tmp_path / "test.promptrek.yaml"
     with open(file_path, "w") as f:
         yaml.dump(sample_upf_data, f)
 

@@ -3,7 +3,7 @@
 ## Repository Structure
 
 ```
-agent-prompt-mapper/
+promptrek/
 ├── README.md                     # Project overview and quick start
 ├── LICENSE                       # MIT License
 ├── .gitignore                    # Git ignore patterns
@@ -12,7 +12,7 @@ agent-prompt-mapper/
 ├── setup.py                     # Python package setup (if needed)
 │
 ├── src/                         # Source code
-│   └── apm/                     # Main package
+│   └── promptrek/                  # Main package
 │       ├── __init__.py          # Package initialization
 │       ├── cli/                 # Command-line interface
 │       ├── core/                # Core functionality
@@ -42,13 +42,13 @@ agent-prompt-mapper/
 │
 ├── examples/                    # Example configurations
 │   ├── basic/                   # Simple examples
-│   │   ├── web-app.apm.yaml
-│   │   ├── api-service.apm.yaml
-│   │   └── library.apm.yaml
+│   │   ├── web-app.promptrek.yaml
+│   │   ├── api-service.promptrek.yaml
+│   │   └── library.promptrek.yaml
 │   ├── advanced/                # Complex examples
-│   │   ├── monorepo.apm.yaml
-│   │   ├── microservices.apm.yaml
-│   │   └── enterprise.apm.yaml
+│   │   ├── monorepo.promptrek.yaml
+│   │   ├── microservices.promptrek.yaml
+│   │   └── enterprise.promptrek.yaml
 │   └── templates/               # Project templates
 │       ├── react-typescript/
 │       ├── node-api/
@@ -69,28 +69,28 @@ agent-prompt-mapper/
 │   ├── PULL_REQUEST_TEMPLATE.md # PR template
 │   └── CONTRIBUTING.md          # Contribution guidelines
 │
-└── .apm/                        # Project's own prompt configuration
-    ├── project.apm.yaml         # Universal prompt for this project
-    └── .apm.config.json         # Project-specific configuration
+└── .promptrek/                    # Project's own prompt configuration
+    ├── project.promptrek.yaml     # Universal prompt for this project
+    └── .promptrek.config.json     # Project-specific configuration
 ```
 
 ## Source Code Structure
 
-### `src/apm/` - Main Package
+### `src/promptrek/` - Main Package
 
 ```
-src/apm/
+src/promptrek/
 ├── __init__.py                  # Package info, version, exports
 ├── cli/                         # Command-line interface
 │   ├── __init__.py
 │   ├── main.py                  # Main CLI entry point
 │   ├── commands/                # Individual commands
 │   │   ├── __init__.py
-│   │   ├── init.py              # `apm init` command
-│   │   ├── generate.py          # `apm generate` command
-│   │   ├── validate.py          # `apm validate` command
-│   │   ├── list_editors.py      # `apm list-editors` command
-│   │   └── preview.py           # `apm preview` command
+│   │   ├── init.py              # `promptrek init` command
+│   │   ├── generate.py          # `promptrek generate` command
+│   │   ├── validate.py          # `promptrek validate` command
+│   │   ├── list_editors.py      # `promptrek list-editors` command
+│   │   └── preview.py           # `promptrek preview` command
 │   └── utils.py                 # CLI utility functions
 ├── core/                        # Core functionality
 │   ├── __init__.py
@@ -134,8 +134,8 @@ src/apm/
 - **Python files**: `snake_case.py`
 - **Directories**: `snake_case` or `kebab-case` for docs
 - **Templates**: `template_name.extension.j2`
-- **UPF files**: `*.apm.yaml` or `*.apm.yml`
-- **Configuration files**: `.apm.config.json`
+- **UPF files**: `*.promptrek.yaml` or `*.promptrek.yml`
+- **Configuration files**: `.promptrek.config.json`
 
 ### Python Code Conventions
 - **Classes**: `PascalCase`
@@ -154,7 +154,7 @@ src/apm/
 
 ### Global Configuration
 ```
-~/.apm/
+~/.promptrek/
 ├── config.json              # Global user configuration
 ├── templates/               # User-defined templates
 │   ├── copilot/
@@ -166,9 +166,9 @@ src/apm/
 ### Project Configuration
 ```
 project-root/
-├── .apm.yaml                # Universal prompt file
-├── .apm.config.json         # Project-specific configuration
-└── .apm/                    # Project-specific APM files
+├── .promptrek.yaml                # Universal prompt file
+├── .promptrek.config.json     # Project-specific configuration
+└── .promptrek/                # Project-specific PrompTrek files
     ├── templates/           # Project templates
     └── overrides/           # Template overrides
 ```

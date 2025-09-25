@@ -9,7 +9,7 @@ from pathlib import Path
 import pytest
 from click.testing import CliRunner
 
-from src.apm.cli.main import cli
+from src.promptrek.cli.main import cli
 
 
 class TestCLIIntegration:
@@ -69,7 +69,7 @@ variables:
   PROJECT_NAME: "CLITestProject"
   AUTHOR_NAME: "Test Author"
 """
-        upf_file = temp_dir / "test.apm.yaml"
+        upf_file = temp_dir / "test.promptrek.yaml"
         upf_file.write_text(upf_content)
         return upf_file
 
@@ -109,7 +109,7 @@ conditions:
 variables:
   TEST_VAR: "default_value"
 """
-        upf_file = temp_dir / "conditional.apm.yaml"
+        upf_file = temp_dir / "conditional.promptrek.yaml"
         upf_file.write_text(upf_content)
         return upf_file
 
@@ -117,7 +117,7 @@ variables:
         """Test CLI help command."""
         result = runner.invoke(cli, ["--help"])
         assert result.exit_code == 0
-        assert "Agent Prompt Mapper" in result.output
+        assert "PrompTrek" in result.output
         assert "generate" in result.output
         assert "validate" in result.output
         assert "list-editors" in result.output
@@ -139,7 +139,7 @@ variables:
 
     def test_validate_nonexistent_file(self, runner):
         """Test validate command with nonexistent file."""
-        result = runner.invoke(cli, ["validate", "nonexistent.apm.yaml"])
+        result = runner.invoke(cli, ["validate", "nonexistent.promptrek.yaml"])
         assert result.exit_code != 0
         assert "does not exist" in result.output.lower()
 
@@ -311,7 +311,7 @@ variables:
 
     def test_init_command_basic(self, runner, temp_dir):
         """Test init command basic functionality."""
-        init_file = temp_dir / "init_test.apm.yaml"
+        init_file = temp_dir / "init_test.promptrek.yaml"
         result = runner.invoke(
             cli, ["init", "--output", str(init_file)], input="\n\n\n\n\n\n"
         )  # Accept all defaults
@@ -327,7 +327,7 @@ variables:
 
     def test_init_command_with_template(self, runner, temp_dir):
         """Test init command with template."""
-        init_file = temp_dir / "template_test.apm.yaml"
+        init_file = temp_dir / "template_test.promptrek.yaml"
         result = runner.invoke(
             cli, ["init", "--template", "basic", "--output", str(init_file)]
         )

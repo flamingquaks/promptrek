@@ -1,5 +1,5 @@
 """
-Agent Prompt Mapper (APM)
+PrompTrek
 
 A universal AI Editor prompt storage solution that allows developers to:
 1. Create prompts/workflows in a universal, standardized format
@@ -8,8 +8,8 @@ A universal AI Editor prompt storage solution that allows developers to:
 """
 
 __version__ = "0.1.0"
-__author__ = "Agent Prompt Mapper Team"
-__email__ = "team@agentpromptmapper.dev"
+__author__ = "PrompTrek Team"
+__email__ = "team@promptrek.dev"
 
 from .core.models import UniversalPrompt
 from .core.parser import UPFParser

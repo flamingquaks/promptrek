@@ -4,7 +4,7 @@ Unit tests for Copilot adapter.
 
 import pytest
 
-from src.apm.adapters.copilot import CopilotAdapter
+from src.promptrek.adapters.copilot import CopilotAdapter
 
 from .base_test import TestAdapterBase
 

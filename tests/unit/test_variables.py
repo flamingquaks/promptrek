@@ -6,9 +6,9 @@ import os
 
 import pytest
 
-from apm.core.exceptions import TemplateError
-from apm.core.models import Instructions, PromptMetadata, UniversalPrompt
-from apm.utils.variables import VariableSubstitution
+from src.promptrek.core.exceptions import TemplateError
+from src.promptrek.core.models import Instructions, PromptMetadata, UniversalPrompt
+from src.promptrek.utils.variables import VariableSubstitution
 
 
 class TestVariableSubstitution:
@@ -18,10 +18,10 @@ class TestVariableSubstitution:
         """Test basic variable substitution."""
         vs = VariableSubstitution()
         content = "Hello {{{ NAME }}}, welcome to {{{ PROJECT }}}!"
-        variables = {"NAME": "John", "PROJECT": "Agent Prompt Mapper"}
+        variables = {"NAME": "John", "PROJECT": "PromptTrek"}
 
         result = vs.substitute(content, variables)
-        assert result == "Hello John, welcome to Agent Prompt Mapper!"
+        assert result == "Hello John, welcome to PromptTrek!"
 
     def test_environment_variable_substitution(self):
         """Test environment variable substitution."""

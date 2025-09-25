@@ -60,20 +60,20 @@ jobs:
     
     - name: Run tests
       run: |
-        python -m pytest tests/ -v --tb=short --cov=src/apm --cov-report=term-missing
+        python -m pytest tests/ -v --tb=short --cov=src/promptrek --cov-report=term-missing
     
     - name: Test CLI installation and basic functionality
       shell: bash
       run: |
         # Test that the CLI is properly installed
-        python -c "import apm; print('Import successful')"
-        python -m apm.cli.main --help
-        python -m apm.cli.main list-editors
+        python -c "import promptrek; print('Import successful')"
+        python -m promptrek.cli.main --help
+        python -m promptrek.cli.main list-editors
         
         # Test basic workflow
-        python -m apm.cli.main init --template basic --output test.apm.yaml
-        python -m apm.cli.main validate test.apm.yaml
-        python -m apm.cli.main generate --all --dry-run test.apm.yaml
+        python -m promptrek.cli.main init --template basic --output test.promptrek.yaml
+        python -m promptrek.cli.main validate test.promptrek.yaml
+        python -m promptrek.cli.main generate --all --dry-run test.promptrek.yaml
 
   test-edge-cases:
     runs-on: ubuntu-latest
@@ -94,12 +94,12 @@ jobs:
       run: |
         # Test that the package works with only required dependencies
         pip install --force-reinstall --no-deps click PyYAML Jinja2 pydantic
-        python -c "import apm; print('Minimal dependencies work')"
+        python -c "import promptrek; print('Minimal dependencies work')"
     
     - name: Test large files
       run: |
         # Create a large test file using here document
-        cat > large-test.apm.yaml << 'EOF'
+        cat > large-test.promptrek.yaml << 'EOF'
         schema_version: "1.0.0"
         metadata:
           title: "Large Test File"
@@ -132,8 +132,8 @@ jobs:
         EOF
         
         # Test parsing and validation of large file
-        python -m apm.cli.main validate large-test.apm.yaml
-        python -m apm.cli.main generate --editor copilot --dry-run large-test.apm.yaml
+        python -m promptrek.cli.main validate large-test.promptrek.yaml
+        python -m promptrek.cli.main generate --editor copilot --dry-run large-test.promptrek.yaml
     
     - name: Test memory usage
       run: |
