@@ -8,7 +8,7 @@ from unittest.mock import mock_open, patch
 
 import pytest
 
-from src.promptrek.adapters.kiro import KiroAdapter
+from promptrek.adapters.kiro import KiroAdapter
 
 from .base_test import TestAdapterBase
 

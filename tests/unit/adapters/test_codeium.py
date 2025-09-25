@@ -8,8 +8,8 @@ from unittest.mock import mock_open, patch
 
 import pytest
 
-from src.promptrek.adapters.codeium import CodeiumAdapter
-from src.promptrek.core.models import PromptMetadata, UniversalPrompt
+from promptrek.adapters.codeium import CodeiumAdapter
+from promptrek.core.models import PromptMetadata, UniversalPrompt
 
 from .base_test import TestAdapterBase
 

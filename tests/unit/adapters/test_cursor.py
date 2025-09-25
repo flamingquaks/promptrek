@@ -4,7 +4,7 @@ Unit tests for Cursor adapter.
 
 import pytest
 
-from src.promptrek.adapters.cursor import CursorAdapter
+from promptrek.adapters.cursor import CursorAdapter
 
 from .base_test import TestAdapterBase
 
@@ -35,7 +35,7 @@ class TestCursorAdapter(TestAdapterBase):
 
     def test_validate_missing_instructions(self, adapter):
         """Test validation with missing instructions."""
-        from src.promptrek.core.models import PromptMetadata, UniversalPrompt
+        from promptrek.core.models import PromptMetadata, UniversalPrompt
 
         prompt = UniversalPrompt(
             schema_version="1.0.0",

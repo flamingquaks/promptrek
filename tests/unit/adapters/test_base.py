@@ -4,8 +4,8 @@ Unit tests for base adapter functionality.
 
 import pytest
 
-from src.promptrek.adapters.continue_adapter import ContinueAdapter
-from src.promptrek.core.models import UniversalPrompt
+from promptrek.adapters.continue_adapter import ContinueAdapter
+from promptrek.core.models import UniversalPrompt
 
 from .base_test import TestAdapterBase
 

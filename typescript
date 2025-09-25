@@ -1,0 +1,1418 @@
+Script started on Thu Sep 25 12:27:36 2025
+^[[A^C[1m[7m%[27m[1m[0m                                                                                                  ]2;awsrudy@bcd0745baf57:~/Documents/Projects/promptrek]1;..cts/promptrek]7;file://bcd0745baf57.ant.amazon.com/Users/awsrudy/Documents/Projects/promptrek\[0m[27m[24m[J[01;31m➜  [36mpromptrek[00m [K[?1h=[?2004h[0m[27m[24m[J[01;31m➜  [36mpromptrek[00m [01;34mgit:([31mcopilot/fix-5a1ca58a-a8a5-4ef0-8504-3321ce846af8[34m) [33m✗[00m [K../script.sh[1m [0m[0m [?1l>[?2004l
+]2;./script.sh]1;./script.sh[0;34mPrompTrek Development Helper[0m
+
+Usage: ./script.sh <command>
+
+Commands:
+  [0;32msetup[0m      - Initial project setup with uv
+  [0;32minstall[0m    - Install dependencies with uv
+  [0;32mtest[0m       - Run tests
+  [0;32mlint[0m       - Run linters
+  [0;32mformat[0m     - Format code
+  [0;32mbuild[0m      - Build package
+  [0;32mclean[0m      - Clean artifacts
+  [0;32mrun[0m        - Run promptrek CLI
+
+For more options, use: [0;33mmake help[0m
+[1m[7m%[27m[1m[0m                                                                                                  ]2;awsrudy@bcd0745baf57:~/Documents/Projects/promptrek]1;..cts/promptrek]7;file://bcd0745baf57.ant.amazon.com/Users/awsrudy/Documents/Projects/promptrek\[0m[27m[24m[J[01;32m➜  [36mpromptrek[00m [01;34mgit:([31mcopilot/fix-5a1ca58a-a8a5-4ef0-8504-3321ce846af8[34m) [33m✗[00m [K[?1h=[?2004h./script.sh setup[?1l>[?2004l
+]2;./script.sh setup]1;./script.sh[0;34mSetting up PrompTrek development environment...[0m
+[0;33mInstalling dependencies...[0m
+[1m[31merror[39m[0m: No `pyproject.toml` found in current directory or any parent directory
+[1m[7m%[27m[1m[0m                                                                                                  ]2;awsrudy@bcd0745baf57:~/Documents/Projects/promptrek]1;..cts/promptrek]7;file://bcd0745baf57.ant.amazon.com/Users/awsrudy/Documents/Projects/promptrek\[0m[27m[24m[J[01;31m➜  [36mpromptrek[00m [01;34mgit:([31mcopilot/fix-5a1ca58a-a8a5-4ef0-8504-3321ce846af8[34m) [33m✗[00m [K[?1h=[?2004hlls[?1l>[?2004l
+]2;ls -G]1;lsCHANGELOG.md       README.md          [1m[36mexamples[39;49m[0m           [31mscript.sh[39;49m[0m          [1m[36mtests[39;49m[0m
+GETTING_STARTED.md [1m[36mdist[39;49m[0m               [1m[36mhtmlcov[39;49m[0m            [1m[36mscripts[39;49m[0m            typescript
+Makefile           [1m[36mdocs[39;49m[0m               pyproject.toml     [1m[36msrc[39;49m[0m                uv.lock
+[1m[7m%[27m[1m[0m                                                                                                  ]2;awsrudy@bcd0745baf57:~/Documents/Projects/promptrek]1;..cts/promptrek]7;file://bcd0745baf57.ant.amazon.com/Users/awsrudy/Documents/Projects/promptrek\[0m[27m[24m[J[01;32m➜  [36mpromptrek[00m [01;34mgit:([31mcopilot/fix-5a1ca58a-a8a5-4ef0-8504-3321ce846af8[34m) [33m✗[00m [K[?1h=[?2004hppwd[?1l>[?2004l
+]2;pwd]1;pwd/Users/awsrudy/Documents/Projects/promptrek
+[1m[7m%[27m[1m[0m                                                                                                  ]2;awsrudy@bcd0745baf57:~/Documents/Projects/promptrek]1;..cts/promptrek]7;file://bcd0745baf57.ant.amazon.com/Users/awsrudy/Documents/Projects/promptrek\[0m[27m[24m[J[01;32m➜  [36mpromptrek[00m [01;34mgit:([31mcopilot/fix-5a1ca58a-a8a5-4ef0-8504-3321ce846af8[34m) [33m✗[00m [K[?1h=[?2004hlls l  pwdls ./script.sh setup[?1l>[?2004l
+]2;./script.sh setup]1;./script.sh[0;34mSetting up PrompTrek development environment...[0m
+[0;33mInstalling dependencies...[0m
+[1m[31merror[39m[0m: No `pyproject.toml` found in current directory or any parent directory
+[1m[7m%[27m[1m[0m                                                                                                  ]2;awsrudy@bcd0745baf57:~/Documents/Projects/promptrek]1;..cts/promptrek]7;file://bcd0745baf57.ant.amazon.com/Users/awsrudy/Documents/Projects/promptrek\[0m[27m[24m[J[01;31m➜  [36mpromptrek[00m [01;34mgit:([31mcopilot/fix-5a1ca58a-a8a5-4ef0-8504-3321ce846af8[34m) [33m✗[00m [K[?1h=[?2004h./script.sh setup     te4s  st[?1l>[?2004l
+]2;./script.sh test]1;./script.sh[0;34mRunning tests...[0m
+[1m====================================== test session starts =======================================[0m
+platform darwin -- Python 3.12.3, pytest-8.4.2, pluggy-1.6.0
+rootdir: /Users/awsrudy/Documents/Projects
+plugins: cov-7.0.0
+[1mcollecting ... [0m[1mcollecting 0 items                                                                               [0m[1mcollecting 423 items                                                                             [0m[1mcollecting 851 items                                                                             [0m[1mcollecting 851 items                                                                             [0m[1mcollecting 851 items                                                                             [0m[1mcollecting 855 items / 2 errors                                                                  [0m[1mcollecting 855 items / 2 errors                                                                  [0m[1mcollecting 855 items / 4 errors                                                                  [0m[1mcollecting 855 items / 4 errors                                                                  [0m	[1mcollecting 860 items / 4 errors                                                                  [0m[1mcollecting 1534 items / 4 errors                                                                 [0m[1mcollecting 1534 items / 4 errors                                                                 [0m[1mcollecting 1540 items / 4 errors                                                                 [0m[1mcollecting 1899 items / 4 errors / 5 skipped                                                     [0m[1mcollecting 2210 items / 4 errors / 14 skipped                                                    [0m[1mcollecting 2574 items / 4 errors / 14 skipped                                                    [0m[1mcollecting 2907 items / 4 errors / 17 skipped                                                    [0m[1mcollecting 3226 items / 4 errors / 18 skipped                                                    [0m[1mcollecting 4294 items / 4 errors / 20 skipped                                                    [0m[1mcollecting 4725 items / 4 errors / 25 skipped                                                    [0m[1mcollecting 5072 items / 4 errors / 25 skipped                                                    [0m[1mcollecting 6225 items / 4 errors / 26 skipped                                                    [0m[1mcollecting 6477 items / 4 errors / 29 skipped                                                    [0m[1mcollecting 6838 items / 4 errors / 37 skipped                                                    [0m[1mcollecting 7139 items / 4 errors / 41 skipped                                                    [0m[1mcollecting 7273 items / 4 errors / 42 skipped                                                    [0m[1mcollecting 7273 items / 4 errors / 42 skipped                                                    [0m[1mcollecting 7273 items / 4 errors / 42 skipped                                                    [0m[1mcollecting 7273 items / 20 errors / 42 skipped                                                   [0m[1mcollecting 7273 items / 20 errors / 42 skipped                                                   [0m[1mcollecting 7273 items / 20 errors / 42 skipped                                                   [0m[1mcollecting 7294 items / 20 errors / 42 skipped                                                   [0m[1mcollecting 8686 items / 22 errors / 43 skipped                                                   [0m[1mcollecting 8686 items / 37 errors / 43 skipped                                                   [0m[1mcollecting 8686 items / 41 errors / 43 skipped                                                   [0m[1mcollecting 8686 items / 45 errors / 43 skipped                                                   [0m[1mcollecting 8686 items / 45 errors / 43 skipped                                                   [0m[1mcollecting 8686 items / 45 errors / 43 skipped                                                   [0m[1mcollecting 8686 items / 49 errors / 43 skipped                                                   [0m[1mcollecting 8686 items / 49 errors / 43 skipped                                                   [0m[1mcollecting 8686 items / 49 errors / 43 skipped                                                   [0m[1mcollecting 8686 items / 49 errors / 43 skipped                                                   [0m[1mcollecting 8686 items / 65 errors / 43 skipped                                                   [0m[1mcollecting 8686 items / 65 errors / 43 skipped                                                   [0m[1mcollecting 8686 items / 65 errors / 43 skipped                                                   [0m[1mcollecting 8686 items / 69 errors / 43 skipped                                                   [0m[1mcollecting 8686 items / 69 errors / 43 skipped                                                   [0m[1mcollecting 8686 items / 74 errors / 43 skipped                                                   [0m[1mcollecting 8686 items / 74 errors / 43 skipped                                                   [0m[1mcollecting 8686 items / 78 errors / 43 skipped                                                   [0m[1mcollecting 8686 items / 78 errors / 43 skipped                                                   [0m[1mcollecting 8686 items / 82 errors / 43 skipped                                                   [0m[1mcollecting 8686 items / 84 errors / 43 skipped                                                   [0m[1mcollecting 8686 items / 84 errors / 43 skipped                                                   [0m[1mcollecting 8689 items / 87 errors / 43 skipped                                                   [0m[1mcollecting 8689 items / 99 errors / 43 skipped                                                   [0m[1mcollected 8689 items / 114 errors / 43 skipped                                                   [0m
+
+============================================= ERRORS =============================================
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.2183dcaa772de3d47631cdebe38c4b022cb6646ea06836395afe4ed48327564a/regex/test_regex.py _[0m
+[31mImportError while importing test module '/Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.2183dcaa772de3d47631cdebe38c4b022cb6646ea06836395afe4ed48327564a/regex/test_regex.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../../.pyenv/versions/3.12.3/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.2183dcaa772de3d47631cdebe38c4b022cb6646ea06836395afe4ed48327564a/regex/__init__.py:1: in <module>
+    from .regex import *
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.2183dcaa772de3d47631cdebe38c4b022cb6646ea06836395afe4ed48327564a/regex/regex.py:417: in <module>
+    import regex._regex_core as _regex_core
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.2183dcaa772de3d47631cdebe38c4b022cb6646ea06836395afe4ed48327564a/regex/_regex_core.py:21: in <module>
+    import regex._regex as _regex
+E   ModuleNotFoundError: No module named 'regex._regex'[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.21ae0926455dfdc595633438d46c8da948f6b5adabc141897f7892c7cdd7fc57/annotated_types/test_cases.py _[0m
+[31mimport file mismatch:
+imported module 'annotated_types.test_cases' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.2183dcaa772de3d47631cdebe38c4b022cb6646ea06836395afe4ed48327564a/annotated_types/test_cases.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.21ae0926455dfdc595633438d46c8da948f6b5adabc141897f7892c7cdd7fc57/annotated_types/test_cases.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.21ae0926455dfdc595633438d46c8da948f6b5adabc141897f7892c7cdd7fc57/regex/test_regex.py _[0m
+[31mImportError while importing test module '/Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.21ae0926455dfdc595633438d46c8da948f6b5adabc141897f7892c7cdd7fc57/regex/test_regex.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../../.pyenv/versions/3.12.3/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.21ae0926455dfdc595633438d46c8da948f6b5adabc141897f7892c7cdd7fc57/regex/__init__.py:1: in <module>
+    from .regex import *
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.21ae0926455dfdc595633438d46c8da948f6b5adabc141897f7892c7cdd7fc57/regex/regex.py:417: in <module>
+    import regex._regex_core as _regex_core
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.21ae0926455dfdc595633438d46c8da948f6b5adabc141897f7892c7cdd7fc57/regex/_regex_core.py:21: in <module>
+    import regex._regex as _regex
+E   ModuleNotFoundError: No module named 'regex._regex'[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.21ae0926455dfdc595633438d46c8da948f6b5adabc141897f7892c7cdd7fc57/sniffio/_tests/test_sniffio.py _[0m
+[31mimport file mismatch:
+imported module 'sniffio._tests.test_sniffio' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.2183dcaa772de3d47631cdebe38c4b022cb6646ea06836395afe4ed48327564a/sniffio/_tests/test_sniffio.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.21ae0926455dfdc595633438d46c8da948f6b5adabc141897f7892c7cdd7fc57/sniffio/_tests/test_sniffio.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.3a993ac6f82fd1fc53f3981efffdad652c44c8a196d282f25cfbe0ad59d8b882/bs4/tests/test_builder.py _[0m
+[31mimport file mismatch:
+imported module 'bs4.tests.test_builder' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.0d6a72e680dc6e5bbf556761e2d0f023bb40962371918657e77457cfbd26e4aa/bs4/tests/test_builder.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.3a993ac6f82fd1fc53f3981efffdad652c44c8a196d282f25cfbe0ad59d8b882/bs4/tests/test_builder.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.3a993ac6f82fd1fc53f3981efffdad652c44c8a196d282f25cfbe0ad59d8b882/bs4/tests/test_builder_registry.py _[0m
+[31mimport file mismatch:
+imported module 'bs4.tests.test_builder_registry' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.0d6a72e680dc6e5bbf556761e2d0f023bb40962371918657e77457cfbd26e4aa/bs4/tests/test_builder_registry.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.3a993ac6f82fd1fc53f3981efffdad652c44c8a196d282f25cfbe0ad59d8b882/bs4/tests/test_builder_registry.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.3a993ac6f82fd1fc53f3981efffdad652c44c8a196d282f25cfbe0ad59d8b882/bs4/tests/test_css.py _[0m
+[31mimport file mismatch:
+imported module 'bs4.tests.test_css' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.0d6a72e680dc6e5bbf556761e2d0f023bb40962371918657e77457cfbd26e4aa/bs4/tests/test_css.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.3a993ac6f82fd1fc53f3981efffdad652c44c8a196d282f25cfbe0ad59d8b882/bs4/tests/test_css.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.3a993ac6f82fd1fc53f3981efffdad652c44c8a196d282f25cfbe0ad59d8b882/bs4/tests/test_dammit.py _[0m
+[31mimport file mismatch:
+imported module 'bs4.tests.test_dammit' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.0d6a72e680dc6e5bbf556761e2d0f023bb40962371918657e77457cfbd26e4aa/bs4/tests/test_dammit.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.3a993ac6f82fd1fc53f3981efffdad652c44c8a196d282f25cfbe0ad59d8b882/bs4/tests/test_dammit.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.3a993ac6f82fd1fc53f3981efffdad652c44c8a196d282f25cfbe0ad59d8b882/bs4/tests/test_element.py _[0m
+[31mimport file mismatch:
+imported module 'bs4.tests.test_element' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.0d6a72e680dc6e5bbf556761e2d0f023bb40962371918657e77457cfbd26e4aa/bs4/tests/test_element.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.3a993ac6f82fd1fc53f3981efffdad652c44c8a196d282f25cfbe0ad59d8b882/bs4/tests/test_element.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.3a993ac6f82fd1fc53f3981efffdad652c44c8a196d282f25cfbe0ad59d8b882/bs4/tests/test_filter.py _[0m
+[31mimport file mismatch:
+imported module 'bs4.tests.test_filter' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.0d6a72e680dc6e5bbf556761e2d0f023bb40962371918657e77457cfbd26e4aa/bs4/tests/test_filter.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.3a993ac6f82fd1fc53f3981efffdad652c44c8a196d282f25cfbe0ad59d8b882/bs4/tests/test_filter.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.3a993ac6f82fd1fc53f3981efffdad652c44c8a196d282f25cfbe0ad59d8b882/bs4/tests/test_formatter.py _[0m
+[31mimport file mismatch:
+imported module 'bs4.tests.test_formatter' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.0d6a72e680dc6e5bbf556761e2d0f023bb40962371918657e77457cfbd26e4aa/bs4/tests/test_formatter.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.3a993ac6f82fd1fc53f3981efffdad652c44c8a196d282f25cfbe0ad59d8b882/bs4/tests/test_formatter.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.3a993ac6f82fd1fc53f3981efffdad652c44c8a196d282f25cfbe0ad59d8b882/bs4/tests/test_fuzz.py _[0m
+[31mimport file mismatch:
+imported module 'bs4.tests.test_fuzz' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.0d6a72e680dc6e5bbf556761e2d0f023bb40962371918657e77457cfbd26e4aa/bs4/tests/test_fuzz.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.3a993ac6f82fd1fc53f3981efffdad652c44c8a196d282f25cfbe0ad59d8b882/bs4/tests/test_fuzz.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.3a993ac6f82fd1fc53f3981efffdad652c44c8a196d282f25cfbe0ad59d8b882/bs4/tests/test_html5lib.py _[0m
+[31mimport file mismatch:
+imported module 'bs4.tests.test_html5lib' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.0d6a72e680dc6e5bbf556761e2d0f023bb40962371918657e77457cfbd26e4aa/bs4/tests/test_html5lib.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.3a993ac6f82fd1fc53f3981efffdad652c44c8a196d282f25cfbe0ad59d8b882/bs4/tests/test_html5lib.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.3a993ac6f82fd1fc53f3981efffdad652c44c8a196d282f25cfbe0ad59d8b882/bs4/tests/test_htmlparser.py _[0m
+[31mimport file mismatch:
+imported module 'bs4.tests.test_htmlparser' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.0d6a72e680dc6e5bbf556761e2d0f023bb40962371918657e77457cfbd26e4aa/bs4/tests/test_htmlparser.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.3a993ac6f82fd1fc53f3981efffdad652c44c8a196d282f25cfbe0ad59d8b882/bs4/tests/test_htmlparser.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.3a993ac6f82fd1fc53f3981efffdad652c44c8a196d282f25cfbe0ad59d8b882/bs4/tests/test_lxml.py _[0m
+[31mimport file mismatch:
+imported module 'bs4.tests.test_lxml' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.0d6a72e680dc6e5bbf556761e2d0f023bb40962371918657e77457cfbd26e4aa/bs4/tests/test_lxml.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.3a993ac6f82fd1fc53f3981efffdad652c44c8a196d282f25cfbe0ad59d8b882/bs4/tests/test_lxml.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.3a993ac6f82fd1fc53f3981efffdad652c44c8a196d282f25cfbe0ad59d8b882/bs4/tests/test_navigablestring.py _[0m
+[31mimport file mismatch:
+imported module 'bs4.tests.test_navigablestring' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.0d6a72e680dc6e5bbf556761e2d0f023bb40962371918657e77457cfbd26e4aa/bs4/tests/test_navigablestring.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.3a993ac6f82fd1fc53f3981efffdad652c44c8a196d282f25cfbe0ad59d8b882/bs4/tests/test_navigablestring.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.3a993ac6f82fd1fc53f3981efffdad652c44c8a196d282f25cfbe0ad59d8b882/bs4/tests/test_pageelement.py _[0m
+[31mimport file mismatch:
+imported module 'bs4.tests.test_pageelement' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.0d6a72e680dc6e5bbf556761e2d0f023bb40962371918657e77457cfbd26e4aa/bs4/tests/test_pageelement.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.3a993ac6f82fd1fc53f3981efffdad652c44c8a196d282f25cfbe0ad59d8b882/bs4/tests/test_pageelement.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.3a993ac6f82fd1fc53f3981efffdad652c44c8a196d282f25cfbe0ad59d8b882/bs4/tests/test_soup.py _[0m
+[31mimport file mismatch:
+imported module 'bs4.tests.test_soup' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.0d6a72e680dc6e5bbf556761e2d0f023bb40962371918657e77457cfbd26e4aa/bs4/tests/test_soup.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.3a993ac6f82fd1fc53f3981efffdad652c44c8a196d282f25cfbe0ad59d8b882/bs4/tests/test_soup.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.3a993ac6f82fd1fc53f3981efffdad652c44c8a196d282f25cfbe0ad59d8b882/bs4/tests/test_tag.py _[0m
+[31mimport file mismatch:
+imported module 'bs4.tests.test_tag' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.0d6a72e680dc6e5bbf556761e2d0f023bb40962371918657e77457cfbd26e4aa/bs4/tests/test_tag.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.3a993ac6f82fd1fc53f3981efffdad652c44c8a196d282f25cfbe0ad59d8b882/bs4/tests/test_tag.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.3a993ac6f82fd1fc53f3981efffdad652c44c8a196d282f25cfbe0ad59d8b882/bs4/tests/test_tree.py _[0m
+[31mimport file mismatch:
+imported module 'bs4.tests.test_tree' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.0d6a72e680dc6e5bbf556761e2d0f023bb40962371918657e77457cfbd26e4aa/bs4/tests/test_tree.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.3a993ac6f82fd1fc53f3981efffdad652c44c8a196d282f25cfbe0ad59d8b882/bs4/tests/test_tree.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/jsonschema/tests/test_cli.py _[0m
+[31mImportError while importing test module '/Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/jsonschema/tests/test_cli.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../../.pyenv/versions/3.12.3/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/jsonschema/__init__.py:13: in <module>
+    from jsonschema._format import FormatChecker
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/jsonschema/_format.py:11: in <module>
+    from jsonschema.exceptions import FormatError
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/jsonschema/exceptions.py:15: in <module>
+    from referencing.exceptions import Unresolvable as _Unresolvable
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/referencing/__init__.py:5: in <module>
+    from referencing._core import Anchor, Registry, Resource, Specification
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/referencing/_core.py:9: in <module>
+    from rpds import HashTrieMap, HashTrieSet, List
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/rpds/__init__.py:1: in <module>
+    from .rpds import *
+E   ModuleNotFoundError: No module named 'rpds.rpds'[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/jsonschema/tests/test_deprecations.py _[0m
+[31mImportError while importing test module '/Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/jsonschema/tests/test_deprecations.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../../.pyenv/versions/3.12.3/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/jsonschema/__init__.py:13: in <module>
+    from jsonschema._format import FormatChecker
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/jsonschema/_format.py:11: in <module>
+    from jsonschema.exceptions import FormatError
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/jsonschema/exceptions.py:15: in <module>
+    from referencing.exceptions import Unresolvable as _Unresolvable
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/referencing/__init__.py:5: in <module>
+    from referencing._core import Anchor, Registry, Resource, Specification
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/referencing/_core.py:9: in <module>
+    from rpds import HashTrieMap, HashTrieSet, List
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/rpds/__init__.py:1: in <module>
+    from .rpds import *
+E   ModuleNotFoundError: No module named 'rpds.rpds'[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/jsonschema/tests/test_exceptions.py _[0m
+[31mImportError while importing test module '/Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/jsonschema/tests/test_exceptions.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../../.pyenv/versions/3.12.3/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/jsonschema/__init__.py:13: in <module>
+    from jsonschema._format import FormatChecker
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/jsonschema/_format.py:11: in <module>
+    from jsonschema.exceptions import FormatError
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/jsonschema/exceptions.py:15: in <module>
+    from referencing.exceptions import Unresolvable as _Unresolvable
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/referencing/__init__.py:5: in <module>
+    from referencing._core import Anchor, Registry, Resource, Specification
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/referencing/_core.py:9: in <module>
+    from rpds import HashTrieMap, HashTrieSet, List
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/rpds/__init__.py:1: in <module>
+    from .rpds import *
+E   ModuleNotFoundError: No module named 'rpds.rpds'[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/jsonschema/tests/test_format.py _[0m
+[31mImportError while importing test module '/Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/jsonschema/tests/test_format.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../../.pyenv/versions/3.12.3/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/jsonschema/__init__.py:13: in <module>
+    from jsonschema._format import FormatChecker
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/jsonschema/_format.py:11: in <module>
+    from jsonschema.exceptions import FormatError
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/jsonschema/exceptions.py:15: in <module>
+    from referencing.exceptions import Unresolvable as _Unresolvable
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/referencing/__init__.py:5: in <module>
+    from referencing._core import Anchor, Registry, Resource, Specification
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/referencing/_core.py:9: in <module>
+    from rpds import HashTrieMap, HashTrieSet, List
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/rpds/__init__.py:1: in <module>
+    from .rpds import *
+E   ModuleNotFoundError: No module named 'rpds.rpds'[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/jsonschema/tests/test_jsonschema_test_suite.py _[0m
+[31mImportError while importing test module '/Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/jsonschema/tests/test_jsonschema_test_suite.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../../.pyenv/versions/3.12.3/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/jsonschema/__init__.py:13: in <module>
+    from jsonschema._format import FormatChecker
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/jsonschema/_format.py:11: in <module>
+    from jsonschema.exceptions import FormatError
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/jsonschema/exceptions.py:15: in <module>
+    from referencing.exceptions import Unresolvable as _Unresolvable
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/referencing/__init__.py:5: in <module>
+    from referencing._core import Anchor, Registry, Resource, Specification
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/referencing/_core.py:9: in <module>
+    from rpds import HashTrieMap, HashTrieSet, List
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/rpds/__init__.py:1: in <module>
+    from .rpds import *
+E   ModuleNotFoundError: No module named 'rpds.rpds'[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/jsonschema/tests/test_types.py _[0m
+[31mImportError while importing test module '/Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/jsonschema/tests/test_types.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../../.pyenv/versions/3.12.3/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/jsonschema/__init__.py:13: in <module>
+    from jsonschema._format import FormatChecker
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/jsonschema/_format.py:11: in <module>
+    from jsonschema.exceptions import FormatError
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/jsonschema/exceptions.py:15: in <module>
+    from referencing.exceptions import Unresolvable as _Unresolvable
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/referencing/__init__.py:5: in <module>
+    from referencing._core import Anchor, Registry, Resource, Specification
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/referencing/_core.py:9: in <module>
+    from rpds import HashTrieMap, HashTrieSet, List
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/rpds/__init__.py:1: in <module>
+    from .rpds import *
+E   ModuleNotFoundError: No module named 'rpds.rpds'[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/jsonschema/tests/test_utils.py _[0m
+[31mImportError while importing test module '/Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/jsonschema/tests/test_utils.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../../.pyenv/versions/3.12.3/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/jsonschema/__init__.py:13: in <module>
+    from jsonschema._format import FormatChecker
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/jsonschema/_format.py:11: in <module>
+    from jsonschema.exceptions import FormatError
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/jsonschema/exceptions.py:15: in <module>
+    from referencing.exceptions import Unresolvable as _Unresolvable
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/referencing/__init__.py:5: in <module>
+    from referencing._core import Anchor, Registry, Resource, Specification
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/referencing/_core.py:9: in <module>
+    from rpds import HashTrieMap, HashTrieSet, List
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/rpds/__init__.py:1: in <module>
+    from .rpds import *
+E   ModuleNotFoundError: No module named 'rpds.rpds'[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/jsonschema/tests/test_validators.py _[0m
+[31mImportError while importing test module '/Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/jsonschema/tests/test_validators.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../../.pyenv/versions/3.12.3/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/jsonschema/__init__.py:13: in <module>
+    from jsonschema._format import FormatChecker
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/jsonschema/_format.py:11: in <module>
+    from jsonschema.exceptions import FormatError
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/jsonschema/exceptions.py:15: in <module>
+    from referencing.exceptions import Unresolvable as _Unresolvable
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/referencing/__init__.py:5: in <module>
+    from referencing._core import Anchor, Registry, Resource, Specification
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/referencing/_core.py:9: in <module>
+    from rpds import HashTrieMap, HashTrieSet, List
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/rpds/__init__.py:1: in <module>
+    from .rpds import *
+E   ModuleNotFoundError: No module named 'rpds.rpds'[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/jsonschema_specifications/tests/test_jsonschema_specifications.py _[0m
+[31mImportError while importing test module '/Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/jsonschema_specifications/tests/test_jsonschema_specifications.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../../.pyenv/versions/3.12.3/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/jsonschema_specifications/__init__.py:5: in <module>
+    from referencing.jsonschema import EMPTY_REGISTRY as _EMPTY_REGISTRY
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/referencing/__init__.py:5: in <module>
+    from referencing._core import Anchor, Registry, Resource, Specification
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/referencing/_core.py:9: in <module>
+    from rpds import HashTrieMap, HashTrieSet, List
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/rpds/__init__.py:1: in <module>
+    from .rpds import *
+E   ModuleNotFoundError: No module named 'rpds.rpds'[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/numpy _[0m
+[1m[31mai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/numpy/_core/__init__.py[0m:22: in <module>
+    [0m[94mfrom[39;49;00m[90m [39;49;00m[04m[96m.[39;49;00m[90m [39;49;00m[94mimport[39;49;00m multiarray[90m[39;49;00m
+[1m[31mai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/numpy/_core/multiarray.py[0m:11: in <module>
+    [0m[94mfrom[39;49;00m[90m [39;49;00m[04m[96m.[39;49;00m[90m [39;49;00m[94mimport[39;49;00m _multiarray_umath, overrides[90m[39;49;00m
+[1m[31mai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/numpy/_core/overrides.py[0m:5: in <module>
+    [0m[94mfrom[39;49;00m[90m [39;49;00m[04m[96mnumpy[39;49;00m[04m[96m.[39;49;00m[04m[96m_core[39;49;00m[04m[96m.[39;49;00m[04m[96m_multiarray_umath[39;49;00m[90m [39;49;00m[94mimport[39;49;00m ([90m[39;49;00m
+[1m[31mE   ModuleNotFoundError: No module named 'numpy._core._multiarray_umath'[0m
+
+[33mThe above exception was the direct cause of the following exception:[0m
+[1m[31mai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/numpy/__init__.py[0m:112: in <module>
+    [0m[94mfrom[39;49;00m[90m [39;49;00m[04m[96mnumpy[39;49;00m[04m[96m.[39;49;00m[04m[96m__config__[39;49;00m[90m [39;49;00m[94mimport[39;49;00m show_config[90m[39;49;00m
+[1m[31mai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/numpy/__config__.py[0m:4: in <module>
+    [0m[94mfrom[39;49;00m[90m [39;49;00m[04m[96mnumpy[39;49;00m[04m[96m.[39;49;00m[04m[96m_core[39;49;00m[04m[96m.[39;49;00m[04m[96m_multiarray_umath[39;49;00m[90m [39;49;00m[94mimport[39;49;00m ([90m[39;49;00m
+[1m[31mai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/numpy/_core/__init__.py[0m:48: in <module>
+    [0m[94mraise[39;49;00m [96mImportError[39;49;00m(msg) [94mfrom[39;49;00m[90m [39;49;00m[04m[96mexc[39;49;00m[90m[39;49;00m
+[1m[31mE   ImportError: [0m
+[1m[31mE   [0m
+[1m[31mE   IMPORTANT: PLEASE READ THIS FOR ADVICE ON HOW TO SOLVE THIS ISSUE![0m
+[1m[31mE   [0m
+[1m[31mE   Importing the numpy C-extensions failed. This error can happen for[0m
+[1m[31mE   many reasons, often due to issues with your setup or how NumPy was[0m
+[1m[31mE   installed.[0m
+[1m[31mE   [0m
+[1m[31mE   We have compiled some common reasons and troubleshooting tips at:[0m
+[1m[31mE   [0m
+[1m[31mE       https://numpy.org/devdocs/user/troubleshooting-importerror.html[0m
+[1m[31mE   [0m
+[1m[31mE   Please note and check the following:[0m
+[1m[31mE   [0m
+[1m[31mE     * The Python version is: Python3.12 from "/Users/awsrudy/Documents/Projects/promptrek/.venv/bin/python3"[0m
+[1m[31mE     * The NumPy version is: "2.3.1"[0m
+[1m[31mE   [0m
+[1m[31mE   and make sure that they are the versions you expect.[0m
+[1m[31mE   Please carefully study the documentation linked above for further help.[0m
+[1m[31mE   [0m
+[1m[31mE   Original error was: No module named 'numpy._core._multiarray_umath'[0m
+
+[33mThe above exception was the direct cause of the following exception:[0m
+[1m[31m../../.pyenv/versions/3.12.3/lib/python3.12/importlib/__init__.py[0m:90: in import_module
+    [0m[94mreturn[39;49;00m _bootstrap._gcd_import(name[level:], package, level)[90m[39;49;00m
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[90m[39;49;00m
+[1m[31m<frozen importlib._bootstrap>[0m:1387: in _gcd_import
+    [0m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[90m[39;49;00m
+[1m[31m<frozen importlib._bootstrap>[0m:1360: in _find_and_load
+    [0m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[90m[39;49;00m
+[1m[31m<frozen importlib._bootstrap>[0m:1310: in _find_and_load_unlocked
+    [0m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[90m[39;49;00m
+[1m[31m<frozen importlib._bootstrap>[0m:488: in _call_with_frames_removed
+    [0m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[90m[39;49;00m
+[1m[31m<frozen importlib._bootstrap>[0m:1387: in _gcd_import
+    [0m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[90m[39;49;00m
+[1m[31m<frozen importlib._bootstrap>[0m:1360: in _find_and_load
+    [0m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[90m[39;49;00m
+[1m[31m<frozen importlib._bootstrap>[0m:1331: in _find_and_load_unlocked
+    [0m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[90m[39;49;00m
+[1m[31m<frozen importlib._bootstrap>[0m:935: in _load_unlocked
+    [0m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[90m[39;49;00m
+[1m[31m<frozen importlib._bootstrap_external>[0m:995: in exec_module
+    [0m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[90m[39;49;00m
+[1m[31m<frozen importlib._bootstrap>[0m:488: in _call_with_frames_removed
+    [0m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[90m[39;49;00m
+[1m[31mai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/numpy/__init__.py[0m:117: in <module>
+    [0m[94mraise[39;49;00m [96mImportError[39;49;00m(msg) [94mfrom[39;49;00m[90m [39;49;00m[04m[96me[39;49;00m[90m[39;49;00m
+[1m[31mE   ImportError: Error importing numpy: you should not try to import numpy from[0m
+[1m[31mE           its source directory; please exit the numpy source tree, and relaunch[0m
+[1m[31mE           your python interpreter from there.[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/referencing/tests/test_core.py _[0m
+[31mImportError while importing test module '/Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/referencing/tests/test_core.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../../.pyenv/versions/3.12.3/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/referencing/__init__.py:5: in <module>
+    from referencing._core import Anchor, Registry, Resource, Specification
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/referencing/_core.py:9: in <module>
+    from rpds import HashTrieMap, HashTrieSet, List
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/rpds/__init__.py:1: in <module>
+    from .rpds import *
+E   ModuleNotFoundError: No module named 'rpds.rpds'[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/referencing/tests/test_exceptions.py _[0m
+[31mImportError while importing test module '/Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/referencing/tests/test_exceptions.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../../.pyenv/versions/3.12.3/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/referencing/__init__.py:5: in <module>
+    from referencing._core import Anchor, Registry, Resource, Specification
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/referencing/_core.py:9: in <module>
+    from rpds import HashTrieMap, HashTrieSet, List
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/rpds/__init__.py:1: in <module>
+    from .rpds import *
+E   ModuleNotFoundError: No module named 'rpds.rpds'[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/referencing/tests/test_jsonschema.py _[0m
+[31mImportError while importing test module '/Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/referencing/tests/test_jsonschema.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../../.pyenv/versions/3.12.3/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/referencing/__init__.py:5: in <module>
+    from referencing._core import Anchor, Registry, Resource, Specification
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/referencing/_core.py:9: in <module>
+    from rpds import HashTrieMap, HashTrieSet, List
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/rpds/__init__.py:1: in <module>
+    from .rpds import *
+E   ModuleNotFoundError: No module named 'rpds.rpds'[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/referencing/tests/test_referencing_suite.py _[0m
+[31mImportError while importing test module '/Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/referencing/tests/test_referencing_suite.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../../.pyenv/versions/3.12.3/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/referencing/__init__.py:5: in <module>
+    from referencing._core import Anchor, Registry, Resource, Specification
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/referencing/_core.py:9: in <module>
+    from rpds import HashTrieMap, HashTrieSet, List
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/rpds/__init__.py:1: in <module>
+    from .rpds import *
+E   ModuleNotFoundError: No module named 'rpds.rpds'[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/referencing/tests/test_retrieval.py _[0m
+[31mImportError while importing test module '/Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/referencing/tests/test_retrieval.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../../.pyenv/versions/3.12.3/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/referencing/__init__.py:5: in <module>
+    from referencing._core import Anchor, Registry, Resource, Specification
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/referencing/_core.py:9: in <module>
+    from rpds import HashTrieMap, HashTrieSet, List
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/rpds/__init__.py:1: in <module>
+    from .rpds import *
+E   ModuleNotFoundError: No module named 'rpds.rpds'[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/scipy _[0m
+[1m[31mai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/numpy/_core/__init__.py[0m:22: in <module>
+    [0m[94mfrom[39;49;00m[90m [39;49;00m[04m[96m.[39;49;00m[90m [39;49;00m[94mimport[39;49;00m multiarray[90m[39;49;00m
+[1m[31mai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/numpy/_core/multiarray.py[0m:11: in <module>
+    [0m[94mfrom[39;49;00m[90m [39;49;00m[04m[96m.[39;49;00m[90m [39;49;00m[94mimport[39;49;00m _multiarray_umath, overrides[90m[39;49;00m
+[1m[31mai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/numpy/_core/overrides.py[0m:5: in <module>
+    [0m[94mfrom[39;49;00m[90m [39;49;00m[04m[96mnumpy[39;49;00m[04m[96m.[39;49;00m[04m[96m_core[39;49;00m[04m[96m.[39;49;00m[04m[96m_multiarray_umath[39;49;00m[90m [39;49;00m[94mimport[39;49;00m ([90m[39;49;00m
+[1m[31mE   ModuleNotFoundError: No module named 'numpy._core._multiarray_umath'[0m
+
+[33mThe above exception was the direct cause of the following exception:[0m
+[1m[31mai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/numpy/__init__.py[0m:112: in <module>
+    [0m[94mfrom[39;49;00m[90m [39;49;00m[04m[96mnumpy[39;49;00m[04m[96m.[39;49;00m[04m[96m__config__[39;49;00m[90m [39;49;00m[94mimport[39;49;00m show_config[90m[39;49;00m
+[1m[31mai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/numpy/__config__.py[0m:4: in <module>
+    [0m[94mfrom[39;49;00m[90m [39;49;00m[04m[96mnumpy[39;49;00m[04m[96m.[39;49;00m[04m[96m_core[39;49;00m[04m[96m.[39;49;00m[04m[96m_multiarray_umath[39;49;00m[90m [39;49;00m[94mimport[39;49;00m ([90m[39;49;00m
+[1m[31mai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/numpy/_core/__init__.py[0m:48: in <module>
+    [0m[94mraise[39;49;00m [96mImportError[39;49;00m(msg) [94mfrom[39;49;00m[90m [39;49;00m[04m[96mexc[39;49;00m[90m[39;49;00m
+[1m[31mE   ImportError: [0m
+[1m[31mE   [0m
+[1m[31mE   IMPORTANT: PLEASE READ THIS FOR ADVICE ON HOW TO SOLVE THIS ISSUE![0m
+[1m[31mE   [0m
+[1m[31mE   Importing the numpy C-extensions failed. This error can happen for[0m
+[1m[31mE   many reasons, often due to issues with your setup or how NumPy was[0m
+[1m[31mE   installed.[0m
+[1m[31mE   [0m
+[1m[31mE   We have compiled some common reasons and troubleshooting tips at:[0m
+[1m[31mE   [0m
+[1m[31mE       https://numpy.org/devdocs/user/troubleshooting-importerror.html[0m
+[1m[31mE   [0m
+[1m[31mE   Please note and check the following:[0m
+[1m[31mE   [0m
+[1m[31mE     * The Python version is: Python3.12 from "/Users/awsrudy/Documents/Projects/promptrek/.venv/bin/python3"[0m
+[1m[31mE     * The NumPy version is: "2.3.1"[0m
+[1m[31mE   [0m
+[1m[31mE   and make sure that they are the versions you expect.[0m
+[1m[31mE   Please carefully study the documentation linked above for further help.[0m
+[1m[31mE   [0m
+[1m[31mE   Original error was: No module named 'numpy._core._multiarray_umath'[0m
+
+[33mThe above exception was the direct cause of the following exception:[0m
+[1m[31m../../.pyenv/versions/3.12.3/lib/python3.12/importlib/__init__.py[0m:90: in import_module
+    [0m[94mreturn[39;49;00m _bootstrap._gcd_import(name[level:], package, level)[90m[39;49;00m
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[90m[39;49;00m
+[1m[31m<frozen importlib._bootstrap>[0m:1387: in _gcd_import
+    [0m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[90m[39;49;00m
+[1m[31m<frozen importlib._bootstrap>[0m:1360: in _find_and_load
+    [0m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[90m[39;49;00m
+[1m[31m<frozen importlib._bootstrap>[0m:1310: in _find_and_load_unlocked
+    [0m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[90m[39;49;00m
+[1m[31m<frozen importlib._bootstrap>[0m:488: in _call_with_frames_removed
+    [0m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[90m[39;49;00m
+[1m[31m<frozen importlib._bootstrap>[0m:1387: in _gcd_import
+    [0m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[90m[39;49;00m
+[1m[31m<frozen importlib._bootstrap>[0m:1360: in _find_and_load
+    [0m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[90m[39;49;00m
+[1m[31m<frozen importlib._bootstrap>[0m:1331: in _find_and_load_unlocked
+    [0m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[90m[39;49;00m
+[1m[31m<frozen importlib._bootstrap>[0m:935: in _load_unlocked
+    [0m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[90m[39;49;00m
+[1m[31m<frozen importlib._bootstrap_external>[0m:995: in exec_module
+    [0m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[90m[39;49;00m
+[1m[31m<frozen importlib._bootstrap>[0m:488: in _call_with_frames_removed
+    [0m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[90m[39;49;00m
+[1m[31mai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/scipy/__init__.py[0m:44: in <module>
+    [0m[94mfrom[39;49;00m[90m [39;49;00m[04m[96mnumpy[39;49;00m[90m [39;49;00m[94mimport[39;49;00m __version__ [94mas[39;49;00m __numpy_version__[90m[39;49;00m
+[1m[31mai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/numpy/__init__.py[0m:117: in <module>
+    [0m[94mraise[39;49;00m [96mImportError[39;49;00m(msg) [94mfrom[39;49;00m[90m [39;49;00m[04m[96me[39;49;00m[90m[39;49;00m
+[1m[31mE   ImportError: Error importing numpy: you should not try to import numpy from[0m
+[1m[31mE           its source directory; please exit the numpy source tree, and relaunch[0m
+[1m[31mE           your python interpreter from there.[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/sklearn _[0m
+[1m[31mai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/sklearn/__check_build/__init__.py[0m:52: in <module>
+    [0m[94mfrom[39;49;00m[90m [39;49;00m[04m[96m.[39;49;00m[04m[96m_check_build[39;49;00m[90m [39;49;00m[94mimport[39;49;00m check_build  [90m# noqa: F401[39;49;00m[90m[39;49;00m
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[90m[39;49;00m
+[1m[31mE   ModuleNotFoundError: No module named 'sklearn.__check_build._check_build'[0m
+
+[33mDuring handling of the above exception, another exception occurred:[0m
+[1m[31m../../.pyenv/versions/3.12.3/lib/python3.12/importlib/__init__.py[0m:90: in import_module
+    [0m[94mreturn[39;49;00m _bootstrap._gcd_import(name[level:], package, level)[90m[39;49;00m
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[90m[39;49;00m
+[1m[31m<frozen importlib._bootstrap>[0m:1387: in _gcd_import
+    [0m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[90m[39;49;00m
+[1m[31m<frozen importlib._bootstrap>[0m:1360: in _find_and_load
+    [0m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[90m[39;49;00m
+[1m[31m<frozen importlib._bootstrap>[0m:1310: in _find_and_load_unlocked
+    [0m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[90m[39;49;00m
+[1m[31m<frozen importlib._bootstrap>[0m:488: in _call_with_frames_removed
+    [0m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[90m[39;49;00m
+[1m[31m<frozen importlib._bootstrap>[0m:1387: in _gcd_import
+    [0m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[90m[39;49;00m
+[1m[31m<frozen importlib._bootstrap>[0m:1360: in _find_and_load
+    [0m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[90m[39;49;00m
+[1m[31m<frozen importlib._bootstrap>[0m:1331: in _find_and_load_unlocked
+    [0m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[90m[39;49;00m
+[1m[31m<frozen importlib._bootstrap>[0m:935: in _load_unlocked
+    [0m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[90m[39;49;00m
+[1m[31m<frozen importlib._bootstrap_external>[0m:995: in exec_module
+    [0m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[90m[39;49;00m
+[1m[31m<frozen importlib._bootstrap>[0m:488: in _call_with_frames_removed
+    [0m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[04m[91m?[39;49;00m[90m[39;49;00m
+[1m[31mai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/sklearn/__init__.py[0m:69: in <module>
+    [0m[94mfrom[39;49;00m[90m [39;49;00m[04m[96m.[39;49;00m[90m [39;49;00m[94mimport[39;49;00m (  [90m# noqa: F401 E402[39;49;00m[90m[39;49;00m
+[1m[31mai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/sklearn/__check_build/__init__.py[0m:54: in <module>
+    [0mraise_build_error(e)[90m[39;49;00m
+[1m[31mai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/sklearn/__check_build/__init__.py[0m:35: in raise_build_error
+    [0m[94mraise[39;49;00m [96mImportError[39;49;00m([90m[39;49;00m
+[1m[31mE   ImportError: No module named 'sklearn.__check_build._check_build'[0m
+[1m[31mE   ___________________________________________________________________________[0m
+[1m[31mE   Contents of /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/sklearn/__check_build:[0m
+[1m[31mE   _check_build.cpython-312-aarch64-linux-gnu.so__init__.py               __pycache__[0m
+[1m[31mE   meson.build               _check_build.pyx[0m
+[1m[31mE   ___________________________________________________________________________[0m
+[1m[31mE   It seems that scikit-learn has not been built correctly.[0m
+[1m[31mE   [0m
+[1m[31mE   If you have installed scikit-learn from source, please do not forget[0m
+[1m[31mE   to build the package before using it. For detailed instructions, see:[0m
+[1m[31mE   https://scikit-learn.org/dev/developers/advanced_installation.html#building-from-source[0m
+[1m[31mE   [0m
+[1m[31mE   If you have used an installer, please check that it is suited for your[0m
+[1m[31mE   Python version, your operating system and your platform.[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.5ae25f28820b74eb9c57ca50634df9b1bd2f7bc20aead0098183fd38b22a8adc/aenum/test_stdlib_tests.py _[0m
+[31mimport file mismatch:
+imported module 'aenum.test_stdlib_tests' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.2d8a6190f47c079cec83e94cb427ed8a09e1aa78690394e0deabe6c15e5ebcf7/aenum/test_stdlib_tests.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.5ae25f28820b74eb9c57ca50634df9b1bd2f7bc20aead0098183fd38b22a8adc/aenum/test_stdlib_tests.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.5ae25f28820b74eb9c57ca50634df9b1bd2f7bc20aead0098183fd38b22a8adc/aenum/test_v3.py _[0m
+[31mimport file mismatch:
+imported module 'aenum.test_v3' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.2d8a6190f47c079cec83e94cb427ed8a09e1aa78690394e0deabe6c15e5ebcf7/aenum/test_v3.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.5ae25f28820b74eb9c57ca50634df9b1bd2f7bc20aead0098183fd38b22a8adc/aenum/test_v3.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.5ae25f28820b74eb9c57ca50634df9b1bd2f7bc20aead0098183fd38b22a8adc/aenum/test_v37.py _[0m
+[31mimport file mismatch:
+imported module 'aenum.test_v37' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.2d8a6190f47c079cec83e94cb427ed8a09e1aa78690394e0deabe6c15e5ebcf7/aenum/test_v37.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.5ae25f28820b74eb9c57ca50634df9b1bd2f7bc20aead0098183fd38b22a8adc/aenum/test_v37.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.5ae25f28820b74eb9c57ca50634df9b1bd2f7bc20aead0098183fd38b22a8adc/aiohttp/test_utils.py _[0m
+[31mimport file mismatch:
+imported module 'aiohttp.test_utils' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.2d8a6190f47c079cec83e94cb427ed8a09e1aa78690394e0deabe6c15e5ebcf7/aiohttp/test_utils.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.5ae25f28820b74eb9c57ca50634df9b1bd2f7bc20aead0098183fd38b22a8adc/aiohttp/test_utils.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.5ed75f0c1a5a3d9df2d29ec4f5638cec0fb1ce44eaa64d5f47e26711f1cbbe7a/aenum/test_stdlib_tests.py _[0m
+[31mimport file mismatch:
+imported module 'aenum.test_stdlib_tests' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.2d8a6190f47c079cec83e94cb427ed8a09e1aa78690394e0deabe6c15e5ebcf7/aenum/test_stdlib_tests.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.5ed75f0c1a5a3d9df2d29ec4f5638cec0fb1ce44eaa64d5f47e26711f1cbbe7a/aenum/test_stdlib_tests.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.5ed75f0c1a5a3d9df2d29ec4f5638cec0fb1ce44eaa64d5f47e26711f1cbbe7a/aenum/test_v3.py _[0m
+[31mimport file mismatch:
+imported module 'aenum.test_v3' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.2d8a6190f47c079cec83e94cb427ed8a09e1aa78690394e0deabe6c15e5ebcf7/aenum/test_v3.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.5ed75f0c1a5a3d9df2d29ec4f5638cec0fb1ce44eaa64d5f47e26711f1cbbe7a/aenum/test_v3.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.5ed75f0c1a5a3d9df2d29ec4f5638cec0fb1ce44eaa64d5f47e26711f1cbbe7a/aenum/test_v37.py _[0m
+[31mimport file mismatch:
+imported module 'aenum.test_v37' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.2d8a6190f47c079cec83e94cb427ed8a09e1aa78690394e0deabe6c15e5ebcf7/aenum/test_v37.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.5ed75f0c1a5a3d9df2d29ec4f5638cec0fb1ce44eaa64d5f47e26711f1cbbe7a/aenum/test_v37.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.5ed75f0c1a5a3d9df2d29ec4f5638cec0fb1ce44eaa64d5f47e26711f1cbbe7a/aiohttp/test_utils.py _[0m
+[31mimport file mismatch:
+imported module 'aiohttp.test_utils' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.2d8a6190f47c079cec83e94cb427ed8a09e1aa78690394e0deabe6c15e5ebcf7/aiohttp/test_utils.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.5ed75f0c1a5a3d9df2d29ec4f5638cec0fb1ce44eaa64d5f47e26711f1cbbe7a/aiohttp/test_utils.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.7fa2c747995c0abcefe3e01c91b8b33c64b4d99e31e9c29f3e7783c13138bc12/aenum/test_stdlib_tests.py _[0m
+[31mimport file mismatch:
+imported module 'aenum.test_stdlib_tests' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.2d8a6190f47c079cec83e94cb427ed8a09e1aa78690394e0deabe6c15e5ebcf7/aenum/test_stdlib_tests.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.7fa2c747995c0abcefe3e01c91b8b33c64b4d99e31e9c29f3e7783c13138bc12/aenum/test_stdlib_tests.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.7fa2c747995c0abcefe3e01c91b8b33c64b4d99e31e9c29f3e7783c13138bc12/aenum/test_v3.py _[0m
+[31mimport file mismatch:
+imported module 'aenum.test_v3' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.2d8a6190f47c079cec83e94cb427ed8a09e1aa78690394e0deabe6c15e5ebcf7/aenum/test_v3.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.7fa2c747995c0abcefe3e01c91b8b33c64b4d99e31e9c29f3e7783c13138bc12/aenum/test_v3.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.7fa2c747995c0abcefe3e01c91b8b33c64b4d99e31e9c29f3e7783c13138bc12/aenum/test_v37.py _[0m
+[31mimport file mismatch:
+imported module 'aenum.test_v37' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.2d8a6190f47c079cec83e94cb427ed8a09e1aa78690394e0deabe6c15e5ebcf7/aenum/test_v37.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.7fa2c747995c0abcefe3e01c91b8b33c64b4d99e31e9c29f3e7783c13138bc12/aenum/test_v37.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.7fa2c747995c0abcefe3e01c91b8b33c64b4d99e31e9c29f3e7783c13138bc12/aiohttp/test_utils.py _[0m
+[31mimport file mismatch:
+imported module 'aiohttp.test_utils' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.2d8a6190f47c079cec83e94cb427ed8a09e1aa78690394e0deabe6c15e5ebcf7/aiohttp/test_utils.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.7fa2c747995c0abcefe3e01c91b8b33c64b4d99e31e9c29f3e7783c13138bc12/aiohttp/test_utils.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.a056e58e9453d20fcfeda677d8383255cb57979165d6e6faa2c83f2f7486638f/bs4/tests/test_builder.py _[0m
+[31mimport file mismatch:
+imported module 'bs4.tests.test_builder' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.0d6a72e680dc6e5bbf556761e2d0f023bb40962371918657e77457cfbd26e4aa/bs4/tests/test_builder.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.a056e58e9453d20fcfeda677d8383255cb57979165d6e6faa2c83f2f7486638f/bs4/tests/test_builder.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.a056e58e9453d20fcfeda677d8383255cb57979165d6e6faa2c83f2f7486638f/bs4/tests/test_builder_registry.py _[0m
+[31mimport file mismatch:
+imported module 'bs4.tests.test_builder_registry' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.0d6a72e680dc6e5bbf556761e2d0f023bb40962371918657e77457cfbd26e4aa/bs4/tests/test_builder_registry.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.a056e58e9453d20fcfeda677d8383255cb57979165d6e6faa2c83f2f7486638f/bs4/tests/test_builder_registry.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.a056e58e9453d20fcfeda677d8383255cb57979165d6e6faa2c83f2f7486638f/bs4/tests/test_css.py _[0m
+[31mimport file mismatch:
+imported module 'bs4.tests.test_css' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.0d6a72e680dc6e5bbf556761e2d0f023bb40962371918657e77457cfbd26e4aa/bs4/tests/test_css.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.a056e58e9453d20fcfeda677d8383255cb57979165d6e6faa2c83f2f7486638f/bs4/tests/test_css.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.a056e58e9453d20fcfeda677d8383255cb57979165d6e6faa2c83f2f7486638f/bs4/tests/test_dammit.py _[0m
+[31mimport file mismatch:
+imported module 'bs4.tests.test_dammit' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.0d6a72e680dc6e5bbf556761e2d0f023bb40962371918657e77457cfbd26e4aa/bs4/tests/test_dammit.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.a056e58e9453d20fcfeda677d8383255cb57979165d6e6faa2c83f2f7486638f/bs4/tests/test_dammit.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.a056e58e9453d20fcfeda677d8383255cb57979165d6e6faa2c83f2f7486638f/bs4/tests/test_element.py _[0m
+[31mimport file mismatch:
+imported module 'bs4.tests.test_element' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.0d6a72e680dc6e5bbf556761e2d0f023bb40962371918657e77457cfbd26e4aa/bs4/tests/test_element.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.a056e58e9453d20fcfeda677d8383255cb57979165d6e6faa2c83f2f7486638f/bs4/tests/test_element.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.a056e58e9453d20fcfeda677d8383255cb57979165d6e6faa2c83f2f7486638f/bs4/tests/test_filter.py _[0m
+[31mimport file mismatch:
+imported module 'bs4.tests.test_filter' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.0d6a72e680dc6e5bbf556761e2d0f023bb40962371918657e77457cfbd26e4aa/bs4/tests/test_filter.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.a056e58e9453d20fcfeda677d8383255cb57979165d6e6faa2c83f2f7486638f/bs4/tests/test_filter.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.a056e58e9453d20fcfeda677d8383255cb57979165d6e6faa2c83f2f7486638f/bs4/tests/test_formatter.py _[0m
+[31mimport file mismatch:
+imported module 'bs4.tests.test_formatter' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.0d6a72e680dc6e5bbf556761e2d0f023bb40962371918657e77457cfbd26e4aa/bs4/tests/test_formatter.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.a056e58e9453d20fcfeda677d8383255cb57979165d6e6faa2c83f2f7486638f/bs4/tests/test_formatter.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.a056e58e9453d20fcfeda677d8383255cb57979165d6e6faa2c83f2f7486638f/bs4/tests/test_fuzz.py _[0m
+[31mimport file mismatch:
+imported module 'bs4.tests.test_fuzz' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.0d6a72e680dc6e5bbf556761e2d0f023bb40962371918657e77457cfbd26e4aa/bs4/tests/test_fuzz.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.a056e58e9453d20fcfeda677d8383255cb57979165d6e6faa2c83f2f7486638f/bs4/tests/test_fuzz.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.a056e58e9453d20fcfeda677d8383255cb57979165d6e6faa2c83f2f7486638f/bs4/tests/test_html5lib.py _[0m
+[31mimport file mismatch:
+imported module 'bs4.tests.test_html5lib' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.0d6a72e680dc6e5bbf556761e2d0f023bb40962371918657e77457cfbd26e4aa/bs4/tests/test_html5lib.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.a056e58e9453d20fcfeda677d8383255cb57979165d6e6faa2c83f2f7486638f/bs4/tests/test_html5lib.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.a056e58e9453d20fcfeda677d8383255cb57979165d6e6faa2c83f2f7486638f/bs4/tests/test_htmlparser.py _[0m
+[31mimport file mismatch:
+imported module 'bs4.tests.test_htmlparser' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.0d6a72e680dc6e5bbf556761e2d0f023bb40962371918657e77457cfbd26e4aa/bs4/tests/test_htmlparser.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.a056e58e9453d20fcfeda677d8383255cb57979165d6e6faa2c83f2f7486638f/bs4/tests/test_htmlparser.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.a056e58e9453d20fcfeda677d8383255cb57979165d6e6faa2c83f2f7486638f/bs4/tests/test_lxml.py _[0m
+[31mimport file mismatch:
+imported module 'bs4.tests.test_lxml' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.0d6a72e680dc6e5bbf556761e2d0f023bb40962371918657e77457cfbd26e4aa/bs4/tests/test_lxml.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.a056e58e9453d20fcfeda677d8383255cb57979165d6e6faa2c83f2f7486638f/bs4/tests/test_lxml.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.a056e58e9453d20fcfeda677d8383255cb57979165d6e6faa2c83f2f7486638f/bs4/tests/test_navigablestring.py _[0m
+[31mimport file mismatch:
+imported module 'bs4.tests.test_navigablestring' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.0d6a72e680dc6e5bbf556761e2d0f023bb40962371918657e77457cfbd26e4aa/bs4/tests/test_navigablestring.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.a056e58e9453d20fcfeda677d8383255cb57979165d6e6faa2c83f2f7486638f/bs4/tests/test_navigablestring.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.a056e58e9453d20fcfeda677d8383255cb57979165d6e6faa2c83f2f7486638f/bs4/tests/test_pageelement.py _[0m
+[31mimport file mismatch:
+imported module 'bs4.tests.test_pageelement' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.0d6a72e680dc6e5bbf556761e2d0f023bb40962371918657e77457cfbd26e4aa/bs4/tests/test_pageelement.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.a056e58e9453d20fcfeda677d8383255cb57979165d6e6faa2c83f2f7486638f/bs4/tests/test_pageelement.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.a056e58e9453d20fcfeda677d8383255cb57979165d6e6faa2c83f2f7486638f/bs4/tests/test_soup.py _[0m
+[31mimport file mismatch:
+imported module 'bs4.tests.test_soup' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.0d6a72e680dc6e5bbf556761e2d0f023bb40962371918657e77457cfbd26e4aa/bs4/tests/test_soup.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.a056e58e9453d20fcfeda677d8383255cb57979165d6e6faa2c83f2f7486638f/bs4/tests/test_soup.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.a056e58e9453d20fcfeda677d8383255cb57979165d6e6faa2c83f2f7486638f/bs4/tests/test_tag.py _[0m
+[31mimport file mismatch:
+imported module 'bs4.tests.test_tag' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.0d6a72e680dc6e5bbf556761e2d0f023bb40962371918657e77457cfbd26e4aa/bs4/tests/test_tag.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.a056e58e9453d20fcfeda677d8383255cb57979165d6e6faa2c83f2f7486638f/bs4/tests/test_tag.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.a056e58e9453d20fcfeda677d8383255cb57979165d6e6faa2c83f2f7486638f/bs4/tests/test_tree.py _[0m
+[31mimport file mismatch:
+imported module 'bs4.tests.test_tree' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.0d6a72e680dc6e5bbf556761e2d0f023bb40962371918657e77457cfbd26e4aa/bs4/tests/test_tree.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.a056e58e9453d20fcfeda677d8383255cb57979165d6e6faa2c83f2f7486638f/bs4/tests/test_tree.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.b38b1463a3a7d7595d93b4253d121c2641ccf572b2ae4b3a5178663ab8683d21/aenum/test_stdlib_tests.py _[0m
+[31mimport file mismatch:
+imported module 'aenum.test_stdlib_tests' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.2d8a6190f47c079cec83e94cb427ed8a09e1aa78690394e0deabe6c15e5ebcf7/aenum/test_stdlib_tests.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.b38b1463a3a7d7595d93b4253d121c2641ccf572b2ae4b3a5178663ab8683d21/aenum/test_stdlib_tests.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.b38b1463a3a7d7595d93b4253d121c2641ccf572b2ae4b3a5178663ab8683d21/aenum/test_v3.py _[0m
+[31mimport file mismatch:
+imported module 'aenum.test_v3' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.2d8a6190f47c079cec83e94cb427ed8a09e1aa78690394e0deabe6c15e5ebcf7/aenum/test_v3.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.b38b1463a3a7d7595d93b4253d121c2641ccf572b2ae4b3a5178663ab8683d21/aenum/test_v3.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.b38b1463a3a7d7595d93b4253d121c2641ccf572b2ae4b3a5178663ab8683d21/aenum/test_v37.py _[0m
+[31mimport file mismatch:
+imported module 'aenum.test_v37' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.2d8a6190f47c079cec83e94cb427ed8a09e1aa78690394e0deabe6c15e5ebcf7/aenum/test_v37.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.b38b1463a3a7d7595d93b4253d121c2641ccf572b2ae4b3a5178663ab8683d21/aenum/test_v37.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.b38b1463a3a7d7595d93b4253d121c2641ccf572b2ae4b3a5178663ab8683d21/aiohttp/test_utils.py _[0m
+[31mimport file mismatch:
+imported module 'aiohttp.test_utils' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.2d8a6190f47c079cec83e94cb427ed8a09e1aa78690394e0deabe6c15e5ebcf7/aiohttp/test_utils.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.b38b1463a3a7d7595d93b4253d121c2641ccf572b2ae4b3a5178663ab8683d21/aiohttp/test_utils.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.b38b1463a3a7d7595d93b4253d121c2641ccf572b2ae4b3a5178663ab8683d21/networkx _[0m
+[1m[31mpromptrek/.venv/lib/python3.12/site-packages/_pytest/config/__init__.py[0m:712: in _importconftest
+    [0mmod = import_path([90m[39;49;00m
+[1m[31mpromptrek/.venv/lib/python3.12/site-packages/_pytest/pathlib.py[0m:610: in import_path
+    [0m[94mraise[39;49;00m ImportPathMismatchError(module_name, module_file, path)[90m[39;49;00m
+[1m[31mE   _pytest.pathlib.ImportPathMismatchError: ('networkx.conftest', '/Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.2d8a6190f47c079cec83e94cb427ed8a09e1aa78690394e0deabe6c15e5ebcf7/networkx/conftest.py', PosixPath('/Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.b38b1463a3a7d7595d93b4253d121c2641ccf572b2ae4b3a5178663ab8683d21/networkx/conftest.py'))[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.b90e318e95429a7ff9898b902c857a36ae262a17f8d389b4b9fa9b71746da142/aenum/test_stdlib_tests.py _[0m
+[31mimport file mismatch:
+imported module 'aenum.test_stdlib_tests' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.2d8a6190f47c079cec83e94cb427ed8a09e1aa78690394e0deabe6c15e5ebcf7/aenum/test_stdlib_tests.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.b90e318e95429a7ff9898b902c857a36ae262a17f8d389b4b9fa9b71746da142/aenum/test_stdlib_tests.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.b90e318e95429a7ff9898b902c857a36ae262a17f8d389b4b9fa9b71746da142/aenum/test_v3.py _[0m
+[31mimport file mismatch:
+imported module 'aenum.test_v3' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.2d8a6190f47c079cec83e94cb427ed8a09e1aa78690394e0deabe6c15e5ebcf7/aenum/test_v3.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.b90e318e95429a7ff9898b902c857a36ae262a17f8d389b4b9fa9b71746da142/aenum/test_v3.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.b90e318e95429a7ff9898b902c857a36ae262a17f8d389b4b9fa9b71746da142/aenum/test_v37.py _[0m
+[31mimport file mismatch:
+imported module 'aenum.test_v37' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.2d8a6190f47c079cec83e94cb427ed8a09e1aa78690394e0deabe6c15e5ebcf7/aenum/test_v37.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.b90e318e95429a7ff9898b902c857a36ae262a17f8d389b4b9fa9b71746da142/aenum/test_v37.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.b90e318e95429a7ff9898b902c857a36ae262a17f8d389b4b9fa9b71746da142/aiohttp/test_utils.py _[0m
+[31mimport file mismatch:
+imported module 'aiohttp.test_utils' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.2d8a6190f47c079cec83e94cb427ed8a09e1aa78690394e0deabe6c15e5ebcf7/aiohttp/test_utils.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.b90e318e95429a7ff9898b902c857a36ae262a17f8d389b4b9fa9b71746da142/aiohttp/test_utils.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.f42593dd8052762349e8c21c4ebe153adafa280dcd52c16508fc395eeba79d80/aenum/test_stdlib_tests.py _[0m
+[31mimport file mismatch:
+imported module 'aenum.test_stdlib_tests' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.2d8a6190f47c079cec83e94cb427ed8a09e1aa78690394e0deabe6c15e5ebcf7/aenum/test_stdlib_tests.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.f42593dd8052762349e8c21c4ebe153adafa280dcd52c16508fc395eeba79d80/aenum/test_stdlib_tests.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.f42593dd8052762349e8c21c4ebe153adafa280dcd52c16508fc395eeba79d80/aenum/test_v3.py _[0m
+[31mimport file mismatch:
+imported module 'aenum.test_v3' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.2d8a6190f47c079cec83e94cb427ed8a09e1aa78690394e0deabe6c15e5ebcf7/aenum/test_v3.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.f42593dd8052762349e8c21c4ebe153adafa280dcd52c16508fc395eeba79d80/aenum/test_v3.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.f42593dd8052762349e8c21c4ebe153adafa280dcd52c16508fc395eeba79d80/aenum/test_v37.py _[0m
+[31mimport file mismatch:
+imported module 'aenum.test_v37' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.2d8a6190f47c079cec83e94cb427ed8a09e1aa78690394e0deabe6c15e5ebcf7/aenum/test_v37.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.f42593dd8052762349e8c21c4ebe153adafa280dcd52c16508fc395eeba79d80/aenum/test_v37.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.f42593dd8052762349e8c21c4ebe153adafa280dcd52c16508fc395eeba79d80/aiohttp/test_utils.py _[0m
+[31mimport file mismatch:
+imported module 'aiohttp.test_utils' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.2d8a6190f47c079cec83e94cb427ed8a09e1aa78690394e0deabe6c15e5ebcf7/aiohttp/test_utils.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.f42593dd8052762349e8c21c4ebe153adafa280dcd52c16508fc395eeba79d80/aiohttp/test_utils.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.f8d3d92dcdaea51a6dd28a9d22fa1811a40456cef31c42e64dff0c5eedb0031b/aenum/test_stdlib_tests.py _[0m
+[31mimport file mismatch:
+imported module 'aenum.test_stdlib_tests' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.2d8a6190f47c079cec83e94cb427ed8a09e1aa78690394e0deabe6c15e5ebcf7/aenum/test_stdlib_tests.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.f8d3d92dcdaea51a6dd28a9d22fa1811a40456cef31c42e64dff0c5eedb0031b/aenum/test_stdlib_tests.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.f8d3d92dcdaea51a6dd28a9d22fa1811a40456cef31c42e64dff0c5eedb0031b/aenum/test_v3.py _[0m
+[31mimport file mismatch:
+imported module 'aenum.test_v3' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.2d8a6190f47c079cec83e94cb427ed8a09e1aa78690394e0deabe6c15e5ebcf7/aenum/test_v3.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.f8d3d92dcdaea51a6dd28a9d22fa1811a40456cef31c42e64dff0c5eedb0031b/aenum/test_v3.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.f8d3d92dcdaea51a6dd28a9d22fa1811a40456cef31c42e64dff0c5eedb0031b/aenum/test_v37.py _[0m
+[31mimport file mismatch:
+imported module 'aenum.test_v37' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.2d8a6190f47c079cec83e94cb427ed8a09e1aa78690394e0deabe6c15e5ebcf7/aenum/test_v37.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.f8d3d92dcdaea51a6dd28a9d22fa1811a40456cef31c42e64dff0c5eedb0031b/aenum/test_v37.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.f8d3d92dcdaea51a6dd28a9d22fa1811a40456cef31c42e64dff0c5eedb0031b/aiohttp/test_utils.py _[0m
+[31mimport file mismatch:
+imported module 'aiohttp.test_utils' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.2d8a6190f47c079cec83e94cb427ed8a09e1aa78690394e0deabe6c15e5ebcf7/aiohttp/test_utils.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.f8d3d92dcdaea51a6dd28a9d22fa1811a40456cef31c42e64dff0c5eedb0031b/aiohttp/test_utils.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.f8d3d92dcdaea51a6dd28a9d22fa1811a40456cef31c42e64dff0c5eedb0031b/networkx _[0m
+[1m[31mpromptrek/.venv/lib/python3.12/site-packages/_pytest/config/__init__.py[0m:712: in _importconftest
+    [0mmod = import_path([90m[39;49;00m
+[1m[31mpromptrek/.venv/lib/python3.12/site-packages/_pytest/pathlib.py[0m:610: in import_path
+    [0m[94mraise[39;49;00m ImportPathMismatchError(module_name, module_file, path)[90m[39;49;00m
+[1m[31mE   _pytest.pathlib.ImportPathMismatchError: ('networkx.conftest', '/Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.2d8a6190f47c079cec83e94cb427ed8a09e1aa78690394e0deabe6c15e5ebcf7/networkx/conftest.py', PosixPath('/Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.f8d3d92dcdaea51a6dd28a9d22fa1811a40456cef31c42e64dff0c5eedb0031b/networkx/conftest.py'))[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.ffd29e7fdcea45824837cabae60c0fecf25ee59459610086907e09f7de714276/annotated_types/test_cases.py _[0m
+[31mimport file mismatch:
+imported module 'annotated_types.test_cases' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.2183dcaa772de3d47631cdebe38c4b022cb6646ea06836395afe4ed48327564a/annotated_types/test_cases.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.ffd29e7fdcea45824837cabae60c0fecf25ee59459610086907e09f7de714276/annotated_types/test_cases.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.ffd29e7fdcea45824837cabae60c0fecf25ee59459610086907e09f7de714276/regex/test_regex.py _[0m
+[31mImportError while importing test module '/Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.ffd29e7fdcea45824837cabae60c0fecf25ee59459610086907e09f7de714276/regex/test_regex.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../../.pyenv/versions/3.12.3/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.ffd29e7fdcea45824837cabae60c0fecf25ee59459610086907e09f7de714276/regex/__init__.py:1: in <module>
+    from .regex import *
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.ffd29e7fdcea45824837cabae60c0fecf25ee59459610086907e09f7de714276/regex/regex.py:417: in <module>
+    import regex._regex_core as _regex_core
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.ffd29e7fdcea45824837cabae60c0fecf25ee59459610086907e09f7de714276/regex/_regex_core.py:21: in <module>
+    import regex._regex as _regex
+E   ModuleNotFoundError: No module named 'regex._regex'[0m
+[31m[1m_ ERROR collecting ai-book-report-interview/cdk-infrastructure/cdk.out/asset.ffd29e7fdcea45824837cabae60c0fecf25ee59459610086907e09f7de714276/sniffio/_tests/test_sniffio.py _[0m
+[31mimport file mismatch:
+imported module 'sniffio._tests.test_sniffio' has this __file__ attribute:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.2183dcaa772de3d47631cdebe38c4b022cb6646ea06836395afe4ed48327564a/sniffio/_tests/test_sniffio.py
+which is not the same as the test file we want to collect:
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.ffd29e7fdcea45824837cabae60c0fecf25ee59459610086907e09f7de714276/sniffio/_tests/test_sniffio.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules[0m
+[31m[1m_____ ERROR collecting ai-book-report-interview/study-buddy-agent/test_agentcore_runtime.py ______[0m
+[31mImportError while importing test module '/Users/awsrudy/Documents/Projects/ai-book-report-interview/study-buddy-agent/test_agentcore_runtime.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../../.pyenv/versions/3.12.3/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ai-book-report-interview/study-buddy-agent/test_agentcore_runtime.py:10: in <module>
+    from dotenv import load_dotenv
+E   ModuleNotFoundError: No module named 'dotenv'[0m
+[31m[1m____________________ ERROR collecting mosaic/agents/test_auth_integration.py _____________________[0m
+[31mImportError while importing test module '/Users/awsrudy/Documents/Projects/mosaic/agents/test_auth_integration.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../../.pyenv/versions/3.12.3/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+mosaic/agents/test_auth_integration.py:9: in <module>
+    from agents.auth_manager import TokenManager, set_session_auth_token, get_current_auth_token
+mosaic/agents/src/agents/auth_manager.py:5: in <module>
+    import structlog
+E   ModuleNotFoundError: No module named 'structlog'[0m
+[31m[1m__________________________ ERROR collecting mosaic/agents/test_basic.py __________________________[0m
+[31mImportError while importing test module '/Users/awsrudy/Documents/Projects/mosaic/agents/test_basic.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../../.pyenv/versions/3.12.3/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+mosaic/agents/test_basic.py:9: in <module>
+    from agents.agent import MosaicAgent
+mosaic/agents/src/agents/agent.py:7: in <module>
+    import structlog
+E   ModuleNotFoundError: No module named 'structlog'[0m
+[31m[1m_________________________ ERROR collecting mosaic/agents/test_graphql.py _________________________[0m
+[31mImportError while importing test module '/Users/awsrudy/Documents/Projects/mosaic/agents/test_graphql.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../../.pyenv/versions/3.12.3/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+mosaic/agents/test_graphql.py:8: in <module>
+    from dotenv import load_dotenv
+E   ModuleNotFoundError: No module named 'dotenv'[0m
+[31m[1m_______________________ ERROR collecting mosaic/agents/test_rest_tools.py ________________________[0m
+[31mImportError while importing test module '/Users/awsrudy/Documents/Projects/mosaic/agents/test_rest_tools.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../../.pyenv/versions/3.12.3/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+mosaic/agents/test_rest_tools.py:9: in <module>
+    from agents.rest_client import MosaicRESTClient
+mosaic/agents/src/agents/rest_client.py:6: in <module>
+    import structlog
+E   ModuleNotFoundError: No module named 'structlog'[0m
+[31m[1m_______________________ ERROR collecting mosaic/agents/tests/test_agent.py _______________________[0m
+[31mImportError while importing test module '/Users/awsrudy/Documents/Projects/mosaic/agents/tests/test_agent.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../../.pyenv/versions/3.12.3/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+mosaic/agents/tests/test_agent.py:4: in <module>
+    from agents.agent import MosaicAgent, AgentMessage
+mosaic/agents/src/agents/agent.py:7: in <module>
+    import structlog
+E   ModuleNotFoundError: No module named 'structlog'[0m
+[31m[1m_____________ ERROR collecting promptrek/tests/integration/test_advanced_features.py _____________[0m
+[31mImportError while importing test module '/Users/awsrudy/Documents/Projects/promptrek/tests/integration/test_advanced_features.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../../.pyenv/versions/3.12.3/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+promptrek/tests/integration/test_advanced_features.py:12: in <module>
+    from src.promptrek.cli.main import cli
+E   ModuleNotFoundError: No module named 'src.promptrek'[0m
+[31m[1m____________________ ERROR collecting promptrek/tests/integration/test_cli.py ____________________[0m
+[31mImportError while importing test module '/Users/awsrudy/Documents/Projects/promptrek/tests/integration/test_cli.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../../.pyenv/versions/3.12.3/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+promptrek/tests/integration/test_cli.py:7: in <module>
+    from src.promptrek.cli.main import cli
+E   ModuleNotFoundError: No module named 'src.promptrek'[0m
+[31m[1m_______________ ERROR collecting promptrek/tests/integration/test_cli_advanced.py ________________[0m
+[31mImportError while importing test module '/Users/awsrudy/Documents/Projects/promptrek/tests/integration/test_cli_advanced.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../../.pyenv/versions/3.12.3/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+promptrek/tests/integration/test_cli_advanced.py:12: in <module>
+    from src.promptrek.cli.main import cli
+E   ModuleNotFoundError: No module named 'src.promptrek'[0m
+[31m[1m______________ ERROR collecting promptrek/tests/integration/test_multiple_files.py _______________[0m
+[31mImportError while importing test module '/Users/awsrudy/Documents/Projects/promptrek/tests/integration/test_multiple_files.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../../.pyenv/versions/3.12.3/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+promptrek/tests/integration/test_multiple_files.py:7: in <module>
+    from src.promptrek.cli.main import cli
+E   ModuleNotFoundError: No module named 'src.promptrek'[0m
+[31m[1m__________________ ERROR collecting promptrek/tests/unit/adapters/base_test.py ___________________[0m
+[31mImportError while importing test module '/Users/awsrudy/Documents/Projects/promptrek/tests/unit/adapters/base_test.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../../.pyenv/versions/3.12.3/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+promptrek/tests/unit/adapters/base_test.py:7: in <module>
+    from src.promptrek.core.models import (
+E   ModuleNotFoundError: No module named 'src.promptrek'[0m
+[31m[1m________________ ERROR collecting promptrek/tests/unit/adapters/test_amazon_q.py _________________[0m
+[31mImportError while importing test module '/Users/awsrudy/Documents/Projects/promptrek/tests/unit/adapters/test_amazon_q.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../../.pyenv/versions/3.12.3/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+promptrek/tests/unit/adapters/test_amazon_q.py:9: in <module>
+    from src.promptrek.adapters.amazon_q import AmazonQAdapter
+E   ModuleNotFoundError: No module named 'src.promptrek'[0m
+[31m[1m__________________ ERROR collecting promptrek/tests/unit/adapters/test_base.py ___________________[0m
+[31mImportError while importing test module '/Users/awsrudy/Documents/Projects/promptrek/tests/unit/adapters/test_base.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../../.pyenv/versions/3.12.3/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+promptrek/tests/unit/adapters/test_base.py:7: in <module>
+    from src.promptrek.adapters.continue_adapter import ContinueAdapter
+E   ModuleNotFoundError: No module named 'src.promptrek'[0m
+[31m[1m_________________ ERROR collecting promptrek/tests/unit/adapters/test_claude.py __________________[0m
+[31mImportError while importing test module '/Users/awsrudy/Documents/Projects/promptrek/tests/unit/adapters/test_claude.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../../.pyenv/versions/3.12.3/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+promptrek/tests/unit/adapters/test_claude.py:7: in <module>
+    from src.promptrek.adapters.claude import ClaudeAdapter
+E   ModuleNotFoundError: No module named 'src.promptrek'[0m
+[31m[1m__________________ ERROR collecting promptrek/tests/unit/adapters/test_cline.py __________________[0m
+[31mImportError while importing test module '/Users/awsrudy/Documents/Projects/promptrek/tests/unit/adapters/test_cline.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../../.pyenv/versions/3.12.3/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+promptrek/tests/unit/adapters/test_cline.py:10: in <module>
+    from src.promptrek.adapters.cline import ClineAdapter
+E   ModuleNotFoundError: No module named 'src.promptrek'[0m
+[31m[1m_________________ ERROR collecting promptrek/tests/unit/adapters/test_codeium.py _________________[0m
+[31mImportError while importing test module '/Users/awsrudy/Documents/Projects/promptrek/tests/unit/adapters/test_codeium.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../../.pyenv/versions/3.12.3/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+promptrek/tests/unit/adapters/test_codeium.py:11: in <module>
+    from src.promptrek.adapters.codeium import CodeiumAdapter
+E   ModuleNotFoundError: No module named 'src.promptrek'[0m
+[31m[1m________________ ERROR collecting promptrek/tests/unit/adapters/test_continue.py _________________[0m
+[31mImportError while importing test module '/Users/awsrudy/Documents/Projects/promptrek/tests/unit/adapters/test_continue.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../../.pyenv/versions/3.12.3/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+promptrek/tests/unit/adapters/test_continue.py:10: in <module>
+    from src.promptrek.adapters.continue_adapter import ContinueAdapter
+E   ModuleNotFoundError: No module named 'src.promptrek'[0m
+[31m[1m_________________ ERROR collecting promptrek/tests/unit/adapters/test_copilot.py _________________[0m
+[31mImportError while importing test module '/Users/awsrudy/Documents/Projects/promptrek/tests/unit/adapters/test_copilot.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../../.pyenv/versions/3.12.3/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+promptrek/tests/unit/adapters/test_copilot.py:7: in <module>
+    from src.promptrek.adapters.copilot import CopilotAdapter
+E   ModuleNotFoundError: No module named 'src.promptrek'[0m
+[31m[1m_________________ ERROR collecting promptrek/tests/unit/adapters/test_cursor.py __________________[0m
+[31mImportError while importing test module '/Users/awsrudy/Documents/Projects/promptrek/tests/unit/adapters/test_cursor.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../../.pyenv/versions/3.12.3/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+promptrek/tests/unit/adapters/test_cursor.py:7: in <module>
+    from src.promptrek.adapters.cursor import CursorAdapter
+E   ModuleNotFoundError: No module named 'src.promptrek'[0m
+[31m[1m________________ ERROR collecting promptrek/tests/unit/adapters/test_jetbrains.py ________________[0m
+[31mImportError while importing test module '/Users/awsrudy/Documents/Projects/promptrek/tests/unit/adapters/test_jetbrains.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../../.pyenv/versions/3.12.3/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+promptrek/tests/unit/adapters/test_jetbrains.py:11: in <module>
+    from src.promptrek.adapters.jetbrains import JetBrainsAdapter
+E   ModuleNotFoundError: No module named 'src.promptrek'[0m
+[31m[1m__________________ ERROR collecting promptrek/tests/unit/adapters/test_kiro.py ___________________[0m
+[31mImportError while importing test module '/Users/awsrudy/Documents/Projects/promptrek/tests/unit/adapters/test_kiro.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../../.pyenv/versions/3.12.3/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+promptrek/tests/unit/adapters/test_kiro.py:11: in <module>
+    from src.promptrek.adapters.kiro import KiroAdapter
+E   ModuleNotFoundError: No module named 'src.promptrek'[0m
+[31m[1m_________________ ERROR collecting promptrek/tests/unit/adapters/test_tabnine.py _________________[0m
+[31mImportError while importing test module '/Users/awsrudy/Documents/Projects/promptrek/tests/unit/adapters/test_tabnine.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../../.pyenv/versions/3.12.3/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+promptrek/tests/unit/adapters/test_tabnine.py:11: in <module>
+    from src.promptrek.adapters.tabnine import TabnineAdapter
+E   ModuleNotFoundError: No module named 'src.promptrek'[0m
+[31m[1m_________________ ERROR collecting promptrek/tests/unit/test_adapter_registry.py _________________[0m
+[31mImportError while importing test module '/Users/awsrudy/Documents/Projects/promptrek/tests/unit/test_adapter_registry.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../../.pyenv/versions/3.12.3/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+promptrek/tests/unit/test_adapter_registry.py:7: in <module>
+    from src.promptrek.adapters.base import EditorAdapter
+E   ModuleNotFoundError: No module named 'src.promptrek'[0m
+[31m[1m___________________ ERROR collecting promptrek/tests/unit/test_conditionals.py ___________________[0m
+[31mImportError while importing test module '/Users/awsrudy/Documents/Projects/promptrek/tests/unit/test_conditionals.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../../.pyenv/versions/3.12.3/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+promptrek/tests/unit/test_conditionals.py:7: in <module>
+    from src.promptrek.core.models import Condition, PromptMetadata, UniversalPrompt
+E   ModuleNotFoundError: No module named 'src.promptrek'[0m
+[31m[1m______________________ ERROR collecting promptrek/tests/unit/test_models.py ______________________[0m
+[31mImportError while importing test module '/Users/awsrudy/Documents/Projects/promptrek/tests/unit/test_models.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../../.pyenv/versions/3.12.3/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+promptrek/tests/unit/test_models.py:4: in <module>
+    from pydantic import ValidationError
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.ffd29e7fdcea45824837cabae60c0fecf25ee59459610086907e09f7de714276/pydantic/__init__.py:5: in <module>
+    from ._migration import getattr_migration
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.ffd29e7fdcea45824837cabae60c0fecf25ee59459610086907e09f7de714276/pydantic/_migration.py:4: in <module>
+    from .version import version_short
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.ffd29e7fdcea45824837cabae60c0fecf25ee59459610086907e09f7de714276/pydantic/version.py:5: in <module>
+    from pydantic_core import __version__ as __pydantic_core_version__
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.ffd29e7fdcea45824837cabae60c0fecf25ee59459610086907e09f7de714276/pydantic_core/__init__.py:6: in <module>
+    from ._pydantic_core import (
+E   ModuleNotFoundError: No module named 'pydantic_core._pydantic_core'[0m
+[31m[1m______________________ ERROR collecting promptrek/tests/unit/test_parser.py ______________________[0m
+[31mImportError while importing test module '/Users/awsrudy/Documents/Projects/promptrek/tests/unit/test_parser.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../../.pyenv/versions/3.12.3/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+promptrek/tests/unit/test_parser.py:6: in <module>
+    from src.promptrek.core.exceptions import UPFFileNotFoundError, UPFParsingError
+E   ModuleNotFoundError: No module named 'src.promptrek'[0m
+[31m[1m____________________ ERROR collecting promptrek/tests/unit/test_validator.py _____________________[0m
+[31mImportError while importing test module '/Users/awsrudy/Documents/Projects/promptrek/tests/unit/test_validator.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../../.pyenv/versions/3.12.3/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+promptrek/tests/unit/test_validator.py:3: in <module>
+    from src.promptrek.core.models import UniversalPrompt
+E   ModuleNotFoundError: No module named 'src.promptrek'[0m
+[31m[1m____________________ ERROR collecting promptrek/tests/unit/test_variables.py _____________________[0m
+[31mImportError while importing test module '/Users/awsrudy/Documents/Projects/promptrek/tests/unit/test_variables.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../../.pyenv/versions/3.12.3/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+promptrek/tests/unit/test_variables.py:9: in <module>
+    from src.promptrek.core.exceptions import TemplateError
+E   ModuleNotFoundError: No module named 'src.promptrek'[0m
+[33m======================================== warnings summary ========================================[0m
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/joblib/testing.py:21
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/joblib/testing.py:21: PytestUnknownMarkWarning: Unknown pytest.mark.timeout - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    timeout = pytest.mark.timeout
+
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/joblib/executor.py:118
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/joblib/executor.py:118: PytestCollectionWarning: cannot collect test class '_TestingMemmappingExecutor' because it has a __init__ constructor (from: ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/joblib/test/test_memmapping.py)
+    class _TestingMemmappingExecutor(MemmappingExecutor):
+
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/joblib/test/test_memory_async.py:31
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/joblib/test/test_memory_async.py:31: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    @pytest.mark.asyncio
+
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/joblib/test/test_memory_async.py:76
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/joblib/test/test_memory_async.py:76: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    @pytest.mark.asyncio
+
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/joblib/test/test_memory_async.py:94
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/joblib/test/test_memory_async.py:94: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    @pytest.mark.asyncio
+
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/joblib/test/test_memory_async.py:133
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/joblib/test/test_memory_async.py:133: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    @pytest.mark.asyncio
+
+ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/joblib/test/test_memory_async.py:165
+  /Users/awsrudy/Documents/Projects/ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/joblib/test/test_memory_async.py:165: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    @pytest.mark.asyncio
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+[36m[1m==================================== short test summary info =====================================[0m
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.2183dcaa772de3d47631cdebe38c4b022cb6646ea06836395afe4ed48327564a/regex/test_regex.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.21ae0926455dfdc595633438d46c8da948f6b5adabc141897f7892c7cdd7fc57/annotated_types/test_cases.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.21ae0926455dfdc595633438d46c8da948f6b5adabc141897f7892c7cdd7fc57/regex/test_regex.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.21ae0926455dfdc595633438d46c8da948f6b5adabc141897f7892c7cdd7fc57/sniffio/_tests/test_sniffio.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.3a993ac6f82fd1fc53f3981efffdad652c44c8a196d282f25cfbe0ad59d8b882/bs4/tests/test_builder.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.3a993ac6f82fd1fc53f3981efffdad652c44c8a196d282f25cfbe0ad59d8b882/bs4/tests/test_builder_registry.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.3a993ac6f82fd1fc53f3981efffdad652c44c8a196d282f25cfbe0ad59d8b882/bs4/tests/test_css.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.3a993ac6f82fd1fc53f3981efffdad652c44c8a196d282f25cfbe0ad59d8b882/bs4/tests/test_dammit.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.3a993ac6f82fd1fc53f3981efffdad652c44c8a196d282f25cfbe0ad59d8b882/bs4/tests/test_element.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.3a993ac6f82fd1fc53f3981efffdad652c44c8a196d282f25cfbe0ad59d8b882/bs4/tests/test_filter.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.3a993ac6f82fd1fc53f3981efffdad652c44c8a196d282f25cfbe0ad59d8b882/bs4/tests/test_formatter.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.3a993ac6f82fd1fc53f3981efffdad652c44c8a196d282f25cfbe0ad59d8b882/bs4/tests/test_fuzz.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.3a993ac6f82fd1fc53f3981efffdad652c44c8a196d282f25cfbe0ad59d8b882/bs4/tests/test_html5lib.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.3a993ac6f82fd1fc53f3981efffdad652c44c8a196d282f25cfbe0ad59d8b882/bs4/tests/test_htmlparser.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.3a993ac6f82fd1fc53f3981efffdad652c44c8a196d282f25cfbe0ad59d8b882/bs4/tests/test_lxml.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.3a993ac6f82fd1fc53f3981efffdad652c44c8a196d282f25cfbe0ad59d8b882/bs4/tests/test_navigablestring.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.3a993ac6f82fd1fc53f3981efffdad652c44c8a196d282f25cfbe0ad59d8b882/bs4/tests/test_pageelement.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.3a993ac6f82fd1fc53f3981efffdad652c44c8a196d282f25cfbe0ad59d8b882/bs4/tests/test_soup.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.3a993ac6f82fd1fc53f3981efffdad652c44c8a196d282f25cfbe0ad59d8b882/bs4/tests/test_tag.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.3a993ac6f82fd1fc53f3981efffdad652c44c8a196d282f25cfbe0ad59d8b882/bs4/tests/test_tree.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/jsonschema/tests/test_cli.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/jsonschema/tests/test_deprecations.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/jsonschema/tests/test_exceptions.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/jsonschema/tests/test_format.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/jsonschema/tests/test_jsonschema_test_suite.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/jsonschema/tests/test_types.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/jsonschema/tests/test_utils.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/jsonschema/tests/test_validators.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/jsonschema_specifications/tests/test_jsonschema_specifications.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/numpy - ImportError: Error importing numpy: you should not try to import numpy from
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/referencing/tests/test_core.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/referencing/tests/test_exceptions.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/referencing/tests/test_jsonschema.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/referencing/tests/test_referencing_suite.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/referencing/tests/test_retrieval.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/scipy - ImportError: Error importing numpy: you should not try to import numpy from
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.44a04f718bdd3f4f22c4843a018e372c72b743f014d4870c515fb4a4d8e5806c/sklearn - ImportError: No module named 'sklearn.__check_build._check_build'
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.5ae25f28820b74eb9c57ca50634df9b1bd2f7bc20aead0098183fd38b22a8adc/aenum/test_stdlib_tests.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.5ae25f28820b74eb9c57ca50634df9b1bd2f7bc20aead0098183fd38b22a8adc/aenum/test_v3.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.5ae25f28820b74eb9c57ca50634df9b1bd2f7bc20aead0098183fd38b22a8adc/aenum/test_v37.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.5ae25f28820b74eb9c57ca50634df9b1bd2f7bc20aead0098183fd38b22a8adc/aiohttp/test_utils.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.5ed75f0c1a5a3d9df2d29ec4f5638cec0fb1ce44eaa64d5f47e26711f1cbbe7a/aenum/test_stdlib_tests.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.5ed75f0c1a5a3d9df2d29ec4f5638cec0fb1ce44eaa64d5f47e26711f1cbbe7a/aenum/test_v3.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.5ed75f0c1a5a3d9df2d29ec4f5638cec0fb1ce44eaa64d5f47e26711f1cbbe7a/aenum/test_v37.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.5ed75f0c1a5a3d9df2d29ec4f5638cec0fb1ce44eaa64d5f47e26711f1cbbe7a/aiohttp/test_utils.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.7fa2c747995c0abcefe3e01c91b8b33c64b4d99e31e9c29f3e7783c13138bc12/aenum/test_stdlib_tests.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.7fa2c747995c0abcefe3e01c91b8b33c64b4d99e31e9c29f3e7783c13138bc12/aenum/test_v3.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.7fa2c747995c0abcefe3e01c91b8b33c64b4d99e31e9c29f3e7783c13138bc12/aenum/test_v37.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.7fa2c747995c0abcefe3e01c91b8b33c64b4d99e31e9c29f3e7783c13138bc12/aiohttp/test_utils.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.a056e58e9453d20fcfeda677d8383255cb57979165d6e6faa2c83f2f7486638f/bs4/tests/test_builder.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.a056e58e9453d20fcfeda677d8383255cb57979165d6e6faa2c83f2f7486638f/bs4/tests/test_builder_registry.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.a056e58e9453d20fcfeda677d8383255cb57979165d6e6faa2c83f2f7486638f/bs4/tests/test_css.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.a056e58e9453d20fcfeda677d8383255cb57979165d6e6faa2c83f2f7486638f/bs4/tests/test_dammit.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.a056e58e9453d20fcfeda677d8383255cb57979165d6e6faa2c83f2f7486638f/bs4/tests/test_element.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.a056e58e9453d20fcfeda677d8383255cb57979165d6e6faa2c83f2f7486638f/bs4/tests/test_filter.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.a056e58e9453d20fcfeda677d8383255cb57979165d6e6faa2c83f2f7486638f/bs4/tests/test_formatter.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.a056e58e9453d20fcfeda677d8383255cb57979165d6e6faa2c83f2f7486638f/bs4/tests/test_fuzz.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.a056e58e9453d20fcfeda677d8383255cb57979165d6e6faa2c83f2f7486638f/bs4/tests/test_html5lib.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.a056e58e9453d20fcfeda677d8383255cb57979165d6e6faa2c83f2f7486638f/bs4/tests/test_htmlparser.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.a056e58e9453d20fcfeda677d8383255cb57979165d6e6faa2c83f2f7486638f/bs4/tests/test_lxml.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.a056e58e9453d20fcfeda677d8383255cb57979165d6e6faa2c83f2f7486638f/bs4/tests/test_navigablestring.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.a056e58e9453d20fcfeda677d8383255cb57979165d6e6faa2c83f2f7486638f/bs4/tests/test_pageelement.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.a056e58e9453d20fcfeda677d8383255cb57979165d6e6faa2c83f2f7486638f/bs4/tests/test_soup.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.a056e58e9453d20fcfeda677d8383255cb57979165d6e6faa2c83f2f7486638f/bs4/tests/test_tag.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.a056e58e9453d20fcfeda677d8383255cb57979165d6e6faa2c83f2f7486638f/bs4/tests/test_tree.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.b38b1463a3a7d7595d93b4253d121c2641ccf572b2ae4b3a5178663ab8683d21/aenum/test_stdlib_tests.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.b38b1463a3a7d7595d93b4253d121c2641ccf572b2ae4b3a5178663ab8683d21/aenum/test_v3.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.b38b1463a3a7d7595d93b4253d121c2641ccf572b2ae4b3a5178663ab8683d21/aenum/test_v37.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.b38b1463a3a7d7595d93b4253d121c2641ccf572b2ae4b3a5178663ab8683d21/aiohttp/test_utils.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.b38b1463a3a7d7595d93b4253d121c2641ccf572b2ae4b3a5178663ab8683d21/networkx - _pytest.pathlib.ImportPathMismatchError: ('networkx.conftest', '/Users/awsrudy/Documents/Proj...
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.b90e318e95429a7ff9898b902c857a36ae262a17f8d389b4b9fa9b71746da142/aenum/test_stdlib_tests.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.b90e318e95429a7ff9898b902c857a36ae262a17f8d389b4b9fa9b71746da142/aenum/test_v3.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.b90e318e95429a7ff9898b902c857a36ae262a17f8d389b4b9fa9b71746da142/aenum/test_v37.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.b90e318e95429a7ff9898b902c857a36ae262a17f8d389b4b9fa9b71746da142/aiohttp/test_utils.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.f42593dd8052762349e8c21c4ebe153adafa280dcd52c16508fc395eeba79d80/aenum/test_stdlib_tests.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.f42593dd8052762349e8c21c4ebe153adafa280dcd52c16508fc395eeba79d80/aenum/test_v3.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.f42593dd8052762349e8c21c4ebe153adafa280dcd52c16508fc395eeba79d80/aenum/test_v37.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.f42593dd8052762349e8c21c4ebe153adafa280dcd52c16508fc395eeba79d80/aiohttp/test_utils.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.f8d3d92dcdaea51a6dd28a9d22fa1811a40456cef31c42e64dff0c5eedb0031b/aenum/test_stdlib_tests.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.f8d3d92dcdaea51a6dd28a9d22fa1811a40456cef31c42e64dff0c5eedb0031b/aenum/test_v3.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.f8d3d92dcdaea51a6dd28a9d22fa1811a40456cef31c42e64dff0c5eedb0031b/aenum/test_v37.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.f8d3d92dcdaea51a6dd28a9d22fa1811a40456cef31c42e64dff0c5eedb0031b/aiohttp/test_utils.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.f8d3d92dcdaea51a6dd28a9d22fa1811a40456cef31c42e64dff0c5eedb0031b/networkx - _pytest.pathlib.ImportPathMismatchError: ('networkx.conftest', '/Users/awsrudy/Documents/Proj...
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.ffd29e7fdcea45824837cabae60c0fecf25ee59459610086907e09f7de714276/annotated_types/test_cases.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.ffd29e7fdcea45824837cabae60c0fecf25ee59459610086907e09f7de714276/regex/test_regex.py
+[31mERROR[0m ai-book-report-interview/cdk-infrastructure/cdk.out/asset.ffd29e7fdcea45824837cabae60c0fecf25ee59459610086907e09f7de714276/sniffio/_tests/test_sniffio.py
+[31mERROR[0m ai-book-report-interview/study-buddy-agent/test_agentcore_runtime.py
+[31mERROR[0m mosaic/agents/test_auth_integration.py
+[31mERROR[0m mosaic/agents/test_basic.py
+[31mERROR[0m mosaic/agents/test_graphql.py
+[31mERROR[0m mosaic/agents/test_rest_tools.py
+[31mERROR[0m mosaic/agents/tests/test_agent.py
+[31mERROR[0m promptrek/tests/integration/test_advanced_features.py
+[31mERROR[0m promptrek/tests/integration/test_cli.py
+[31mERROR[0m promptrek/tests/integration/test_cli_advanced.py
+[31mERROR[0m promptrek/tests/integration/test_multiple_files.py
+[31mERROR[0m promptrek/tests/unit/adapters/base_test.py
+[31mERROR[0m promptrek/tests/unit/adapters/test_amazon_q.py
+[31mERROR[0m promptrek/tests/unit/adapters/test_base.py
+[31mERROR[0m promptrek/tests/unit/adapters/test_claude.py
+[31mERROR[0m promptrek/tests/unit/adapters/test_cline.py
+[31mERROR[0m promptrek/tests/unit/adapters/test_codeium.py
+[31mERROR[0m promptrek/tests/unit/adapters/test_continue.py
+[31mERROR[0m promptrek/tests/unit/adapters/test_copilot.py
+[31mERROR[0m promptrek/tests/unit/adapters/test_cursor.py
+[31mERROR[0m promptrek/tests/unit/adapters/test_jetbrains.py
+[31mERROR[0m promptrek/tests/unit/adapters/test_kiro.py
+[31mERROR[0m promptrek/tests/unit/adapters/test_tabnine.py
+[31mERROR[0m promptrek/tests/unit/test_adapter_registry.py
+[31mERROR[0m promptrek/tests/unit/test_conditionals.py
+[31mERROR[0m promptrek/tests/unit/test_models.py
+[31mERROR[0m promptrek/tests/unit/test_parser.py
+[31mERROR[0m promptrek/tests/unit/test_validator.py
+[31mERROR[0m promptrek/tests/unit/test_variables.py
+!!!!!!!!!!!!!!!!!!!!!!!!!!! Interrupted: 114 errors during collection !!!!!!!!!!!!!!!!!!!!!!!!!!!!
+[31m========================== [33m43 skipped[0m, [33m7 warnings[0m, [31m[1m114 errors[0m[31m in 30.13s[0m[31m ==========================[0m
+[1m[7m%[27m[1m[0m                                                                                                  ]2;awsrudy@bcd0745baf57:~/Documents/Projects/promptrek]1;..cts/promptrek]7;file://bcd0745baf57.ant.amazon.com/Users/awsrudy/Documents/Projects/promptrek\[0m[27m[24m[J[01;31m➜  [36mpromptrek[00m [01;34mgit:([31mcopilot/fix-5a1ca58a-a8a5-4ef0-8504-3321ce846af8[34m) [33m✗[00m [K[?1h=[?2004h  rm   

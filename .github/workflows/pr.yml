@@ -13,75 +13,76 @@ jobs:
         # Fetch full history for better diffs
         fetch-depth: 0
     
+    - name: Install uv
+      uses: astral-sh/setup-uv@v1
+    
     - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
+      run: uv python install 3.11
     
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install -e ".[dev]"
+        uv sync --extra dev
     
     - name: Check code formatting
       run: |
         echo "Checking black formatting..."
-        black --check --diff src/ tests/
+        uv run black --check --diff src/ tests/
     
     - name: Check import sorting
       run: |
         echo "Checking import order..."
-        isort --check-only --diff src/ tests/
+        uv run isort --check-only --diff src/ tests/
     
     - name: Run linter
       run: |
         echo "Running flake8..."
-        flake8 src/ tests/ --max-line-length=88 --statistics
+        uv run flake8 src/ tests/
       continue-on-error: true
     
     - name: Run tests with coverage
       run: |
         echo "Running tests..."
-        python -m pytest tests/ --cov=src/promptrek --cov-report=term-missing --cov-fail-under=80
+        uv run pytest tests/ --cov=src/promptrek --cov-report=term-missing --cov-fail-under=80
     
     - name: Test CLI functionality
       run: |
         echo "Testing CLI commands..."
         # Test basic CLI commands work
-        python -m promptrek.cli.main --help
-        python -m promptrek.cli.main list-editors
+        uv run promptrek --help
+        uv run promptrek list-editors
         
         # Test init command with basic template and output
-        python -m promptrek.cli.main init --template basic --output test-project.promptrek.yaml
+        uv run promptrek init --template basic --output test-project.promptrek.yaml
         
         # Test validate command
-        python -m promptrek.cli.main validate test-project.promptrek.yaml
+        uv run promptrek validate test-project.promptrek.yaml
         
         # Test generate command (dry-run)
-        python -m promptrek.cli.main generate --all --dry-run test-project.promptrek.yaml
+        uv run promptrek generate --all --dry-run test-project.promptrek.yaml
 
   security-scan:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
     
+    - name: Install uv
+      uses: astral-sh/setup-uv@v1
+    
     - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
+      run: uv python install 3.11
     
     - name: Install security tools
       run: |
-        python -m pip install --upgrade pip
-        pip install bandit safety
+        uv add --extra dev bandit safety
+        uv sync --extra dev
     
     - name: Security scan with bandit
       run: |
-        bandit -r src/ -ll
+        uv run bandit -r src/ -ll
     
     - name: Check for known vulnerabilities
       run: |
-        safety check
+        uv run safety check
 
   comprehensive-tests:
     runs-on: ubuntu-latest
@@ -90,32 +91,42 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
+    - name: Install uv
+      uses: astral-sh/setup-uv@v1
+    
     - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
+      run: uv python install 3.11
     
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install -e ".[dev]"
+        uv sync --extra dev
     
     - name: Run comprehensive test matrix (single platform)
       run: |
         echo "Running comprehensive tests on single platform for PR validation..."
-        python -m pytest tests/ -v --cov=src/promptrek --cov-report=term-missing --cov-fail-under=80
+        uv run pytest tests/ -v --cov=src/promptrek --cov-report=term-missing --cov-fail-under=80
         
         # Test CLI functionality
-        python -m promptrek.cli.main --help
-        python -m promptrek.cli.main list-editors
-        python -m promptrek.cli.main init --template basic --output test-pr.promptrek.yaml
-        python -m promptrek.cli.main validate test-pr.promptrek.yaml
-        python -m promptrek.cli.main generate --all --dry-run test-pr.promptrek.yaml
+        uv run promptrek --help
+        uv run promptrek list-editors
+        uv run promptrek init --template basic --output test-pr.promptrek.yaml
+        uv run promptrek validate test-pr.promptrek.yaml
+        uv run promptrek generate --all --dry-run test-pr.promptrek.yaml
 
   docs-check:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+    
+    - name: Install uv
+      uses: astral-sh/setup-uv@v1
+    
+    - name: Set up Python
+      run: uv python install 3.11
+    
+    - name: Install dependencies (for CLI testing)
+      run: |
+        uv sync --extra dev
     
     - name: Check documentation files
       run: |
@@ -123,6 +134,11 @@ jobs:
         test -f README.md || (echo "README.md missing" && exit 1)
         test -f GETTING_STARTED.md || (echo "GETTING_STARTED.md missing" && exit 1)
         test -d docs || (echo "docs directory missing" && exit 1)
+    
+    - name: Test uvx functionality in docs
+      run: |
+        echo "Testing uvx commands from documentation..."
+        uvx --from . promptrek --help
     
     - name: Check for placeholder content
       run: |

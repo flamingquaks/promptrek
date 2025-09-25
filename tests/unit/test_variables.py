@@ -6,9 +6,9 @@ import os
 
 import pytest
 
-from src.promptrek.core.exceptions import TemplateError
-from src.promptrek.core.models import Instructions, PromptMetadata, UniversalPrompt
-from src.promptrek.utils.variables import VariableSubstitution
+from promptrek.core.exceptions import TemplateError
+from promptrek.core.models import Instructions, PromptMetadata, UniversalPrompt
+from promptrek.utils.variables import VariableSubstitution
 
 
 class TestVariableSubstitution:

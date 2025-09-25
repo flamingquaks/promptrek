@@ -1,0 +1,15 @@
+name: Workflow Assistant
+version: 1.0.0
+schema: v1
+models: []
+systemMessage: 'Workflow Assistant
+
+
+  Development workflow configuration'
+completionOptions: {}
+allowAnonymousTelemetry: false
+rules:
+- Follow git workflow
+context:
+- provider: file
+- provider: code
