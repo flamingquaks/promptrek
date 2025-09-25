@@ -142,11 +142,12 @@ class JetBrainsAdapter(EditorAdapter):
             for guideline in prompt.instructions.code_style:
                 # Proper XML escaping: & must be escaped first to avoid double-escaping
                 escaped_guideline = (
-                    guideline.replace("&", "&amp;")
+                    guideline
                     .replace("<", "&lt;")
                     .replace(">", "&gt;")
                     .replace('"', "&quot;")
                     .replace("'", "&apos;")
+                    .replace("&", "&amp;")
                 )
                 lines.append(f'      <rule description="{escaped_guideline}" />')
             lines.append("    </codeStyle>")
