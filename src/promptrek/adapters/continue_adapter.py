@@ -72,13 +72,12 @@ class ContinueAdapter(EditorAdapter):
                 click.echo("  📄 Config content preview:")
                 preview = content[:200] + "..." if len(content) > 200 else content
                 click.echo(f"    {preview}")
+            return [output_file]
         else:
             with open(output_file, "w", encoding="utf-8") as f:
                 f.write(content)
             click.echo(f"✅ Generated: {output_file}")
             return [output_file]
-
-        return []
 
     def _generate_rules_system(
         self,
@@ -104,6 +103,7 @@ class ContinueAdapter(EditorAdapter):
                 if verbose:
                     preview = general_content[:200] + "..." if len(general_content) > 200 else general_content
                     click.echo(f"    {preview}")
+                created_files.append(general_file)
             else:
                 rules_dir.mkdir(parents=True, exist_ok=True)
                 with open(general_file, "w", encoding="utf-8") as f:
@@ -124,6 +124,7 @@ class ContinueAdapter(EditorAdapter):
                 if verbose:
                     preview = style_content[:200] + "..." if len(style_content) > 200 else style_content
                     click.echo(f"    {preview}")
+                created_files.append(style_file)
             else:
                 rules_dir.mkdir(parents=True, exist_ok=True)
                 with open(style_file, "w", encoding="utf-8") as f:
@@ -144,6 +145,7 @@ class ContinueAdapter(EditorAdapter):
                 if verbose:
                     preview = testing_content[:200] + "..." if len(testing_content) > 200 else testing_content
                     click.echo(f"    {preview}")
+                created_files.append(testing_file)
             else:
                 rules_dir.mkdir(parents=True, exist_ok=True)
                 with open(testing_file, "w", encoding="utf-8") as f:
@@ -162,6 +164,7 @@ class ContinueAdapter(EditorAdapter):
                     if verbose:
                         preview = tech_content[:200] + "..." if len(tech_content) > 200 else tech_content
                         click.echo(f"    {preview}")
+                    created_files.append(tech_file)
                 else:
                     rules_dir.mkdir(parents=True, exist_ok=True)
                     with open(tech_file, "w", encoding="utf-8") as f:
