@@ -1,344 +1,288 @@
-# UV/UVX Development Workflows
+# UV/UVX Workflow Guide
 
-This document describes how to use `uv` and `uvx` for building, testing, and installing the PrompTrek project.
+This document explains how to use PrompTrek with `uv` and `uvx` for streamlined development workflows.
 
-## What is uv?
+## Quick Start with uvx (No Installation Required)
 
-[uv](https://github.com/astral-sh/uv) is a fast Python package installer and resolver, designed as a drop-in replacement for pip and pip-tools. It provides:
+Run PrompTrek commands directly without installing:
 
-- **Fast dependency resolution and installation**
-- **Virtual environment management**
-- **Project dependencies via pyproject.toml**
-- **Development workflow automation**
+```bash
+# Run PrompTrek CLI directly
+uvx promptrek --help
+uvx promptrek init
+uvx promptrek generate config.yaml --editor copilot
 
-### uvx
-
-`uvx` is a companion tool that allows you to run Python packages directly without installing them globally.
-
-## Project Configuration
-
-The project has been configured to work seamlessly with uv:
-
-### pyproject.toml Configuration
-
-```toml
-[dependency-groups]
-dev = [
-    "pytest>=7.0.0",
-    "pytest-cov>=4.0.0",
-    "black>=22.0.0",
-    "flake8>=5.0.0",
-    "mypy>=1.0.0",
-    "isort>=5.0.0",
-]
-
-[tool.uv.workspace]
-# Mark this as the root of a uv workspace
-
-[tool.uv]
-# uv-specific configuration and shortcuts
-package = true
+# Run with specific version
+uvx promptrek@0.1.0 --help
 ```
 
-## Development Workflows
+## Development Setup with uv
 
 ### 1. Initial Setup
 
 ```bash
-# Install uv if not already installed
-curl -LsSf https://astral.sh/uv/install.sh | sh
+# Clone and navigate to project
+git clone https://github.com/flamingquaks/promptrek.git
+cd promptrek
 
-# Set up the development environment
+# Install project with development dependencies
 uv sync --group dev
 ```
 
-### 2. Development Commands
+### 2. Available Commands
 
-#### Using Makefile (Recommended)
+#### Core PrompTrek Commands
+```bash
+# Main CLI (after sync)
+uv run promptrek --help
+uv run promptrek init
+uv run promptrek generate config.yaml --editor copilot
+uv run promptrek validate config.yaml
+uv run promptrek list-editors
+
+# Or using uvx (no sync required)
+uvx --from . promptrek --help
+```
+
+#### Development Commands
+
+**Testing:**
+```bash
+# Run all tests
+uv run pytest
+
+# Run tests with coverage
+uv run pytest --cov=src/promptrek
+
+# Run specific test types
+uv run pytest tests/unit/
+uv run pytest tests/integration/
+
+# Fast tests (no coverage)
+uv run pytest --no-cov
+```
+
+**Code Quality:**
+```bash
+# Format code
+uv run black src/ tests/
+uv run isort src/ tests/
+
+# Check formatting (CI mode)
+uv run black --check src/ tests/
+uv run isort --check-only src/ tests/
+
+# Lint code
+uv run flake8 src/ tests/
+
+# Type checking
+uv run mypy src/
+```
+
+**Build & Distribution:**
+```bash
+# Build package
+uv build
+
+# Build wheel only
+uv build --wheel
+
+# Build source distribution only
+uv build --sdist
+```
+
+#### Make Commands (Alternative Interface)
+
+All development workflows are also available through Make:
 
 ```bash
 # Show all available commands
 make help
 
-# Install dependencies
-make install
+# Development setup
+make install    # or make sync
 
-# Run tests (fast, no coverage)
-make test-fast
-
-# Run all tests with coverage
+# Testing
 make test
-
-# Run only unit tests
+make test-fast
 make test-unit
-
-# Run only integration tests  
 make test-integration
 
-# Format code
+# Code quality
 make format
-
-# Run linters
 make lint
-
-# Type checking
 make typecheck
 
-# Build the package
+# Build
 make build
-
-# Clean artifacts
 make clean
-
-# Run CLI
-make run
 ```
 
-#### Using the Helper Script
+#### Shell Script (Legacy)
 
 ```bash
-# Show available commands
-./scripts help
-
-# Set up development environment
-./scripts setup
-
-# Run tests
-./scripts test
-
-# Format code
-./scripts format
-
-# Run the CLI
-./scripts run --help
+# Setup and basic commands
+./script.sh help
+./script.sh setup
+./script.sh test
+./script.sh format
+./script.sh build
 ```
 
-#### Using uv directly
+## Command Comparison
+
+| Task | uv Command | Make Command | Script Command |
+|------|------------|--------------|----------------|
+| Install deps | `uv sync --group dev` | `make install` | `./script.sh setup` |
+| Run tests | `uv run pytest` | `make test` | `./script.sh test` |
+| Format code | `uv run black src/ tests/` | `make format` | `./script.sh format` |
+| Build package | `uv build` | `make build` | `./script.sh build` |
+| Run CLI | `uv run promptrek` | - | `./script.sh run` |
+
+## Environment Management
+
+### Virtual Environment
 
 ```bash
-# Install dependencies
-uv sync --group dev
+# uv automatically manages virtual environments
+# To see the active environment:
+uv info
 
-# Run tests
-uv run python -m pytest
-
-# Run tests without coverage
-uv run python -m pytest --no-cov
-
-# Run formatters
-uv run black src/ tests/
-uv run isort src/ tests/
-
-# Run linters
-uv run flake8 src/ tests/
-
-# Type checking
-uv run mypy src/
-
-# Build package
-uv build
-
-# Run CLI
-uv run promptrek --help
+# To run a shell in the environment:
+uv run bash
+uv run python  # Interactive Python shell
 ```
 
-### 3. Working with Dependencies
-
-#### Adding Dependencies
+### Dependency Management
 
 ```bash
-# Add a new runtime dependency
-# Edit pyproject.toml to add it to the dependencies list
+# Add new dependency
+uv add click>=8.1.0
 
-# Add a new development dependency
-# Edit pyproject.toml to add it to dependency-groups.dev
+# Add development dependency
+uv add --group dev pytest-xdist
 
-# Sync after changes
-uv sync --group dev
-```
+# Update dependencies
+uv sync
 
-#### Updating Dependencies
+# Remove dependency
+uv remove click
 
-```bash
-# Update all dependencies
-uv sync --upgrade
-
-# Update specific dependency group
-uv sync --group dev --upgrade
-```
-
-### 4. Running the CLI
-
-#### Development Mode
-
-```bash
-# Run from source (development)
-uv run promptrek --help
-
-# Run with the Makefile
-make run -- --help
-
-# Run with the helper script
-./scripts run --help
-```
-
-#### Installing Globally with uvx
-
-```bash
-# Install and run from PyPI (when published)
-uvx promptrek --help
-
-# Install and run from local build
-uv build
-uvx --from ./dist/promptrek-*.whl promptrek --help
-```
-
-## Testing Workflows
-
-### Running Tests
-
-```bash
-# All tests with coverage (default)
-make test
-
-# Fast tests without coverage
-make test-fast
-
-# Unit tests only
-make test-unit
-
-# Integration tests only
-make test-integration
-
-# CI-style tests (for automation)
-make ci-test
-```
-
-### Coverage Reports
-
-Coverage reports are generated in HTML format:
-
-```bash
-# Run tests with coverage
-make test
-
-# View coverage report
-open htmlcov/index.html  # macOS
-xdg-open htmlcov/index.html  # Linux
-```
-
-## Build and Distribution
-
-### Building the Package
-
-```bash
-# Build source and wheel distributions
-make build
-# or
-uv build
-
-# Outputs:
-# - dist/promptrek-0.1.0.tar.gz (source distribution)
-# - dist/promptrek-0.1.0-py3-none-any.whl (wheel)
-```
-
-### Installation from Built Package
-
-```bash
-# Install from wheel with uv
-uv pip install dist/promptrek-*.whl
-
-# Install with uvx for global usage
-uvx --from ./dist/promptrek-*.whl promptrek
+# Lock dependencies
+uv lock
 ```
 
 ## CI/CD Integration
 
-The project includes CI-friendly commands:
-
-```bash
-# Lint check for CI
-make ci-lint
-
-# Test with coverage for CI
-make ci-test
-
-# Full workflow
-make all
-```
-
-Example GitHub Actions workflow:
+### GitHub Actions Example
 
 ```yaml
 name: Test
 on: [push, pull_request]
+
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      
       - name: Install uv
-        uses: astral-sh/setup-uv@v2
+        uses: astral-sh/setup-uv@v1
+      
       - name: Set up Python
         run: uv python install
+      
       - name: Install dependencies
         run: uv sync --group dev
+      
       - name: Run tests
-        run: uv run python -m pytest
+        run: uv run pytest
+      
       - name: Run linting
         run: |
           uv run black --check src/ tests/
-          uv run isort --check-only src/ tests/
           uv run flake8 src/ tests/
-      - name: Type check
-        run: uv run mypy src/
+          uv run mypy src/
 ```
-
-## Advantages of Using uv
-
-1. **Speed**: Much faster than pip for dependency resolution and installation
-2. **Reliability**: Better dependency resolution with conflict detection
-3. **Reproducibility**: Lock files ensure consistent environments
-4. **Developer Experience**: Integrated virtual environment and project management
-5. **Modern Standards**: Built for modern Python packaging standards
-
-## Migrating from pip
-
-If you were previously using pip:
-
-```bash
-# Old way
-pip install -e ".[dev]"
-python -m pytest
-
-# New way with uv
-uv sync --group dev
-uv run python -m pytest
-```
-
-The uv approach provides better isolation, faster installation, and more reliable dependency resolution.
 
 ## Troubleshooting
 
 ### Common Issues
 
-1. **Module not found errors**: Make sure you're using `uv run` or have activated the virtual environment
-2. **Dependency conflicts**: Run `uv sync --upgrade` to resolve conflicts
-3. **Build failures**: Check that all build dependencies are available
-
-### Getting Help
-
+**`uv: command not found`**
 ```bash
-# uv help
-uv --help
-
-# Project-specific help
-make help
-./scripts help
+# Install uv
+curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
-## References
+**Permission issues with uvx**
+```bash
+# Ensure uvx cache is writable
+export UVTOOLS_DIR=~/.local/uvtools
+uvx promptrek --help
+```
 
-- [uv Documentation](https://docs.astral.sh/uv/)
-- [uvx Documentation](https://docs.astral.sh/uv/guides/tools/)
-- [Python Packaging Guide](https://packaging.python.org/)
+**Missing dependencies**
+```bash
+# Reinstall all dependencies
+uv sync --group dev --reinstall
+```
+
+### Performance Tips
+
+- Use `uv run` for development commands (faster than activating venv)
+- Use `uvx` for one-off commands without installation
+- Use `--no-dev` flag for production installs: `uv sync --no-dev`
+- Use `uv cache clean` to clear cache if needed
+
+## Advanced Usage
+
+### Custom Scripts
+
+Add custom scripts to `pyproject.toml`:
+
+```toml
+[project.scripts]
+promptrek = "promptrek.cli.main:cli"
+# Add more scripts here
+```
+
+### Workspace Support
+
+For multi-package projects:
+
+```toml
+[tool.uv.workspace]
+members = ["packages/*"]
+```
+
+### Lock File Management
+
+```bash
+# Generate lock file
+uv lock
+
+# Update specific dependency
+uv lock --update-package click
+
+# Upgrade all dependencies
+uv lock --upgrade
+```
+
+## Migration from pip/virtualenv
+
+If migrating from pip-based workflow:
+
+```bash
+# Instead of:
+pip install -e .[dev]
+
+# Use:
+uv sync --group dev
+
+# Instead of:
+source venv/bin/activate
+python -m pytest
+
+# Use:
+uv run pytest

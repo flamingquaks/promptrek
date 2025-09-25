@@ -7,8 +7,8 @@ from unittest.mock import mock_open, patch
 
 import pytest
 
-from src.promptrek.adapters.cline import ClineAdapter
-from src.promptrek.core.models import PromptMetadata, UniversalPrompt
+from promptrek.adapters.cline import ClineAdapter
+from promptrek.core.models import PromptMetadata, UniversalPrompt
 
 from .base_test import TestAdapterBase
 

@@ -7,8 +7,8 @@ from unittest.mock import mock_open, patch
 
 import pytest
 
-from src.promptrek.adapters.continue_adapter import ContinueAdapter
-from src.promptrek.core.models import PromptMetadata, UniversalPrompt
+from promptrek.adapters.continue_adapter import ContinueAdapter
+from promptrek.core.models import PromptMetadata, UniversalPrompt
 
 from .base_test import TestAdapterBase
 

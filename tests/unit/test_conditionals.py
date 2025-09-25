@@ -4,8 +4,8 @@ Unit tests for conditional processing.
 
 import pytest
 
-from src.promptrek.core.models import Condition, PromptMetadata, UniversalPrompt
-from src.promptrek.utils.conditionals import ConditionalProcessor
+from promptrek.core.models import Condition, PromptMetadata, UniversalPrompt
+from promptrek.utils.conditionals import ConditionalProcessor
 
 
 class TestConditionalProcessor:

@@ -9,7 +9,7 @@ from pathlib import Path
 import pytest
 from click.testing import CliRunner
 
-from src.promptrek.cli.main import cli
+from promptrek.cli.main import cli
 
 
 class TestAdvancedFeatures:

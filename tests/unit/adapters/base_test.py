@@ -4,7 +4,7 @@ Base test class for editor adapters.
 
 import pytest
 
-from src.promptrek.core.models import (
+from promptrek.core.models import (
     Instructions,
     ProjectContext,
     PromptMetadata,

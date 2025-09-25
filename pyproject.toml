@@ -33,16 +33,6 @@ dependencies = [
     "pydantic>=2.0.0",
 ]
 
-[project.optional-dependencies]
-dev = [
-    "pytest>=7.0.0",
-    "pytest-cov>=4.0.0",
-    "black>=22.0.0",
-    "flake8>=5.0.0",
-    "mypy>=1.0.0",
-    "isort>=5.0.0",
-]
-
 [project.scripts]
 promptrek = "promptrek.cli.main:cli"
 
@@ -73,6 +63,18 @@ exclude = '''
   | dist
 )/
 '''
+
+[tool.flake8]
+max-line-length = 88
+extend-ignore = ["E203", "W503"]
+exclude = [
+    ".git",
+    "__pycache__",
+    ".venv",
+    "build",
+    "dist",
+    "*.egg-info"
+]
 
 [tool.isort]
 profile = "black"
@@ -134,11 +136,5 @@ dev = [
     "flake8>=5.0.0",
     "mypy>=1.0.0",
     "isort>=5.0.0",
+    "types-pyyaml>=6.0.12.20241230",
 ]
-
-[tool.uv.workspace]
-# Mark this as the root of a uv workspace
-
-[tool.uv]
-# uv-specific configuration and shortcuts
-package = true
