@@ -297,7 +297,7 @@ variables:
             cli, ["generate", "--editor", "nonexistent", str(sample_upf_file)]
         )
         assert result.exit_code != 0
-        assert "not available" in result.output
+        assert "not in targets" in result.output
 
     def test_generate_no_editor_or_all(self, runner, sample_upf_file):
         """Test generate command without specifying editor or --all."""
