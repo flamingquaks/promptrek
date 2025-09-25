@@ -56,7 +56,7 @@ def init_command(ctx: click.Context, template: Optional[str], output: str) -> No
         raise CLIError(f"Failed to write file {output_path}: {e}")
 
     click.echo(f"✅ Initialized universal prompt file: {output_path}")
-    click.echo(f"📝 Edit the file to customize your prompt configuration")
+    click.echo("📝 Edit the file to customize your prompt configuration")
     click.echo(f"🔍 Run 'promptrek validate {output_path}' to check your configuration")
 
 

@@ -44,8 +44,8 @@ class KiroAdapter(EditorAdapter):
         # Apply variable substitution if supported
         processed_prompt = self.substitute_variables(prompt, variables)
 
-        # Process conditionals if supported
-        conditional_content = self.process_conditionals(processed_prompt, variables)
+        # Process conditionals if supported (content used by generate method)
+        self.process_conditionals(processed_prompt, variables)
 
         created_files = []
 
