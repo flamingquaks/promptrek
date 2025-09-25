@@ -2,9 +2,18 @@
 
 This project uses [commitlint](https://commitlint.js.org/) to ensure consistent commit message format following the [Conventional Commits](https://www.conventionalcommits.org/) specification.
 
+## Workflow Strategy
+
+**Important:** Commitlint is configured to validate **only PR squashed merge commits**, not individual development commits. This allows:
+
+- ✅ Developers can use any commit message format during feature branch development
+- ✅ Only the final squashed commit message needs to follow conventional commit format
+- ✅ Reduces friction during development while ensuring clean main branch history
+- ✅ Enables automated changelog generation from main branch commits
+
 ## Configuration
 
-The commitlint configuration is defined in `commitlint.config.js` at the project root.
+The commitlint configuration is defined in `.commitlintrc.json` at the project root.
 
 ### Allowed Commit Types
 
@@ -20,12 +29,31 @@ The commitlint configuration is defined in `commitlint.config.js` at the project
 - `chore`: Other changes that don't modify src or test files
 - `revert`: Reverts a previous commit
 
+### Optional Scopes
+
+Scopes are optional but encouraged for better organization:
+
+- `cli`: Command-line interface changes
+- `core`: Core functionality changes
+- `adapters`: AI editor adapter changes
+- `templates`: Template changes
+- `docs`: Documentation changes
+- `parser`: Parser-related changes
+- `validator`: Validation logic changes
+- `utils`: Utility function changes
+- `tests`: Test-related changes
+- `deps`: Dependency updates
+- `changelog`: Changelog updates
+- `config`: Configuration changes
+- `scripts`: Script changes
+- `workflows`: GitHub Actions workflow changes
+
 ### Rules
 
-- **Header length**: Maximum 72 characters
-- **Subject**: Must be lowercase, minimum 3 characters, no period at the end
+- **Subject**: Must not be empty, no period at the end, not start/pascal/upper case
 - **Type**: Must be lowercase and from the allowed list above
-- **Body/Footer**: Maximum 100 characters per line, blank line required before body/footer
+- **Scope**: Optional, must be lowercase if provided
+- **Format**: `type(scope): description` or `type: description`
 
 ## Usage
 
@@ -49,9 +77,59 @@ To check a commit message manually:
 echo "feat: add new feature" | npx commitlint
 ```
 
-### Git Hooks Integration
+### CI/CD Integration for PR Squash Commits
 
-To automatically validate commit messages, install commitlint as a git hook using husky:
+For the recommended workflow of validating only squashed merge commits, configure commitlint to run after PRs are merged:
+
+**GitHub Actions Example:**
+```yaml
+name: Validate Squashed Commit Messages
+on:
+  push:
+    branches: [main, master]
+
+jobs:
+  validate-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Fetch enough history to get the previous commit for comparison
+          fetch-depth: 2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - run: npm install @commitlint/cli @commitlint/config-conventional
+      - name: Validate squashed commit message
+        run: |
+          # Validate only the latest commit (the squashed merge commit)
+          git log -1 --pretty=format:"%s" | npx commitlint
+```
+
+**Alternative: Validate PR Title (Preview)**
+If you want to validate the expected commit message before merging:
+```yaml
+name: Validate PR Title Format
+on:
+  pull_request:
+    types: [opened, edited, synchronize]
+
+jobs:
+  validate-pr-title:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - run: npm install @commitlint/cli @commitlint/config-conventional
+      - name: Validate PR title (future commit message)
+        run: echo "${{ github.event.pull_request.title }}" | npx commitlint
+```
+
+### Local Git Hooks (Optional)
+
+If you want to validate commits locally during development, you can set up git hooks:
 
 ```bash
 # Install husky
@@ -60,6 +138,8 @@ npm install husky --save-dev
 # Add commit-msg hook
 npx husky add .husky/commit-msg 'npx commitlint --edit "$1"'
 ```
+
+**Note:** Local hooks are optional since the main validation happens on PR squash commits.
 
 ## Examples
 
