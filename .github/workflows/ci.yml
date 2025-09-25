@@ -19,47 +19,49 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
+    - name: Install uv
+      uses: astral-sh/setup-uv@v1
       with:
-        python-version: ${{ matrix.python-version }}
+        version: "latest"
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      run: uv python install ${{ matrix.python-version }}
     
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install -e ".[dev]"
+        uv sync --group dev
     
     - name: Check code formatting with black
       run: |
-        black --check src/ tests/
+        uv run black --check src/ tests/
     
     - name: Check import sorting with isort
       run: |
-        isort --check-only src/ tests/
+        uv run isort --check-only src/ tests/
     
     - name: Lint with flake8
       run: |
-        flake8 src/ tests/ --max-line-length=88 --statistics
+        uv run flake8 src/ tests/
       continue-on-error: true  # Allow some linting issues for now
     
     - name: Type check with mypy
       run: |
-        mypy src/
+        uv run mypy src/
       continue-on-error: true  # Allow type errors for now
     
     - name: Run unit tests
       run: |
-        python -m pytest tests/unit/ -v --tb=short
+        uv run pytest tests/unit/ -v --tb=short
       continue-on-error: true  # Allow some test failures for now
     
     - name: Run integration tests
       run: |
-        python -m pytest tests/integration/ -v --tb=short
+        uv run pytest tests/integration/ -v --tb=short
       continue-on-error: true  # Allow some test failures for now
     
     - name: Run all tests with coverage
       run: |
-        python -m pytest tests/ --cov=src/promptrek --cov-report=xml --cov-report=term-missing
+        uv run pytest tests/ --cov=src/promptrek --cov-report=xml --cov-report=term-missing
       continue-on-error: true  # Allow some test failures for now
     
     - name: Upload coverage to Codecov
@@ -73,24 +75,25 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
+    - name: Install uv
+      uses: astral-sh/setup-uv@v1
+    
     - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
+      run: uv python install 3.11
     
     - name: Install security tools
       run: |
-        python -m pip install --upgrade pip
-        pip install bandit safety
+        uv add --group dev bandit safety
+        uv sync --group dev
     
     - name: Run bandit security linter
       run: |
-        bandit -r src/ -f json -o bandit-report.json
+        uv run bandit -r src/ -f json -o bandit-report.json
       continue-on-error: true
     
     - name: Run safety check
       run: |
-        safety check
+        uv run safety check
       continue-on-error: true
 
   docs:
@@ -98,19 +101,19 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
+    - name: Install uv
+      uses: astral-sh/setup-uv@v1
+    
     - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
+      run: uv python install 3.11
     
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install -e ".[dev]"
+        uv sync --group dev
     
     - name: Test CLI help commands
       run: |
-        python -m promptrek.cli.main --help
-        python -m promptrek.cli.main init --help
-        python -m promptrek.cli.main validate --help
-        python -m promptrek.cli.main generate --help
+        uv run promptrek --help
+        uv run promptrek init --help
+        uv run promptrek validate --help
+        uv run promptrek generate --help

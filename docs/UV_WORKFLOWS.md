@@ -183,6 +183,42 @@ on: [push, pull_request]
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install uv
+        uses: astral-sh/setup-uv@v1
+        with:
+          version: "latest"
+      
+      - name: Set up Python ${{ matrix.python-version }}
+        run: uv python install ${{ matrix.python-version }}
+      
+      - name: Install dependencies
+        run: uv sync --group dev
+      
+      - name: Run tests
+        run: uv run pytest tests/ --cov=src/promptrek
+      
+      - name: Run linting
+        run: |
+          uv run black --check src/ tests/
+          uv run flake8 src/ tests/
+          uv run mypy src/
+      
+      - name: Test CLI functionality
+        run: |
+          uv run promptrek --help
+          uv run promptrek list-editors
+          
+          # Test uvx functionality
+          uvx --from . promptrek --help
+
+  security:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       
@@ -190,19 +226,53 @@ jobs:
         uses: astral-sh/setup-uv@v1
       
       - name: Set up Python
-        run: uv python install
+        run: uv python install 3.11
+      
+      - name: Install security tools
+        run: |
+          uv add --group dev bandit safety
+          uv sync --group dev
+      
+      - name: Run security checks
+        run: |
+          uv run bandit -r src/
+          uv run safety check
+```
+
+### Release Workflow Example
+
+```yaml
+name: Release
+on:
+  push:
+    tags: ['v*.*.*']
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install uv
+        uses: astral-sh/setup-uv@v1
+      
+      - name: Set up Python
+        run: uv python install 3.11
       
       - name: Install dependencies
         run: uv sync --group dev
       
       - name: Run tests
-        run: uv run pytest
+        run: uv run pytest tests/ --cov-fail-under=80
       
-      - name: Run linting
-        run: |
-          uv run black --check src/ tests/
-          uv run flake8 src/ tests/
-          uv run mypy src/
+      - name: Build package
+        run: uv build
+      
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: dist
+          path: dist/
 ```
 
 ## Troubleshooting

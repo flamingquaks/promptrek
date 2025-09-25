@@ -33,68 +33,56 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
+    - name: Install uv
+      uses: astral-sh/setup-uv@v1
+    
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python-version }}
-        allow-prereleases: true
-    
-    - name: Get pip cache dir
-      id: pip-cache
-      run: |
-        echo "dir=$(pip cache dir)" >> $GITHUB_OUTPUT
-    
-    - name: Cache pip dependencies
-      uses: actions/cache@v3
-      with:
-        path: ${{ steps.pip-cache.outputs.dir }}
-        key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('**/pyproject.toml') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-${{ matrix.python-version }}-
-          ${{ runner.os }}-pip-
+      run: uv python install ${{ matrix.python-version }}
     
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip setuptools wheel
-        pip install -e ".[dev]"
+        uv sync --group dev
     
     - name: Run tests
       run: |
-        python -m pytest tests/ -v --tb=short --cov=src/promptrek --cov-report=term-missing
+        uv run pytest tests/ -v --tb=short --cov=src/promptrek --cov-report=term-missing
     
     - name: Test CLI installation and basic functionality
       shell: bash
       run: |
         # Test that the CLI is properly installed
-        python -c "import promptrek; print('Import successful')"
-        python -m promptrek.cli.main --help
-        python -m promptrek.cli.main list-editors
+        uv run python -c "import promptrek; print('Import successful')"
+        uv run promptrek --help
+        uv run promptrek list-editors
         
         # Test basic workflow
-        python -m promptrek.cli.main init --template basic --output test.promptrek.yaml
-        python -m promptrek.cli.main validate test.promptrek.yaml
-        python -m promptrek.cli.main generate --all --dry-run test.promptrek.yaml
+        uv run promptrek init --template basic --output test.promptrek.yaml
+        uv run promptrek validate test.promptrek.yaml
+        uv run promptrek generate --all --dry-run test.promptrek.yaml
+        
+        # Test uvx functionality
+        uvx --from . promptrek --help
 
   test-edge-cases:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
     
+    - name: Install uv
+      uses: astral-sh/setup-uv@v1
+    
     - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
+      run: uv python install 3.11
     
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install -e ".[dev]"
+        uv sync --group dev
     
     - name: Test with minimal dependencies
       run: |
         # Test that the package works with only required dependencies
-        pip install --force-reinstall --no-deps click PyYAML Jinja2 pydantic
-        python -c "import promptrek; print('Minimal dependencies work')"
+        uv add click PyYAML Jinja2 pydantic --no-group
+        uv run python -c "import promptrek; print('Minimal dependencies work')"
     
     - name: Test large files
       run: |
@@ -132,13 +120,14 @@ jobs:
         EOF
         
         # Test parsing and validation of large file
-        python -m promptrek.cli.main validate large-test.promptrek.yaml
-        python -m promptrek.cli.main generate --editor copilot --dry-run large-test.promptrek.yaml
+        uv run promptrek validate large-test.promptrek.yaml
+        uv run promptrek generate --editor copilot --dry-run large-test.promptrek.yaml
     
     - name: Test memory usage
       run: |
         # Test that memory usage is reasonable
-        pip install psutil
+        uv add --group dev psutil
+        uv sync --group dev
         echo 'Testing memory usage is reasonable...'
         echo 'Memory test simplified for CI compatibility'
 
@@ -147,23 +136,23 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
+    - name: Install uv
+      uses: astral-sh/setup-uv@v1
+    
     - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
+      run: uv python install 3.11
     
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install -e ".[dev]"
-        pip install pytest-benchmark
+        uv add --group dev pytest-benchmark
+        uv sync --group dev
     
     - name: Run benchmarks
       run: |
         # Create benchmark tests if they exist
         if [ -d "tests/benchmark" ]; then
-          python -m pytest tests/benchmark/ --benchmark-only
+          uv run pytest tests/benchmark/ --benchmark-only
         else
           echo "No benchmark tests found, running basic performance test..."
-          python -m pytest --version
+          uv run pytest --version
         fi
