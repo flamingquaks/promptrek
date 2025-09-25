@@ -201,7 +201,7 @@ def list_editors() -> None:
             f"  Generate for specific editor:  promptrek generate config.yaml --editor {example_editor}"
         )
         click.echo(
-            f"  Generate for all supported:    promptrek generate config.yaml --all"
+            "  Generate for all supported:    promptrek generate config.yaml --all"
         )
     click.echo()
 

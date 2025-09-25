@@ -15,7 +15,10 @@ from .base import EditorAdapter
 class CopilotAdapter(EditorAdapter):
     """Adapter for GitHub Copilot."""
 
-    _description = "GitHub Copilot (.github/copilot-instructions.md, path-specific instructions, agent files)"
+    _description = (
+        "GitHub Copilot (.github/copilot-instructions.md, "
+        "path-specific instructions, agent files)"
+    )
     _file_patterns = [
         ".github/copilot-instructions.md",
         ".github/instructions/*.instructions.md",
@@ -584,7 +587,8 @@ class CopilotAdapter(EditorAdapter):
         # Common prompts
         lines.append("### Common Coding Tasks")
         lines.append(
-            "- **Function Creation:** Generate well-documented functions with proper typing"
+            "- **Function Creation:** Generate well-documented functions "
+            "with proper typing"
         )
         lines.append(
             "- **Code Review:** Analyze code for bugs, performance, and maintainability"
