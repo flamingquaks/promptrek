@@ -1,0 +1,29 @@
+# YAML linting configuration for PrompTrek files
+extends: default
+
+rules:
+  # Allow longer lines for documentation
+  line-length:
+    max: 120
+
+  # Allow empty values in YAML (common in promptrek files)
+  empty-values: disable
+
+  # Allow truthy values (on/off, yes/no, etc.)
+  truthy: disable
+
+  # More flexible indentation for nested structures
+  indentation:
+    spaces: consistent
+    indent-sequences: consistent
+    check-multi-line-strings: false
+
+  # Allow comments to have flexible spacing
+  comments:
+    min-spaces-from-content: 1
+
+  # Allow document start marker to be optional for promptrek files
+  document-start: disable
+
+  # Disable trailing spaces check since pre-commit handles this
+  trailing-spaces: disable

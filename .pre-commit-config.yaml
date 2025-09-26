@@ -1,0 +1,103 @@
+# Pre-commit configuration for PrompTrek
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+
+repos:
+  # PrompTrek-specific hooks - all local to avoid network dependencies
+  - repo: local
+    hooks:
+      # Validate promptrek files
+      - id: validate-promptrek-files
+        name: Validate PrompTrek files
+        entry: promptrek validate
+        language: system
+        files: \.promptrek\.ya?ml$
+        pass_filenames: true
+        stages: [pre-commit]
+
+      # Prevent committing generated files
+      - id: prevent-generated-files
+        name: Prevent committing generated prompt files
+        entry: python scripts/check_generated_files.py
+        language: system
+        files: |
+          (?x)(
+            # GitHub Copilot files
+            ^\.github/(copilot-instructions\.md|instructions/.*\.instructions\.md|prompts/.*\.prompt\.md)$|
+            # Cursor files
+            ^(\.cursorrules|\.cursor/rules/.*\.mdc|\.cursorignore|\.cursorindexingignore|AGENTS\.md)$|
+            # Continue files
+            ^(config\.yaml|\.continue/(config\.json|rules/.*\.md))$|
+            # Claude files
+            ^(\.claude/.*\.md|CLAUDE\.md)$|
+            # Cline files
+            ^\.cline-rules/.*\.md$|
+            # Codeium files
+            ^(\.codeium/.*\.json|\.codeiumrc)$|
+            # Other AI editor files
+            ^\.ai-prompts/
+          )
+        stages: [pre-commit]
+        always_run: false
+        pass_filenames: true
+
+      # Basic code formatting and linting (local versions)
+      - id: black-check
+        name: Check code formatting with black
+        entry: black --check --diff
+        language: system
+        files: ^(src/|tests/).*\.py$
+
+      - id: isort-check
+        name: Check import sorting with isort
+        entry: isort --check-only --diff
+        language: system
+        files: ^(src/|tests/).*\.py$
+
+      - id: flake8-check
+        name: Check code style with flake8
+        entry: flake8
+        language: system
+        files: ^(src/|tests/).*\.py$
+
+      # Basic file checks
+      - id: trailing-whitespace
+        name: Trim trailing whitespace
+        entry: >
+          bash -c 'if command -v sed >/dev/null 2>&1; then
+          sed -i "s/[[:space:]]*$//" "$@"; else
+          echo "Warning: sed not available, skipping whitespace trim"; fi' --
+        language: system
+        types: [text]
+
+      - id: end-of-file-fixer
+        name: Fix end of files
+        entry: >
+          bash -c 'for file in "$@"; do
+          [ -s "$file" ] && [ -z "$(tail -c 1 "$file")" ] || echo >> "$file";
+          done' --
+        language: system
+        types: [text]
+
+      - id: check-yaml
+        name: Check YAML
+        entry: python -c "import yaml, sys; [yaml.safe_load(open(f)) for f in sys.argv[1:]]"
+        language: system
+        files: \.ya?ml$
+        exclude: \.promptrek\.ya?ml$  # Our files have custom format
+
+      - id: check-merge-conflict
+        name: Check for merge conflicts
+        entry: >
+          bash -c 'if grep -rn "^<<<<<<< \|^=======$\|^>>>>>>> " "$@"; then
+          echo "Error: Merge conflict markers found"; exit 1; fi' --
+        language: system
+        types: [text]
+
+      - id: debug-statements
+        name: Debug Statements (Python)
+        entry: >
+          bash -c 'if grep -rn "import pdb\|pdb.set_trace()\|import ipdb\|ipdb.set_trace()" "$@"; then
+          echo "Error: Debug statements found"; exit 1; fi' --
+        language: system
+        files: \.py$

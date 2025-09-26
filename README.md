@@ -116,7 +116,8 @@ uv sync --group dev
 # Install from source (recommended for now)
 git clone https://github.com/flamingquaks/promptrek.git
 cd promptrek
-pip install -e .
+uv sync
+# or with pip: pip install -e .
 ```
 
 ### Quick Start
@@ -134,7 +135,7 @@ uv run promptrek generate my-project.promptrek.yaml --all
 
 # 4. Your AI editor prompts are ready!
 ls .github/copilot-instructions.md
-ls .cursorrules  
+ls .cursorrules
 ls .continue/config.json
 ```
 
@@ -146,6 +147,42 @@ ls .continue/config.json
 - `promptrek list-editors` - Show supported editors and their status
 
 For detailed usage instructions, see [`GETTING_STARTED.md`](./GETTING_STARTED.md).
+
+## 🔧 Development Setup
+
+### Pre-commit Hooks
+
+PrompTrek includes pre-commit hooks to ensure code quality and prevent accidental commits of generated files:
+
+```bash
+# Install development dependencies
+uv sync --group dev
+# or with pip: pip install -e .[dev]
+
+# Install pre-commit hooks
+uv run pre-commit install
+
+# Run hooks manually (optional)
+uv run pre-commit run --all-files
+```
+
+The pre-commit hooks will:
+- Validate `.promptrek.yaml` files using `promptrek validate`
+- Prevent committing generated prompt files (they should be generated locally)
+- Run code formatting (black, isort) and linting (flake8, yamllint)
+- Check for common issues (trailing whitespace, merge conflicts, etc.)
+
+### Generated Files
+
+PrompTrek generates editor-specific files that should **not** be committed to version control:
+
+- `.github/copilot-instructions.md` - GitHub Copilot prompts
+- `.cursorrules`, `.cursor/` - Cursor editor configuration
+- `config.yaml`, `.continue/` - Continue editor configuration
+- `.claude/` - Claude/Anthropic configuration
+- And more...
+
+These files are automatically ignored via `.gitignore` and the pre-commit hooks will prevent accidental commits.
 
 ## 🤝 Contributing
 
@@ -217,10 +254,11 @@ make typecheck  # Type checking
 
 ```bash
 # Install development dependencies
-pip install -e ".[dev]"
+uv sync --group dev
+# or with pip: pip install -e ".[dev]"
 
 # Run all tests
-pytest
+uv run pytest
 
 # Run with coverage
 pytest --cov=src/promptrek --cov-report=html

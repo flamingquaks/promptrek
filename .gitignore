@@ -78,8 +78,34 @@ yarn-debug.log*
 yarn-error.log*
 
 # Generated files (examples of what the tool would create)
-# .github/copilot-instructions.md
+# .github/copilot-instructions.md # TEMP - allowing copilot-instructions.md
 .copilot/instructions.md
+
+# Cursor generated files
 .cursorrules
-.continue/config.json
+.cursor/
+.cursorignore
+.cursorindexingignore
+
+# Continue generated files
+config.yaml
+.continue/
+
+# Claude generated files
+.claude/
+CLAUDE.md
+
+# Cline generated files
+.cline-rules/
+
+# Codeium generated files
+.codeium/
+.codeiumrc
+
+# Other AI editor files
 .ai-prompts/
+AGENTS.md
+
+# AI editor specific ignore and config files (when generated)
+.*ignore
+.*indexingignore
