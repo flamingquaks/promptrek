@@ -352,3 +352,11 @@ Generate optimized configurations for all major AI coding assistants:
 ## 📄 License
 
 MIT License - see [LICENSE](LICENSE) file for details.
+
+## 🌐 Website
+
+Visit our comprehensive [GitHub Pages site](https://flamingquaks.github.io/promptrek) for:
+- Detailed documentation and user guides
+- Quick start tutorials
+- Contributing guidelines
+- Community feedback and support

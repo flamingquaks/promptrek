@@ -109,3 +109,10 @@ AGENTS.md
 # AI editor specific ignore and config files (when generated)
 .*ignore
 .*indexingignore
+
+# Jekyll and GitHub Pages
+_site/
+.sass-cache/
+.jekyll-cache/
+.jekyll-metadata
+Gemfile.lock
