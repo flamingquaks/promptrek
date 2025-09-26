@@ -1,0 +1,56 @@
+# Site settings
+title: PrompTrek
+description: Universal AI Editor prompt storage solution that dynamically maps prompt data to a wide-range of agentic/AI editors and tools.
+tagline: Taking your coding prompts on a journey to every AI editor!
+url: "https://flamingquaks.github.io"
+baseurl: "/promptrek"
+
+# Build settings
+markdown: kramdown
+highlighter: rouge
+theme: minima
+
+# Navigation
+header_pages:
+  - index.md
+  - quick-start.md
+  - user-guide.md
+  - contributing.md
+  - feedback.md
+
+# GitHub repository
+github_username: flamingquaks
+repository: flamingquaks/promptrek
+
+# Social links
+github_url: https://github.com/flamingquaks/promptrek
+issues_url: https://github.com/flamingquaks/promptrek/issues
+
+# Collections
+collections:
+  guides:
+    output: true
+    permalink: /:collection/:name/
+
+# Plugins
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+  - jekyll-seo-tag
+
+# Exclude from processing
+exclude:
+  - src/
+  - tests/
+  - scripts/
+  - pyproject.toml
+  - .pytest_cache/
+  - .coverage
+  - htmlcov/
+  - __pycache__/
+  - *.pyc
+  - .git/
+  - .github/workflows/
+  - .pre-commit-config.yaml
+  - Makefile
+  - uv.lock
