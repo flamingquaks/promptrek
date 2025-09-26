@@ -13,7 +13,7 @@ import yaml
 
 from ...adapters import registry
 from ...core.exceptions import PrompTrekError, UPFParsingError
-from ...core.models import UniversalPrompt, Instructions, PromptMetadata, ProjectContext
+from ...core.models import Instructions, ProjectContext, PromptMetadata, UniversalPrompt
 from ...core.parser import UPFParser
 
 

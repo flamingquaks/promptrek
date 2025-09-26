@@ -2,16 +2,16 @@
 Continue editor adapter implementation.
 """
 
+import re
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import click
 import yaml
-import re
-from datetime import datetime
 
 from ..core.exceptions import ValidationError
-from ..core.models import UniversalPrompt, Instructions, PromptMetadata, ProjectContext
+from ..core.models import Instructions, ProjectContext, PromptMetadata, UniversalPrompt
 from .base import EditorAdapter
 
 

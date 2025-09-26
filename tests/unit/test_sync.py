@@ -4,26 +4,26 @@ Test cases for sync command functionality.
 
 import tempfile
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 import click
 import pytest
 import yaml
 
+from promptrek.adapters.continue_adapter import ContinueAdapter
 from promptrek.cli.commands.sync import (
-    sync_command,
     _merge_prompts,
     _preview_prompt,
     _write_prompt_file,
-)
-from promptrek.adapters.continue_adapter import ContinueAdapter
-from promptrek.core.models import (
-    UniversalPrompt,
-    PromptMetadata,
-    Instructions,
-    ProjectContext,
+    sync_command,
 )
 from promptrek.core.exceptions import PrompTrekError
+from promptrek.core.models import (
+    Instructions,
+    ProjectContext,
+    PromptMetadata,
+    UniversalPrompt,
+)
 
 
 class TestSyncCommand:
