@@ -44,13 +44,13 @@ exclude:
   - tests/
   - scripts/
   - pyproject.toml
-  - .pytest_cache/
-  - .coverage
+  - ".pytest_cache/"
+  - ".coverage"
   - htmlcov/
-  - __pycache__/
-  - *.pyc
-  - .git/
-  - .github/workflows/
-  - .pre-commit-config.yaml
+  - "__pycache__/"
+  - "*.pyc"
+  - ".git/"
+  - ".github/workflows/"
+  - ".pre-commit-config.yaml"
   - Makefile
   - uv.lock

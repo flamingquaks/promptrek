@@ -275,13 +275,63 @@ code {
   color: #065f46;
 }
 
-/* Responsive adjustments */
+/* Hero section */
+.hero-section {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 4rem 2rem;
+  margin: -2rem -2rem 3rem -2rem;
+  text-align: center;
+  border-radius: 0 0 20px 20px;
+}
+
+.hero-section h1 {
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.hero-section .tagline {
+  font-size: 1.25rem;
+  opacity: 0.9;
+  margin-bottom: 1rem;
+}
+
+.hero-section .hero-description {
+  font-size: 1.1rem;
+  max-width: 800px;
+  margin: 0 auto;
+  opacity: 0.9;
+}
+
+/* CTA section */
+.cta-section {
+  background: #f8fafc;
+  padding: 3rem 2rem;
+  margin: 3rem -2rem -2rem -2rem;
+  text-align: center;
+  border-radius: 20px 20px 0 0;
+}
+
+.cta-section h2 {
+  color: var(--primary-color);
+  margin-bottom: 2rem;
+}
+
 @media (max-width: 768px) {
-  .features {
-    grid-template-columns: 1fr;
+  .hero-section h1 {
+    font-size: 2rem;
   }
   
-  .quick-links .links-grid {
-    grid-template-columns: 1fr;
+  .hero-section .tagline {
+    font-size: 1rem;
+  }
+  
+  .hero-section {
+    padding: 2rem 1rem;
+  }
+  
+  .cta-section {
+    padding: 2rem 1rem;
   }
 }
