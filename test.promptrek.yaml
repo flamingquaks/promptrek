@@ -1,0 +1,9 @@
+schema_version: '1.0.0'
+metadata:
+  title: 'Test Project'
+  description: 'Test project for pre-commit demo'
+  version: '1.0.0'
+  author: 'Test Author'
+targets: ['copilot']
+instructions:
+  general: ['Test instruction']
