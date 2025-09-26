@@ -12,6 +12,7 @@ from ..core.exceptions import PrompTrekError
 from .commands.agents import agents_command
 from .commands.generate import generate_command
 from .commands.init import init_command
+from .commands.sync import sync_command
 from .commands.validate import validate_command
 
 
@@ -62,6 +63,60 @@ def validate(ctx: click.Context, file: Path, strict: bool) -> None:
     """Validate a universal prompt file."""
     try:
         validate_command(ctx, file, strict)
+    except PrompTrekError as e:
+        click.echo(f"Error: {e}", err=True)
+        ctx.exit(1)
+    except Exception as e:
+        if ctx.obj.get("verbose"):
+            raise
+        click.echo(f"Unexpected error: {e}", err=True)
+        ctx.exit(1)
+
+
+@cli.command()
+@click.option(
+    "--source-dir",
+    "-s",
+    type=click.Path(exists=True, file_okay=False, path_type=Path),
+    default=".",
+    help="Directory containing editor files to sync from",
+)
+@click.option(
+    "--editor",
+    "-e",
+    type=str,
+    required=True,
+    help="Editor type to sync from (e.g., continue)",
+)
+@click.option(
+    "--output",
+    "-o",
+    type=click.Path(path_type=Path),
+    help="Output PrompTrek file (defaults to project.promptrek.yaml)",
+)
+@click.option(
+    "--dry-run",
+    is_flag=True,
+    help="Show what would be updated without making changes",
+)
+@click.option(
+    "--force",
+    "-f",
+    is_flag=True,
+    help="Overwrite existing files without confirmation",
+)
+@click.pass_context
+def sync(
+    ctx: click.Context,
+    source_dir: Path,
+    editor: str,
+    output: Path,
+    dry_run: bool,
+    force: bool,
+) -> None:
+    """Sync editor-specific files to PrompTrek configuration."""
+    try:
+        sync_command(ctx, source_dir, editor, output, dry_run, force)
     except PrompTrekError as e:
         click.echo(f"Error: {e}", err=True)
         ctx.exit(1)
