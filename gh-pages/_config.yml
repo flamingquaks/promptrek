@@ -40,17 +40,17 @@ plugins:
 
 # Exclude from processing
 exclude:
-  - src/
-  - tests/
-  - scripts/
-  - pyproject.toml
-  - ".pytest_cache/"
-  - ".coverage"
-  - htmlcov/
-  - "__pycache__/"
-  - "*.pyc"
-  - ".git/"
-  - ".github/workflows/"
-  - ".pre-commit-config.yaml"
-  - Makefile
-  - uv.lock
+  - ../src/
+  - ../tests/
+  - ../scripts/
+  - ../pyproject.toml
+  - "../.pytest_cache/"
+  - "../.coverage"
+  - ../htmlcov/
+  - ../__pycache__/
+  - "../*.pyc"
+  - ../.git/
+  - ../.github/workflows/
+  - ../.pre-commit-config.yaml
+  - ../Makefile
+  - ../uv.lock

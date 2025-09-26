@@ -35,10 +35,11 @@ jobs:
         with:
           ruby-version: '3.1'
           bundler-cache: true
+          working-directory: gh-pages
       - name: Build with Jekyll
         uses: actions/jekyll-build-pages@v1
         with:
-          source: ./
+          source: ./gh-pages
           destination: ./_site
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
