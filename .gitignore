@@ -78,7 +78,7 @@ yarn-debug.log*
 yarn-error.log*
 
 # Generated files (examples of what the tool would create)
-.github/copilot-instructions.md
+# .github/copilot-instructions.md
 .copilot/instructions.md
 .cursorrules
 .continue/config.json
