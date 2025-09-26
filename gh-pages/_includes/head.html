@@ -5,6 +5,46 @@
   {%- seo -%}
   <link rel="stylesheet" href="{{ "/assets/css/style.css" | relative_url }}">
   {%- feed_meta -%}
+  {% if page.title == "Home" %}
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const promptLines = document.querySelectorAll('.prompt-line');
+
+      promptLines.forEach((line, index) => {
+        const text = line.getAttribute('data-text');
+        let displayText = '';
+        let charIndex = 0;
+
+        function typeWriter() {
+          if (charIndex < text.length) {
+            displayText += text.charAt(charIndex);
+            line.textContent = displayText + '|';
+            charIndex++;
+            setTimeout(typeWriter, 100 + Math.random() * 50);
+          } else {
+            line.textContent = displayText;
+            setTimeout(() => {
+              displayText = '';
+              charIndex = 0;
+              line.textContent = '';
+            }, 2000);
+          }
+        }
+
+        // Start typing animation with delay
+        setTimeout(() => {
+          typeWriter();
+          setInterval(() => {
+            displayText = '';
+            charIndex = 0;
+            line.textContent = '';
+            setTimeout(typeWriter, 1000);
+          }, 8000);
+        }, index * 1500);
+      });
+    });
+  </script>
+  {% endif %}
   {%- if jekyll.environment == 'production' and site.google_analytics -%}
     {%- include google-analytics.html -%}
   {%- endif -%}
