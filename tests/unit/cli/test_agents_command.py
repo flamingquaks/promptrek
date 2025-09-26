@@ -1,16 +1,17 @@
 """Tests for the agents CLI command."""
 
-import pytest
 from pathlib import Path
 from unittest.mock import Mock
 
-from promptrek.cli.commands.agents import agents_command, _build_agents_content
+import pytest
+
+from promptrek.cli.commands.agents import _build_agents_content, agents_command
 from promptrek.core.exceptions import CLIError
 from promptrek.core.models import (
-    UniversalPrompt,
-    PromptMetadata,
-    ProjectContext,
     Instructions,
+    ProjectContext,
+    PromptMetadata,
+    UniversalPrompt,
 )
 
 

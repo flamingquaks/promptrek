@@ -1,7 +1,8 @@
 """Integration tests for the agents CLI command."""
 
-import pytest
 from pathlib import Path
+
+import pytest
 from click.testing import CliRunner
 
 from promptrek.cli.main import cli

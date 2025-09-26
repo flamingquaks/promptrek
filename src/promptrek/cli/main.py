@@ -228,13 +228,9 @@ def list_editors() -> None:
                 description = info.get("description", "No description")
                 file_patterns = info.get("file_patterns", [])
                 files_str = (
-                    ", ".join(file_patterns)
-                    if file_patterns
-                    else "configuration files"
+                    ", ".join(file_patterns) if file_patterns else "configuration files"
                 )
-                click.echo(
-                    f"   • {adapter_name:12} - {description} → {files_str}"
-                )
+                click.echo(f"   • {adapter_name:12} - {description} → {files_str}")
             except Exception:
                 click.echo(f"   • {adapter_name:12} - Available")
         click.echo()
@@ -242,8 +238,7 @@ def list_editors() -> None:
     if global_config_adapters:
         click.echo("ℹ️  Global Configuration Only:")
         click.echo(
-            "   These tools use global settings "
-            "(no project-level files generated):"
+            "   These tools use global settings " "(no project-level files generated):"
         )
 
         for adapter_name in sorted(global_config_adapters):
@@ -260,9 +255,7 @@ def list_editors() -> None:
 
     if ide_plugin_adapters:
         click.echo("🔧 IDE Configuration Only:")
-        click.echo(
-            "   These tools are configured through IDE interface:"
-        )
+        click.echo("   These tools are configured through IDE interface:")
 
         for adapter_name in sorted(ide_plugin_adapters):
             try:
@@ -284,8 +277,7 @@ def list_editors() -> None:
             f"promptrek generate config.yaml --editor {example_editor}"
         )
         click.echo(
-            "  Generate for all supported:    "
-            "promptrek generate config.yaml --all"
+            "  Generate for all supported:    " "promptrek generate config.yaml --all"
         )
     click.echo()
 
