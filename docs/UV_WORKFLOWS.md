@@ -348,7 +348,7 @@ If migrating from pip-based workflow:
 pip install -e .[dev]
 
 # Use:
-uv sync --extra dev
+uv sync --group dev
 
 # Instead of:
 source venv/bin/activate

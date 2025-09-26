@@ -70,19 +70,19 @@ dev: sync ## Set up development environment (alias for sync)
 	@echo "$(GREEN)Development environment ready!$(NC)"
 	@echo "To activate the environment manually, run: $(YELLOW)source .venv/bin/activate$(NC)"
 	@echo "Installing pre-commit hooks..."
-	pre-commit install || echo "$(YELLOW)Warning: pre-commit not available, install with: pip install pre-commit$(NC)"
+	uv run pre-commit install || echo "$(YELLOW)Warning: pre-commit not available, install with: uv add --group dev pre-commit$(NC)"
 
 pre-commit-install: ## Install pre-commit hooks
 	@echo "$(BLUE)Installing pre-commit hooks...$(NC)"
-	pre-commit install
+	uv run pre-commit install
 
 pre-commit-run: ## Run pre-commit hooks on all files
 	@echo "$(BLUE)Running pre-commit hooks on all files...$(NC)"
-	pre-commit run --all-files
+	uv run pre-commit run --all-files
 
 pre-commit-update: ## Update pre-commit hook versions
 	@echo "$(BLUE)Updating pre-commit hooks...$(NC)"
-	pre-commit autoupdate
+	uv run pre-commit autoupdate
 
 run: ## Run promptrek CLI (with uv)
 	@echo "$(BLUE)Running promptrek CLI...$(NC)"

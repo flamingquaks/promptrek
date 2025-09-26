@@ -116,7 +116,8 @@ uv sync --group dev
 # Install from source (recommended for now)
 git clone https://github.com/flamingquaks/promptrek.git
 cd promptrek
-pip install -e .
+uv sync
+# or with pip: pip install -e .
 ```
 
 ### Quick Start
@@ -253,10 +254,11 @@ make typecheck  # Type checking
 
 ```bash
 # Install development dependencies
-pip install -e ".[dev]"
+uv sync --group dev
+# or with pip: pip install -e ".[dev]"
 
 # Run all tests
-pytest
+uv run pytest
 
 # Run with coverage
 pytest --cov=src/promptrek --cov-report=html

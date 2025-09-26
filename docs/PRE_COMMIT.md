@@ -6,14 +6,14 @@ PrompTrek includes comprehensive pre-commit hooks to ensure code quality and pre
 
 ```bash
 # Install development dependencies (includes pre-commit)
-pip install -e .[dev]
-# or with uv: uv sync --group dev
+uv sync --group dev
+# or with pip: pip install -e .[dev]
 
 # Install pre-commit hooks
-pre-commit install
+uv run pre-commit install
 
 # (Optional) Run hooks on all files
-pre-commit run --all-files
+uv run pre-commit run --all-files
 ```
 
 ## What the Hooks Do
@@ -140,14 +140,14 @@ AGENTS.md
 
 ```bash
 # Run all hooks on staged files
-pre-commit run
+uv run pre-commit run
 
 # Run all hooks on all files
-pre-commit run --all-files
+uv run pre-commit run --all-files
 
 # Run specific hook
-pre-commit run validate-promptrek-files
-pre-commit run prevent-generated-files
+uv run pre-commit run validate-promptrek-files
+uv run pre-commit run prevent-generated-files
 
 # Skip hooks for a specific commit (not recommended)
 git commit --no-verify -m "Emergency commit"
@@ -164,11 +164,11 @@ git commit --no-verify -m "Emergency commit"
 ### Hook Installation Issues
 ```bash
 # Reinstall hooks
-pre-commit uninstall
-pre-commit install
+uv run pre-commit uninstall
+uv run pre-commit install
 
 # Clear cache if needed
-pre-commit clean
+uv run pre-commit clean
 ```
 
 ### Network Issues
@@ -180,7 +180,7 @@ The configuration uses only local hooks to avoid network dependencies during com
 git commit --no-verify -m "Emergency commit"
 
 # Re-run hooks later
-pre-commit run --all-files
+uv run pre-commit run --all-files
 ```
 
 ## Integration with Make
