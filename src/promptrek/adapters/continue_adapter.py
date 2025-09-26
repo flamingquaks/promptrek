@@ -514,11 +514,22 @@ class ContinueAdapter(EditorAdapter):
                         instructions_dict["code_style"] = instructions_from_file
                     elif filename == "testing":
                         instructions_dict["testing"] = instructions_from_file
+                    elif filename == "security":
+                        instructions_dict["security"] = instructions_from_file
+                    elif filename == "performance":
+                        instructions_dict["performance"] = instructions_from_file
+                    elif filename == "architecture":
+                        instructions_dict["architecture"] = instructions_from_file
                     elif filename.endswith("-rules"):
                         # Technology-specific rules
                         tech = filename.replace("-rules", "")
                         technologies.append(tech)
                         # Add to general instructions for now
+                        if "general" not in instructions_dict:
+                            instructions_dict["general"] = []
+                        instructions_dict["general"].extend(instructions_from_file)
+                    else:
+                        # Unknown file, add to general instructions
                         if "general" not in instructions_dict:
                             instructions_dict["general"] = []
                         instructions_dict["general"].extend(instructions_from_file)
