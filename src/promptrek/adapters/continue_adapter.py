@@ -455,57 +455,61 @@ class ContinueAdapter(EditorAdapter):
     def parse_files(self, source_dir: Path) -> UniversalPrompt:
         """
         Parse Continue files back into a UniversalPrompt.
-        
+
         Args:
             source_dir: Directory containing Continue configuration files
-            
+
         Returns:
             UniversalPrompt object parsed from Continue files
         """
         # Initialize parsed data
         metadata = PromptMetadata(
-            title="Continue AI Assistant", 
+            title="Continue AI Assistant",
             description="Configuration parsed from Continue files",
             version="1.0.0",
             author="PrompTrek Sync",
             created=datetime.now().isoformat(),
             updated=datetime.now().isoformat(),
-            tags=["continue", "synced"]
+            tags=["continue", "synced"],
         )
-        
+
         instructions = Instructions()
         technologies = []
-        
+
         # Parse config.yaml if it exists
         config_file = source_dir / "config.yaml"
         if config_file.exists():
             try:
-                with open(config_file, 'r', encoding='utf-8') as f:
+                with open(config_file, "r", encoding="utf-8") as f:
                     config = yaml.safe_load(f)
-                    
+
                 if config and isinstance(config, dict):
                     # Update metadata from config
-                    if 'name' in config:
-                        metadata.title = config['name']
-                    if 'systemMessage' in config:
-                        metadata.description = config['systemMessage'].split('\n\n', 1)[-1] if '\n\n' in config['systemMessage'] else config['systemMessage']
-                    
+                    if "name" in config:
+                        metadata.title = config["name"]
+                    if "systemMessage" in config:
+                        metadata.description = (
+                            config["systemMessage"].split("\n\n", 1)[-1]
+                            if "\n\n" in config["systemMessage"]
+                            else config["systemMessage"]
+                        )
+
                     # Extract rules as general instructions
-                    if 'rules' in config and isinstance(config['rules'], list):
-                        instructions.general = config['rules']
-                        
+                    if "rules" in config and isinstance(config["rules"], list):
+                        instructions.general = config["rules"]
+
             except Exception as e:
                 click.echo(f"Warning: Could not parse config.yaml: {e}")
-        
+
         # Parse markdown files from .continue/rules/
         rules_dir = source_dir / ".continue" / "rules"
         if rules_dir.exists():
             instructions_dict = {}
-            
+
             for md_file in rules_dir.glob("*.md"):
                 try:
                     instructions_from_file = self._parse_markdown_file(md_file)
-                    
+
                     # Map file names to instruction categories
                     filename = md_file.stem
                     if filename == "general":
@@ -533,10 +537,10 @@ class ContinueAdapter(EditorAdapter):
                         if "general" not in instructions_dict:
                             instructions_dict["general"] = []
                         instructions_dict["general"].extend(instructions_from_file)
-                        
+
                 except Exception as e:
                     click.echo(f"Warning: Could not parse {md_file}: {e}")
-            
+
             # Merge config.yaml rules with markdown rules
             if instructions.general and "general" in instructions_dict:
                 # Combine and deduplicate
@@ -547,58 +551,63 @@ class ContinueAdapter(EditorAdapter):
                 instructions_dict["general"] = combined_general
             elif instructions.general and "general" not in instructions_dict:
                 instructions_dict["general"] = list(instructions.general)
-            
+
             # Update instructions object
             for category, instrs in instructions_dict.items():
                 if instrs:
                     setattr(instructions, category, instrs)
-        
+
         # Create context if technologies were found
         context = None
         if technologies:
             context = ProjectContext(
                 project_type="application",
                 technologies=technologies,
-                description=f"Project using {', '.join(technologies)}"
+                description=f"Project using {', '.join(technologies)}",
             )
-        
+
         return UniversalPrompt(
             schema_version="1.0.0",
             metadata=metadata,
             targets=["continue"],
             context=context,
-            instructions=instructions
+            instructions=instructions,
         )
-    
+
     def _parse_markdown_file(self, md_file: Path) -> List[str]:
         """
         Parse markdown file and extract bullet point instructions.
-        
+
         Args:
             md_file: Path to markdown file
-            
+
         Returns:
             List of instructions extracted from the file
         """
         instructions = []
-        
-        with open(md_file, 'r', encoding='utf-8') as f:
+
+        with open(md_file, "r", encoding="utf-8") as f:
             content = f.read()
-        
+
         # Extract bullet points (lines starting with -)
         # Skip the generic guidelines that are added by the generator
         generic_guidelines = {
             "Follow project-specific patterns and conventions",
-            "Maintain consistency with existing codebase", 
-            "Consider performance and security implications"
+            "Maintain consistency with existing codebase",
+            "Consider performance and security implications",
         }
-        
-        for line in content.split('\n'):
+
+        for line in content.split("\n"):
             line = line.strip()
-            if line.startswith('- '):
+            # Only process lines that start with "- " (not indented bullets)
+            if line.startswith("- ") and not line.startswith("  -"):
                 # Remove the bullet point marker and clean up
                 instruction = line[2:].strip()
-                if instruction and instruction not in instructions and instruction not in generic_guidelines:
+                if (
+                    instruction
+                    and instruction not in instructions
+                    and instruction not in generic_guidelines
+                ):
                     instructions.append(instruction)
-        
+
         return instructions

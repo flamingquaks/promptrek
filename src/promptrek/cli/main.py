@@ -81,15 +81,17 @@ def validate(ctx: click.Context, file: Path, strict: bool) -> None:
     help="Directory containing editor files to sync from",
 )
 @click.option(
-    "--editor", "-e", 
-    type=str, 
+    "--editor",
+    "-e",
+    type=str,
     required=True,
-    help="Editor type to sync from (e.g., continue)"
+    help="Editor type to sync from (e.g., continue)",
 )
 @click.option(
-    "--output", "-o", 
+    "--output",
+    "-o",
     type=click.Path(path_type=Path),
-    help="Output PrompTrek file (defaults to project.promptrek.yaml)"
+    help="Output PrompTrek file (defaults to project.promptrek.yaml)",
 )
 @click.option(
     "--dry-run",
@@ -97,12 +99,20 @@ def validate(ctx: click.Context, file: Path, strict: bool) -> None:
     help="Show what would be updated without making changes",
 )
 @click.option(
-    "--force", "-f",
+    "--force",
+    "-f",
     is_flag=True,
     help="Overwrite existing files without confirmation",
 )
 @click.pass_context
-def sync(ctx: click.Context, source_dir: Path, editor: str, output: Path, dry_run: bool, force: bool) -> None:
+def sync(
+    ctx: click.Context,
+    source_dir: Path,
+    editor: str,
+    output: Path,
+    dry_run: bool,
+    force: bool,
+) -> None:
     """Sync editor-specific files to PrompTrek configuration."""
     try:
         sync_command(ctx, source_dir, editor, output, dry_run, force)
