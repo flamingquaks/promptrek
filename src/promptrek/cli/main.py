@@ -9,6 +9,7 @@ from pathlib import Path
 import click
 
 from ..core.exceptions import PrompTrekError
+from .commands.agents import agents_command
 from .commands.generate import generate_command
 from .commands.init import init_command
 from .commands.validate import validate_command
@@ -149,6 +150,56 @@ def generate(
 
 
 @cli.command()
+@click.option(
+    "--prompt-file",
+    "-f",
+    type=click.Path(path_type=Path),
+    help="Universal prompt file to use (auto-detects if not specified)",
+)
+@click.option(
+    "--output",
+    "-o",
+    type=click.Path(path_type=Path),
+    help="Output directory for agent files (default: current directory)",
+)
+@click.option(
+    "--dry-run",
+    is_flag=True,
+    help="Show what would be generated without creating files",
+)
+@click.option(
+    "--force",
+    is_flag=True,
+    help="Overwrite existing agent files",
+)
+@click.pass_context
+def agents(
+    ctx: click.Context,
+    prompt_file: Path,
+    output: Path,
+    dry_run: bool,
+    force: bool,
+) -> None:
+    """Generate persistent agent instruction files.
+
+    Creates agent instruction files (AGENTS.md, .github/copilot-instructions.md, etc.)
+    that tell autonomous agents to use PrompTrek and follow the generated instructions.
+    These files persist in your repository and help autonomous agents understand
+    your project configuration.
+    """
+    try:
+        agents_command(ctx, prompt_file, output, dry_run, force)
+    except PrompTrekError as e:
+        click.echo(f"Error: {e}", err=True)
+        ctx.exit(1)
+    except Exception as e:
+        if ctx.obj.get("verbose"):
+            raise
+        click.echo(f"Unexpected error: {e}", err=True)
+        ctx.exit(1)
+
+
+@cli.command()
 def list_editors() -> None:
     """List supported editors and their capabilities."""
     from ..adapters.registry import AdapterCapability
@@ -167,7 +218,8 @@ def list_editors() -> None:
     if project_file_adapters:
         click.echo("✅ Project Configuration File Support:")
         click.echo(
-            "   These editors support project-level configuration files that PrompTrek can generate:"
+            "   These editors support project-level configuration files "
+            "that PrompTrek can generate:"
         )
 
         for adapter_name in sorted(project_file_adapters):
@@ -186,7 +238,7 @@ def list_editors() -> None:
     if global_config_adapters:
         click.echo("ℹ️  Global Configuration Only:")
         click.echo(
-            "   These tools use global settings (no project-level files generated):"
+            "   These tools use global settings " "(no project-level files generated):"
         )
 
         for adapter_name in sorted(global_config_adapters):
@@ -194,7 +246,8 @@ def list_editors() -> None:
                 info = registry.get_adapter_info(adapter_name)
                 description = info.get("description", "No description")
                 click.echo(
-                    f"   • {adapter_name:12} - Configure through global settings or admin panel"
+                    f"   • {adapter_name:12} - Configure through global "
+                    "settings or admin panel"
                 )
             except Exception:
                 click.echo(f"   • {adapter_name:12} - Global configuration only")
@@ -208,7 +261,8 @@ def list_editors() -> None:
             try:
                 info = registry.get_adapter_info(adapter_name)
                 click.echo(
-                    f"   • {adapter_name:12} - Configure through IDE settings/preferences"
+                    f"   • {adapter_name:12} - Configure through IDE "
+                    "settings/preferences"
                 )
             except Exception:
                 click.echo(f"   • {adapter_name:12} - IDE configuration only")
@@ -219,18 +273,21 @@ def list_editors() -> None:
     if project_file_adapters:
         example_editor = sorted(project_file_adapters)[0]
         click.echo(
-            f"  Generate for specific editor:  promptrek generate config.yaml --editor {example_editor}"
+            f"  Generate for specific editor:  "
+            f"promptrek generate config.yaml --editor {example_editor}"
         )
         click.echo(
-            "  Generate for all supported:    promptrek generate config.yaml --all"
+            "  Generate for all supported:    " "promptrek generate config.yaml --all"
         )
     click.echo()
 
     click.echo(
-        "Note: Only editors with 'Project Configuration File Support' will generate files."
+        "Note: Only editors with 'Project Configuration File Support' "
+        "will generate files."
     )
     click.echo(
-        "      Other editors require manual configuration through their respective interfaces."
+        "      Other editors require manual configuration through their "
+        "respective interfaces."
     )
 
 
