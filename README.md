@@ -155,14 +155,14 @@ PrompTrek includes pre-commit hooks to ensure code quality and prevent accidenta
 
 ```bash
 # Install development dependencies
-pip install -e .[dev]
-# or with uv: uv sync --group dev
+uv sync --group dev
+# or with pip: pip install -e .[dev]
 
 # Install pre-commit hooks
-pre-commit install
+uv run pre-commit install
 
 # Run hooks manually (optional)
-pre-commit run --all-files
+uv run pre-commit run --all-files
 ```
 
 The pre-commit hooks will:
