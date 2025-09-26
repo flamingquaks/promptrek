@@ -2,8 +2,8 @@
 title: PrompTrek
 description: Universal AI Editor prompt storage solution that dynamically maps prompt data to a wide-range of agentic/AI editors and tools.
 tagline: Taking your coding prompts on a journey to every AI editor!
-url: "https://flamingquaks.github.io"
-baseurl: "/promptrek"
+url: "https://promptrek.ai"
+baseurl: ""
 
 # Build settings
 markdown: kramdown
