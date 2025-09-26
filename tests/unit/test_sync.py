@@ -122,9 +122,10 @@ class TestSyncCommand:
         parsed_prompt = adapter.parse_files(tmp_path)
 
         assert parsed_prompt.metadata.title == "Continue AI Assistant"
-        assert parsed_prompt.instructions.general is None or len(
-            parsed_prompt.instructions.general
-        ) == 0
+        assert (
+            parsed_prompt.instructions.general is None
+            or len(parsed_prompt.instructions.general) == 0
+        )
 
     def test_merge_prompts(self):
         """Test merging of existing and parsed prompts."""
@@ -274,7 +275,9 @@ Some other text that should be ignored.
         ctx = MagicMock()
 
         with pytest.raises(PrompTrekError, match="Unsupported editor: fake_editor"):
-            sync_command(ctx, tmp_path, "fake_editor", tmp_path / "out.yaml", False, False)
+            sync_command(
+                ctx, tmp_path, "fake_editor", tmp_path / "out.yaml", False, False
+            )
 
     def test_sync_command_adapter_without_parse_files(self, tmp_path):
         """Test sync command with adapter that doesn't support parsing."""
@@ -287,7 +290,8 @@ Some other text that should be ignored.
             ctx = MagicMock()
 
             with pytest.raises(
-                PrompTrekError, match="Editor 'test' does not support syncing from files"
+                PrompTrekError,
+                match="Editor 'test' does not support syncing from files",
             ):
                 sync_command(ctx, tmp_path, "test", tmp_path / "out.yaml", False, False)
 
@@ -301,7 +305,9 @@ Some other text that should be ignored.
 
             ctx = MagicMock()
 
-            with pytest.raises(PrompTrekError, match="Failed to parse test files: Parse error"):
+            with pytest.raises(
+                PrompTrekError, match="Failed to parse test files: Parse error"
+            ):
                 sync_command(ctx, tmp_path, "test", tmp_path / "out.yaml", False, False)
 
     def test_preview_prompt(self, capsys):
@@ -350,7 +356,7 @@ Some other text that should be ignored.
         _write_prompt_file(prompt, output_file)
 
         assert output_file.exists()
-        
+
         # Check that file contains expected content
         content = yaml.safe_load(output_file.read_text())
         assert content["metadata"]["title"] == "Test Prompt"
