@@ -73,7 +73,14 @@ jobs:
         if [ "${{ inputs.fail-on-issues }}" = "true" ]; then
           # Parse JSON to check for issues
           if [ -f bandit-report.json ]; then
-            ISSUE_COUNT=$(python -c "import json; data = json.load(open('bandit-report.json')); print(len(data.get('results', [])))")
+            ISSUE_COUNT=$(python -c "import sys, json; \
+try: \
+    with open('bandit-report.json') as f: \
+        data = json.load(f); \
+    print(len(data.get('results', []))) \
+except (OSError, json.JSONDecodeError) as e: \
+    print(f'Error reading bandit-report.json: {e}', file=sys.stderr); \
+    sys.exit(2)")
             if [ "$ISSUE_COUNT" -gt "0" ]; then
               echo "Found $ISSUE_COUNT security issues"
               exit 1
