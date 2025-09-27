@@ -62,9 +62,14 @@ build: ## Build the package
 		echo "$(YELLOW)Using uv build...$(NC)"; \
 		uv build; \
 	else \
-		echo "$(YELLOW)uv not found, using python -m build...$(NC)"; \
-		python -m pip install --user build wheel 2>/dev/null || true; \
+		echo "$(YELLOW)uv not found, using python -m build in a temporary virtual environment...$(NC)"; \
+		python -m venv .build-venv; \
+		. .build-venv/bin/activate; \
+		pip install --upgrade pip >/dev/null 2>&1; \
+		pip install build wheel >/dev/null 2>&1; \
 		python -m build --wheel --no-isolation; \
+		deactivate; \
+		rm -rf .build-venv; \
 	fi
 
 clean: ## Clean build artifacts and cache
