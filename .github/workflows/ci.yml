@@ -2,118 +2,263 @@ name: Continuous Integration
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
   schedule:
     # Run weekly to catch dependency issues
     - cron: '0 8 * * 1'
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ['3.9', '3.10', '3.11', '3.12']
-        
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Install uv
-      uses: astral-sh/setup-uv@v1
-      with:
-        version: "latest"
-    
-    - name: Set up Python ${{ matrix.python-version }}
-      run: uv python install ${{ matrix.python-version }}
-    
-    - name: Install dependencies
-      run: |
-        uv sync --extra dev
-    
-    - name: Check code formatting with black
-      run: |
-        uv run black --check src/ tests/
-    
-    - name: Check import sorting with isort
-      run: |
-        uv run isort --check-only src/ tests/
-    
-    - name: Lint with flake8
-      run: |
-        uv run flake8 src/ tests/
-      continue-on-error: true  # Allow some linting issues for now
-    
-    - name: Type check with mypy
-      run: |
-        uv run mypy src/
-      continue-on-error: true  # Allow type errors for now
-    
-    - name: Run unit tests
-      run: |
-        uv run pytest tests/unit/ -v --tb=short
-      continue-on-error: true  # Allow some test failures for now
-    
-    - name: Run integration tests
-      run: |
-        uv run pytest tests/integration/ -v --tb=short
-      continue-on-error: true  # Allow some test failures for now
-    
-    - name: Run all tests with coverage
-      run: |
-        uv run pytest tests/ --cov=src/promptrek --cov-report=xml --cov-report=term-missing
-      continue-on-error: true  # Allow some test failures for now
-    
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
-      with:
-        file: ./coverage.xml
-        fail_ci_if_error: false
+  # Build once and share artifacts
+  build:
+    uses: ./.github/workflows/build.yml
+    with:
+      python-version: '3.11'
+      upload-artifacts: true
 
+  # Test matrix - Ubuntu latest
+  test-ubuntu-39:
+    needs: build
+    uses: ./.github/workflows/test.yml
+    with:
+      os: ubuntu-latest
+      python-version: '3.9'
+      test-suite: 'all'
+      coverage: true
+      coverage-threshold: 0
+      artifact-name: ${{ needs.build.outputs.artifact-name }}
+      upload-coverage: true
+
+  test-ubuntu-310:
+    needs: build
+    uses: ./.github/workflows/test.yml
+    with:
+      os: ubuntu-latest
+      python-version: '3.10'
+      test-suite: 'all'
+      coverage: true
+      coverage-threshold: 0
+      artifact-name: ${{ needs.build.outputs.artifact-name }}
+      upload-coverage: true
+
+  test-ubuntu-311:
+    needs: build
+    uses: ./.github/workflows/test.yml
+    with:
+      os: ubuntu-latest
+      python-version: '3.11'
+      test-suite: 'all'
+      coverage: true
+      coverage-threshold: 0
+      artifact-name: ${{ needs.build.outputs.artifact-name }}
+      upload-coverage: true
+
+  test-ubuntu-312:
+    needs: build
+    uses: ./.github/workflows/test.yml
+    with:
+      os: ubuntu-latest
+      python-version: '3.12'
+      test-suite: 'all'
+      coverage: true
+      coverage-threshold: 0
+      artifact-name: ${{ needs.build.outputs.artifact-name }}
+      upload-coverage: true
+
+  # Test matrix - Windows
+  test-windows-310:
+    needs: build
+    uses: ./.github/workflows/test.yml
+    with:
+      os: windows-latest
+      python-version: '3.10'
+      test-suite: 'all'
+      coverage: false  # Skip coverage on Windows
+      artifact-name: ${{ needs.build.outputs.artifact-name }}
+      upload-coverage: false
+
+  test-windows-311:
+    needs: build
+    uses: ./.github/workflows/test.yml
+    with:
+      os: windows-latest
+      python-version: '3.11'
+      test-suite: 'all'
+      coverage: false
+      artifact-name: ${{ needs.build.outputs.artifact-name }}
+      upload-coverage: false
+
+  test-windows-312:
+    needs: build
+    uses: ./.github/workflows/test.yml
+    with:
+      os: windows-latest
+      python-version: '3.12'
+      test-suite: 'all'
+      coverage: false
+      artifact-name: ${{ needs.build.outputs.artifact-name }}
+      upload-coverage: false
+
+  # Test matrix - macOS
+  test-macos-311:
+    needs: build
+    uses: ./.github/workflows/test.yml
+    with:
+      os: macos-latest
+      python-version: '3.11'
+      test-suite: 'all'
+      coverage: false  # Skip coverage on macOS
+      artifact-name: ${{ needs.build.outputs.artifact-name }}
+      upload-coverage: false
+
+  test-macos-312:
+    needs: build
+    uses: ./.github/workflows/test.yml
+    with:
+      os: macos-latest
+      python-version: '3.12'
+      test-suite: 'all'
+      coverage: false
+      artifact-name: ${{ needs.build.outputs.artifact-name }}
+      upload-coverage: false
+
+  # Quick tests for primary configuration
+  test-primary:
+    needs: build
+    uses: ./.github/workflows/test.yml
+    with:
+      python-version: '3.11'
+      test-suite: 'all'
+      coverage: true
+      coverage-threshold: 80
+      artifact-name: ${{ needs.build.outputs.artifact-name }}
+
+  # Security scanning (parallel with tests)
   security:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Install uv
-      uses: astral-sh/setup-uv@v1
-    
-    - name: Set up Python
-      run: uv python install 3.11
-    
-    - name: Install security tools
-      run: |
-        uv add --extra dev bandit safety
-        uv sync --extra dev
-    
-    - name: Run bandit security linter
-      run: |
-        uv run bandit -r src/ -f json -o bandit-report.json
-      continue-on-error: true
-    
-    - name: Run safety check
-      run: |
-        uv run safety check
-      continue-on-error: true
+    uses: ./.github/workflows/security.yml
+    with:
+      python-version: '3.11'
+      bandit-severity: 'medium'
+      fail-on-issues: false  # Don't fail CI on security issues for now
 
-  docs:
+  # Validate each commit can build (for PRs)
+  validate-commits:
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
+    name: Validate Each Commit Builds
+
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Install uv
-      uses: astral-sh/setup-uv@v1
-    
-    - name: Set up Python
-      run: uv python install 3.11
-    
-    - name: Install dependencies
-      run: |
-        uv sync --extra dev
-    
-    - name: Test CLI help commands
-      run: |
-        uv run promptrek --help
-        uv run promptrek init --help
-        uv run promptrek validate --help
-        uv run promptrek generate --help
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install 3.11
+
+      - name: Get commits to validate
+        id: commits
+        run: |
+          BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+          echo "Validating PR commits from ${BASE_SHA} to ${HEAD_SHA}"
+          git rev-list --reverse ${BASE_SHA}..${HEAD_SHA} > commits_to_check.txt
+
+          COMMIT_COUNT=$(wc -l < commits_to_check.txt)
+          echo "Found ${COMMIT_COUNT} commits to validate"
+
+          if [ ${COMMIT_COUNT} -eq 0 ]; then
+            echo "skip_validation=true" >> $GITHUB_OUTPUT
+          else
+            echo "skip_validation=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Validate each commit
+        if: steps.commits.outputs.skip_validation == 'false'
+        run: |
+          FAILED_COMMITS=""
+          TOTAL_COMMITS=$(wc -l < commits_to_check.txt)
+          CURRENT=0
+
+          while IFS= read -r commit_sha; do
+            CURRENT=$((CURRENT + 1))
+            echo "Validating commit ${CURRENT}/${TOTAL_COMMITS}: ${commit_sha}"
+
+            git checkout ${commit_sha} --quiet
+            rm -rf dist/ build/ *.egg-info/ || true
+
+            if ! uv sync --all-groups --quiet; then
+              FAILED_COMMITS="${FAILED_COMMITS}\n- ${commit_sha}: Dependency installation failed"
+              continue
+            fi
+
+            if ! uv build --quiet; then
+              FAILED_COMMITS="${FAILED_COMMITS}\n- ${commit_sha}: Build failed"
+              continue
+            fi
+
+            if [ ! -d "dist/" ] || [ -z "$(ls -A dist/ 2>/dev/null)" ]; then
+              FAILED_COMMITS="${FAILED_COMMITS}\n- ${commit_sha}: No build artifacts"
+            fi
+          done < commits_to_check.txt
+
+          git checkout ${{ github.event.pull_request.head.sha }} --quiet
+
+          if [ -n "${FAILED_COMMITS}" ]; then
+            echo "The following commits failed to build:"
+            echo -e "${FAILED_COMMITS}"
+            exit 1
+          else
+            echo "All ${TOTAL_COMMITS} commits build successfully"
+          fi
+
+  # Summary job to ensure all checks pass
+  ci-success:
+    needs: [
+      build,
+      test-primary,
+      test-ubuntu-39, test-ubuntu-310, test-ubuntu-311, test-ubuntu-312,
+      test-windows-310, test-windows-311, test-windows-312,
+      test-macos-311, test-macos-312,
+      security
+    ]
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - name: Check CI Status
+        run: |
+          echo "## CI Summary"
+          echo "Build: ${{ needs.build.result }}"
+          echo "Primary Tests: ${{ needs.test-primary.result }}"
+          echo "Security: ${{ needs.security.result }}"
+          echo ""
+          echo "### Test Matrix Results:"
+          echo "Ubuntu 3.9: ${{ needs.test-ubuntu-39.result }}"
+          echo "Ubuntu 3.10: ${{ needs.test-ubuntu-310.result }}"
+          echo "Ubuntu 3.11: ${{ needs.test-ubuntu-311.result }}"
+          echo "Ubuntu 3.12: ${{ needs.test-ubuntu-312.result }}"
+          echo "Windows 3.10: ${{ needs.test-windows-310.result }}"
+          echo "Windows 3.11: ${{ needs.test-windows-311.result }}"
+          echo "Windows 3.12: ${{ needs.test-windows-312.result }}"
+          echo "macOS 3.11: ${{ needs.test-macos-311.result }}"
+          echo "macOS 3.12: ${{ needs.test-macos-312.result }}"
+
+          if [ "${{ needs.build.result }}" != "success" ] || \
+             [ "${{ needs.test-primary.result }}" != "success" ]; then
+            echo "CI failed due to critical job failures"
+            exit 1
+          fi
+
+          echo "CI completed successfully"
