@@ -107,7 +107,6 @@ jobs:
         else
           uv run pytest tests/unit/ -v --tb=short
         fi
-      continue-on-error: true
 
     - name: Run integration tests
       if: inputs.test-suite == 'all' || inputs.test-suite == 'integration'
@@ -118,7 +117,6 @@ jobs:
         else
           uv run pytest tests/integration/ -v --tb=short
         fi
-      continue-on-error: true
 
     - name: Run all tests with coverage
       if: inputs.test-suite == 'all' && inputs.coverage
