@@ -25,7 +25,7 @@ jobs:
     
       - name: Install dependencies
         run: |
-          uv sync --extra dev
+          uv sync --dev
     
       - name: Run full test suite
         run: |
@@ -45,12 +45,12 @@ jobs:
     
       - name: Install build dependencies
         run: |
-          uv add --extra dev build twine
-          uv sync --extra dev
-    
+          uv add --dev build twine
+          uv sync --dev
+
       - name: Build package
         run: |
-          uv build
+          uv run python -m build
     
       - name: Check package
         run: |
