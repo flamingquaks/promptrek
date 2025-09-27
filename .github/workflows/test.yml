@@ -72,7 +72,7 @@ jobs:
       run: |
         echo "Installing from downloaded artifacts..."
         python -m pip install dist/*.whl
-        uv sync --all-groups --no-install-project
+        uv sync --all-groups
 
     - name: Install dependencies
       if: inputs.artifact-name == ''
