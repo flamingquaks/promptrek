@@ -325,7 +325,7 @@ class TestAdapterWorkflowsFixed:
             assert "Generated:" in result.output
 
             # Check Claude specific output files
-            context_files = [Path(".claude/context.md"), Path(".claude-context.md")]
+            context_files = [Path(".claude/CLAUDE.md"), Path(".claude-context.md")]
             # At least one of these should exist
             assert any(f.exists() for f in context_files)
 

@@ -117,7 +117,7 @@ variables:
         assert result.exit_code == 0
 
         # Check that file was generated
-        generated_file = temp_dir / ".claude" / "context.md"
+        generated_file = temp_dir / ".claude" / "CLAUDE.md"
         assert generated_file.exists()
 
         content = generated_file.read_text()
@@ -195,7 +195,7 @@ variables:
 
         assert result.exit_code == 0
 
-        generated_file = temp_dir / ".claude" / "context.md"
+        generated_file = temp_dir / ".claude" / "CLAUDE.md"
         assert generated_file.exists()
 
         content = generated_file.read_text()
@@ -274,7 +274,7 @@ variables:
 
         assert result.exit_code == 0
 
-        claude_file = temp_dir / "claude_test" / ".claude" / "context.md"
+        claude_file = temp_dir / "claude_test" / ".claude" / "CLAUDE.md"
         assert claude_file.exists()
         claude_content = claude_file.read_text()
 
@@ -457,7 +457,7 @@ variables:
 
         assert result.exit_code == 0
 
-        generated_file = temp_dir / ".claude" / "context.md"
+        generated_file = temp_dir / ".claude" / "CLAUDE.md"
         assert generated_file.exists()
         content = generated_file.read_text()
 

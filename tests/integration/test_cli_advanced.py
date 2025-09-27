@@ -160,11 +160,11 @@ variables:
         assert result.exit_code == 0
         assert "Would create" in result.output
         # Use Path to handle cross-platform path separators
-        expected_path = str(Path(".claude") / "context.md")
+        expected_path = str(Path(".claude") / "CLAUDE.md")
         assert (
             expected_path in result.output
             or ".claude" in result.output
-            and "context.md" in result.output
+            and "CLAUDE.md" in result.output
         )
 
     def test_generate_single_editor_actual(self, runner, sample_upf_file, temp_dir):
@@ -184,7 +184,7 @@ variables:
         assert "Generated:" in result.output
 
         # Check that file was actually created
-        generated_file = temp_dir / ".claude" / "context.md"
+        generated_file = temp_dir / ".claude" / "CLAUDE.md"
         assert generated_file.exists()
 
         # Check content
@@ -236,7 +236,7 @@ variables:
         assert result.exit_code == 0
 
         # Check that variables were overridden
-        generated_file = temp_dir / ".claude" / "context.md"
+        generated_file = temp_dir / ".claude" / "CLAUDE.md"
         assert generated_file.exists()
         # Verify file was generated
         # The content should include the overridden values if variable substitution is used
@@ -257,7 +257,7 @@ variables:
         )
         assert result.exit_code == 0
 
-        claude_file = temp_dir / ".claude" / "context.md"
+        claude_file = temp_dir / ".claude" / "CLAUDE.md"
         assert claude_file.exists()
         claude_content = claude_file.read_text()
         assert "Claude-specific: Provide detailed explanations" in claude_content
