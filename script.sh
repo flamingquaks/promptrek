@@ -69,9 +69,14 @@ case "${1:-help}" in
             echo -e "${YELLOW}Using uv build...${NC}"
             uv build
         else
-            echo -e "${YELLOW}uv not found, using python -m build...${NC}"
-            python -m pip install --user build wheel 2>/dev/null || true
+            echo -e "${YELLOW}uv not found, using python -m build in a temporary virtual environment...${NC}"
+            VENV_DIR=".venv-build"
+            python3 -m venv "$VENV_DIR"
+            source "$VENV_DIR/bin/activate"
+            pip install --upgrade pip build wheel
             python -m build --wheel --no-isolation
+            deactivate
+            rm -rf "$VENV_DIR"
         fi
         ;;
     clean)
