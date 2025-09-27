@@ -88,7 +88,7 @@ jobs:
     - name: Setup Node.js for changelog
       uses: actions/setup-node@v5
       with:
-        node-version: 20
+        node-version: 22
 
     - name: Install conventional-changelog
       run: |
