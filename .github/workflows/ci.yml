@@ -2,9 +2,9 @@ name: Continuous Integration
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
   schedule:
     # Run weekly to catch dependency issues
     - cron: '0 8 * * 1'
@@ -154,74 +154,74 @@ jobs:
     name: Validate Each Commit Builds
 
     steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: Install uv
-      uses: astral-sh/setup-uv@v3
-      with:
-        version: "latest"
-        enable-cache: true
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+          enable-cache: true
 
-    - name: Set up Python
-      run: uv python install 3.11
+      - name: Set up Python
+        run: uv python install 3.11
 
-    - name: Get commits to validate
-      id: commits
-      run: |
-        BASE_SHA="${{ github.event.pull_request.base.sha }}"
-        HEAD_SHA="${{ github.event.pull_request.head.sha }}"
-        echo "Validating PR commits from ${BASE_SHA} to ${HEAD_SHA}"
-        git rev-list --reverse ${BASE_SHA}..${HEAD_SHA} > commits_to_check.txt
+      - name: Get commits to validate
+        id: commits
+        run: |
+          BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+          echo "Validating PR commits from ${BASE_SHA} to ${HEAD_SHA}"
+          git rev-list --reverse ${BASE_SHA}..${HEAD_SHA} > commits_to_check.txt
 
-        COMMIT_COUNT=$(wc -l < commits_to_check.txt)
-        echo "Found ${COMMIT_COUNT} commits to validate"
+          COMMIT_COUNT=$(wc -l < commits_to_check.txt)
+          echo "Found ${COMMIT_COUNT} commits to validate"
 
-        if [ ${COMMIT_COUNT} -eq 0 ]; then
-          echo "skip_validation=true" >> $GITHUB_OUTPUT
-        else
-          echo "skip_validation=false" >> $GITHUB_OUTPUT
-        fi
-
-    - name: Validate each commit
-      if: steps.commits.outputs.skip_validation == 'false'
-      run: |
-        FAILED_COMMITS=""
-        TOTAL_COMMITS=$(wc -l < commits_to_check.txt)
-        CURRENT=0
-
-        while IFS= read -r commit_sha; do
-          CURRENT=$((CURRENT + 1))
-          echo "Validating commit ${CURRENT}/${TOTAL_COMMITS}: ${commit_sha}"
-
-          git checkout ${commit_sha} --quiet
-          rm -rf dist/ build/ *.egg-info/ || true
-
-          if ! uv sync --all-groups --quiet; then
-            FAILED_COMMITS="${FAILED_COMMITS}\n- ${commit_sha}: Dependency installation failed"
-            continue
+          if [ ${COMMIT_COUNT} -eq 0 ]; then
+            echo "skip_validation=true" >> $GITHUB_OUTPUT
+          else
+            echo "skip_validation=false" >> $GITHUB_OUTPUT
           fi
 
-          if ! uv build --quiet; then
-            FAILED_COMMITS="${FAILED_COMMITS}\n- ${commit_sha}: Build failed"
-            continue
+      - name: Validate each commit
+        if: steps.commits.outputs.skip_validation == 'false'
+        run: |
+          FAILED_COMMITS=""
+          TOTAL_COMMITS=$(wc -l < commits_to_check.txt)
+          CURRENT=0
+
+          while IFS= read -r commit_sha; do
+            CURRENT=$((CURRENT + 1))
+            echo "Validating commit ${CURRENT}/${TOTAL_COMMITS}: ${commit_sha}"
+
+            git checkout ${commit_sha} --quiet
+            rm -rf dist/ build/ *.egg-info/ || true
+
+            if ! uv sync --all-groups --quiet; then
+              FAILED_COMMITS="${FAILED_COMMITS}\n- ${commit_sha}: Dependency installation failed"
+              continue
+            fi
+
+            if ! uv build --quiet; then
+              FAILED_COMMITS="${FAILED_COMMITS}\n- ${commit_sha}: Build failed"
+              continue
+            fi
+
+            if [ ! -d "dist/" ] || [ -z "$(ls -A dist/ 2>/dev/null)" ]; then
+              FAILED_COMMITS="${FAILED_COMMITS}\n- ${commit_sha}: No build artifacts"
+            fi
+          done < commits_to_check.txt
+
+          git checkout ${{ github.event.pull_request.head.sha }} --quiet
+
+          if [ -n "${FAILED_COMMITS}" ]; then
+            echo "The following commits failed to build:"
+            echo -e "${FAILED_COMMITS}"
+            exit 1
+          else
+            echo "All ${TOTAL_COMMITS} commits build successfully"
           fi
-
-          if [ ! -d "dist/" ] || [ -z "$(ls -A dist/ 2>/dev/null)" ]; then
-            FAILED_COMMITS="${FAILED_COMMITS}\n- ${commit_sha}: No build artifacts"
-          fi
-        done < commits_to_check.txt
-
-        git checkout ${{ github.event.pull_request.head.sha }} --quiet
-
-        if [ -n "${FAILED_COMMITS}" ]; then
-          echo "The following commits failed to build:"
-          echo -e "${FAILED_COMMITS}"
-          exit 1
-        else
-          echo "All ${TOTAL_COMMITS} commits build successfully"
-        fi
 
   # Summary job to ensure all checks pass
   ci-success:
@@ -237,28 +237,28 @@ jobs:
     if: always()
 
     steps:
-    - name: Check CI Status
-      run: |
-        echo "## CI Summary"
-        echo "Build: ${{ needs.build.result }}"
-        echo "Primary Tests: ${{ needs.test-primary.result }}"
-        echo "Security: ${{ needs.security.result }}"
-        echo ""
-        echo "### Test Matrix Results:"
-        echo "Ubuntu 3.9: ${{ needs.test-ubuntu-39.result }}"
-        echo "Ubuntu 3.10: ${{ needs.test-ubuntu-310.result }}"
-        echo "Ubuntu 3.11: ${{ needs.test-ubuntu-311.result }}"
-        echo "Ubuntu 3.12: ${{ needs.test-ubuntu-312.result }}"
-        echo "Windows 3.10: ${{ needs.test-windows-310.result }}"
-        echo "Windows 3.11: ${{ needs.test-windows-311.result }}"
-        echo "Windows 3.12: ${{ needs.test-windows-312.result }}"
-        echo "macOS 3.11: ${{ needs.test-macos-311.result }}"
-        echo "macOS 3.12: ${{ needs.test-macos-312.result }}"
+      - name: Check CI Status
+        run: |
+          echo "## CI Summary"
+          echo "Build: ${{ needs.build.result }}"
+          echo "Primary Tests: ${{ needs.test-primary.result }}"
+          echo "Security: ${{ needs.security.result }}"
+          echo ""
+          echo "### Test Matrix Results:"
+          echo "Ubuntu 3.9: ${{ needs.test-ubuntu-39.result }}"
+          echo "Ubuntu 3.10: ${{ needs.test-ubuntu-310.result }}"
+          echo "Ubuntu 3.11: ${{ needs.test-ubuntu-311.result }}"
+          echo "Ubuntu 3.12: ${{ needs.test-ubuntu-312.result }}"
+          echo "Windows 3.10: ${{ needs.test-windows-310.result }}"
+          echo "Windows 3.11: ${{ needs.test-windows-311.result }}"
+          echo "Windows 3.12: ${{ needs.test-windows-312.result }}"
+          echo "macOS 3.11: ${{ needs.test-macos-311.result }}"
+          echo "macOS 3.12: ${{ needs.test-macos-312.result }}"
 
-        if [ "${{ needs.build.result }}" != "success" ] || \
-           [ "${{ needs.test-primary.result }}" != "success" ]; then
-          echo "CI failed due to critical job failures"
-          exit 1
-        fi
+          if [ "${{ needs.build.result }}" != "success" ] || \
+             [ "${{ needs.test-primary.result }}" != "success" ]; then
+            echo "CI failed due to critical job failures"
+            exit 1
+          fi
 
-        echo "CI completed successfully"
+          echo "CI completed successfully"
