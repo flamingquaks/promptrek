@@ -121,4 +121,3 @@ class TestAmazonQAdapter:
         except Exception:
             # Any other exception is also acceptable for coverage
             pass
-
