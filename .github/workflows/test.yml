@@ -1,0 +1,140 @@
+name: Reusable Test Workflow
+
+on:
+  workflow_call:
+    inputs:
+      python-version:
+        required: false
+        type: string
+        default: '3.11'
+      os:
+        required: false
+        type: string
+        default: 'ubuntu-latest'
+      test-suite:
+        required: false
+        type: string
+        default: 'all'  # Options: all, unit, integration, cli
+      coverage:
+        required: false
+        type: boolean
+        default: true
+      coverage-threshold:
+        required: false
+        type: number
+        default: 80
+      artifact-name:
+        required: false
+        type: string
+        default: ''  # If provided, download and test with artifacts
+      upload-coverage:
+        required: false
+        type: boolean
+        default: true
+
+jobs:
+  test:
+    runs-on: ${{ inputs.os }}
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v3
+      with:
+        version: "latest"
+        enable-cache: true
+        cache-dependency-glob: "pyproject.toml"
+
+    - name: Set up Python ${{ inputs.python-version }}
+      run: uv python install ${{ inputs.python-version }}
+
+    - name: Cache dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cache/uv
+          .venv
+        key: ${{ inputs.os }}-uv-${{ inputs.python-version }}-${{ hashFiles('pyproject.toml', 'uv.lock') }}
+        restore-keys: |
+          ${{ inputs.os }}-uv-${{ inputs.python-version }}-
+          ${{ inputs.os }}-uv-
+
+    - name: Download build artifacts
+      if: inputs.artifact-name != ''
+      uses: actions/download-artifact@v4
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: dist/
+
+    - name: Install from artifacts
+      if: inputs.artifact-name != ''
+      run: |
+        echo "Installing from downloaded artifacts..."
+        python -m pip install dist/*.whl
+        uv sync --all-groups --no-install-project
+
+    - name: Install dependencies
+      if: inputs.artifact-name == ''
+      run: |
+        uv sync --all-groups
+
+    - name: Run linting checks
+      if: inputs.test-suite == 'all' || inputs.test-suite == 'lint'
+      run: |
+        echo "Running code quality checks..."
+        uv run black --check src/ tests/ || echo "Black formatting issues found"
+        uv run isort --check-only src/ tests/ || echo "Import sorting issues found"
+        uv run flake8 src/ tests/ || echo "Flake8 issues found"
+        uv run mypy src/ || echo "Type checking issues found"
+      continue-on-error: true
+
+    - name: Run unit tests
+      if: inputs.test-suite == 'all' || inputs.test-suite == 'unit'
+      run: |
+        if [ "${{ inputs.coverage }}" = "true" ]; then
+          uv run pytest tests/unit/ -v --tb=short --cov=src/promptrek --cov-report=xml --cov-report=term-missing
+        else
+          uv run pytest tests/unit/ -v --tb=short
+        fi
+      continue-on-error: true
+
+    - name: Run integration tests
+      if: inputs.test-suite == 'all' || inputs.test-suite == 'integration'
+      run: |
+        if [ "${{ inputs.coverage }}" = "true" ]; then
+          uv run pytest tests/integration/ -v --tb=short --cov=src/promptrek --cov-append --cov-report=xml --cov-report=term-missing
+        else
+          uv run pytest tests/integration/ -v --tb=short
+        fi
+      continue-on-error: true
+
+    - name: Run all tests with coverage
+      if: inputs.test-suite == 'all' && inputs.coverage
+      run: |
+        uv run pytest tests/ --cov=src/promptrek --cov-report=xml --cov-report=term-missing --cov-fail-under=${{ inputs.coverage-threshold }}
+      continue-on-error: ${{ inputs.coverage-threshold == 0 }}
+
+    - name: Test CLI functionality
+      if: inputs.test-suite == 'all' || inputs.test-suite == 'cli'
+      run: |
+        echo "Testing CLI commands..."
+        uv run promptrek --help
+        uv run promptrek list-editors
+        uv run promptrek init --template basic --output test.promptrek.yaml
+        uv run promptrek validate test.promptrek.yaml
+        uv run promptrek generate --all --dry-run test.promptrek.yaml
+
+        # Test uvx functionality if not on Windows
+        if [ "${{ inputs.os }}" != "windows-latest" ]; then
+          uvx --from . promptrek --help
+        fi
+
+    - name: Upload coverage reports
+      if: inputs.coverage && inputs.upload-coverage && (inputs.test-suite == 'all' || inputs.test-suite == 'unit' || inputs.test-suite == 'integration')
+      uses: codecov/codecov-action@v4
+      with:
+        file: ./coverage.xml
+        fail_ci_if_error: false
+        flags: ${{ inputs.test-suite }}
+        name: ${{ inputs.os }}-py${{ inputs.python-version }}

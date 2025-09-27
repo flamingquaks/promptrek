@@ -11,96 +11,179 @@ on:
         required: true
         type: string
 
+permissions:
+  contents: write
+  packages: write
+  id-token: write  # For PyPI trusted publishing
+
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-    
-      - name: Install uv
-        uses: astral-sh/setup-uv@v1
-    
-      - name: Set up Python
-        run: uv python install 3.12
-    
-      - name: Install dependencies
-        run: |
-          uv sync --extra dev
-    
-      - name: Run full test suite
-        run: |
-          uv run pytest tests/ --cov=src/promptrek --cov-fail-under=80
-
+  # Build the package once
   build:
-    needs: test
+    uses: ./.github/workflows/build.yml
+    with:
+      python-version: '3.12'
+      upload-artifacts: true
+
+  # Run comprehensive tests on the build
+  test:
+    needs: build
+    uses: ./.github/workflows/test.yml
+    with:
+      python-version: '3.12'
+      test-suite: 'all'
+      coverage: true
+      coverage-threshold: 80
+      artifact-name: ${{ needs.build.outputs.artifact-name }}
+
+  # Security validation before release
+  security:
+    needs: build
+    uses: ./.github/workflows/security.yml
+    with:
+      python-version: '3.12'
+      bandit-severity: 'medium'
+      fail-on-issues: true  # Strict security for releases
+
+  # Validate package with twine
+  validate-package:
+    needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-    
-      - name: Install uv
-        uses: astral-sh/setup-uv@v1
-    
-      - name: Set up Python
-        run: uv python install 3.12
-    
-      - name: Install build dependencies
-        run: |
-          uv add --extra dev build twine
-          uv sync --extra dev
-    
-      - name: Build package
-        run: |
-          uv build
-    
-      - name: Check package
-        run: |
-          uv run twine check dist/*
-    
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: dist
-          path: dist/
+    - uses: actions/checkout@v4
 
-  release:
-    needs: [test, build]
+    - name: Install uv
+      uses: astral-sh/setup-uv@v3
+
+    - name: Set up Python
+      run: uv python install 3.12
+
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: ${{ needs.build.outputs.artifact-name }}
+        path: dist/
+
+    - name: Install twine
+      run: |
+        uv add --group dev twine
+        uv sync --group dev
+
+    - name: Check package with twine
+      run: |
+        uv run twine check dist/*
+        echo "Package validation successful"
+
+  # Create GitHub release
+  github-release:
+    needs: [build, test, security, validate-package]
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      packages: write
+
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-    
-      - name: Setup Node.js for changelog
-        uses: actions/setup-node@v5
-        with:
-          node-version: 24
-          cache: ''
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
-      - name: Install conventional-changelog
-        run: |
-          npm install -g conventional-changelog-cli conventional-commits-parser
+    - name: Setup Node.js for changelog
+      uses: actions/setup-node@v5
+      with:
+        node-version: 20
 
-      - name: Generate release notes
-        run: |
-          # Generate release notes from git history using conventional commits
-          conventional-changelog -p angular -s -r 1 > RELEASE_NOTES.md || \
-            echo "Release notes generated from conventional commits" > RELEASE_NOTES.md
+    - name: Install conventional-changelog
+      run: |
+        npm install -g conventional-changelog-cli conventional-commits-parser
 
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: dist
-          path: dist/
-    
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: dist/*
-          body_path: RELEASE_NOTES.md
-          draft: false
-          prerelease: ${{ contains(github.ref, 'alpha') || contains(github.ref, 'beta') || contains(github.ref, 'rc') }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Generate release notes
+      run: |
+        # Generate release notes from git history using conventional commits
+        conventional-changelog -p angular -s -r 1 > RELEASE_NOTES.md || \
+          echo "Release notes generated from conventional commits" > RELEASE_NOTES.md
+
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: ${{ needs.build.outputs.artifact-name }}
+        path: dist/
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        files: dist/*
+        body_path: RELEASE_NOTES.md
+        draft: false
+        prerelease: ${{ contains(github.ref, 'alpha') || contains(github.ref, 'beta') || contains(github.ref, 'rc') }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Publish to PyPI (using the same artifacts)
+  publish-pypi:
+    needs: [build, test, security, validate-package]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    environment:
+      name: pypi
+      url: https://pypi.org/project/promptrek/
+
+    permissions:
+      id-token: write
+
+    steps:
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: ${{ needs.build.outputs.artifact-name }}
+        path: dist/
+
+    - name: Publish to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        print-hash: true
+        verify-metadata: true
+
+  # Optional: Publish to Test PyPI first
+  publish-test-pypi:
+    needs: [build, test, security, validate-package]
+    runs-on: ubuntu-latest
+    if: contains(github.ref, 'rc') || contains(github.ref, 'beta')
+    environment:
+      name: test-pypi
+      url: https://test.pypi.org/project/promptrek/
+
+    permissions:
+      id-token: write
+
+    steps:
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: ${{ needs.build.outputs.artifact-name }}
+        path: dist/
+
+    - name: Publish to Test PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        repository-url: https://test.pypi.org/legacy/
+        print-hash: true
+        verify-metadata: true
+
+  # Final success check
+  release-success:
+    needs: [github-release, publish-pypi]
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+    - name: Check Release Status
+      run: |
+        echo "## Release Summary"
+        echo "GitHub Release: ${{ needs.github-release.result }}"
+        echo "PyPI Publish: ${{ needs.publish-pypi.result }}"
+
+        if [ "${{ needs.github-release.result }}" != "success" ] || \
+           [ "${{ needs.publish-pypi.result }}" != "success" ]; then
+          echo "Release failed"
+          exit 1
+        fi
+
+        echo "Release completed successfully! 🎉"
