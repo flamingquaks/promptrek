@@ -79,16 +79,25 @@ jobs:
       run: |
         uv sync --all-groups
 
-    - name: Run linting checks
+    - name: Check formatting with Black
       if: inputs.test-suite == 'all' || inputs.test-suite == 'lint'
-      run: |
-        echo "Running code quality checks..."
-        uv run black --check src/ tests/ || echo "Black formatting issues found"
-        uv run isort --check-only src/ tests/ || echo "Import sorting issues found"
-        uv run flake8 src/ tests/ || echo "Flake8 issues found"
-        uv run mypy src/ || echo "Type checking issues found"
+      run: uv run black --check src/ tests/
       continue-on-error: true
 
+    - name: Check import sorting with isort
+      if: inputs.test-suite == 'all' || inputs.test-suite == 'lint'
+      run: uv run isort --check-only src/ tests/
+      continue-on-error: true
+
+    - name: Lint with flake8
+      if: inputs.test-suite == 'all' || inputs.test-suite == 'lint'
+      run: uv run flake8 src/ tests/
+      continue-on-error: true
+
+    - name: Type check with mypy
+      if: inputs.test-suite == 'all' || inputs.test-suite == 'lint'
+      run: uv run mypy src/
+      continue-on-error: true
     - name: Run unit tests
       if: inputs.test-suite == 'all' || inputs.test-suite == 'unit'
       shell: bash
