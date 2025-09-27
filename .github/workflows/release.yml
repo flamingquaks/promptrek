@@ -141,6 +141,32 @@ jobs:
         print-hash: true
         verify-metadata: true
 
+  # Optional: Publish to Test PyPI first
+  publish-test-pypi:
+    needs: [build, test, security, validate-package]
+    runs-on: ubuntu-latest
+    if: contains(github.ref, 'rc') || contains(github.ref, 'beta')
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/project/promptrek/
+
+    permissions:
+      id-token: write
+
+    steps:
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: ${{ needs.build.outputs.artifact-name }}
+        path: dist/
+
+    - name: Publish to Test PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        repository-url: https://test.pypi.org/legacy/
+        print-hash: true
+        verify-metadata: true
+
   # Final success check
   release-success:
     needs: [github-release, publish-pypi]
