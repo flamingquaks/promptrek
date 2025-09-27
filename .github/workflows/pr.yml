@@ -63,7 +63,11 @@ jobs:
       id: formatting
       run: |
         echo "Checking black formatting..."
-        uv run black --check --diff src/ tests/ || echo "formatting_issues=true" >> $GITHUB_OUTPUT
+        if uv run black --check --diff src/ tests/; then
+          echo "formatting_issues=false" >> $GITHUB_OUTPUT
+        else
+          echo "formatting_issues=true" >> $GITHUB_OUTPUT
+        fi
 
     - name: Check import sorting
       id: imports
