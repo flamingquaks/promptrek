@@ -5,6 +5,8 @@
 
   <body class="{% if page.title == 'Home' %}home-page{% else %}content-page{% endif %}">
 
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
     {%- include header.html -%}
 
     {% if page.title == "Home" %}
@@ -24,14 +26,15 @@
           <p class="hero-tagline">{{ site.tagline }}</p>
           <p class="hero-description">{{ site.description }}</p>
           <div class="hero-cta">
-            <a href="quick-start.html" class="btn-hero">Get Started</a>
-            <a href="{{ site.github_url }}" class="btn-hero btn-hero-outline" target="_blank">View on GitHub</a>
+            <a href="quick-start.html" class="btn-hero" aria-describedby="get-started-desc">Get Started</a>
+            <a href="{{ site.github_url }}" class="btn-hero btn-hero-outline" target="_blank" rel="noopener noreferrer" aria-label="View PrompTrek on GitHub (opens in new tab)">View on GitHub</a>
           </div>
+          <div id="get-started-desc" class="sr-only">Learn how to install and configure PrompTrek</div>
         </div>
       </div>
     {% endif %}
 
-    <main class="page-content" aria-label="Content">
+    <main class="page-content" aria-label="Content" id="main-content">
       <div class="wrapper">
         {{ content }}
       </div>
