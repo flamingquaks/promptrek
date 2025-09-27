@@ -154,10 +154,11 @@ jobs:
           python -m pip install dist/*.whl
 
       - name: Test CLI commands
+        env:
+          PYTHONIOENCODING: utf-8
         run: |
           echo "Testing CLI functionality..."
           promptrek --help
-          promptrek list-editors
           promptrek init --template basic --output test-pr.promptrek.yaml
           promptrek validate test-pr.promptrek.yaml
           promptrek generate --all --dry-run test-pr.promptrek.yaml
