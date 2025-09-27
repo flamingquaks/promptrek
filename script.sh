@@ -4,7 +4,7 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+PROJECT_ROOT="$SCRIPT_DIR"
 
 # Colors
 BLUE='\033[0;34m'
@@ -65,7 +65,14 @@ case "${1:-help}" in
         ;;
     build)
         echo -e "${BLUE}Building package...${NC}"
-        uv build
+        if command -v uv &> /dev/null; then
+            echo -e "${YELLOW}Using uv build...${NC}"
+            uv build
+        else
+            echo -e "${YELLOW}uv not found, using python -m build...${NC}"
+            python -m pip install --user build wheel 2>/dev/null || true
+            python -m build --wheel --no-isolation
+        fi
         ;;
     clean)
         echo -e "${BLUE}Cleaning artifacts...${NC}"
