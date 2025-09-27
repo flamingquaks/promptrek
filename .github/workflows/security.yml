@@ -87,13 +87,14 @@ jobs:
         id: safety
         run: |
           echo "Checking for known vulnerabilities in dependencies..."
-          uv run safety check --json --output safety-report.json || true
-          uv run safety check || true
+          # Use the new scan command
+          uv run safety scan --output json --save-as safety-report.json || true
+          uv run safety scan || true
 
           # Check if we should fail on issues
           if [ "${{ inputs.fail-on-issues }}" = "true" ]; then
-            # Check exit code of safety check
-            uv run safety check || exit 1
+            # Check exit code of safety scan
+            uv run safety scan || exit 1
           fi
         continue-on-error: ${{ !inputs.fail-on-issues }}
 
