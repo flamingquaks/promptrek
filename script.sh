@@ -4,7 +4,7 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+PROJECT_ROOT="$SCRIPT_DIR"
 
 # Colors
 BLUE='\033[0;34m'
@@ -69,14 +69,9 @@ case "${1:-help}" in
             echo -e "${YELLOW}Using uv build...${NC}"
             uv build
         else
-            echo -e "${YELLOW}uv not found, using python -m build in a temporary virtual environment...${NC}"
-            VENV_DIR=".venv-build"
-            python3 -m venv "$VENV_DIR"
-            source "$VENV_DIR/bin/activate"
-            pip install --upgrade pip build wheel
+            echo -e "${YELLOW}uv not found, using python -m build...${NC}"
+            python -m pip install --user build wheel setuptools 2>/dev/null || true
             python -m build --wheel --no-isolation
-            deactivate
-            rm -rf "$VENV_DIR"
         fi
         ;;
     clean)

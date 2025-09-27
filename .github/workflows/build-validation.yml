@@ -87,6 +87,8 @@ jobs:
           
           # Test build
           echo "🔨 Testing build..."  
+          echo "Current directory: $(pwd)"
+          echo "Checking for pyproject.toml: $(ls -la pyproject.toml 2>/dev/null || echo 'not found')"
           if uv build --quiet; then
             echo "✅ Build succeeded for commit ${commit_sha}"
           else
@@ -170,6 +172,12 @@ jobs:
     - name: Test script.sh build
       run: |
         echo "🔨 Testing script.sh build..."
+        echo "Current directory: $(pwd)"
+        echo "Contents of current directory:"
+        ls -la
+        echo "Checking if pyproject.toml exists:"
+        ls -la pyproject.toml || echo "pyproject.toml not found"
+        
         ./script.sh clean
         ./script.sh build
         
