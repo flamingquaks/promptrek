@@ -15,10 +15,14 @@ on:
         required: false
         type: boolean
         default: false
+  push:
+    tags:
+      - '*-rc*'
 
 jobs:
   security-scan:
     runs-on: ubuntu-latest
+    environment: safety
 
     steps:
       - uses: actions/checkout@v4
@@ -83,8 +87,16 @@ jobs:
             fi
           fi
 
-      - name: Check for known vulnerabilities with Safety
+      - name: Check for known vulnerabilities with Safety CLI (RC tags only)
         id: safety
+        if: github.ref_type == 'tag' && contains(github.ref_name, '-rc')
+        uses: pyupio/safety-action@v1
+        with:
+          api-key: ${{ secrets.SAFETY_API_KEY }}
+
+      - name: Check for known vulnerabilities with Safety (free scan)
+        id: safety-fallback
+        if: github.ref_type != 'tag' || !contains(github.ref_name, '-rc')
         run: |
           echo "Checking for known vulnerabilities in dependencies..."
           # Use the new scan command
