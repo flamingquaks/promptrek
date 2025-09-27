@@ -22,32 +22,111 @@ jobs:
       python-version: '3.11'
       upload-artifacts: true
 
-  # Test matrix using build artifacts
-  test-matrix:
+  # Test matrix - Ubuntu latest
+  test-ubuntu-39:
     needs: build
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['3.9', '3.10', '3.11', '3.12']
-        exclude:
-          # Reduce matrix size for faster CI
-          - os: windows-latest
-            python-version: '3.9'
-          - os: macos-latest
-            python-version: '3.9'
-          - os: macos-latest
-            python-version: '3.10'
-
     uses: ./.github/workflows/test.yml
     with:
-      os: ${{ matrix.os }}
-      python-version: ${{ matrix.python-version }}
+      os: ubuntu-latest
+      python-version: '3.9'
       test-suite: 'all'
       coverage: true
-      coverage-threshold: 0  # Don't fail on coverage in matrix tests
+      coverage-threshold: 0
       artifact-name: ${{ needs.build.outputs.artifact-name }}
       upload-coverage: true
+
+  test-ubuntu-310:
+    needs: build
+    uses: ./.github/workflows/test.yml
+    with:
+      os: ubuntu-latest
+      python-version: '3.10'
+      test-suite: 'all'
+      coverage: true
+      coverage-threshold: 0
+      artifact-name: ${{ needs.build.outputs.artifact-name }}
+      upload-coverage: true
+
+  test-ubuntu-311:
+    needs: build
+    uses: ./.github/workflows/test.yml
+    with:
+      os: ubuntu-latest
+      python-version: '3.11'
+      test-suite: 'all'
+      coverage: true
+      coverage-threshold: 0
+      artifact-name: ${{ needs.build.outputs.artifact-name }}
+      upload-coverage: true
+
+  test-ubuntu-312:
+    needs: build
+    uses: ./.github/workflows/test.yml
+    with:
+      os: ubuntu-latest
+      python-version: '3.12'
+      test-suite: 'all'
+      coverage: true
+      coverage-threshold: 0
+      artifact-name: ${{ needs.build.outputs.artifact-name }}
+      upload-coverage: true
+
+  # Test matrix - Windows
+  test-windows-310:
+    needs: build
+    uses: ./.github/workflows/test.yml
+    with:
+      os: windows-latest
+      python-version: '3.10'
+      test-suite: 'all'
+      coverage: false  # Skip coverage on Windows
+      artifact-name: ${{ needs.build.outputs.artifact-name }}
+      upload-coverage: false
+
+  test-windows-311:
+    needs: build
+    uses: ./.github/workflows/test.yml
+    with:
+      os: windows-latest
+      python-version: '3.11'
+      test-suite: 'all'
+      coverage: false
+      artifact-name: ${{ needs.build.outputs.artifact-name }}
+      upload-coverage: false
+
+  test-windows-312:
+    needs: build
+    uses: ./.github/workflows/test.yml
+    with:
+      os: windows-latest
+      python-version: '3.12'
+      test-suite: 'all'
+      coverage: false
+      artifact-name: ${{ needs.build.outputs.artifact-name }}
+      upload-coverage: false
+
+  # Test matrix - macOS
+  test-macos-311:
+    needs: build
+    uses: ./.github/workflows/test.yml
+    with:
+      os: macos-latest
+      python-version: '3.11'
+      test-suite: 'all'
+      coverage: false  # Skip coverage on macOS
+      artifact-name: ${{ needs.build.outputs.artifact-name }}
+      upload-coverage: false
+
+  test-macos-312:
+    needs: build
+    uses: ./.github/workflows/test.yml
+    with:
+      os: macos-latest
+      python-version: '3.12'
+      test-suite: 'all'
+      coverage: false
+      artifact-name: ${{ needs.build.outputs.artifact-name }}
+      upload-coverage: false
 
   # Quick tests for primary configuration
   test-primary:
@@ -146,7 +225,14 @@ jobs:
 
   # Summary job to ensure all checks pass
   ci-success:
-    needs: [build, test-primary, test-matrix, security]
+    needs: [
+      build,
+      test-primary,
+      test-ubuntu-39, test-ubuntu-310, test-ubuntu-311, test-ubuntu-312,
+      test-windows-310, test-windows-311, test-windows-312,
+      test-macos-311, test-macos-312,
+      security
+    ]
     runs-on: ubuntu-latest
     if: always()
 
@@ -156,8 +242,18 @@ jobs:
         echo "## CI Summary"
         echo "Build: ${{ needs.build.result }}"
         echo "Primary Tests: ${{ needs.test-primary.result }}"
-        echo "Test Matrix: ${{ needs.test-matrix.result }}"
         echo "Security: ${{ needs.security.result }}"
+        echo ""
+        echo "### Test Matrix Results:"
+        echo "Ubuntu 3.9: ${{ needs.test-ubuntu-39.result }}"
+        echo "Ubuntu 3.10: ${{ needs.test-ubuntu-310.result }}"
+        echo "Ubuntu 3.11: ${{ needs.test-ubuntu-311.result }}"
+        echo "Ubuntu 3.12: ${{ needs.test-ubuntu-312.result }}"
+        echo "Windows 3.10: ${{ needs.test-windows-310.result }}"
+        echo "Windows 3.11: ${{ needs.test-windows-311.result }}"
+        echo "Windows 3.12: ${{ needs.test-windows-312.result }}"
+        echo "macOS 3.11: ${{ needs.test-macos-311.result }}"
+        echo "macOS 3.12: ${{ needs.test-macos-312.result }}"
 
         if [ "${{ needs.build.result }}" != "success" ] || \
            [ "${{ needs.test-primary.result }}" != "success" ]; then
