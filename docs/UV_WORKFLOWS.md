@@ -81,7 +81,7 @@ uv run mypy src/
 
 **Build & Distribution:**
 ```bash
-# Build package
+# Build package (preferred method when uv is available)
 uv build
 
 # Build wheel only
@@ -89,7 +89,14 @@ uv build --wheel
 
 # Build source distribution only
 uv build --sdist
+
+# Alternative build methods (when uv is not available)
+python -m build --wheel --no-isolation
+make build                    # Auto-detects uv availability
+./script.sh build            # Auto-detects uv availability
 ```
+
+**Note:** The `make build` and `./script.sh build` commands automatically detect whether `uv` is available and fall back to using `python -m build` when needed, ensuring builds work in any environment.
 
 #### Make Commands (Alternative Interface)
 
