@@ -1,0 +1,126 @@
+name: Reusable Build Workflow
+
+on:
+  workflow_call:
+    inputs:
+      python-version:
+        required: false
+        type: string
+        default: '3.11'
+      upload-artifacts:
+        required: false
+        type: boolean
+        default: true
+      artifact-name:
+        required: false
+        type: string
+        default: 'dist'
+    outputs:
+      artifact-name:
+        description: Name of the uploaded artifact
+        value: ${{ jobs.build.outputs.artifact-name }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      artifact-name: ${{ steps.artifact.outputs.name }}
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Full history for versioning
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v3
+      with:
+        version: "latest"
+        enable-cache: true
+        cache-dependency-glob: "pyproject.toml"
+
+    - name: Set up Python ${{ inputs.python-version }}
+      run: uv python install ${{ inputs.python-version }}
+
+    - name: Cache dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cache/uv
+          .venv
+        key: ${{ runner.os }}-uv-${{ inputs.python-version }}-${{ hashFiles('pyproject.toml', 'uv.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-uv-${{ inputs.python-version }}-
+          ${{ runner.os }}-uv-
+
+    - name: Install dependencies
+      run: |
+        uv sync --all-groups
+
+    - name: Clean previous build artifacts
+      run: |
+        rm -rf dist/ build/ *.egg-info/ || true
+
+    - name: Build package
+      run: |
+        echo "Building package..."
+        uv build
+
+    - name: Validate build artifacts
+      run: |
+        echo "Validating build artifacts..."
+
+        if [ ! -d "dist/" ]; then
+          echo "No dist/ directory found"
+          exit 1
+        fi
+
+        WHEEL_COUNT=$(ls -1 dist/*.whl 2>/dev/null | wc -l)
+        TAR_COUNT=$(ls -1 dist/*.tar.gz 2>/dev/null | wc -l)
+
+        if [ ${WHEEL_COUNT} -eq 0 ]; then
+          echo "No wheel files found in dist/"
+          exit 1
+        fi
+
+        if [ ${TAR_COUNT} -eq 0 ]; then
+          echo "No tar.gz files found in dist/"
+          exit 1
+        fi
+
+        echo "Found ${WHEEL_COUNT} wheel file(s) and ${TAR_COUNT} tar.gz file(s)"
+        ls -la dist/
+
+        # Verify wheel structure
+        for wheel in dist/*.whl; do
+          if [ -f "$wheel" ]; then
+            echo "Checking wheel contents: $(basename "$wheel")"
+            python -m zipfile -l "$wheel" | grep -E "(promptrek|\.py)" | head -5
+          fi
+        done
+
+    - name: Test installation
+      run: |
+        echo "Testing package installation..."
+        python -m pip install --user --force-reinstall dist/*.whl
+        python -c "import promptrek; print('Package imported successfully')"
+
+    - name: Generate artifact name
+      id: artifact
+      run: |
+        if [ "${{ inputs.artifact-name }}" = "dist" ]; then
+          # Generate unique name for parallel builds
+          ARTIFACT_NAME="dist-${{ github.run_id }}-${{ github.run_attempt }}"
+        else
+          ARTIFACT_NAME="${{ inputs.artifact-name }}"
+        fi
+        echo "name=${ARTIFACT_NAME}" >> $GITHUB_OUTPUT
+        echo "Artifact will be named: ${ARTIFACT_NAME}"
+
+    - name: Upload build artifacts
+      if: inputs.upload-artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ steps.artifact.outputs.name }}
+        path: dist/
+        retention-days: 7
+        if-no-files-found: error
