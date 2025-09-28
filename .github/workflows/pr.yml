@@ -33,16 +33,14 @@ jobs:
   code-quality:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v3
+        uses: astral-sh/setup-uv@v6
         with:
           version: "latest"
           enable-cache: true
-
-      - name: Set up Python
-        run: uv python install 3.11
+          python-version: "3.11"
 
       - name: Cache dependencies
         uses: actions/cache@v4
@@ -135,13 +133,14 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v3
-
-      - name: Set up Python
-        run: uv python install 3.11
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: "latest"
+          enable-cache: true
+          python-version: "3.11"
 
       - name: Download build artifacts
         uses: actions/download-artifact@v4
