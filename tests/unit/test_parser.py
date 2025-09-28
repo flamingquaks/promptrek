@@ -115,3 +115,168 @@ class TestUPFParser:
         # Recursive should find both files
         files = parser.find_upf_files(tmp_path, recursive=True)
         assert len(files) == 2
+
+    def test_parse_multiple_files(self, tmp_path):
+        """Test parsing and merging multiple UPF files."""
+        # Create first file
+        data1 = {
+            "schema_version": "1.0.0",
+            "metadata": {
+                "title": "Project 1",
+                "description": "First project",
+                "version": "1.0",
+                "author": "Test Author",
+            },
+            "instructions": {"general": ["Rule 1", "Rule 2"]},
+            "context": {"technologies": ["python"]},
+            "targets": ["editor1"],
+        }
+        file1 = tmp_path / "first.promptrek.yaml"
+        file1.write_text(yaml.dump(data1))
+
+        # Create second file
+        data2 = {
+            "schema_version": "1.0.0",
+            "metadata": {
+                "title": "Project 2",
+                "description": "Second project",
+                "version": "1.0",
+                "author": "Test Author",
+            },
+            "instructions": {"general": ["Rule 3"], "code_style": ["Style 1"]},
+            "context": {"technologies": ["javascript"]},
+            "targets": ["editor2"],
+        }
+        file2 = tmp_path / "second.promptrek.yaml"
+        file2.write_text(yaml.dump(data2))
+
+        parser = UPFParser()
+        merged_prompt = parser.parse_multiple_files([file1, file2])
+
+        # Check that content was merged properly
+        assert merged_prompt.metadata.title == "Project 2"  # Second takes precedence
+        assert merged_prompt.metadata.description == "Second project"
+        assert len(merged_prompt.instructions.general) == 3  # Combined rules
+        assert "Rule 1" in merged_prompt.instructions.general
+        assert "Rule 3" in merged_prompt.instructions.general
+        assert merged_prompt.instructions.code_style == ["Style 1"]
+        assert len(merged_prompt.context.technologies) == 2  # Combined technologies
+        assert "python" in merged_prompt.context.technologies
+        assert "javascript" in merged_prompt.context.technologies
+        assert len(merged_prompt.targets) == 2  # Combined targets
+
+    def test_parse_directory(self, tmp_path):
+        """Test parsing all UPF files in a directory."""
+        # Create multiple files
+        data1 = {
+            "schema_version": "1.0.0",
+            "metadata": {
+                "title": "Base Project",
+                "description": "Base project description",
+                "version": "1.0",
+                "author": "Test Author",
+            },
+            "instructions": {"general": ["Base rule"]},
+            "targets": ["editor1"],
+        }
+        (tmp_path / "base.promptrek.yaml").write_text(yaml.dump(data1))
+
+        data2 = {
+            "schema_version": "1.0.0",
+            "metadata": {
+                "title": "Additional Project",
+                "description": "Additional project description",
+                "version": "1.0",
+                "author": "Test Author",
+            },
+            "instructions": {"general": ["Additional rule"]},
+            "targets": ["editor2"],
+        }
+        (tmp_path / "additional.promptrek.yaml").write_text(yaml.dump(data2))
+
+        parser = UPFParser()
+        merged_prompt = parser.parse_directory(tmp_path)
+
+        # Should find and merge both files
+        assert merged_prompt.metadata.title == "Base Project"
+        assert len(merged_prompt.instructions.general) == 2
+        assert len(merged_prompt.targets) == 2
+
+    def test_parse_directory_no_files(self, tmp_path):
+        """Test parsing directory with no UPF files raises error."""
+        parser = UPFParser()
+        with pytest.raises(UPFParsingError, match="No .promptrek.yaml files found"):
+            parser.parse_directory(tmp_path)
+
+    def test_merge_prompts_complex(self):
+        """Test complex prompt merging scenarios."""
+        from promptrek.core.models import UniversalPrompt
+
+        # Create base prompt
+        base_data = {
+            "schema_version": "1.0.0",
+            "metadata": {
+                "title": "Base",
+                "description": "Base project",
+                "version": "1.0",
+                "author": "Test Author",
+            },
+            "instructions": {"general": ["Base rule"], "testing": ["Test base"]},
+            "context": {"technologies": ["python"], "project_type": "api"},
+            "variables": {"VAR1": "base_value"},
+            "targets": ["editor1"],
+        }
+        base_prompt = UniversalPrompt(**base_data)
+
+        # Create additional prompt
+        additional_data = {
+            "schema_version": "1.0.0",
+            "metadata": {
+                "title": "Enhanced",
+                "version": "1.0",
+                "author": "Test Author",
+                "description": "Enhanced version",
+            },
+            "instructions": {
+                "general": ["Additional rule"],
+                "code_style": ["Style rule"],
+            },
+            "context": {
+                "technologies": ["javascript"],
+                "description": "Full stack app",
+            },
+            "variables": {"VAR1": "new_value", "VAR2": "additional_value"},
+            "targets": ["editor2"],
+        }
+        additional_prompt = UniversalPrompt(**additional_data)
+
+        parser = UPFParser()
+        merged = parser._merge_prompts(base_prompt, additional_prompt)
+
+        # Test metadata merging
+        assert merged.metadata.title == "Enhanced"  # Additional takes precedence
+        assert merged.metadata.version == "1.0"  # Base preserved
+        assert merged.metadata.description == "Enhanced version"
+
+        # Test instructions merging
+        assert len(merged.instructions.general) == 2
+        assert "Base rule" in merged.instructions.general
+        assert "Additional rule" in merged.instructions.general
+        assert merged.instructions.testing == ["Test base"]
+        assert merged.instructions.code_style == ["Style rule"]
+
+        # Test context merging
+        assert len(merged.context.technologies) == 2
+        assert merged.context.project_type == "api"  # Base preserved
+        assert (
+            merged.context.description == "Full stack app"
+        )  # Additional takes precedence
+
+        # Test variables merging
+        assert merged.variables["VAR1"] == "new_value"  # Additional takes precedence
+        assert merged.variables["VAR2"] == "additional_value"
+
+        # Test targets merging
+        assert len(merged.targets) == 2
+        assert "editor1" in merged.targets
+        assert "editor2" in merged.targets

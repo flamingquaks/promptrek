@@ -296,6 +296,65 @@ Comment-based assistance system:
 - Context-aware suggestions
 - Integration with AWS tools
 
+### Kiro
+
+Comprehensive AI-powered development assistance system:
+
+**Generated files:**
+- `.kiro/steering/*.md` - Project steering documents
+- `.kiro/specs/*/requirements.md` - Functional requirements
+- `.kiro/specs/*/design.md` - Technical design documents
+- `.kiro/specs/*/tasks.md` - Implementation task breakdown
+- `.kiro/hooks/*.md` - Automated quality and process hooks
+- `.prompts/*.md` - Reusable development prompts
+
+**Features:**
+- **Steering System**: Context-aware project guidance with YAML frontmatter
+- **Specifications System**: Three-phase workflow (Requirements → Design → Implementation)
+- **Hooks System**: Automated quality checks and pre-commit validation
+- **Prompts System**: Reusable prompts for common development tasks
+- **Multi-file Support**: Merge multiple `.promptrek.yaml` files intelligently
+- **Enhanced Content**: Rich context, rationale, and practical examples
+
+**File Structure:**
+```
+.kiro/
+├── steering/
+│   ├── product.md                      # Product overview (inclusion: always)
+│   ├── tech.md                         # Technology stack guidance
+│   ├── structure.md                    # Project organization
+│   ├── api-rest-conventions.md         # API-specific rules (fileMatch)
+│   └── component-development-patterns.md # Frontend patterns (fileMatch)
+├── specs/
+│   └── {project-name}/
+│       ├── requirements.md             # Functional/non-functional requirements
+│       ├── design.md                   # Technical architecture
+│       └── tasks.md                    # Implementation breakdown
+└── hooks/
+    ├── code-quality.md                 # Automated quality checks
+    └── pre-commit.md                   # Pre-commit validation
+
+.prompts/
+├── development.md                      # Feature development prompts
+└── refactoring.md                      # Code improvement prompts
+```
+
+**YAML Frontmatter Examples:**
+```yaml
+---
+inclusion: always                       # Always include this steering
+---
+
+---
+inclusion: fileMatch                    # Include only for matching files
+fileMatchPattern: "**/api/**/*.{ts,js,py,go,java}"
+---
+
+---
+inclusion: manual                       # Include only when explicitly referenced
+---
+```
+
 ## Advanced Features
 
 ### Variable Substitution
@@ -340,6 +399,73 @@ instructions:
   general:
     - "Follow project-specific patterns"
 ```
+
+### Multi-File Support
+
+Merge multiple `.promptrek.yaml` files for complex projects:
+
+**File Structure:**
+```
+project/
+├── base.promptrek.yaml              # Core project configuration
+├── api/
+│   └── api.promptrek.yaml          # API-specific additions
+└── frontend/
+    └── frontend.promptrek.yaml     # Frontend-specific additions
+```
+
+**Base Configuration (`base.promptrek.yaml`):**
+```yaml
+schema_version: "1.0.0"
+metadata:
+  title: "E-commerce Platform"
+  version: "1.0.0"
+  author: "Development Team"
+
+instructions:
+  general:
+    - "Write clean, maintainable code"
+    - "Follow established patterns"
+
+context:
+  technologies: ["typescript"]
+  project_type: "web_application"
+
+targets: ["kiro"]
+```
+
+**API Addition (`api/api.promptrek.yaml`):**
+```yaml
+schema_version: "1.0.0"
+metadata:
+  title: "API Module"
+
+instructions:
+  general:
+    - "Follow RESTful conventions"
+    - "Implement proper error handling"
+
+context:
+  technologies: ["node", "express"]
+
+targets: ["kiro"]
+```
+
+**Generate from Multiple Files:**
+```bash
+# Specific files
+promptrek generate --editor kiro base.promptrek.yaml api/api.promptrek.yaml
+
+# All files in directory
+promptrek generate --editor kiro --directory . --recursive
+```
+
+**Merging Behavior:**
+- **Instructions**: Combined (concatenated)
+- **Technologies**: Combined (deduplicated)
+- **Variables**: Later files override earlier ones
+- **Targets**: Combined (deduplicated)
+- **Metadata**: Later files take precedence
 
 ### Editor-Specific Customizations
 

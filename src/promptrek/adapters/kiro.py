@@ -4,7 +4,7 @@ Kiro (AI-powered assistance) adapter implementation.
 
 import json
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 import click
 
@@ -22,6 +22,8 @@ class KiroAdapter(EditorAdapter):
         ".kiro/specs/*/requirements.md",
         ".kiro/specs/*/design.md",
         ".kiro/specs/*/tasks.md",
+        ".kiro/hooks/*.md",
+        ".prompts/*.md",
     ]
 
     def __init__(self):
@@ -66,6 +68,18 @@ class KiroAdapter(EditorAdapter):
             processed_prompt, output_dir, dry_run, verbose
         )
         created_files.extend(custom_files)
+
+        # Generate hooks system
+        hooks_files = self._generate_hooks_system(
+            processed_prompt, output_dir, dry_run, verbose
+        )
+        created_files.extend(hooks_files)
+
+        # Generate prompts system
+        prompts_files = self._generate_prompts_system(
+            processed_prompt, output_dir, dry_run, verbose
+        )
+        created_files.extend(prompts_files)
 
         return created_files
 
@@ -240,7 +254,7 @@ class KiroAdapter(EditorAdapter):
                 for tech in prompt.context.technologies
             )
         ):
-            api_file = steering_dir / "api-standards.md"
+            api_file = steering_dir / "api-rest-conventions.md"
             api_content = self._build_api_standards_steering(prompt)
 
             if dry_run:
@@ -269,8 +283,8 @@ class KiroAdapter(EditorAdapter):
                 for tech in prompt.context.technologies
             )
         ):
-            frontend_file = steering_dir / "frontend-standards.md"
-            frontend_content = self._build_frontend_standards_steering(prompt)
+            frontend_file = steering_dir / "component-development-patterns.md"
+            frontend_content = self._build_component_patterns_steering(prompt)
 
             if dry_run:
                 click.echo(f"  📁 Would create: {frontend_file}")
@@ -356,6 +370,10 @@ class KiroAdapter(EditorAdapter):
 
     def supports_conditionals(self) -> bool:
         """Kiro supports conditional configuration."""
+        return True
+
+    def supports_hooks(self) -> bool:
+        """Kiro supports hooks system."""
         return True
 
     def _build_config(self, prompt: UniversalPrompt) -> str:
@@ -580,22 +598,75 @@ class KiroAdapter(EditorAdapter):
 
         lines.append("---")
         lines.append("inclusion: fileMatch")
-        lines.append('fileMatchPattern: "app/api/**/*"')
+        lines.append('fileMatchPattern: "**/api/**/*.{ts,js,py,go,java}"')
         lines.append("---")
         lines.append("")
-        lines.append("# API Standards")
+        lines.append("# API REST Conventions")
+        lines.append("")
+        lines.append(
+            "This steering file provides comprehensive guidelines for REST API development, ensuring consistency, security, and maintainability across all API endpoints."
+        )
+        lines.append("")
+        lines.append("## Why These Conventions Matter")
+        lines.append(
+            "- **Consistency**: Predictable API behavior improves developer experience"
+        )
+        lines.append(
+            "- **Security**: Proper implementation prevents common vulnerabilities"
+        )
+        lines.append(
+            "- **Maintainability**: Clear patterns reduce cognitive load for future changes"
+        )
+        lines.append("- **Scalability**: Well-designed APIs handle growth gracefully")
         lines.append("")
         lines.append("## REST Conventions")
-        lines.append("- Use HTTP status codes properly")
-        lines.append("- Follow RESTful naming patterns")
-        lines.append("- Include proper error responses")
-        lines.append("- Implement consistent response formats")
         lines.append("")
-        lines.append("## Authentication & Security")
-        lines.append("- Implement proper authentication mechanisms")
-        lines.append("- Validate all inputs")
-        lines.append("- Use HTTPS for all communications")
-        lines.append("- Follow OWASP security guidelines")
+        lines.append("### HTTP Status Codes")
+        lines.append("```")
+        lines.append("200 OK - Successful GET, PUT, PATCH")
+        lines.append("201 Created - Successful POST that creates a resource")
+        lines.append("204 No Content - Successful DELETE or PUT with no return value")
+        lines.append("400 Bad Request - Invalid request syntax or validation error")
+        lines.append("401 Unauthorized - Authentication required")
+        lines.append(
+            "403 Forbidden - Authentication valid but insufficient permissions"
+        )
+        lines.append("404 Not Found - Resource does not exist")
+        lines.append("422 Unprocessable Entity - Valid syntax but semantic errors")
+        lines.append("500 Internal Server Error - Unexpected server error")
+        lines.append("```")
+        lines.append("")
+        lines.append("### URL Patterns")
+        lines.append("- Use nouns for resources: `/users`, `/orders`, `/products`")
+        lines.append("- Use HTTP verbs for actions: `GET /users/123`, `POST /users`")
+        lines.append("- Nested resources: `/users/123/orders` for related data")
+        lines.append(
+            "- Query parameters for filtering: `/users?role=admin&active=true`"
+        )
+        lines.append("")
+        lines.append("### Response Format Standards")
+        lines.append("```json")
+        lines.append("{")
+        lines.append('  "data": {...},')
+        lines.append('  "meta": {')
+        lines.append('    "timestamp": "2023-01-01T00:00:00Z",')
+        lines.append('    "version": "1.0"')
+        lines.append("  }")
+        lines.append("}")
+        lines.append("```")
+        lines.append("")
+        lines.append("## Security Implementation")
+        lines.append("")
+        lines.append("### Authentication Requirements")
+        lines.append("- Always validate authentication tokens")
+        lines.append("- Implement proper session management")
+        lines.append("- Use secure token storage (HttpOnly cookies or secure storage)")
+        lines.append("")
+        lines.append("### Input Validation")
+        lines.append("- Validate all inputs at the API boundary")
+        lines.append("- Sanitize data before processing")
+        lines.append("- Use schema validation for request bodies")
+        lines.append("- Implement rate limiting to prevent abuse")
         lines.append("")
 
         if prompt.instructions and prompt.instructions.general:
@@ -609,16 +680,34 @@ class KiroAdapter(EditorAdapter):
 
         return "\n".join(lines)
 
-    def _build_frontend_standards_steering(self, prompt: UniversalPrompt) -> str:
-        """Build frontend standards steering content."""
+    def _build_component_patterns_steering(self, prompt: UniversalPrompt) -> str:
+        """Build component development patterns steering content."""
         lines = []
 
         lines.append("---")
         lines.append("inclusion: fileMatch")
-        lines.append('fileMatchPattern: "src/**/*.{tsx,jsx,ts,js,vue,svelte}"')
+        lines.append('fileMatchPattern: "**/components/**/*.{tsx,jsx,vue,svelte}"')
         lines.append("---")
         lines.append("")
-        lines.append("# Frontend Standards")
+        lines.append("# Component Development Patterns")
+        lines.append("")
+        lines.append(
+            "This steering file establishes patterns for building maintainable, reusable, and testable UI components. These patterns ensure consistency across the codebase and improve developer productivity."
+        )
+        lines.append("")
+        lines.append("## Core Principles")
+        lines.append(
+            "- **Single Responsibility**: Each component should have one clear purpose"
+        )
+        lines.append(
+            "- **Composition over Inheritance**: Build complex UIs by combining simple components"
+        )
+        lines.append(
+            "- **Predictable State**: Component behavior should be easy to understand and debug"
+        )
+        lines.append(
+            "- **Accessibility First**: Every component should be usable by everyone"
+        )
         lines.append("")
 
         # Determine frontend framework
@@ -636,17 +725,51 @@ class KiroAdapter(EditorAdapter):
                     lines.append(f"- {guideline}")
                 lines.append("")
 
-        lines.append("## Component Development")
-        lines.append("- Create reusable, modular components")
-        lines.append("- Follow single responsibility principle")
-        lines.append("- Implement proper prop validation")
-        lines.append("- Use consistent naming conventions")
+        lines.append("## Component Structure")
         lines.append("")
-        lines.append("## Performance Guidelines")
-        lines.append("- Optimize bundle size and loading times")
-        lines.append("- Implement code splitting where appropriate")
-        lines.append("- Use lazy loading for non-critical components")
-        lines.append("- Follow accessibility best practices")
+        lines.append("### File Organization")
+        lines.append("```")
+        lines.append("components/")
+        lines.append(
+            "  ├── ui/              # Basic UI components (Button, Input, etc.)"
+        )
+        lines.append(
+            "  ├── layout/          # Layout components (Header, Sidebar, etc.)"
+        )
+        lines.append("  ├── features/        # Feature-specific components")
+        lines.append("  └── common/          # Shared business logic components")
+        lines.append("```")
+        lines.append("")
+        lines.append("### Naming Conventions")
+        lines.append(
+            "- PascalCase for component names: `UserProfile`, `NavigationMenu`"
+        )
+        lines.append("- camelCase for props and methods: `onItemClick`, `isLoading`")
+        lines.append("- kebab-case for CSS classes: `user-profile`, `navigation-menu`")
+        lines.append("")
+        lines.append("## Development Best Practices")
+        lines.append("")
+        lines.append("### Prop Validation")
+        lines.append("- Always define prop types or interfaces")
+        lines.append("- Provide default values where appropriate")
+        lines.append("- Document complex prop structures")
+        lines.append("")
+        lines.append("### State Management")
+        lines.append("- Keep component state minimal and focused")
+        lines.append("- Lift state up when multiple components need it")
+        lines.append("- Use global state management for app-wide data")
+        lines.append("")
+        lines.append("### Performance Optimization")
+        lines.append("- Memoize expensive calculations")
+        lines.append("- Implement proper component splitting")
+        lines.append("- Use lazy loading for route-level components")
+        lines.append("- Optimize re-renders with proper dependency arrays")
+        lines.append("")
+        lines.append("## Accessibility Standards")
+        lines.append("- Include proper ARIA labels and roles")
+        lines.append("- Ensure keyboard navigation support")
+        lines.append("- Maintain sufficient color contrast ratios")
+        lines.append("- Test with screen readers during development")
 
         return "\n".join(lines)
 
@@ -860,3 +983,326 @@ class KiroAdapter(EditorAdapter):
             "rust": "Systems programming and performance-critical code",
         }
         return roles.get(tech, "Development technology")
+
+    def _generate_hooks_system(
+        self,
+        prompt: UniversalPrompt,
+        output_dir: Path,
+        dry_run: bool,
+        verbose: bool,
+    ) -> List[Path]:
+        """Generate .kiro/hooks/ system for reusable hooks."""
+        hooks_dir = output_dir / ".kiro" / "hooks"
+        created_files = []
+
+        # Generate code quality hook
+        quality_hook = hooks_dir / "code-quality.md"
+        quality_content = self._build_code_quality_hook(prompt)
+
+        if dry_run:
+            click.echo(f"  📁 Would create: {quality_hook}")
+            if verbose:
+                preview = (
+                    quality_content[:200] + "..."
+                    if len(quality_content) > 200
+                    else quality_content
+                )
+                click.echo(f"    {preview}")
+        else:
+            hooks_dir.mkdir(parents=True, exist_ok=True)
+            with open(quality_hook, "w", encoding="utf-8") as f:
+                f.write(quality_content)
+            click.echo(f"✅ Generated: {quality_hook}")
+            created_files.append(quality_hook)
+
+        # Generate pre-commit hook if applicable
+        if prompt.instructions and prompt.instructions.testing:
+            precommit_hook = hooks_dir / "pre-commit.md"
+            precommit_content = self._build_precommit_hook(prompt)
+
+            if dry_run:
+                click.echo(f"  📁 Would create: {precommit_hook}")
+                if verbose:
+                    preview = (
+                        precommit_content[:200] + "..."
+                        if len(precommit_content) > 200
+                        else precommit_content
+                    )
+                    click.echo(f"    {preview}")
+            else:
+                hooks_dir.mkdir(parents=True, exist_ok=True)
+                with open(precommit_hook, "w", encoding="utf-8") as f:
+                    f.write(precommit_content)
+                click.echo(f"✅ Generated: {precommit_hook}")
+                created_files.append(precommit_hook)
+
+        return created_files
+
+    def _generate_prompts_system(
+        self,
+        prompt: UniversalPrompt,
+        output_dir: Path,
+        dry_run: bool,
+        verbose: bool,
+    ) -> List[Path]:
+        """Generate .prompts/ system for reusable prompts."""
+        prompts_dir = output_dir / ".prompts"
+        created_files = []
+
+        # Generate development prompts
+        dev_prompt = prompts_dir / "development.md"
+        dev_content = self._build_development_prompts(prompt)
+
+        if dry_run:
+            click.echo(f"  📁 Would create: {dev_prompt}")
+            if verbose:
+                preview = (
+                    dev_content[:200] + "..." if len(dev_content) > 200 else dev_content
+                )
+                click.echo(f"    {preview}")
+        else:
+            prompts_dir.mkdir(parents=True, exist_ok=True)
+            with open(dev_prompt, "w", encoding="utf-8") as f:
+                f.write(dev_content)
+            click.echo(f"✅ Generated: {dev_prompt}")
+            created_files.append(dev_prompt)
+
+        # Generate refactoring prompts if applicable
+        if prompt.instructions and prompt.instructions.code_style:
+            refactor_prompt = prompts_dir / "refactoring.md"
+            refactor_content = self._build_refactoring_prompts(prompt)
+
+            if dry_run:
+                click.echo(f"  📁 Would create: {refactor_prompt}")
+                if verbose:
+                    preview = (
+                        refactor_content[:200] + "..."
+                        if len(refactor_content) > 200
+                        else refactor_content
+                    )
+                    click.echo(f"    {preview}")
+            else:
+                prompts_dir.mkdir(parents=True, exist_ok=True)
+                with open(refactor_prompt, "w", encoding="utf-8") as f:
+                    f.write(refactor_content)
+                click.echo(f"✅ Generated: {refactor_prompt}")
+                created_files.append(refactor_prompt)
+
+        return created_files
+
+    def _build_code_quality_hook(self, prompt: UniversalPrompt) -> str:
+        """Build code quality hook content."""
+        lines = []
+
+        lines.append("# Code Quality Hook")
+        lines.append("")
+        lines.append("Automatically triggered on file save and before commits.")
+        lines.append("")
+        lines.append("## Quality Checks")
+        lines.append("")
+
+        if prompt.instructions and prompt.instructions.code_style:
+            lines.append("### Code Style Validation")
+            for style_rule in prompt.instructions.code_style:
+                lines.append(f"- {style_rule}")
+            lines.append("")
+
+        if prompt.context and prompt.context.technologies:
+            lines.append("### Technology-Specific Checks")
+            for tech in prompt.context.technologies:
+                tech_checks = self._get_tech_quality_checks(tech.lower())
+                if tech_checks:
+                    lines.append(f"#### {tech}")
+                    for check in tech_checks:
+                        lines.append(f"- {check}")
+                    lines.append("")
+
+        lines.append("## Execution Triggers")
+        lines.append("- On file save")
+        lines.append("- Before git commit")
+        lines.append("- Before merge requests")
+
+        return "\n".join(lines)
+
+    def _build_precommit_hook(self, prompt: UniversalPrompt) -> str:
+        """Build pre-commit hook content."""
+        lines = []
+
+        lines.append("# Pre-Commit Hook")
+        lines.append("")
+        lines.append("Validates code quality before allowing commits.")
+        lines.append("")
+        lines.append("## Test Requirements")
+
+        if prompt.instructions and prompt.instructions.testing:
+            for test_rule in prompt.instructions.testing:
+                lines.append(f"- {test_rule}")
+        else:
+            lines.append("- All tests must pass")
+            lines.append("- Code coverage must meet minimum threshold")
+
+        lines.append("")
+        lines.append("## Quality Gates")
+        lines.append("- Lint checks must pass")
+        lines.append("- Type checking must pass")
+        lines.append("- Security scan must pass")
+        lines.append("")
+        lines.append("## Bypass Options")
+        lines.append("Use `--no-verify` flag to bypass (not recommended)")
+
+        return "\n".join(lines)
+
+    def _build_development_prompts(self, prompt: UniversalPrompt) -> str:
+        """Build development prompts content."""
+        lines = []
+
+        lines.append(f"# {prompt.metadata.title} - Development Prompts")
+        lines.append("")
+        lines.append("## Feature Development")
+        lines.append("")
+        lines.append("### New Feature Prompt")
+        lines.append("```")
+        lines.append(f"I'm working on {prompt.metadata.title}.")
+        if prompt.context and prompt.context.technologies:
+            tech_list = ", ".join(prompt.context.technologies)
+            lines.append(f"This project uses: {tech_list}")
+        lines.append("")
+        lines.append("Please help me implement [feature description]:")
+        lines.append("- Follow the project's established patterns")
+        lines.append("- Include appropriate tests")
+        lines.append("- Ensure code quality standards")
+        lines.append("```")
+        lines.append("")
+
+        lines.append("### Bug Fix Prompt")
+        lines.append("```")
+        lines.append(f"I'm debugging an issue in {prompt.metadata.title}.")
+        lines.append("")
+        lines.append("Problem: [describe the bug]")
+        lines.append("Expected: [what should happen]")
+        lines.append("Actual: [what actually happens]")
+        lines.append("")
+        lines.append("Please help me:")
+        lines.append("1. Identify the root cause")
+        lines.append("2. Implement a fix")
+        lines.append("3. Add tests to prevent regression")
+        lines.append("```")
+
+        return "\n".join(lines)
+
+    def _build_refactoring_prompts(self, prompt: UniversalPrompt) -> str:
+        """Build refactoring prompts content."""
+        lines = []
+
+        lines.append(f"# {prompt.metadata.title} - Refactoring Prompts")
+        lines.append("")
+        lines.append("## Code Improvement")
+        lines.append("")
+        lines.append("### Refactoring Prompt")
+        lines.append("```")
+        lines.append(f"I want to refactor code in {prompt.metadata.title}.")
+        lines.append("")
+        lines.append("Code to refactor:")
+        lines.append("[paste code here]")
+        lines.append("")
+        lines.append("Please help me improve this code by:")
+
+        if prompt.instructions and prompt.instructions.code_style:
+            for style_rule in prompt.instructions.code_style[:3]:  # Take first 3
+                lines.append(f"- {style_rule}")
+        else:
+            lines.append("- Improving readability")
+            lines.append("- Reducing complexity")
+            lines.append("- Following best practices")
+
+        lines.append("```")
+        lines.append("")
+
+        lines.append("### Performance Optimization")
+        lines.append("```")
+        lines.append("I need to optimize performance in this code:")
+        lines.append("[paste code here]")
+        lines.append("")
+        lines.append("Please suggest optimizations while maintaining:")
+        lines.append("- Code readability")
+        lines.append("- Test coverage")
+        lines.append("- Existing functionality")
+        lines.append("```")
+
+        return "\n".join(lines)
+
+    def _get_tech_quality_checks(self, tech: str) -> List[str]:
+        """Get technology-specific quality checks."""
+        checks = {
+            "typescript": [
+                "TypeScript strict mode compliance",
+                "Proper type annotations",
+                "No 'any' types without justification",
+            ],
+            "react": [
+                "Component prop validation",
+                "Proper hook usage",
+                "No unused components or props",
+            ],
+            "python": [
+                "PEP 8 compliance",
+                "Type hints for function signatures",
+                "Docstring coverage",
+            ],
+            "node": [
+                "Async/await error handling",
+                "Security best practices",
+                "Performance optimizations",
+            ],
+        }
+        return checks.get(tech, [])
+
+    def generate_merged(
+        self,
+        prompt_files: List[Tuple[UniversalPrompt, Path]],
+        output_dir: Path,
+        dry_run: bool = False,
+        verbose: bool = False,
+        variables: Optional[Dict[str, Any]] = None,
+    ) -> List[Path]:
+        """
+        Generate Kiro configuration files from multiple merged promptrek files.
+
+        Args:
+            prompt_files: List of (prompt, source_file) tuples
+            output_dir: Directory to generate files in
+            dry_run: If True, don't create files, just show what would be created
+            verbose: Enable verbose output
+            variables: Additional variables for substitution
+
+        Returns:
+            List of file paths that were created (or would be created in dry run)
+        """
+        if verbose:
+            source_files = [str(pf[1]) for pf in prompt_files]
+            click.echo(
+                f"Merging {len(prompt_files)} promptrek files: {', '.join(source_files)}"
+            )
+
+        # Merge all prompts into one
+        merged_prompt = prompt_files[0][0]  # Start with the first prompt
+        for prompt, source_file in prompt_files[1:]:
+            merged_prompt = self._merge_prompts_for_generation(merged_prompt, prompt)
+            if verbose:
+                click.echo(f"  Merged content from {source_file}")
+
+        # Use the regular generate method with the merged prompt
+        return self.generate(merged_prompt, output_dir, dry_run, verbose, variables)
+
+    def _merge_prompts_for_generation(
+        self, base: UniversalPrompt, additional: UniversalPrompt
+    ) -> UniversalPrompt:
+        """
+        Merge two prompts specifically for Kiro generation.
+        This is a simpler version focused on what Kiro needs.
+        """
+        # Import the parser's merge method
+        from ..core.parser import UPFParser
+
+        parser = UPFParser()
+        return parser._merge_prompts(base, additional)
