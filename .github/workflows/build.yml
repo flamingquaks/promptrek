@@ -27,20 +27,19 @@ jobs:
       artifact-name: ${{ steps.artifact.outputs.name }}
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         fetch-depth: 0  # Full history for versioning
 
     - name: Install uv
-      uses: astral-sh/setup-uv@v3
+      uses: astral-sh/setup-uv@v6
       with:
         version: "latest"
         enable-cache: true
+        python-version: ${{ inputs.python-version }}
         cache-dependency-glob: "pyproject.toml"
 
-    - name: Set up Python ${{ inputs.python-version }}
-      run: uv python install ${{ inputs.python-version }}
-
+   
     - name: Cache dependencies
       uses: actions/cache@v4
       with:
