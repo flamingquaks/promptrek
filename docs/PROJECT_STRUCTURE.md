@@ -114,7 +114,8 @@ src/promptrek/
 │   │   ├── instructions.md.j2
 │   │   └── config.json.j2
 │   ├── cursor/                  # Cursor templates
-│   │   └── cursorrules.j2
+│   │   ├── index.mdc.j2         # Main project overview template
+│   │   └── rule.mdc.j2          # Category-specific rule template
 │   ├── continue/                # Continue templates
 │   │   └── config.json.j2
 │   └── shared/                  # Shared template components
@@ -180,7 +181,10 @@ project-root/
 │   └── copilot-instructions.md    # Generated Copilot prompts
 ├── .copilot/
 │   └── instructions.md             # Alternative Copilot location
-├── .cursorrules                    # Generated Cursor prompts
+├── .cursor/
+│   └── rules/
+│       ├── index.mdc               # Main project overview (Always rule)
+│       └── *.mdc                   # Category-specific rules (Auto Attached)
 ├── .continue/
 │   └── config.json                 # Generated Continue prompts
 └── .ai-prompts/                    # Centralized output (optional)
