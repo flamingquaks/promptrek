@@ -121,10 +121,15 @@ class TestUPFParser:
         # Create first file
         data1 = {
             "schema_version": "1.0.0",
-            "metadata": {"title": "Project 1", "description": "First project", "version": "1.0", "author": "Test Author"},
+            "metadata": {
+                "title": "Project 1",
+                "description": "First project",
+                "version": "1.0",
+                "author": "Test Author",
+            },
             "instructions": {"general": ["Rule 1", "Rule 2"]},
             "context": {"technologies": ["python"]},
-            "targets": ["editor1"]
+            "targets": ["editor1"],
         }
         file1 = tmp_path / "first.promptrek.yaml"
         file1.write_text(yaml.dump(data1))
@@ -132,10 +137,15 @@ class TestUPFParser:
         # Create second file
         data2 = {
             "schema_version": "1.0.0",
-            "metadata": {"title": "Project 2", "description": "Second project", "version": "1.0", "author": "Test Author"},
+            "metadata": {
+                "title": "Project 2",
+                "description": "Second project",
+                "version": "1.0",
+                "author": "Test Author",
+            },
             "instructions": {"general": ["Rule 3"], "code_style": ["Style 1"]},
             "context": {"technologies": ["javascript"]},
-            "targets": ["editor2"]
+            "targets": ["editor2"],
         }
         file2 = tmp_path / "second.promptrek.yaml"
         file2.write_text(yaml.dump(data2))
@@ -160,17 +170,25 @@ class TestUPFParser:
         # Create multiple files
         data1 = {
             "schema_version": "1.0.0",
-            "metadata": {"title": "Base Project", "version": "1.0", "author": "Test Author"},
+            "metadata": {
+                "title": "Base Project",
+                "version": "1.0",
+                "author": "Test Author",
+            },
             "instructions": {"general": ["Base rule"]},
-            "targets": ["editor1"]
+            "targets": ["editor1"],
         }
         (tmp_path / "base.promptrek.yaml").write_text(yaml.dump(data1))
 
         data2 = {
             "schema_version": "1.0.0",
-            "metadata": {"title": "Additional Project", "version": "1.0", "author": "Test Author"},
+            "metadata": {
+                "title": "Additional Project",
+                "version": "1.0",
+                "author": "Test Author",
+            },
             "instructions": {"general": ["Additional rule"]},
-            "targets": ["editor2"]
+            "targets": ["editor2"],
         }
         (tmp_path / "additional.promptrek.yaml").write_text(yaml.dump(data2))
 
@@ -199,18 +217,29 @@ class TestUPFParser:
             "instructions": {"general": ["Base rule"], "testing": ["Test base"]},
             "context": {"technologies": ["python"], "project_type": "api"},
             "variables": {"VAR1": "base_value"},
-            "targets": ["editor1"]
+            "targets": ["editor1"],
         }
         base_prompt = UniversalPrompt(**base_data)
 
         # Create additional prompt
         additional_data = {
             "schema_version": "1.0.0",
-            "metadata": {"title": "Enhanced", "version": "1.0", "author": "Test Author", "description": "Enhanced version"},
-            "instructions": {"general": ["Additional rule"], "code_style": ["Style rule"]},
-            "context": {"technologies": ["javascript"], "description": "Full stack app"},
+            "metadata": {
+                "title": "Enhanced",
+                "version": "1.0",
+                "author": "Test Author",
+                "description": "Enhanced version",
+            },
+            "instructions": {
+                "general": ["Additional rule"],
+                "code_style": ["Style rule"],
+            },
+            "context": {
+                "technologies": ["javascript"],
+                "description": "Full stack app",
+            },
             "variables": {"VAR1": "new_value", "VAR2": "additional_value"},
-            "targets": ["editor2"]
+            "targets": ["editor2"],
         }
         additional_prompt = UniversalPrompt(**additional_data)
 
@@ -232,7 +261,9 @@ class TestUPFParser:
         # Test context merging
         assert len(merged.context.technologies) == 2
         assert merged.context.project_type == "api"  # Base preserved
-        assert merged.context.description == "Full stack app"  # Additional takes precedence
+        assert (
+            merged.context.description == "Full stack app"
+        )  # Additional takes precedence
 
         # Test variables merging
         assert merged.variables["VAR1"] == "new_value"  # Additional takes precedence

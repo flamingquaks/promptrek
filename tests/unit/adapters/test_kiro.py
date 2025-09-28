@@ -119,7 +119,9 @@ class TestKiroAdapter(TestAdapterBase):
 
     @patch("builtins.open", new_callable=mock_open)
     @patch("pathlib.Path.mkdir")
-    def test_generate_with_hooks_and_prompts(self, mock_mkdir, mock_file, adapter, sample_prompt):
+    def test_generate_with_hooks_and_prompts(
+        self, mock_mkdir, mock_file, adapter, sample_prompt
+    ):
         """Test generation includes hooks and prompts."""
         output_dir = Path("/tmp/test")
         files = adapter.generate(sample_prompt, output_dir, dry_run=False)
@@ -138,14 +140,15 @@ class TestKiroAdapter(TestAdapterBase):
         second_prompt_dict["metadata"]["description"] = "Additional description"
         second_prompt_dict["instructions"] = {
             "general": ["Additional instruction"],
-            "code_style": ["Additional style rule"]
+            "code_style": ["Additional style rule"],
         }
         from promptrek.core.models import UniversalPrompt
+
         second_prompt = UniversalPrompt(**second_prompt_dict)
 
         prompt_files = [
             (sample_prompt, Path("first.promptrek.yaml")),
-            (second_prompt, Path("second.promptrek.yaml"))
+            (second_prompt, Path("second.promptrek.yaml")),
         ]
 
         # Test that generate_merged method exists and works
@@ -176,16 +179,28 @@ class TestKiroAdapter(TestAdapterBase):
     def test_improved_file_naming_conventions(self, adapter, sample_prompt):
         """Test that file naming follows domain-specific conventions."""
         # Check that API files use better names
-        if (sample_prompt.context and sample_prompt.context.technologies and
-            any(tech.lower() in ["api", "rest", "node", "express"] for tech in sample_prompt.context.technologies)):
+        if (
+            sample_prompt.context
+            and sample_prompt.context.technologies
+            and any(
+                tech.lower() in ["api", "rest", "node", "express"]
+                for tech in sample_prompt.context.technologies
+            )
+        ):
 
             output_dir = Path("/tmp/test")
             files = adapter.generate(sample_prompt, output_dir, dry_run=True)
             # Would generate api-rest-conventions.md instead of api-standards.md
 
         # Check frontend files use better names
-        if (sample_prompt.context and sample_prompt.context.technologies and
-            any(tech.lower() in ["react", "vue", "angular"] for tech in sample_prompt.context.technologies)):
+        if (
+            sample_prompt.context
+            and sample_prompt.context.technologies
+            and any(
+                tech.lower() in ["react", "vue", "angular"]
+                for tech in sample_prompt.context.technologies
+            )
+        ):
 
             output_dir = Path("/tmp/test")
             files = adapter.generate(sample_prompt, output_dir, dry_run=True)

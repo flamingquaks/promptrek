@@ -170,7 +170,9 @@ class UPFParser:
 
         return f"Validation errors in {source}:\n" + "\n".join(messages)
 
-    def parse_multiple_files(self, file_paths: List[Union[str, Path]]) -> UniversalPrompt:
+    def parse_multiple_files(
+        self, file_paths: List[Union[str, Path]]
+    ) -> UniversalPrompt:
         """
         Parse multiple UPF files and merge them into a single UniversalPrompt.
 
@@ -262,7 +264,9 @@ class UPFParser:
             if add_context.get("technologies"):
                 existing = context.get("technologies", [])
                 combined = existing + add_context["technologies"]
-                context["technologies"] = list(dict.fromkeys(combined))  # Remove duplicates
+                context["technologies"] = list(
+                    dict.fromkeys(combined)
+                )  # Remove duplicates
 
         # Merge instructions - combine lists
         if additional_dict.get("instructions"):
@@ -292,7 +296,9 @@ class UPFParser:
         # Merge conditions - combine lists
         if additional_dict.get("conditions"):
             existing_conditions = base_dict.get("conditions", []) or []
-            base_dict["conditions"] = existing_conditions + additional_dict["conditions"]
+            base_dict["conditions"] = (
+                existing_conditions + additional_dict["conditions"]
+            )
 
         # Merge targets - combine and deduplicate
         if additional_dict.get("targets"):

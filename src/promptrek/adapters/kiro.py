@@ -603,12 +603,20 @@ class KiroAdapter(EditorAdapter):
         lines.append("")
         lines.append("# API REST Conventions")
         lines.append("")
-        lines.append("This steering file provides comprehensive guidelines for REST API development, ensuring consistency, security, and maintainability across all API endpoints.")
+        lines.append(
+            "This steering file provides comprehensive guidelines for REST API development, ensuring consistency, security, and maintainability across all API endpoints."
+        )
         lines.append("")
         lines.append("## Why These Conventions Matter")
-        lines.append("- **Consistency**: Predictable API behavior improves developer experience")
-        lines.append("- **Security**: Proper implementation prevents common vulnerabilities")
-        lines.append("- **Maintainability**: Clear patterns reduce cognitive load for future changes")
+        lines.append(
+            "- **Consistency**: Predictable API behavior improves developer experience"
+        )
+        lines.append(
+            "- **Security**: Proper implementation prevents common vulnerabilities"
+        )
+        lines.append(
+            "- **Maintainability**: Clear patterns reduce cognitive load for future changes"
+        )
         lines.append("- **Scalability**: Well-designed APIs handle growth gracefully")
         lines.append("")
         lines.append("## REST Conventions")
@@ -620,7 +628,9 @@ class KiroAdapter(EditorAdapter):
         lines.append("204 No Content - Successful DELETE or PUT with no return value")
         lines.append("400 Bad Request - Invalid request syntax or validation error")
         lines.append("401 Unauthorized - Authentication required")
-        lines.append("403 Forbidden - Authentication valid but insufficient permissions")
+        lines.append(
+            "403 Forbidden - Authentication valid but insufficient permissions"
+        )
         lines.append("404 Not Found - Resource does not exist")
         lines.append("422 Unprocessable Entity - Valid syntax but semantic errors")
         lines.append("500 Internal Server Error - Unexpected server error")
@@ -630,7 +640,9 @@ class KiroAdapter(EditorAdapter):
         lines.append("- Use nouns for resources: `/users`, `/orders`, `/products`")
         lines.append("- Use HTTP verbs for actions: `GET /users/123`, `POST /users`")
         lines.append("- Nested resources: `/users/123/orders` for related data")
-        lines.append("- Query parameters for filtering: `/users?role=admin&active=true`")
+        lines.append(
+            "- Query parameters for filtering: `/users?role=admin&active=true`"
+        )
         lines.append("")
         lines.append("### Response Format Standards")
         lines.append("```json")
@@ -679,13 +691,23 @@ class KiroAdapter(EditorAdapter):
         lines.append("")
         lines.append("# Component Development Patterns")
         lines.append("")
-        lines.append("This steering file establishes patterns for building maintainable, reusable, and testable UI components. These patterns ensure consistency across the codebase and improve developer productivity.")
+        lines.append(
+            "This steering file establishes patterns for building maintainable, reusable, and testable UI components. These patterns ensure consistency across the codebase and improve developer productivity."
+        )
         lines.append("")
         lines.append("## Core Principles")
-        lines.append("- **Single Responsibility**: Each component should have one clear purpose")
-        lines.append("- **Composition over Inheritance**: Build complex UIs by combining simple components")
-        lines.append("- **Predictable State**: Component behavior should be easy to understand and debug")
-        lines.append("- **Accessibility First**: Every component should be usable by everyone")
+        lines.append(
+            "- **Single Responsibility**: Each component should have one clear purpose"
+        )
+        lines.append(
+            "- **Composition over Inheritance**: Build complex UIs by combining simple components"
+        )
+        lines.append(
+            "- **Predictable State**: Component behavior should be easy to understand and debug"
+        )
+        lines.append(
+            "- **Accessibility First**: Every component should be usable by everyone"
+        )
         lines.append("")
 
         # Determine frontend framework
@@ -708,14 +730,20 @@ class KiroAdapter(EditorAdapter):
         lines.append("### File Organization")
         lines.append("```")
         lines.append("components/")
-        lines.append("  ├── ui/              # Basic UI components (Button, Input, etc.)")
-        lines.append("  ├── layout/          # Layout components (Header, Sidebar, etc.)")
+        lines.append(
+            "  ├── ui/              # Basic UI components (Button, Input, etc.)"
+        )
+        lines.append(
+            "  ├── layout/          # Layout components (Header, Sidebar, etc.)"
+        )
         lines.append("  ├── features/        # Feature-specific components")
         lines.append("  └── common/          # Shared business logic components")
         lines.append("```")
         lines.append("")
         lines.append("### Naming Conventions")
-        lines.append("- PascalCase for component names: `UserProfile`, `NavigationMenu`")
+        lines.append(
+            "- PascalCase for component names: `UserProfile`, `NavigationMenu`"
+        )
         lines.append("- camelCase for props and methods: `onItemClick`, `isLoading`")
         lines.append("- kebab-case for CSS classes: `user-profile`, `navigation-menu`")
         lines.append("")
@@ -1029,9 +1057,7 @@ class KiroAdapter(EditorAdapter):
             click.echo(f"  📁 Would create: {dev_prompt}")
             if verbose:
                 preview = (
-                    dev_content[:200] + "..."
-                    if len(dev_content) > 200
-                    else dev_content
+                    dev_content[:200] + "..." if len(dev_content) > 200 else dev_content
                 )
                 click.echo(f"    {preview}")
         else:
@@ -1254,7 +1280,9 @@ class KiroAdapter(EditorAdapter):
         """
         if verbose:
             source_files = [str(pf[1]) for pf in prompt_files]
-            click.echo(f"Merging {len(prompt_files)} promptrek files: {', '.join(source_files)}")
+            click.echo(
+                f"Merging {len(prompt_files)} promptrek files: {', '.join(source_files)}"
+            )
 
         # Merge all prompts into one
         merged_prompt = prompt_files[0][0]  # Start with the first prompt
