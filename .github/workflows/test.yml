@@ -47,7 +47,43 @@ jobs:
         cache-dependency-glob: "pyproject.toml"
 
     - name: Set up Python ${{ inputs.python-version }}
-      run: uv python install ${{ inputs.python-version }}
+      run: |
+        echo "Installing Python ${{ inputs.python-version }}..."
+        uv python install ${{ inputs.python-version }}
+        echo "Python installation completed."
+
+    - name: Create virtual environment
+      run: |
+        echo "Creating virtual environment..."
+        echo "UV version: $(uv --version)"
+        echo "Available Python installations:"
+        uv python list
+
+        # Create virtual environment
+        uv venv --python ${{ inputs.python-version }}
+        echo "Virtual environment created."
+
+    - name: Verify environment setup
+      shell: bash
+      run: |
+        echo "Verifying environment setup..."
+        echo "Current directory: $(pwd)"
+        echo "Virtual environment contents:"
+        if [ -d ".venv" ]; then
+          ls -la .venv/
+          if [ "${{ inputs.os }}" = "windows-latest" ]; then
+            echo "Windows Python executable:"
+            ls -la .venv/Scripts/ || echo "No Scripts directory"
+          else
+            echo "Unix Python executable:"
+            ls -la .venv/bin/ || echo "No bin directory"
+          fi
+        else
+          echo "No .venv directory found"
+        fi
+
+        echo "UV python list:"
+        uv python list
 
     - name: Cache dependencies
       uses: actions/cache@v4
@@ -67,11 +103,57 @@ jobs:
         name: ${{ inputs.artifact-name }}
         path: dist/
 
-    - name: Install from artifacts
-      if: inputs.artifact-name != ''
+    - name: Install from artifacts (Windows)
+      if: inputs.artifact-name != '' && inputs.os == 'windows-latest'
+      shell: powershell
+      run: |
+        Write-Host "Installing from downloaded artifacts on Windows..."
+        Write-Host "Current directory: $(Get-Location)"
+        Write-Host "Directory contents:"
+        Get-ChildItem
+        Write-Host "Dist directory contents:"
+        if (Test-Path "dist") {
+          Get-ChildItem dist
+          $wheelFile = Get-ChildItem "dist\*.whl" | Select-Object -First 1
+          if ($wheelFile) {
+            Write-Host "Installing wheel: $($wheelFile.FullName)"
+            uv pip install $wheelFile.FullName
+          } else {
+            Write-Host "No wheel file found in dist/"
+            Get-ChildItem dist
+            exit 1
+          }
+        } else {
+          Write-Host "No dist directory found"
+          exit 1
+        }
+        Write-Host "Syncing dependencies..."
+        uv sync --all-groups
+
+    - name: Install from artifacts (Unix)
+      if: inputs.artifact-name != '' && inputs.os != 'windows-latest'
+      shell: bash
       run: |
         echo "Installing from downloaded artifacts..."
-        python -m pip install dist/*.whl
+        echo "Current directory: $(pwd)"
+        echo "Directory contents:"
+        ls -la
+        echo "Dist directory contents:"
+        ls -la dist/ || echo "No dist directory"
+
+        # Find and install wheel files
+        WHEEL_FILE=$(ls dist/*.whl | head -1)
+        if [ -f "$WHEEL_FILE" ]; then
+          echo "Installing wheel: $WHEEL_FILE"
+          uv pip install "$WHEEL_FILE"
+        else
+          echo "No wheel file found in dist/"
+          echo "Available files in dist/:"
+          ls -la dist/
+          exit 1
+        fi
+
+        echo "Syncing dependencies..."
         uv sync --all-groups
 
     - name: Install dependencies
