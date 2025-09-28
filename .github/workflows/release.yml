@@ -49,16 +49,22 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v3
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          python-version: '3.12'
+          cache-dependency-glob: "pyproject.toml"
 
-      - name: Set up Python
-        run: uv python install 3.12
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
 
       - name: Download build artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: ${{ needs.build.outputs.artifact-name }}
           path: dist/
@@ -81,7 +87,7 @@ jobs:
       contents: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
@@ -101,7 +107,7 @@ jobs:
             echo "Release notes generated from conventional commits" > RELEASE_NOTES.md
 
       - name: Download build artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: ${{ needs.build.outputs.artifact-name }}
           path: dist/
@@ -130,7 +136,7 @@ jobs:
 
     steps:
       - name: Download build artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: ${{ needs.build.outputs.artifact-name }}
           path: dist/
@@ -155,7 +161,7 @@ jobs:
 
     steps:
       - name: Download build artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: ${{ needs.build.outputs.artifact-name }}
           path: dist/

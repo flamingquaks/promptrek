@@ -37,7 +37,7 @@ jobs:
     runs-on: ${{ inputs.os }}
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - name: Install uv
       uses: astral-sh/setup-uv@v6
@@ -89,8 +89,8 @@ jobs:
 
         if [ -f "$WHEEL_FILE" ]; then
           echo "Installing wheel: $WHEEL_FILE"
-          # Try with system pip first as fallback
-          python -m pip install "$WHEEL_FILE" || uv pip install "$WHEEL_FILE"
+          # Install wheel using uv
+          uv pip install --system "$WHEEL_FILE"
         else
           echo "No wheel file found in dist/"
           echo "Available files in dist/:"
@@ -99,21 +99,15 @@ jobs:
         fi
 
         echo "Syncing dependencies..."
-        # Try uv sync first, fallback to pip install if it fails
-        if ! uv sync --all-groups; then
-          echo "uv sync failed, trying pip install as fallback..."
-          python -m pip install -e ".[dev]"
-        fi
+        # Sync dependencies
+        uv sync --all-groups
 
     - name: Install dependencies
       if: inputs.artifact-name == ''
       run: |
         echo "Installing dependencies..."
-        # Try uv sync first, fallback to pip install if it fails
-        if ! uv sync --all-groups; then
-          echo "uv sync failed, trying pip install as fallback..."
-          python -m pip install -e ".[dev]"
-        fi
+        # Sync dependencies
+        uv sync --all-groups
 
     - name: Check formatting with Black
       if: inputs.test-suite == 'all' || inputs.test-suite == 'lint'
