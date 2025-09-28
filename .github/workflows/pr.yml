@@ -39,7 +39,6 @@ jobs:
         uses: astral-sh/setup-uv@v6
         with:
           version: "latest"
-          enable-cache: true
           python-version: "3.11"
 
       - name: Cache dependencies
@@ -139,7 +138,6 @@ jobs:
         uses: astral-sh/setup-uv@v6
         with:
           version: "latest"
-          enable-cache: true
           python-version: "3.11"
 
       - name: Download build artifacts
