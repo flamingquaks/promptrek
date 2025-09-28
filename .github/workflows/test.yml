@@ -42,58 +42,19 @@ jobs:
     - name: Install uv
       uses: astral-sh/setup-uv@v6
       with:
-        version: "latest"
         enable-cache: true
         cache-dependency-glob: "pyproject.toml"
+        python-version: ${{ inputs.python-version}}
 
     - name: Set up Python ${{ inputs.python-version }}
       uses: actions/setup-python@v6
       with:
         python-version: ${{ inputs.python-version }}
 
-    - name: Create virtual environment
-      run: |
-        echo "Creating virtual environment..."
-        echo "UV version: $(uv --version)"
-        echo "Available Python installations:"
-        uv python list
-        echo "System Python version:"
-        python --version
-        echo "System Python path:"
-        which python || where python
-
-        # Try to create virtual environment with system Python first
-        echo "Creating virtual environment with system Python..."
-        uv venv --python python
-
-    - name: Verify environment setup
-      shell: bash
-      run: |
-        echo "Verifying environment setup..."
-        echo "Current directory: $(pwd)"
-        echo "Virtual environment contents:"
-        if [ -d ".venv" ]; then
-          ls -la .venv/
-          if [ "${{ inputs.os }}" = "windows-latest" ]; then
-            echo "Windows Python executable:"
-            ls -la .venv/Scripts/ || echo "No Scripts directory"
-          else
-            echo "Unix Python executable:"
-            ls -la .venv/bin/ || echo "No bin directory"
-          fi
-        else
-          echo "No .venv directory found"
-        fi
-
-        echo "UV python list:"
-        uv python list
-
     - name: Cache dependencies
       uses: actions/cache@v4
       with:
-        path: |
-          ~/.cache/uv
-          .venv
+        path: ~/.cache/uv
         key: ${{ inputs.os }}-uv-${{ inputs.python-version }}-${{ hashFiles('pyproject.toml', 'uv.lock') }}
         restore-keys: |
           ${{ inputs.os }}-uv-${{ inputs.python-version }}-
