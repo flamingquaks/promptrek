@@ -71,7 +71,7 @@ jobs:
 
         # Try to create virtual environment with system Python first
         echo "Creating virtual environment with system Python..."
-        uv venv
+        uv venv --python python
 
     - name: Verify environment setup
       shell: bash
