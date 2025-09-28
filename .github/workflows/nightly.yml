@@ -13,71 +13,86 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         python-version: ['3.8', '3.12']
-    
+
     steps:
-    - uses: actions/checkout@v4
-    
+    - uses: actions/checkout@v5
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v6
+      with:
+        enable-cache: true
+        cache-dependency-glob: "pyproject.toml"
+        python-version: ${{ matrix.python-version }}
+
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v6
       with:
         python-version: ${{ matrix.python-version }}
-    
+
     - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -e ".[dev]"
-    
+      run: uv sync --all-groups
+
     - name: Run tests
-      run: |
-        python -m pytest tests/ -x --tb=short
+      run: uv run pytest tests/ -x --tb=short
 
   dependency-check:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    
+    - uses: actions/checkout@v5
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v6
+      with:
+        enable-cache: true
+        cache-dependency-glob: "pyproject.toml"
+        python-version: '3.11'
+
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v6
       with:
         python-version: '3.11'
-    
+
     - name: Install with latest dependencies
       run: |
-        python -m pip install --upgrade pip
         # Install with latest versions of dependencies
-        pip install --upgrade click PyYAML Jinja2 pydantic
-        pip install -e ".[dev]"
-    
+        uv pip install --upgrade click PyYAML Jinja2 pydantic
+        uv sync --all-groups
+
     - name: Run tests with latest deps
-      run: |
-        python -m pytest tests/ --tb=short
-    
+      run: uv run pytest tests/ --tb=short
+
     - name: Check for security vulnerabilities
       run: |
-        pip install safety
-        safety check
+        uv pip install safety
+        uv run safety check
 
   performance-test:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    
+    - uses: actions/checkout@v5
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v6
+      with:
+        enable-cache: true
+        cache-dependency-glob: "pyproject.toml"
+        python-version: '3.11'
+
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v6
       with:
         python-version: '3.11'
-    
+
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install -e ".[dev]"
-        pip install memory-profiler
-    
+        uv sync --all-groups
+        uv pip install memory-profiler
+
     - name: Performance test
       run: |
         echo "Running performance tests..."
         # Test CLI performance with sample files
-        time python -m promptrek.cli.main --help
+        time uv run promptrek --help
         
         # Create a large test file using here document
         cat > large-test.promptrek.yaml << 'EOF'
@@ -98,5 +113,5 @@ jobs:
         EOF
         
         # Test parsing performance
-        time python -m promptrek.cli.main validate large-test.promptrek.yaml
-        time python -m promptrek.cli.main generate --all --dry-run large-test.promptrek.yaml
+        time uv run promptrek validate large-test.promptrek.yaml
+        time uv run promptrek generate --all --dry-run large-test.promptrek.yaml

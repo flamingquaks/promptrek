@@ -22,7 +22,7 @@ class TestClaudeAdapter(TestAdapterBase):
         """Test adapter initialization."""
         assert adapter.name == "claude"
         assert adapter.description == "Claude Code (context-based)"
-        assert ".claude/context.md" in adapter.file_patterns
+        assert ".claude/CLAUDE.md" in adapter.file_patterns
 
     def test_supports_features(self, adapter):
         """Test feature support."""

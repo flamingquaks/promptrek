@@ -151,9 +151,9 @@ def _generate_agent_files(
             click.echo(f"✅ Generated: {copilot_file}")
         created_files.append(copilot_file)
 
-    # Generate .claude/context.md for Claude agents
+    # Generate .claude/CLAUDE.md for Claude agents
     claude_dir = output_dir / ".claude"
-    claude_file = claude_dir / "context.md"
+    claude_file = claude_dir / "CLAUDE.md"
     claude_content = _build_claude_agent_content(prompt)
 
     if _should_create_file(claude_file, force, dry_run):
@@ -317,7 +317,7 @@ def _build_copilot_agent_content(prompt: UniversalPrompt) -> str:
 
 
 def _build_claude_agent_content(prompt: UniversalPrompt) -> str:
-    """Build content for Claude agents (.claude/context.md)."""
+    """Build content for Claude agents (.claude/CLAUDE.md)."""
     lines = []
 
     lines.append(f"# {prompt.metadata.title} - Claude Context")

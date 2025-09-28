@@ -27,26 +27,27 @@ jobs:
       artifact-name: ${{ steps.artifact.outputs.name }}
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         fetch-depth: 0  # Full history for versioning
 
     - name: Install uv
-      uses: astral-sh/setup-uv@v3
+      uses: astral-sh/setup-uv@v6
       with:
-        version: "latest"
         enable-cache: true
+        python-version: ${{ inputs.python-version }}
         cache-dependency-glob: "pyproject.toml"
 
     - name: Set up Python ${{ inputs.python-version }}
-      run: uv python install ${{ inputs.python-version }}
+      uses: actions/setup-python@v6
+      with:
+        python-version: ${{ inputs.python-version }}
 
+   
     - name: Cache dependencies
       uses: actions/cache@v4
       with:
-        path: |
-          ~/.cache/uv
-          .venv
+        path: ~/.cache/uv
         key: ${{ runner.os }}-uv-${{ inputs.python-version }}-${{ hashFiles('pyproject.toml', 'uv.lock') }}
         restore-keys: |
           ${{ runner.os }}-uv-${{ inputs.python-version }}-
@@ -101,7 +102,7 @@ jobs:
     - name: Test installation
       run: |
         echo "Testing package installation..."
-        python -m pip install --user --force-reinstall dist/*.whl
+        uv pip install --system --force-reinstall dist/*.whl
         python -c "import promptrek; print('Package imported successfully')"
 
     - name: Generate artifact name

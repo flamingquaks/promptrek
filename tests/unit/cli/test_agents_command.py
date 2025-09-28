@@ -46,7 +46,7 @@ targets: ["copilot"]
         # Check that files were created
         assert (tmp_path / "AGENTS.md").exists()
         assert (tmp_path / ".github" / "copilot-instructions.md").exists()
-        assert (tmp_path / ".claude" / "context.md").exists()
+        assert (tmp_path / ".claude" / "CLAUDE.md").exists()
 
     def test_agents_command_auto_discovery(self, tmp_path):
         """Test agents command with auto-discovery of prompt file."""
@@ -125,7 +125,7 @@ targets: ["copilot"]
         # Check that no files were actually created
         assert not (tmp_path / "AGENTS.md").exists()
         assert not (tmp_path / ".github" / "copilot-instructions.md").exists()
-        assert not (tmp_path / ".claude" / "context.md").exists()
+        assert not (tmp_path / ".claude" / "CLAUDE.md").exists()
 
     def test_agents_command_force_overwrite(self, tmp_path):
         """Test agents command with force flag overwrites existing files."""
