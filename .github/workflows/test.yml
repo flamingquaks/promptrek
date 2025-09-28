@@ -46,17 +46,10 @@ jobs:
         enable-cache: true
         cache-dependency-glob: "pyproject.toml"
 
-    - name: Set up Python ${{ inputs.python-version }} (Actions)
+    - name: Set up Python ${{ inputs.python-version }}
       uses: actions/setup-python@v6
       with:
         python-version: ${{ inputs.python-version }}
-
-    - name: Set up Python ${{ inputs.python-version }} (UV)
-      continue-on-error: true
-      run: |
-        echo "Installing Python ${{ inputs.python-version }} with uv..."
-        uv python install ${{ inputs.python-version }}
-        echo "Python installation completed."
 
     - name: Create virtual environment
       run: |
