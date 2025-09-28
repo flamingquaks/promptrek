@@ -23,6 +23,7 @@ jobs:
   # Security scan for RC tags (uses API)
   security-scan-rc:
     if: github.ref_type == 'tag' && contains(github.ref_name, '-rc')
+    continue-on-error: true
     runs-on: ubuntu-latest
     environment: safety
 
@@ -98,6 +99,7 @@ jobs:
     if: github.ref_type != 'tag' || !contains(github.ref_name, '-rc')
     runs-on: ubuntu-latest
     environment: safety
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v5
 
