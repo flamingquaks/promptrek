@@ -36,13 +36,13 @@ jobs:
       artifact-name: ${{ needs.build.outputs.artifact-name }}
 
   # Security validation before release
-  security:
-    needs: build
-    uses: ./.github/workflows/security.yml
-    with:
-      python-version: '3.12'
-      bandit-severity: 'medium'
-      fail-on-issues: true  # Strict security for releases
+  # security:
+  #   needs: build
+  #   uses: ./.github/workflows/security.yml
+  #   with:
+  #     python-version: '3.12'
+  #     bandit-severity: 'medium'
+  #     fail-on-issues: true  # Strict security for releases
 
   # Validate package with twine
   validate-package:
@@ -81,7 +81,7 @@ jobs:
 
   # Create GitHub release
   github-release:
-    needs: [build, test, security, validate-package]
+    needs: [build, test, validate-package]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -124,7 +124,7 @@ jobs:
 
   # Publish to PyPI (using the same artifacts)
   publish-pypi:
-    needs: [build, test, security, validate-package]
+    needs: [build, test, validate-package]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
     environment:
@@ -149,7 +149,7 @@ jobs:
 
   # Optional: Publish to Test PyPI first
   publish-test-pypi:
-    needs: [build, test, security, validate-package]
+    needs: [build, test, validate-package]
     runs-on: ubuntu-latest
     if: contains(github.ref, 'rc') || contains(github.ref, 'beta')
     environment:

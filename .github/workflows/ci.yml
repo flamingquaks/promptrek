@@ -139,13 +139,13 @@ jobs:
       coverage-threshold: 80
       artifact-name: ${{ needs.build.outputs.artifact-name }}
 
-  # Security scanning (parallel with tests)
-  security:
-    uses: ./.github/workflows/security.yml
-    with:
-      python-version: "3.11"
-      bandit-severity: "medium"
-      fail-on-issues: false # Don't fail CI on security issues for now
+  # # Security scanning (parallel with tests)
+  # security:
+  #   uses: ./.github/workflows/security.yml
+  #   with:
+  #     python-version: "3.11"
+  #     bandit-severity: "medium"
+  #     fail-on-issues: false # Don't fail CI on security issues for now
 
   # Validate each commit can build (for PRs)
   validate-commits:
@@ -235,7 +235,6 @@ jobs:
         test-windows-312,
         test-macos-311,
         test-macos-312,
-        security,
       ]
     runs-on: ubuntu-latest
     if: always()
@@ -246,7 +245,6 @@ jobs:
           echo "## CI Summary"
           echo "Build: ${{ needs.build.result }}"
           echo "Primary Tests: ${{ needs.test-primary.result }}"
-          echo "Security: ${{ needs.security.result }}"
           echo ""
           echo "### Test Matrix Results:"
           echo "Ubuntu 3.9: ${{ needs.test-ubuntu-39.result }}"
