@@ -16,7 +16,7 @@ class ClaudeAdapter(EditorAdapter):
     """Adapter for Claude Code."""
 
     _description = "Claude Code (context-based)"
-    _file_patterns = [".claude/context.md", ".claude-context.md"]
+    _file_patterns = [".claude/CLAUDE.md", ".claude-context.md"]
 
     def __init__(self):
         super().__init__(
@@ -44,10 +44,10 @@ class ClaudeAdapter(EditorAdapter):
         # Create content
         content = self._build_content(processed_prompt, conditional_content)
 
-        # Determine output path - Claude works well with context files
+        # Determine output path - Claude Code expects CLAUDE.md
         # in .claude directory
         claude_dir = output_dir / ".claude"
-        output_file = claude_dir / "context.md"
+        output_file = claude_dir / "CLAUDE.md"
 
         if dry_run:
             click.echo(f"  📁 Would create: {output_file}")

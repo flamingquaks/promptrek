@@ -52,7 +52,7 @@ targets: ["copilot"]
             # Check files were created
             assert Path("AGENTS.md").exists()
             assert Path(".github/copilot-instructions.md").exists()
-            assert Path(".claude/context.md").exists()
+            assert Path(".claude/CLAUDE.md").exists()
 
     def test_agents_command_auto_discovery(self):
         """Test agents command with auto-discovery."""
@@ -116,7 +116,7 @@ targets: ["copilot"]
             # Check no files were actually created
             assert not Path("AGENTS.md").exists()
             assert not Path(".github/copilot-instructions.md").exists()
-            assert not Path(".claude/context.md").exists()
+            assert not Path(".claude/CLAUDE.md").exists()
 
     def test_agents_command_verbose(self):
         """Test agents command with verbose output."""
@@ -266,4 +266,4 @@ targets: ["copilot"]
             # Check files were created in custom directory
             assert (output_dir / "AGENTS.md").exists()
             assert (output_dir / ".github" / "copilot-instructions.md").exists()
-            assert (output_dir / ".claude" / "context.md").exists()
+            assert (output_dir / ".claude" / "CLAUDE.md").exists()
