@@ -20,8 +20,15 @@ class TestCursorAdapter(TestAdapterBase):
     def test_init(self, adapter):
         """Test adapter initialization."""
         assert adapter.name == "cursor"
-        assert adapter.description == "Cursor (.cursor/rules/index.mdc, .cursor/rules/*.mdc, AGENTS.md)"
-        assert adapter.file_patterns == [".cursor/rules/index.mdc", ".cursor/rules/*.mdc", "AGENTS.md"]
+        assert (
+            adapter.description
+            == "Cursor (.cursor/rules/index.mdc, .cursor/rules/*.mdc, AGENTS.md)"
+        )
+        assert adapter.file_patterns == [
+            ".cursor/rules/index.mdc",
+            ".cursor/rules/*.mdc",
+            "AGENTS.md",
+        ]
 
     def test_supports_features(self, adapter):
         """Test feature support."""

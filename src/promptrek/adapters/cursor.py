@@ -173,7 +173,11 @@ class CursorAdapter(EditorAdapter):
         if dry_run:
             click.echo(f"  📁 Would create: {index_file}")
             if verbose:
-                preview = index_content[:200] + "..." if len(index_content) > 200 else index_content
+                preview = (
+                    index_content[:200] + "..."
+                    if len(index_content) > 200
+                    else index_content
+                )
                 click.echo(f"    {preview}")
             return [index_file]
         else:
@@ -255,7 +259,11 @@ class CursorAdapter(EditorAdapter):
             click.echo(f"  📁 Would create merged: {index_file}")
             if verbose:
                 click.echo("  📄 Merged project overview preview:")
-                preview = index_content[:300] + "..." if len(index_content) > 300 else index_content
+                preview = (
+                    index_content[:300] + "..."
+                    if len(index_content) > 300
+                    else index_content
+                )
                 click.echo(f"    {preview}")
             created_files.append(index_file)
         else:
@@ -549,7 +557,10 @@ class CursorAdapter(EditorAdapter):
             tech_lower_list = [tech.lower() for tech in prompt.context.technologies]
 
             # Determine which tech categories are present
-            if any(tech in ["react", "typescript", "javascript", "node"] for tech in tech_lower_list):
+            if any(
+                tech in ["react", "typescript", "javascript", "node"]
+                for tech in tech_lower_list
+            ):
                 tech_categories.add("javascript")
             if "python" in tech_lower_list:
                 tech_categories.add("python")
@@ -727,7 +738,9 @@ class CursorAdapter(EditorAdapter):
         # Configuration sources
         if len(prompt_files) > 1:
             lines.append("## Configuration Sources")
-            lines.append(f"This project uses {len(prompt_files)} prompt configuration files:")
+            lines.append(
+                f"This project uses {len(prompt_files)} prompt configuration files:"
+            )
             lines.append("")
             for i, (prompt, source_file) in enumerate(prompt_files, 1):
                 lines.append(f"{i}. **{prompt.metadata.title}** (`{source_file.name}`)")
@@ -739,7 +752,9 @@ class CursorAdapter(EditorAdapter):
             if processed_prompt.context.project_type:
                 lines.append(f"**Type:** {processed_prompt.context.project_type}")
             if processed_prompt.context.technologies:
-                lines.append(f"**Technologies:** {', '.join(processed_prompt.context.technologies)}")
+                lines.append(
+                    f"**Technologies:** {', '.join(processed_prompt.context.technologies)}"
+                )
             if processed_prompt.context.description:
                 lines.append("")
                 lines.append("**Description:**")
@@ -790,7 +805,9 @@ class CursorAdapter(EditorAdapter):
             if prompt.context.project_type:
                 lines.append(f"**Type:** {prompt.context.project_type}")
             if prompt.context.technologies:
-                lines.append(f"**Technologies:** {', '.join(prompt.context.technologies)}")
+                lines.append(
+                    f"**Technologies:** {', '.join(prompt.context.technologies)}"
+                )
             if prompt.context.description:
                 lines.append("")
                 lines.append("**Description:**")
@@ -830,11 +847,15 @@ class CursorAdapter(EditorAdapter):
             sanitized_name = sanitized_name[:-10]  # Remove -promptrek suffix
 
         # Generate different rule types based on instruction categories
-        instruction_data = prompt.instructions.model_dump() if prompt.instructions else {}
+        instruction_data = (
+            prompt.instructions.model_dump() if prompt.instructions else {}
+        )
 
         for category, instructions in instruction_data.items():
             if instructions:  # Only generate files for non-empty categories
-                rule_file = rules_dir / f"{sanitized_name}-{category.replace('_', '-')}.mdc"
+                rule_file = (
+                    rules_dir / f"{sanitized_name}-{category.replace('_', '-')}.mdc"
+                )
                 rule_content = self._build_category_mdc_content(
                     category, instructions, prompt, source_file
                 )
@@ -842,7 +863,11 @@ class CursorAdapter(EditorAdapter):
                 if dry_run:
                     click.echo(f"  📁 Would create: {rule_file}")
                     if verbose:
-                        preview = rule_content[:200] + "..." if len(rule_content) > 200 else rule_content
+                        preview = (
+                            rule_content[:200] + "..."
+                            if len(rule_content) > 200
+                            else rule_content
+                        )
                         click.echo(f"    {preview}")
                     created_files.append(rule_file)
                 else:
