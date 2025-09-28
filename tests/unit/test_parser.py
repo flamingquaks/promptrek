@@ -172,6 +172,7 @@ class TestUPFParser:
             "schema_version": "1.0.0",
             "metadata": {
                 "title": "Base Project",
+                "description": "Base project description",
                 "version": "1.0",
                 "author": "Test Author",
             },
@@ -184,6 +185,7 @@ class TestUPFParser:
             "schema_version": "1.0.0",
             "metadata": {
                 "title": "Additional Project",
+                "description": "Additional project description",
                 "version": "1.0",
                 "author": "Test Author",
             },
@@ -213,7 +215,7 @@ class TestUPFParser:
         # Create base prompt
         base_data = {
             "schema_version": "1.0.0",
-            "metadata": {"title": "Base", "version": "1.0", "author": "Test Author"},
+            "metadata": {"title": "Base", "description": "Base project", "version": "1.0", "author": "Test Author"},
             "instructions": {"general": ["Base rule"], "testing": ["Test base"]},
             "context": {"technologies": ["python"], "project_type": "api"},
             "variables": {"VAR1": "base_value"},
