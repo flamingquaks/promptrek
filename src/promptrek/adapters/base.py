@@ -74,6 +74,10 @@ class EditorAdapter(ABC):
         """Return True if this adapter supports conditional instructions."""
         return False
 
+    def supports_hooks(self) -> bool:
+        """Return True if this adapter supports hooks system."""
+        return False
+
     def get_required_variables(self, prompt: UniversalPrompt) -> List[str]:
         """
         Get list of variables required by this adapter for the given prompt.

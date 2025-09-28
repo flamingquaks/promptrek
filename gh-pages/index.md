@@ -86,7 +86,7 @@ title: Home
       <div class="editor-card">
         <div class="editor-icon">🤖</div>
         <h4>Kiro</h4>
-        <p>Comprehensive steering and specification files</p>
+        <p>AI-powered steering, specs, hooks, and prompts</p>
         <span class="status-badge supported">Fully Supported</span>
       </div>
 
@@ -201,7 +201,7 @@ instructions:
           </div>
           <div class="file-item">
             <span class="file-icon">📄</span>
-            <span class="file-name">kiro_steering.json</span>
+            <span class="file-name">.kiro/steering/product.md</span>
           </div>
         </div>
         <div class="command-example">

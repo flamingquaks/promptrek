@@ -191,6 +191,48 @@ alwaysApply: false
 - `.cursorignore` - Files to exclude from analysis
 - `.cursorindexingignore` - Files to exclude from indexing
 
+### ✅ Kiro
+**Generated Files**: `.kiro/steering/*.md`, `.kiro/specs/*/requirements.md`, `.kiro/specs/*/design.md`, `.kiro/specs/*/tasks.md`, `.kiro/hooks/*.md`, `.prompts/*.md`
+**Features**: Variable substitution, Conditional instructions, Hooks system, Multi-file merging, Enhanced content structure
+
+Kiro adapter generates comprehensive AI-powered development assistance with steering files, specifications, hooks, and reusable prompts.
+
+**Steering System (.kiro/steering/)**:
+```yaml
+---
+inclusion: always
+---
+
+# Product Overview
+
+This steering file provides comprehensive guidelines for the project...
+
+## Why These Conventions Matter
+- **Consistency**: Predictable patterns improve developer experience
+- **Security**: Proper implementation prevents common vulnerabilities
+- **Maintainability**: Clear patterns reduce cognitive load
+```
+
+**Specifications System (.kiro/specs/)**:
+- `requirements.md` - Functional and non-functional requirements with acceptance criteria
+- `design.md` - Technical architecture and implementation guidelines
+- `tasks.md` - Implementation task breakdown with progress tracking
+
+**Hooks System (.kiro/hooks/)**:
+- `code-quality.md` - Automated quality checks triggered on file save and commits
+- `pre-commit.md` - Pre-commit validation with test requirements and quality gates
+
+**Prompts System (.prompts/)**:
+- `development.md` - Reusable prompts for feature development and bug fixes
+- `refactoring.md` - Structured prompts for code improvement and optimization
+
+**Multi-File Support**:
+Kiro adapter supports merging multiple `.promptrek.yaml` files, combining:
+- Instructions (concatenated)
+- Technologies (deduplicated)
+- Variables (later files take precedence)
+- Targets (combined)
+
 ## Using Adapters
 
 ### Generate for Single Editor
@@ -201,6 +243,16 @@ promptrek generate --editor claude --output ./output project.promptrek.yaml
 ### Generate for All Target Editors
 ```bash
 promptrek generate --all --output ./output project.promptrek.yaml
+```
+
+### Generate from Multiple Files
+```bash
+promptrek generate --editor kiro --output ./output base.promptrek.yaml additional.promptrek.yaml
+```
+
+### Generate from Directory (All .promptrek.yaml files)
+```bash
+promptrek generate --editor kiro --directory ./configs --output ./output
 ```
 
 ### Dry Run (Preview Mode)
@@ -371,10 +423,20 @@ project/
 │   ├── steering/
 │   │   ├── product.md
 │   │   ├── tech.md
-│   │   └── structure.md
-│   └── specs/
-│       ├── requirements.md
-│       └── design.md
+│   │   ├── structure.md
+│   │   ├── api-rest-conventions.md
+│   │   └── component-development-patterns.md
+│   ├── specs/
+│   │   ├── {project-name}/
+│   │   │   ├── requirements.md
+│   │   │   ├── design.md
+│   │   │   └── tasks.md
+│   └── hooks/
+│       ├── code-quality.md
+│       └── pre-commit.md
+├── .prompts/
+│   ├── development.md
+│   └── refactoring.md
 ├── AGENTS.md
 ├── CLAUDE.md
 └── .clinerules

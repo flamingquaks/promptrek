@@ -132,7 +132,7 @@ PrompTrek generates sophisticated configuration files for each editor:
 ### Other Editors
 - **Amazon Q**: `.amazonq/context.md`, `.amazonq/comments.template`
 - **JetBrains AI**: `.idea/ai-assistant.xml`, `.jetbrains/config.json`
-- **Kiro**: `.kiro/steering/*.md`, `.kiro/specs/*.md`
+- **Kiro**: `.kiro/steering/*.md`, `.kiro/specs/*/requirements.md`, `.kiro/hooks/*.md`, `.prompts/*.md`
 - **Cline**: `.clinerules`
 
 ## Example Workflow
