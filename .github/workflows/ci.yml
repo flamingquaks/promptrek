@@ -7,7 +7,7 @@ on:
     branches: [main, develop]
   schedule:
     # Run weekly to catch dependency issues
-    - cron: '0 8 * * 1'
+    - cron: "0 8 * * 1"
   workflow_dispatch:
 
 concurrency:
@@ -19,7 +19,7 @@ jobs:
   build:
     uses: ./.github/workflows/build.yml
     with:
-      python-version: '3.11'
+      python-version: "3.11"
       upload-artifacts: true
 
   # Test matrix - Ubuntu latest
@@ -28,8 +28,8 @@ jobs:
     uses: ./.github/workflows/test.yml
     with:
       os: ubuntu-latest
-      python-version: '3.9'
-      test-suite: 'all'
+      python-version: "3.9"
+      test-suite: "all"
       coverage: true
       coverage-threshold: 0
       artifact-name: ${{ needs.build.outputs.artifact-name }}
@@ -40,8 +40,8 @@ jobs:
     uses: ./.github/workflows/test.yml
     with:
       os: ubuntu-latest
-      python-version: '3.10'
-      test-suite: 'all'
+      python-version: "3.10"
+      test-suite: "all"
       coverage: true
       coverage-threshold: 0
       artifact-name: ${{ needs.build.outputs.artifact-name }}
@@ -52,8 +52,8 @@ jobs:
     uses: ./.github/workflows/test.yml
     with:
       os: ubuntu-latest
-      python-version: '3.11'
-      test-suite: 'all'
+      python-version: "3.11"
+      test-suite: "all"
       coverage: true
       coverage-threshold: 0
       artifact-name: ${{ needs.build.outputs.artifact-name }}
@@ -64,8 +64,8 @@ jobs:
     uses: ./.github/workflows/test.yml
     with:
       os: ubuntu-latest
-      python-version: '3.12'
-      test-suite: 'all'
+      python-version: "3.12"
+      test-suite: "all"
       coverage: true
       coverage-threshold: 0
       artifact-name: ${{ needs.build.outputs.artifact-name }}
@@ -77,9 +77,9 @@ jobs:
     uses: ./.github/workflows/test.yml
     with:
       os: windows-latest
-      python-version: '3.10'
-      test-suite: 'all'
-      coverage: false  # Skip coverage on Windows
+      python-version: "3.10"
+      test-suite: "all"
+      coverage: false # Skip coverage on Windows
       artifact-name: ${{ needs.build.outputs.artifact-name }}
       upload-coverage: false
 
@@ -88,8 +88,8 @@ jobs:
     uses: ./.github/workflows/test.yml
     with:
       os: windows-latest
-      python-version: '3.11'
-      test-suite: 'all'
+      python-version: "3.11"
+      test-suite: "all"
       coverage: false
       artifact-name: ${{ needs.build.outputs.artifact-name }}
       upload-coverage: false
@@ -99,8 +99,8 @@ jobs:
     uses: ./.github/workflows/test.yml
     with:
       os: windows-latest
-      python-version: '3.12'
-      test-suite: 'all'
+      python-version: "3.12"
+      test-suite: "all"
       coverage: false
       artifact-name: ${{ needs.build.outputs.artifact-name }}
       upload-coverage: false
@@ -111,9 +111,9 @@ jobs:
     uses: ./.github/workflows/test.yml
     with:
       os: macos-latest
-      python-version: '3.11'
-      test-suite: 'all'
-      coverage: false  # Skip coverage on macOS
+      python-version: "3.11"
+      test-suite: "all"
+      coverage: false # Skip coverage on macOS
       artifact-name: ${{ needs.build.outputs.artifact-name }}
       upload-coverage: false
 
@@ -122,8 +122,8 @@ jobs:
     uses: ./.github/workflows/test.yml
     with:
       os: macos-latest
-      python-version: '3.12'
-      test-suite: 'all'
+      python-version: "3.12"
+      test-suite: "all"
       coverage: false
       artifact-name: ${{ needs.build.outputs.artifact-name }}
       upload-coverage: false
@@ -133,8 +133,8 @@ jobs:
     needs: build
     uses: ./.github/workflows/test.yml
     with:
-      python-version: '3.11'
-      test-suite: 'all'
+      python-version: "3.11"
+      test-suite: "all"
       coverage: true
       coverage-threshold: 80
       artifact-name: ${{ needs.build.outputs.artifact-name }}
@@ -143,9 +143,9 @@ jobs:
   security:
     uses: ./.github/workflows/security.yml
     with:
-      python-version: '3.11'
-      bandit-severity: 'medium'
-      fail-on-issues: false  # Don't fail CI on security issues for now
+      python-version: "3.11"
+      bandit-severity: "medium"
+      fail-on-issues: false # Don't fail CI on security issues for now
 
   # Validate each commit can build (for PRs)
   validate-commits:
@@ -159,13 +159,10 @@ jobs:
           fetch-depth: 0
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v3
+        uses: astral-sh/setup-uv@v6
         with:
           version: "latest"
-          enable-cache: true
-
-      - name: Set up Python
-        run: uv python install 3.11
+          python-version: "3.11"
 
       - name: Get commits to validate
         id: commits
@@ -225,14 +222,21 @@ jobs:
 
   # Summary job to ensure all checks pass
   ci-success:
-    needs: [
-      build,
-      test-primary,
-      test-ubuntu-39, test-ubuntu-310, test-ubuntu-311, test-ubuntu-312,
-      test-windows-310, test-windows-311, test-windows-312,
-      test-macos-311, test-macos-312,
-      security
-    ]
+    needs:
+      [
+        build,
+        test-primary,
+        test-ubuntu-39,
+        test-ubuntu-310,
+        test-ubuntu-311,
+        test-ubuntu-312,
+        test-windows-310,
+        test-windows-311,
+        test-windows-312,
+        test-macos-311,
+        test-macos-312,
+        security,
+      ]
     runs-on: ubuntu-latest
     if: always()
 
