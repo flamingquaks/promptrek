@@ -166,30 +166,66 @@ applyTo: "**/*.{ts,tsx}"
 - Use proper typing for all function parameters
 ```
 
-### ✅ Cursor
-**Generated Files**: `.cursor/rules/*.mdc`, `AGENTS.md`, `.cursorignore`, `.cursorindexingignore`  
-**Features**: Variable substitution, Conditional instructions, Technology-specific rules, Advanced file targeting, Ignore systems
+### ✅ Cursor (Modernized 2025)
+**Generated Files**: `.cursor/rules/index.mdc`, `.cursor/rules/*.mdc`, `AGENTS.md`, `.cursorignore`, `.cursorindexingignore`
+**Features**: Variable substitution, Conditional instructions, Modern rule types (Always/Auto Attached), Technology-specific rules, Advanced file targeting, Ignore systems
 
-Cursor adapter generates modern rules system with YAML frontmatter, technology-specific guidelines, and indexing control.
+Cursor adapter generates modern MDC rules system following Cursor IDE's 2025 best practices with intelligent rule types, project overview, and enhanced file organization.
 
-**Rule Files (.cursor/rules/)**:
+**Main Project Overview (.cursor/rules/index.mdc)**:
 ```yaml
 ---
-description: Apply coding standards to all source files
-globs: "**/*.{ts,tsx,js,jsx,py,java,go,rs,cpp,c,h}"
+description: Project overview and core guidelines
+alwaysApply: true
+---
+
+# My Project
+
+A modern web application built with React and TypeScript.
+
+## Project Context
+**Type:** web_application
+**Technologies:** typescript, react, vite
+
+**Description:**
+A modern web application demonstrating best practices.
+
+## Core Guidelines
+- Write clean, maintainable code
+- Follow TypeScript best practices
+- Use consistent naming conventions
+```
+
+**Category-Specific Rules (.cursor/rules/)**:
+```yaml
+---
+description: Code style and formatting guidelines
+globs: "**/*.{py,js,ts,tsx,jsx,go,rs,java,cpp,c,h}"
 alwaysApply: false
 ---
 
-# Coding Standards
+# Code Style Guidelines
+
+*Source: project.promptrek.yaml*
 
 - Use meaningful variable names
 - Add appropriate comments
 - Follow project conventions
 ```
 
-**Ignore Files**:
-- `.cursorignore` - Files to exclude from analysis
-- `.cursorindexingignore` - Files to exclude from indexing
+**Technology-Specific Rules**:
+- `typescript-guidelines.mdc` - TypeScript patterns (Auto Attached to `**/*.{ts,tsx}`)
+- `python-guidelines.mdc` - Python patterns (Auto Attached to `**/*.{py,pyi}`)
+- `testing-guidelines.mdc` - Testing standards (Auto Attached to `**/*.{test,spec}.*`)
+
+**Enhanced Ignore Files**:
+- `.cursorignore` - Files to exclude from analysis (no duplicates, technology-aware)
+- `.cursorindexingignore` - Files to exclude from indexing (comprehensive coverage)
+
+**Rule Types**:
+- **Always** (`alwaysApply: true`) - Project overview, general guidelines, architecture
+- **Auto Attached** (`alwaysApply: false` + `globs`) - Technology and category-specific rules
+- Intelligent rule application based on file patterns and conversation context
 
 ### ✅ Kiro
 **Generated Files**: `.kiro/steering/*.md`, `.kiro/specs/*/requirements.md`, `.kiro/specs/*/design.md`, `.kiro/specs/*/tasks.md`, `.kiro/hooks/*.md`, `.prompts/*.md`

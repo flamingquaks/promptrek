@@ -119,11 +119,12 @@ PrompTrek generates sophisticated configuration files for each editor:
 - `.github/instructions/*.instructions.md` - Path-specific instructions with YAML frontmatter
 - `AGENTS.md`, `CLAUDE.md`, `GEMINI.md` - Agent-specific instructions
 
-### Cursor
-- `.cursor/rules/*.mdc` - Modern rules with YAML frontmatter and glob patterns
+### Cursor (Modernized 2025)
+- `.cursor/rules/index.mdc` - Main project overview (Always rule)
+- `.cursor/rules/*.mdc` - Category-specific rules (Auto Attached)
 - `AGENTS.md` - Simple agent instructions
-- `.cursorignore` - Files to exclude from analysis
-- `.cursorindexingignore` - Indexing control
+- `.cursorignore` - Enhanced exclusion patterns
+- `.cursorindexingignore` - Intelligent indexing control
 
 ### Continue
 - `config.yaml` - Main configuration in modern YAML format

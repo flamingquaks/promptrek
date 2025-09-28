@@ -79,7 +79,7 @@ All planning documents are available in the [`docs/`](./docs/) directory:
 
 ### ✅ All Implemented
 - **GitHub Copilot** - `.github/copilot-instructions.md`, `.github/instructions/*.instructions.md`, `AGENTS.md` - Path-specific instructions with YAML frontmatter
-- **Cursor** - `.cursor/rules/*.mdc`, `AGENTS.md` - Modern rules system with technology-specific guidelines
+- **Cursor** - `.cursor/rules/index.mdc`, `.cursor/rules/*.mdc`, `AGENTS.md` - Modern 2025 rules system with Always/Auto Attached rule types and project overview
 - **Continue** - `config.yaml`, `.continue/rules/*.md` - Modern YAML configuration with advanced rules directory
 - **Kiro** - `.kiro/steering/*.md`, `.kiro/specs/*.md` - Comprehensive steering and specs system with YAML frontmatter
 - **Cline** - `.clinerules` - Simple rules-based configuration
@@ -179,7 +179,7 @@ The pre-commit hooks will:
 PrompTrek generates editor-specific files that should **not** be committed to version control:
 
 - `.github/copilot-instructions.md` - GitHub Copilot prompts
-- `.cursorrules`, `.cursor/` - Cursor editor configuration
+- `.cursor/` - Cursor editor configuration (modern .mdc rules)
 - `config.yaml`, `.continue/` - Continue editor configuration
 - `.claude/` - Claude/Anthropic configuration
 - And more...
@@ -344,7 +344,7 @@ imports:
 Generate optimized configurations for all major AI coding assistants:
 
 - **GitHub Copilot** → `.github/copilot-instructions.md` + path-specific instructions
-- **Cursor** → `.cursor/rules/*.mdc` + `AGENTS.md` with technology-specific rules
+- **Cursor** → `.cursor/rules/index.mdc` + `.cursor/rules/*.mdc` + `AGENTS.md` with modern rule types and project overview
 - **Continue** → `config.yaml` + `.continue/rules/*.md` with advanced rule system
 - **Kiro** → `.kiro/steering/*.md` + `.kiro/specs/*.md` with comprehensive guidance
 - **Cline** → `.clinerules` with project-specific rules

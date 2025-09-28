@@ -58,7 +58,7 @@ title: Home
       <div class="editor-card">
         <div class="editor-icon">🎯</div>
         <h4>Cursor</h4>
-        <p>Modern rules with YAML frontmatter and glob patterns</p>
+        <p>Modern 2025 rules with Always/Auto Attached types and project overview</p>
         <span class="status-badge supported">Fully Supported</span>
       </div>
 
@@ -189,7 +189,7 @@ instructions:
           </div>
           <div class="file-item">
             <span class="file-icon">📄</span>
-            <span class="file-name">.cursor/rules</span>
+            <span class="file-name">.cursor/rules/index.mdc</span>
           </div>
           <div class="file-item">
             <span class="file-icon">📄</span>
