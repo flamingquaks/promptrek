@@ -10,6 +10,8 @@
 
 A universal AI Editor prompt storage solution that dynamically maps prompt data to a wide-range of agentic/AI editors and tools. This tool allows you to create generic prompts and workflows in a standardized format, then generate editor-specific prompts for your preferred AI coding assistant.
 
+# ⚠️ PrompTrek is not yet released and is highly unstable currently. Please check back soon for the official release! 
+
 ## 🎯 Problem It Solves
 
 AI coding assistants like GitHub Copilot, Cursor, Continue, and others all use different prompt formats and configuration methods. When working across teams or switching between editors, you have to maintain separate prompt configurations for each tool. PrompTrek solves this by:
