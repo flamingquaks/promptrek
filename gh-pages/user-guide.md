@@ -250,21 +250,24 @@ PrompTrek generates comprehensive Copilot configurations:
 - Agent-specific customizations
 - YAML frontmatter for metadata
 
-### Cursor
+### Cursor (Modernized 2025)
 
-Advanced rule system with modern features:
+Advanced rule system following Cursor IDE's 2025 best practices:
 
 **Generated files:**
-- `.cursor/rules/*.mdc` - Rule files with YAML frontmatter
+- `.cursor/rules/index.mdc` - Main project overview (Always rule)
+- `.cursor/rules/*.mdc` - Category-specific rules (Auto Attached)
 - `AGENTS.md` - Agent instructions
-- `.cursorignore` - Exclusion patterns
-- `.cursorindexingignore` - Indexing control
+- `.cursorignore` - Enhanced exclusion patterns
+- `.cursorindexingignore` - Intelligent indexing control
 
 **Features:**
-- YAML frontmatter with metadata
-- Glob patterns for file targeting
-- Technology-specific rules
-- Performance optimizations
+- Modern rule types (Always/Auto Attached) with intelligent application
+- Project overview with core guidelines always included
+- Category-based rule organization (code style, testing, architecture)
+- Technology-specific file patterns (20+ languages supported)
+- Enhanced ignore files with duplicate prevention
+- Context-aware rule application based on conversation and file types
 
 ### Continue
 

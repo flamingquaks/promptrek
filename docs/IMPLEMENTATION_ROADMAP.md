@@ -92,7 +92,7 @@
 **Goal**: Add support for Cursor and Continue editors
 
 #### 3.1 Cursor Editor Support
-- [x] Research Cursor's `.cursorrules` format
+- [x] Research Cursor's modern `.cursor/rules/*.mdc` format
 - [x] Create Cursor adapter class
 - [x] Design Cursor-specific templates
 - [ ] Test with real Cursor installations

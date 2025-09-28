@@ -15,8 +15,8 @@ from .base import EditorAdapter
 class CursorAdapter(EditorAdapter):
     """Adapter for Cursor editor."""
 
-    _description = "Cursor (.cursor/rules/, AGENTS.md)"
-    _file_patterns = [".cursor/rules/*.mdc", "AGENTS.md"]
+    _description = "Cursor (.cursor/rules/index.mdc, .cursor/rules/*.mdc, AGENTS.md)"
+    _file_patterns = [".cursor/rules/index.mdc", ".cursor/rules/*.mdc", "AGENTS.md"]
 
     def __init__(self):
         super().__init__(
@@ -39,6 +39,12 @@ class CursorAdapter(EditorAdapter):
         processed_prompt = self.substitute_variables(prompt, variables)
 
         created_files = []
+
+        # Generate main index.mdc for project overview
+        index_file = self._generate_index_file(
+            processed_prompt, output_dir, dry_run, verbose
+        )
+        created_files.extend(index_file)
 
         # Generate modern .cursor/rules/ system
         rules_files = self._generate_rules_system(
@@ -150,6 +156,33 @@ class CursorAdapter(EditorAdapter):
 
         return created_files
 
+    def _generate_index_file(
+        self,
+        prompt: UniversalPrompt,
+        output_dir: Path,
+        dry_run: bool,
+        verbose: bool,
+    ) -> List[Path]:
+        """Generate main index.mdc file for project overview."""
+        rules_dir = output_dir / ".cursor" / "rules"
+        index_file = rules_dir / "index.mdc"
+
+        # Build index content for single prompt file
+        index_content = self._build_single_index_content(prompt)
+
+        if dry_run:
+            click.echo(f"  📁 Would create: {index_file}")
+            if verbose:
+                preview = index_content[:200] + "..." if len(index_content) > 200 else index_content
+                click.echo(f"    {preview}")
+            return [index_file]
+        else:
+            rules_dir.mkdir(parents=True, exist_ok=True)
+            with open(index_file, "w", encoding="utf-8") as f:
+                f.write(index_content)
+            click.echo(f"✅ Generated: {index_file}")
+            return [index_file]
+
     def _generate_agents_file(
         self,
         prompt: UniversalPrompt,
@@ -210,28 +243,39 @@ class CursorAdapter(EditorAdapter):
         verbose: bool = False,
         variables: Optional[Dict[str, Any]] = None,
     ) -> List[Path]:
-        """Generate merged Cursor rules from multiple prompt files."""
+        """Generate merged Cursor rules from multiple prompt files using modern .mdc format."""
+        created_files = []
+        rules_dir = output_dir / ".cursor" / "rules"
 
-        # Build merged content
-        content = self._build_merged_content(prompt_files, variables)
-
-        # Determine output path
-        output_file = output_dir / ".cursorrules"
+        # Generate main index.mdc with merged project overview
+        index_content = self._build_merged_index_content(prompt_files, variables)
+        index_file = rules_dir / "index.mdc"
 
         if dry_run:
-            click.echo(f"  📁 Would create merged: {output_file}")
+            click.echo(f"  📁 Would create merged: {index_file}")
             if verbose:
-                click.echo("  📄 Merged content preview:")
-                preview = content[:300] + "..." if len(content) > 300 else content
+                click.echo("  📄 Merged project overview preview:")
+                preview = index_content[:300] + "..." if len(index_content) > 300 else index_content
                 click.echo(f"    {preview}")
+            created_files.append(index_file)
         else:
-            with open(output_file, "w", encoding="utf-8") as f:
-                f.write(content)
+            rules_dir.mkdir(parents=True, exist_ok=True)
+            with open(index_file, "w", encoding="utf-8") as f:
+                f.write(index_content)
             click.echo(
-                f"✅ Generated merged: {output_file} (from {len(prompt_files)} files)"
+                f"✅ Generated merged project overview: {index_file} (from {len(prompt_files)} files)"
             )
+            created_files.append(index_file)
 
-        return [output_file]
+        # Generate source-specific rules for each prompt file
+        for i, (prompt, source_file) in enumerate(prompt_files):
+            processed_prompt = self.substitute_variables(prompt, variables)
+            source_rules = self._generate_source_specific_rules(
+                processed_prompt, source_file, rules_dir, dry_run, verbose
+            )
+            created_files.extend(source_rules)
+
+        return created_files
 
     def validate(self, prompt: UniversalPrompt) -> List[ValidationError]:
         """Validate prompt for Cursor."""
@@ -286,14 +330,30 @@ class CursorAdapter(EditorAdapter):
         # Determine file patterns based on technology
         tech_patterns = {
             "typescript": "**/*.{ts,tsx}",
-            "javascript": "**/*.{js,jsx}",
-            "python": "**/*.py",
+            "javascript": "**/*.{js,jsx,mjs,cjs}",
+            "python": "**/*.{py,pyi}",
             "react": "**/*.{tsx,jsx}",
-            "node": "**/*.{js,ts}",
+            "vue": "**/*.{vue,js,ts}",
+            "angular": "**/*.{ts,js,html,scss,css}",
+            "node": "**/*.{js,ts,mjs,cjs}",
             "go": "**/*.go",
-            "rust": "**/*.rs",
-            "java": "**/*.java",
-            "cpp": "**/*.{cpp,c,h}",
+            "rust": "**/*.{rs,toml}",
+            "java": "**/*.{java,kt}",
+            "kotlin": "**/*.{kt,kts}",
+            "cpp": "**/*.{cpp,c,h,hpp,cc,cxx}",
+            "c": "**/*.{c,h}",
+            "csharp": "**/*.{cs,csx}",
+            "php": "**/*.{php,phtml}",
+            "ruby": "**/*.{rb,rake}",
+            "swift": "**/*.swift",
+            "scala": "**/*.{scala,sc}",
+            "shell": "**/*.{sh,bash,zsh}",
+            "docker": "**/Dockerfile*",
+            "yaml": "**/*.{yml,yaml}",
+            "json": "**/*.json",
+            "html": "**/*.{html,htm}",
+            "css": "**/*.{css,scss,sass,less}",
+            "sql": "**/*.{sql,pgsql,mysql}",
         }
 
         pattern = tech_patterns.get(tech.lower(), "**/*")
@@ -483,28 +543,39 @@ class CursorAdapter(EditorAdapter):
         lines.append("temp/")
         lines.append("")
 
-        # Technology-specific ignore patterns
+        # Technology-specific ignore patterns (avoid duplicates)
         if prompt.context and prompt.context.technologies:
-            for tech in prompt.context.technologies:
-                tech_lower = tech.lower()
-                if tech_lower in ["react", "typescript", "javascript", "node"]:
-                    lines.append("# JavaScript/Node.js specific")
-                    lines.append("coverage/")
-                    lines.append("*.tsbuildinfo")
-                    lines.append("npm-debug.log*")
-                    lines.append("")
-                elif tech_lower == "python":
-                    lines.append("# Python specific")
-                    lines.append("*.egg-info/")
-                    lines.append(".pytest_cache/")
-                    lines.append(".coverage")
-                    lines.append("")
-                elif tech_lower in ["java", "kotlin"]:
-                    lines.append("# Java/Kotlin specific")
-                    lines.append("target/")
-                    lines.append("*.class")
-                    lines.append("*.jar")
-                    lines.append("")
+            tech_categories = set()
+            tech_lower_list = [tech.lower() for tech in prompt.context.technologies]
+
+            # Determine which tech categories are present
+            if any(tech in ["react", "typescript", "javascript", "node"] for tech in tech_lower_list):
+                tech_categories.add("javascript")
+            if "python" in tech_lower_list:
+                tech_categories.add("python")
+            if any(tech in ["java", "kotlin"] for tech in tech_lower_list):
+                tech_categories.add("java")
+
+            # Add patterns for each category only once
+            if "javascript" in tech_categories:
+                lines.append("# JavaScript/Node.js specific")
+                lines.append("coverage/")
+                lines.append("*.tsbuildinfo")
+                lines.append("npm-debug.log*")
+                lines.append("")
+            if "python" in tech_categories:
+                lines.append("# Python specific")
+                lines.append("*.egg-info/")
+                lines.append(".pytest_cache/")
+                lines.append(".coverage")
+                lines.append(".mypy_cache/")
+                lines.append("")
+            if "java" in tech_categories:
+                lines.append("# Java/Kotlin specific")
+                lines.append("target/")
+                lines.append("*.class")
+                lines.append("*.jar")
+                lines.append("")
 
         return "\n".join(lines)
 
@@ -627,3 +698,249 @@ class CursorAdapter(EditorAdapter):
                 lines.append("")
 
         return "\n".join(lines)
+
+    def _build_merged_index_content(
+        self,
+        prompt_files: List[tuple[UniversalPrompt, Path]],
+        variables: Optional[Dict[str, Any]] = None,
+    ) -> str:
+        """Build merged index.mdc content for main project overview."""
+        lines = []
+
+        # Get the first prompt for primary metadata
+        primary_prompt, primary_file = prompt_files[0]
+        processed_prompt = self.substitute_variables(primary_prompt, variables)
+
+        # YAML frontmatter for "Always" rule type
+        lines.append("---")
+        lines.append("description: Project overview and core guidelines")
+        lines.append("alwaysApply: true")
+        lines.append("---")
+        lines.append("")
+
+        # Project overview
+        lines.append(f"# {processed_prompt.metadata.title}")
+        lines.append("")
+        lines.append(processed_prompt.metadata.description)
+        lines.append("")
+
+        # Configuration sources
+        if len(prompt_files) > 1:
+            lines.append("## Configuration Sources")
+            lines.append(f"This project uses {len(prompt_files)} prompt configuration files:")
+            lines.append("")
+            for i, (prompt, source_file) in enumerate(prompt_files, 1):
+                lines.append(f"{i}. **{prompt.metadata.title}** (`{source_file.name}`)")
+            lines.append("")
+
+        # Project context
+        if processed_prompt.context:
+            lines.append("## Project Context")
+            if processed_prompt.context.project_type:
+                lines.append(f"**Type:** {processed_prompt.context.project_type}")
+            if processed_prompt.context.technologies:
+                lines.append(f"**Technologies:** {', '.join(processed_prompt.context.technologies)}")
+            if processed_prompt.context.description:
+                lines.append("")
+                lines.append("**Description:**")
+                lines.append(processed_prompt.context.description)
+            lines.append("")
+
+        # Core instructions from all sources
+        lines.append("## Core Guidelines")
+        all_general_instructions = []
+        for prompt, _ in prompt_files:
+            processed = self.substitute_variables(prompt, variables)
+            if processed.instructions and processed.instructions.general:
+                all_general_instructions.extend(processed.instructions.general)
+
+        # Remove duplicates while preserving order
+        seen = set()
+        unique_instructions = []
+        for instruction in all_general_instructions:
+            if instruction not in seen:
+                seen.add(instruction)
+                unique_instructions.append(instruction)
+
+        for instruction in unique_instructions:
+            lines.append(f"- {instruction}")
+
+        return "\n".join(lines)
+
+    def _build_single_index_content(self, prompt: UniversalPrompt) -> str:
+        """Build index.mdc content for a single prompt file."""
+        lines = []
+
+        # YAML frontmatter for "Always" rule type
+        lines.append("---")
+        lines.append("description: Project overview and core guidelines")
+        lines.append("alwaysApply: true")
+        lines.append("---")
+        lines.append("")
+
+        # Project overview
+        lines.append(f"# {prompt.metadata.title}")
+        lines.append("")
+        lines.append(prompt.metadata.description)
+        lines.append("")
+
+        # Project context
+        if prompt.context:
+            lines.append("## Project Context")
+            if prompt.context.project_type:
+                lines.append(f"**Type:** {prompt.context.project_type}")
+            if prompt.context.technologies:
+                lines.append(f"**Technologies:** {', '.join(prompt.context.technologies)}")
+            if prompt.context.description:
+                lines.append("")
+                lines.append("**Description:**")
+                lines.append(prompt.context.description)
+            lines.append("")
+
+        # Core instructions
+        if prompt.instructions and prompt.instructions.general:
+            lines.append("## Core Guidelines")
+            for instruction in prompt.instructions.general:
+                lines.append(f"- {instruction}")
+            lines.append("")
+
+        # Architecture guidance
+        if prompt.instructions and prompt.instructions.architecture:
+            lines.append("## Architecture")
+            for instruction in prompt.instructions.architecture:
+                lines.append(f"- {instruction}")
+            lines.append("")
+
+        return "\n".join(lines)
+
+    def _generate_source_specific_rules(
+        self,
+        prompt: UniversalPrompt,
+        source_file: Path,
+        rules_dir: Path,
+        dry_run: bool,
+        verbose: bool,
+    ) -> List[Path]:
+        """Generate source-specific MDC rules for a prompt file."""
+        created_files = []
+
+        # Create a sanitized filename from the source file
+        sanitized_name = source_file.stem.replace(".", "-").replace("_", "-")
+        if sanitized_name.endswith("-promptrek"):
+            sanitized_name = sanitized_name[:-10]  # Remove -promptrek suffix
+
+        # Generate different rule types based on instruction categories
+        instruction_data = prompt.instructions.model_dump() if prompt.instructions else {}
+
+        for category, instructions in instruction_data.items():
+            if instructions:  # Only generate files for non-empty categories
+                rule_file = rules_dir / f"{sanitized_name}-{category.replace('_', '-')}.mdc"
+                rule_content = self._build_category_mdc_content(
+                    category, instructions, prompt, source_file
+                )
+
+                if dry_run:
+                    click.echo(f"  📁 Would create: {rule_file}")
+                    if verbose:
+                        preview = rule_content[:200] + "..." if len(rule_content) > 200 else rule_content
+                        click.echo(f"    {preview}")
+                    created_files.append(rule_file)
+                else:
+                    with open(rule_file, "w", encoding="utf-8") as f:
+                        f.write(rule_content)
+                    click.echo(f"✅ Generated: {rule_file}")
+                    created_files.append(rule_file)
+
+        return created_files
+
+    def _build_category_mdc_content(
+        self,
+        category: str,
+        instructions: List[str],
+        prompt: UniversalPrompt,
+        source_file: Path,
+    ) -> str:
+        """Build MDC content for a specific instruction category."""
+        lines = []
+
+        # Determine rule type and globs based on category
+        rule_config = self._get_rule_config_for_category(category, prompt)
+
+        # YAML frontmatter
+        lines.append("---")
+        lines.append(f"description: {rule_config['description']}")
+        if rule_config.get("globs"):
+            lines.append(f'globs: "{rule_config["globs"]}"')
+        lines.append(f"alwaysApply: {str(rule_config['always_apply']).lower()}")
+        lines.append("---")
+        lines.append("")
+
+        # Content
+        category_title = category.replace("_", " ").title()
+        lines.append(f"# {category_title} Guidelines")
+        lines.append("")
+        lines.append(f"*Source: {source_file.name}*")
+        lines.append("")
+
+        for instruction in instructions:
+            lines.append(f"- {instruction}")
+
+        return "\n".join(lines)
+
+    def _get_rule_config_for_category(
+        self, category: str, prompt: UniversalPrompt
+    ) -> Dict[str, Any]:
+        """Get rule configuration (type, globs, etc.) for an instruction category."""
+        # Default configuration
+        config = {
+            "description": f"{category.replace('_', ' ').title()} guidelines",
+            "always_apply": False,
+        }
+
+        # Category-specific configurations
+        if category == "general":
+            config["description"] = "General coding guidelines"
+            config["always_apply"] = True  # General rules always apply
+        elif category == "code_style":
+            config["description"] = "Code style and formatting guidelines"
+            config["globs"] = "**/*.{py,js,ts,tsx,jsx,go,rs,java,cpp,c,h}"
+        elif category == "testing":
+            config["description"] = "Testing standards and practices"
+            config["globs"] = "**/*.{test,spec}.{py,js,ts,tsx,jsx}"
+        elif category == "architecture":
+            config["description"] = "Architecture and design patterns"
+            config["always_apply"] = True
+        elif category == "security":
+            config["description"] = "Security guidelines and best practices"
+            config["always_apply"] = True
+        elif category == "performance":
+            config["description"] = "Performance optimization guidelines"
+            config["globs"] = "**/*.{py,js,ts,tsx,jsx,go,rs,java,cpp,c,h}"
+        else:
+            # For custom categories, try to infer from technologies
+            if prompt.context and prompt.context.technologies:
+                main_tech = prompt.context.technologies[0].lower()
+                tech_patterns = {
+                    "python": "**/*.{py,pyi}",
+                    "javascript": "**/*.{js,jsx,mjs,cjs}",
+                    "typescript": "**/*.{ts,tsx}",
+                    "react": "**/*.{tsx,jsx}",
+                    "vue": "**/*.{vue,js,ts}",
+                    "angular": "**/*.{ts,js,html,scss,css}",
+                    "node": "**/*.{js,ts,mjs,cjs}",
+                    "go": "**/*.go",
+                    "rust": "**/*.{rs,toml}",
+                    "java": "**/*.{java,kt}",
+                    "kotlin": "**/*.{kt,kts}",
+                    "cpp": "**/*.{cpp,c,h,hpp,cc,cxx}",
+                    "c": "**/*.{c,h}",
+                    "csharp": "**/*.{cs,csx}",
+                    "php": "**/*.{php,phtml}",
+                    "ruby": "**/*.{rb,rake}",
+                    "swift": "**/*.swift",
+                    "scala": "**/*.{scala,sc}",
+                }
+                if main_tech in tech_patterns:
+                    config["globs"] = tech_patterns[main_tech]
+
+        return config
