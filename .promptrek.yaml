@@ -4,7 +4,7 @@
 schema_version: "1.0.0"
 
 metadata:
-  title: "PrompTrek Development Assistant"
+  title: "PrompTrek AI Editor Prompts"
   description: "AI assistant configuration for developing PrompTrek - Universal AI Editor prompt management tool"
   version: "1.0.0"
   author: "PrompTrek Development Team"
@@ -50,6 +50,7 @@ instructions:
     - "Follow the existing adapter pattern for new AI editor integrations"
     - "Use Pydantic models for data validation and serialization"
     - "Implement proper error handling with custom exceptions"
+    - "You are trying to update the PrompTrek project itself, not generated outputs"
   
   code_style:
     - "Format code with Black (line length 88)"
