@@ -75,7 +75,7 @@ jobs:
       - name: Check for known vulnerabilities with Safety CLI
         uses: pyupio/safety-action@v1
         with:
-          api-key: ${{ secrets.SAFETY_API_KEY }}
+          api_key: ${{ secrets.SAFETY_API_KEY }}
 
       - name: Run pip-audit for dependency vulnerabilities
         run: |
@@ -97,7 +97,7 @@ jobs:
   security-scan:
     if: github.ref_type != 'tag' || !contains(github.ref_name, '-rc')
     runs-on: ubuntu-latest
-
+    environment: safety
     steps:
       - uses: actions/checkout@v5
 
