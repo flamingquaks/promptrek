@@ -4,6 +4,7 @@ Generate command implementation.
 Handles generation of editor-specific prompts from universal prompt files.
 """
 
+import inspect
 from pathlib import Path
 from typing import Optional
 
@@ -15,6 +16,31 @@ from ...core.exceptions import AdapterNotFoundError, CLIError, UPFParsingError
 from ...core.models import UniversalPrompt
 from ...core.parser import UPFParser
 from ...core.validator import UPFValidator
+
+
+def _adapter_supports_headless(adapter, method_name: str) -> bool:
+    """
+    Check if an adapter method supports the 'headless' parameter.
+
+    Uses inspect.signature() for reliable parameter detection.
+
+    Args:
+        adapter: The adapter instance
+        method_name: Name of the method to check ('generate' or 'generate_merged')
+
+    Returns:
+        bool: True if the method supports headless parameter
+    """
+    try:
+        if not hasattr(adapter, method_name):
+            return False
+
+        method = getattr(adapter, method_name)
+        sig = inspect.signature(method)
+        return "headless" in sig.parameters
+    except (ValueError, TypeError):
+        # Fallback to False if signature inspection fails
+        return False
 
 
 def generate_command(
@@ -222,10 +248,7 @@ def _generate_for_editor_multiple(
             # Single file - use existing logic
             prompt, source_file = prompt_files[0]
             # Check if adapter supports headless parameter
-            if (
-                hasattr(adapter, "generate")
-                and "headless" in adapter.generate.__code__.co_varnames
-            ):
+            if _adapter_supports_headless(adapter, "generate"):
                 adapter.generate(
                     prompt, output_dir, dry_run, verbose, variables, headless=headless
                 )
@@ -248,38 +271,61 @@ def _generate_for_editor_multiple(
                 )
                 click.echo(f"Generated separate {editor} files")
             elif hasattr(adapter, "generate_merged"):
-                # Other adapters use merged files
-                # Check if adapter supports headless parameter in generate_merged
-                if "headless" in adapter.generate_merged.__code__.co_varnames:
-                    adapter.generate_merged(
-                        prompt_files,
-                        output_dir,
-                        dry_run,
-                        verbose,
-                        variables,
-                        headless=headless,
-                    )
-                else:
-                    if headless:
-                        click.echo(
-                            f"Warning: {editor} adapter does not support headless mode in merged generation, ignoring --headless flag"
+                # Other adapters use merged files - try to use generate_merged
+                try:
+                    # Check if adapter supports headless parameter in generate_merged
+                    if _adapter_supports_headless(adapter, "generate_merged"):
+                        adapter.generate_merged(
+                            prompt_files,
+                            output_dir,
+                            dry_run,
+                            verbose,
+                            variables,
+                            headless=headless,
                         )
-                    adapter.generate_merged(
-                        prompt_files, output_dir, dry_run, verbose, variables
-                    )
-                if verbose:
+                    else:
+                        if headless:
+                            click.echo(
+                                f"Warning: {editor} adapter does not support headless mode in merged generation, ignoring --headless flag"
+                            )
+                        adapter.generate_merged(
+                            prompt_files, output_dir, dry_run, verbose, variables
+                        )
+                    if verbose:
+                        source_files = [str(pf[1]) for pf in prompt_files]
+                        click.echo(
+                            f"✅ Generated merged {editor} files from: {', '.join(source_files)}"
+                        )
+                except NotImplementedError:
+                    # Adapter doesn't actually support merging - fall back to single file generation
+                    prompt, source_file = prompt_files[-1]
+                    # Check if adapter supports headless parameter
+                    if _adapter_supports_headless(adapter, "generate"):
+                        adapter.generate(
+                            prompt,
+                            output_dir,
+                            dry_run,
+                            verbose,
+                            variables,
+                            headless=headless,
+                        )
+                    else:
+                        if headless:
+                            click.echo(
+                                f"Warning: {editor} adapter does not support headless mode, ignoring --headless flag"
+                            )
+                        adapter.generate(
+                            prompt, output_dir, dry_run, verbose, variables
+                        )
                     source_files = [str(pf[1]) for pf in prompt_files]
                     click.echo(
-                        f"✅ Generated merged {editor} files from: {', '.join(source_files)}"
+                        f"⚠️ {editor} adapter doesn't support merging. Generated from {source_file}, other files ignored: {', '.join(source_files[:-1])}"
                     )
             else:
                 # Fallback: generate from last file with warning
                 prompt, source_file = prompt_files[-1]
                 # Check if adapter supports headless parameter
-                if (
-                    hasattr(adapter, "generate")
-                    and "headless" in adapter.generate.__code__.co_varnames
-                ):
+                if _adapter_supports_headless(adapter, "generate"):
                     adapter.generate(
                         prompt,
                         output_dir,
@@ -311,6 +357,7 @@ def _process_single_file(
     dry_run: bool,
     all_editors: bool,
     variables: Optional[dict] = None,
+    headless: bool = False,
 ) -> None:
     """Process a single UPF file."""
     verbose = ctx.obj.get("verbose", False)
@@ -424,10 +471,7 @@ def _generate_for_editor(
     try:
         adapter = registry.get(editor)
         # Check if adapter supports headless parameter
-        if (
-            hasattr(adapter, "generate")
-            and "headless" in adapter.generate.__code__.co_varnames
-        ):
+        if _adapter_supports_headless(adapter, "generate"):
             adapter.generate(
                 prompt, output_dir, dry_run, verbose, variables, headless=headless
             )

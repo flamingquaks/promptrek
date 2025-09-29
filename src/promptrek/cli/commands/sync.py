@@ -85,6 +85,130 @@ def sync_command(
         click.echo(f"✅ Synced {editor} configuration to: {output_file}")
 
 
+def _merge_metadata(existing_data: dict, parsed: UniversalPrompt) -> dict:
+    """
+    Merge metadata intelligently, preserving user-defined data.
+
+    Args:
+        existing_data: Existing configuration data
+        parsed: Newly parsed data from editor files
+
+    Returns:
+        Updated metadata dictionary
+    """
+    if not parsed.metadata:
+        return existing_data
+
+    metadata = existing_data.get("metadata", {})
+
+    # Prefer existing user-defined metadata over auto-generated
+    # Only update if existing is empty or if parsed is from a real source
+    if (
+        parsed.metadata.title
+        and not metadata.get("title")
+        and parsed.metadata.author != "PrompTrek Sync"
+    ):
+        metadata["title"] = parsed.metadata.title
+
+    if (
+        parsed.metadata.description
+        and not metadata.get("description")
+        and parsed.metadata.author != "PrompTrek Sync"
+    ):
+        metadata["description"] = parsed.metadata.description
+
+    # Update timestamp from parsed data or current time
+    if parsed.metadata.updated:
+        metadata["updated"] = parsed.metadata.updated
+    else:
+        metadata["updated"] = datetime.now().isoformat()[:10]  # YYYY-MM-DD
+
+    existing_data["metadata"] = metadata
+    return existing_data
+
+
+def _merge_instructions(existing_data: dict, parsed: UniversalPrompt) -> dict:
+    """
+    Merge instructions intelligently, avoiding duplicates.
+
+    Args:
+        existing_data: Existing configuration data
+        parsed: Newly parsed data from editor files
+
+    Returns:
+        Updated configuration with merged instructions
+    """
+    if not parsed.instructions:
+        return existing_data
+
+    if "instructions" not in existing_data:
+        existing_data["instructions"] = {}
+
+    parsed_instructions = parsed.instructions.model_dump(exclude_none=True)
+    existing_instructions = existing_data.get("instructions", {})
+
+    for category, new_instructions in parsed_instructions.items():
+        if not new_instructions:
+            continue
+
+        if category not in existing_instructions:
+            # New category - add all instructions
+            existing_instructions[category] = list(new_instructions)
+        else:
+            # Merge with existing, preserving order and avoiding duplicates
+            existing_list = existing_instructions[category] or []
+            existing_set = set(existing_list)
+
+            # Add new instructions that don't exist
+            for instruction in new_instructions:
+                if instruction not in existing_set:
+                    existing_list.append(instruction)
+                    existing_set.add(instruction)
+
+            existing_instructions[category] = existing_list
+
+    existing_data["instructions"] = existing_instructions
+    return existing_data
+
+
+def _merge_context(existing_data: dict, parsed: UniversalPrompt) -> dict:
+    """
+    Merge context information intelligently.
+
+    Args:
+        existing_data: Existing configuration data
+        parsed: Newly parsed data from editor files
+
+    Returns:
+        Updated configuration with merged context
+    """
+    if not parsed.context:
+        return existing_data
+
+    existing_context = existing_data.get("context", {})
+    parsed_context = parsed.context.model_dump(exclude_none=True)
+
+    # Merge technologies additively
+    if "technologies" in parsed_context:
+        existing_techs = set(existing_context.get("technologies", []))
+        new_techs = set(parsed_context["technologies"])
+        existing_context["technologies"] = sorted(existing_techs | new_techs)
+
+    # Update project type if not set or if parsed is more specific
+    if parsed_context.get("project_type") and (
+        not existing_context.get("project_type")
+        or existing_context.get("project_type") == "application"
+    ):
+        existing_context["project_type"] = parsed_context["project_type"]
+
+    # Update description if parsed has better info
+    if parsed_context.get("description") and not existing_context.get("description"):
+        existing_context["description"] = parsed_context["description"]
+
+    existing_data["context"] = existing_context
+    return existing_data
+
+
 def _merge_prompts(
     existing: UniversalPrompt, parsed: UniversalPrompt, editor: str
 ) -> UniversalPrompt:
@@ -108,88 +232,10 @@ def _merge_prompts(
     # Start with existing configuration
     merged_data = existing.model_dump(exclude_none=True)
 
-    # Merge metadata: prefer existing user data, but take parsed data if existing is generic/empty
-    if parsed.metadata:
-        metadata = merged_data.get("metadata", {})
-
-        # Prefer existing user-defined metadata over auto-generated
-        # Only update if existing is empty or if parsed is from a real source (not PrompTrek Sync)
-        if (
-            parsed.metadata.title
-            and not metadata.get("title")
-            and parsed.metadata.author != "PrompTrek Sync"
-        ):
-            metadata["title"] = parsed.metadata.title
-
-        if (
-            parsed.metadata.description
-            and not metadata.get("description")
-            and parsed.metadata.author != "PrompTrek Sync"
-        ):
-            metadata["description"] = parsed.metadata.description
-
-        # Update timestamp from parsed data or current time
-        if parsed.metadata.updated:
-            metadata["updated"] = parsed.metadata.updated
-        else:
-            metadata["updated"] = datetime.now().isoformat()[:10]  # YYYY-MM-DD
-        merged_data["metadata"] = metadata
-
-    # Merge instructions intelligently
-    if parsed.instructions:
-        if "instructions" not in merged_data:
-            merged_data["instructions"] = {}
-
-        parsed_instructions = parsed.instructions.model_dump(exclude_none=True)
-        existing_instructions = merged_data.get("instructions", {})
-
-        for category, new_instructions in parsed_instructions.items():
-            if not new_instructions:
-                continue
-
-            if category not in existing_instructions:
-                # New category - add all instructions
-                existing_instructions[category] = list(new_instructions)
-            else:
-                # Merge with existing, preserving order and avoiding duplicates
-                existing_list = existing_instructions[category] or []
-                existing_set = set(existing_list)
-
-                # Add new instructions that don't exist
-                for instruction in new_instructions:
-                    if instruction not in existing_set:
-                        existing_list.append(instruction)
-                        existing_set.add(instruction)
-
-                existing_instructions[category] = existing_list
-
-        merged_data["instructions"] = existing_instructions
-
-    # Merge context information
-    if parsed.context:
-        existing_context = merged_data.get("context", {})
-        parsed_context = parsed.context.model_dump(exclude_none=True)
-
-        # Merge technologies additively
-        if "technologies" in parsed_context:
-            existing_techs = set(existing_context.get("technologies", []))
-            new_techs = set(parsed_context["technologies"])
-            existing_context["technologies"] = sorted(existing_techs | new_techs)
-
-        # Update project type if not set or if parsed is more specific
-        if parsed_context.get("project_type") and (
-            not existing_context.get("project_type")
-            or existing_context.get("project_type") == "application"
-        ):
-            existing_context["project_type"] = parsed_context["project_type"]
-
-        # Update description if parsed has better info
-        if parsed_context.get("description") and not existing_context.get(
-            "description"
-        ):
-            existing_context["description"] = parsed_context["description"]
-
-        merged_data["context"] = existing_context
+    # Use helper functions to merge each section
+    merged_data = _merge_metadata(merged_data, parsed)
+    merged_data = _merge_instructions(merged_data, parsed)
+    merged_data = _merge_context(merged_data, parsed)
 
     # Ensure the target editor is included in targets
     targets = merged_data.get("targets", [])

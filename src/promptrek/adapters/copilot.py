@@ -610,7 +610,7 @@ class CopilotAdapter(EditorAdapter):
             return content
 
         # Remove the entire headless block
-        return content[:start_pos] + content[end_pos + len(end_marker):].lstrip()
+        return content[:start_pos] + content[end_pos + len(end_marker) :].lstrip()
 
     def _normalize_section_name(self, section_name: str) -> Optional[str]:
         """Normalize section names to instruction categories."""
