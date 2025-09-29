@@ -20,17 +20,17 @@ schema_version: "1.0.0"
 
 # Metadata about the prompt file (required)
 metadata:
-  title: string                    # Human-readable title
-  description: string              # Brief description of purpose
-  version: string                  # Semantic version of this prompt
-  author: string                   # Author name or email
-  created: string                  # ISO 8601 date (YYYY-MM-DD)
-  updated: string                  # ISO 8601 date (YYYY-MM-DD)
-  tags: [string]                   # Optional tags for categorization
+  title: string                    # Human-readable title (required)
+  description: string              # Brief description of purpose (required)
+  version: string                  # Semantic version of this prompt (optional)
+  author: string                   # Author name or email (optional)
+  created: string                  # ISO 8601 date (YYYY-MM-DD) (optional)
+  updated: string                  # ISO 8601 date (YYYY-MM-DD) (optional)
+  tags: [string]                   # Tags for categorization (optional)
 
-# Target editors this prompt supports (required)
+# Target editors this prompt supports (optional)
 targets:
-  - string                         # List of supported editor names
+  - string                         # List of supported editor names (optional)
 
 # Project context information (optional)
 context:

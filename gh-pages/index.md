@@ -156,6 +156,7 @@ metadata:
   title: "Full-Stack Development Assistant"
   description: "Production-ready coding standards"
 
+# Optional - generates for all supported editors if not specified
 targets: [copilot, cursor, continue, cline]
 
 instructions:

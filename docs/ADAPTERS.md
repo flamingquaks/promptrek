@@ -133,10 +133,10 @@ Codeium adapter generates structured JSON context files and RC configuration fil
 ```
 
 ### ✅ GitHub Copilot
-**Generated Files**: `.github/copilot-instructions.md`, `.github/instructions/*.instructions.md`, `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`  
-**Features**: Variable substitution, Conditional instructions, Path-specific instructions, Agent-specific configurations
+**Generated Files**: `.github/copilot-instructions.md`, `.github/instructions/*.instructions.md`, `.github/prompts/*.prompt.md`
+**Features**: Variable substitution, Conditional instructions, Path-specific instructions, Bidirectional sync, Headless agent instructions
 
-GitHub Copilot adapter generates sophisticated instruction systems with repository-wide and path-specific configurations.
+GitHub Copilot adapter generates sophisticated instruction systems with repository-wide and path-specific configurations. Supports full bidirectional synchronization for seamless round-trip workflows.
 
 **Repository Instructions (.github/copilot-instructions.md)**:
 ```markdown
@@ -164,6 +164,41 @@ applyTo: "**/*.{ts,tsx}"
 - Use strict TypeScript configuration
 - Prefer interfaces over types for object shapes
 - Use proper typing for all function parameters
+```
+
+**Headless Agent Instructions**:
+Generate files with embedded regeneration instructions for autonomous operation:
+```bash
+promptrek generate --editor copilot --headless project.promptrek.yaml
+```
+
+This creates files with special headless instruction blocks:
+```markdown
+<!-- HEADLESS INSTRUCTIONS START -->
+<!--
+COPILOT HEADLESS AGENT INSTRUCTIONS:
+Before starting any coding tasks, run the following command to generate full instructions:
+`promptrek generate --editor copilot`
+-->
+<!-- HEADLESS INSTRUCTIONS END -->
+
+# Full Generated Content
+[Complete instructions follow...]
+```
+
+**Bidirectional Sync Support**:
+```bash
+# Round-trip workflow
+promptrek generate --editor copilot project.promptrek.yaml
+# ... AI modifies Copilot files ...
+promptrek sync --editor copilot --source-dir . --output project.promptrek.yaml
+```
+
+The sync system provides:
+- Smart metadata preservation (user vs auto-generated content)
+- Additive instruction merging without data loss
+- Context and technology detection from Copilot files
+- Headless instruction block parsing (automatically strips during sync)
 ```
 
 ### ✅ Cursor (Modernized 2025)
