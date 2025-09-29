@@ -1011,53 +1011,90 @@ html, body {
 .prompt-line {
   position: absolute;
   font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   font-weight: 400;
   color: rgba(139, 92, 246, 0.6);
-  white-space: nowrap;
+  white-space: pre-wrap;
   opacity: 0;
-  max-width: 80%;
-  text-overflow: ellipsis;
-  overflow: hidden;
+  max-width: 600px;
+  width: auto;
+  line-height: 1.4;
   letter-spacing: 0.02em;
   filter: blur(0px);
   transition: all 0.3s ease;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  backdrop-filter: blur(4px);
 }
 
 .prompt-line:nth-child(1) {
-  animation: promptFloatDiagonal1 18s infinite ease-in-out;
+  animation: promptFloatContinuous 45s infinite linear;
   animation-delay: 0s;
-  color: rgba(139, 92, 246, 0.7);
+  color: rgba(139, 92, 246, 0.8);
+  top: 5vh;
 }
 
 .prompt-line:nth-child(2) {
-  animation: promptFloatCurved1 22s infinite ease-in-out;
-  animation-delay: 2s;
-  color: rgba(255, 107, 107, 0.6);
+  animation: promptFloatContinuous 50s infinite linear;
+  animation-delay: 7s;
+  color: rgba(255, 107, 107, 0.7);
+  top: 20vh;
 }
 
 .prompt-line:nth-child(3) {
-  animation: promptFloatWave1 20s infinite ease-in-out;
-  animation-delay: 4s;
-  color: rgba(78, 205, 196, 0.6);
+  animation: promptFloatContinuous 55s infinite linear;
+  animation-delay: 14s;
+  color: rgba(78, 205, 196, 0.7);
+  top: 35vh;
 }
 
 .prompt-line:nth-child(4) {
-  animation: promptFloatDiagonal2 24s infinite ease-in-out;
-  animation-delay: 6s;
-  color: rgba(69, 183, 209, 0.6);
+  animation: promptFloatContinuous 48s infinite linear;
+  animation-delay: 21s;
+  color: rgba(69, 183, 209, 0.7);
+  top: 50vh;
 }
 
 .prompt-line:nth-child(5) {
-  animation: promptFloatCurved2 19s infinite ease-in-out;
-  animation-delay: 8s;
-  color: rgba(150, 206, 180, 0.6);
+  animation: promptFloatContinuous 52s infinite linear;
+  animation-delay: 28s;
+  color: rgba(150, 206, 180, 0.7);
+  top: 65vh;
 }
 
 .prompt-line:nth-child(6) {
-  animation: promptFloatWave2 21s infinite ease-in-out;
-  animation-delay: 10s;
-  color: rgba(254, 202, 87, 0.6);
+  animation: promptFloatContinuous 47s infinite linear;
+  animation-delay: 35s;
+  color: rgba(254, 202, 87, 0.7);
+  top: 80vh;
+}
+
+/* Continuous floating animation for smooth flow */
+@keyframes promptFloatContinuous {
+  0% {
+    opacity: 0;
+    transform: translateX(calc(-100% - 650px));
+  }
+  3% {
+    opacity: 0.6;
+  }
+  5% {
+    opacity: 1;
+    transform: translateX(calc(-100% - 400px));
+  }
+  95% {
+    opacity: 1;
+    transform: translateX(100vw);
+  }
+  97% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(calc(100vw + 100px));
+  }
 }
 
 /* Dynamic floating animations with varied paths */
@@ -1629,10 +1666,8 @@ section:not(.hero-section):not(.editors-section):not(.benefits-section):not(.cta
 .editors-section {
   background: linear-gradient(135deg, var(--text-primary) 0%, #1e293b 100%);
   color: white;
-  width: 100vw;
+  width: 100%;
   margin: 0;
-  margin-left: calc(-50vw + 50%);
-  margin-right: calc(-50vw + 50%);
   padding: clamp(4rem, 8vh, 6rem) 0;
   box-sizing: border-box;
 }
@@ -1646,16 +1681,21 @@ section:not(.hero-section):not(.editors-section):not(.benefits-section):not(.cta
 }
 
 .editors-section .container {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 0 clamp(1rem, 3vw, 2rem);
+  max-width: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 .editors-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: clamp(1.5rem, 3vw, 2.5rem);
   margin-top: clamp(2rem, 4vh, 3rem);
+  width: 100%;
+  padding: 0 clamp(1.5rem, 3vw, 3rem);
+  box-sizing: border-box;
 }
 
 .editor-card {
@@ -2281,7 +2321,12 @@ section:not(.hero-section):not(.editors-section):not(.benefits-section):not(.cta
     gap: clamp(2rem, 4vh, 3rem);
   }
 
-  .editors-grid,
+  .editors-grid {
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: clamp(1.5rem, 3vw, 2rem);
+    width: 100%;
+  }
+
   .features-grid,
   .benefits-grid {
     grid-template-columns: 1fr;
