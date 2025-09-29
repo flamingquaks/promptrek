@@ -136,7 +136,10 @@ def generate_command(
                 target_editors = file_targets
             elif editor:
                 # If targets is None (not specified), allow any editor
-                if file_prompts.targets is not None and editor not in file_prompts.targets:
+                if (
+                    file_prompts.targets is not None
+                    and editor not in file_prompts.targets
+                ):
                     # For single file scenario, this should be an error for backward compatibility
                     if len(unique_files) == 1:
                         raise CLIError(
