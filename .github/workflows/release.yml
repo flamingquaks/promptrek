@@ -173,6 +173,7 @@ jobs:
           repository-url: https://test.pypi.org/legacy/
           print-hash: true
           verify-metadata: true
+          skip-existing: true  # Skip if version already exists
 
   # Final success check
   release-success:
