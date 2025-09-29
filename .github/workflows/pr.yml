@@ -137,6 +137,8 @@ jobs:
   cli-test:
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v5
 
