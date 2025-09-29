@@ -157,7 +157,13 @@ def generate_command(
     for target_editor, prompt_files in prompts_by_editor.items():
         try:
             _generate_for_editor_multiple(
-                prompt_files, target_editor, output, dry_run, verbose, variables, headless
+                prompt_files,
+                target_editor,
+                output,
+                dry_run,
+                verbose,
+                variables,
+                headless,
             )
         except AdapterNotFoundError:
             click.echo(f"⚠️ Editor '{target_editor}' not yet implemented - skipping")
@@ -216,11 +222,18 @@ def _generate_for_editor_multiple(
             # Single file - use existing logic
             prompt, source_file = prompt_files[0]
             # Check if adapter supports headless parameter
-            if hasattr(adapter, 'generate') and 'headless' in adapter.generate.__code__.co_varnames:
-                adapter.generate(prompt, output_dir, dry_run, verbose, variables, headless=headless)
+            if (
+                hasattr(adapter, "generate")
+                and "headless" in adapter.generate.__code__.co_varnames
+            ):
+                adapter.generate(
+                    prompt, output_dir, dry_run, verbose, variables, headless=headless
+                )
             else:
                 if headless:
-                    click.echo(f"Warning: {editor} adapter does not support headless mode, ignoring --headless flag")
+                    click.echo(
+                        f"Warning: {editor} adapter does not support headless mode, ignoring --headless flag"
+                    )
                 adapter.generate(prompt, output_dir, dry_run, verbose, variables)
             if verbose:
                 click.echo(f"✅ Generated {editor} files from {source_file}")
@@ -237,13 +250,20 @@ def _generate_for_editor_multiple(
             elif hasattr(adapter, "generate_merged"):
                 # Other adapters use merged files
                 # Check if adapter supports headless parameter in generate_merged
-                if 'headless' in adapter.generate_merged.__code__.co_varnames:
+                if "headless" in adapter.generate_merged.__code__.co_varnames:
                     adapter.generate_merged(
-                        prompt_files, output_dir, dry_run, verbose, variables, headless=headless
+                        prompt_files,
+                        output_dir,
+                        dry_run,
+                        verbose,
+                        variables,
+                        headless=headless,
                     )
                 else:
                     if headless:
-                        click.echo(f"Warning: {editor} adapter does not support headless mode in merged generation, ignoring --headless flag")
+                        click.echo(
+                            f"Warning: {editor} adapter does not support headless mode in merged generation, ignoring --headless flag"
+                        )
                     adapter.generate_merged(
                         prompt_files, output_dir, dry_run, verbose, variables
                     )
@@ -256,11 +276,23 @@ def _generate_for_editor_multiple(
                 # Fallback: generate from last file with warning
                 prompt, source_file = prompt_files[-1]
                 # Check if adapter supports headless parameter
-                if hasattr(adapter, 'generate') and 'headless' in adapter.generate.__code__.co_varnames:
-                    adapter.generate(prompt, output_dir, dry_run, verbose, variables, headless=headless)
+                if (
+                    hasattr(adapter, "generate")
+                    and "headless" in adapter.generate.__code__.co_varnames
+                ):
+                    adapter.generate(
+                        prompt,
+                        output_dir,
+                        dry_run,
+                        verbose,
+                        variables,
+                        headless=headless,
+                    )
                 else:
                     if headless:
-                        click.echo(f"Warning: {editor} adapter does not support headless mode, ignoring --headless flag")
+                        click.echo(
+                            f"Warning: {editor} adapter does not support headless mode, ignoring --headless flag"
+                        )
                     adapter.generate(prompt, output_dir, dry_run, verbose, variables)
                 source_files = [str(pf[1]) for pf in prompt_files]
                 click.echo(
@@ -358,7 +390,14 @@ def _process_single_file(
     for target_editor in target_editors:
         try:
             _generate_for_editor(
-                prompt, target_editor, output, dry_run, verbose, variables, file_path, headless
+                prompt,
+                target_editor,
+                output,
+                dry_run,
+                verbose,
+                variables,
+                file_path,
+                headless,
             )
         except AdapterNotFoundError:
             click.echo(f"⚠️ Editor '{target_editor}' not yet implemented - skipping")
@@ -385,11 +424,18 @@ def _generate_for_editor(
     try:
         adapter = registry.get(editor)
         # Check if adapter supports headless parameter
-        if hasattr(adapter, 'generate') and 'headless' in adapter.generate.__code__.co_varnames:
-            adapter.generate(prompt, output_dir, dry_run, verbose, variables, headless=headless)
+        if (
+            hasattr(adapter, "generate")
+            and "headless" in adapter.generate.__code__.co_varnames
+        ):
+            adapter.generate(
+                prompt, output_dir, dry_run, verbose, variables, headless=headless
+            )
         else:
             if headless:
-                click.echo(f"Warning: {editor} adapter does not support headless mode, ignoring --headless flag")
+                click.echo(
+                    f"Warning: {editor} adapter does not support headless mode, ignoring --headless flag"
+                )
             adapter.generate(prompt, output_dir, dry_run, verbose, variables)
 
         if verbose and source_file:

@@ -114,12 +114,18 @@ def _merge_prompts(
 
         # Prefer existing user-defined metadata over auto-generated
         # Only update if existing is empty or if parsed is from a real source (not PrompTrek Sync)
-        if (parsed.metadata.title and not metadata.get("title") and
-            parsed.metadata.author != "PrompTrek Sync"):
+        if (
+            parsed.metadata.title
+            and not metadata.get("title")
+            and parsed.metadata.author != "PrompTrek Sync"
+        ):
             metadata["title"] = parsed.metadata.title
 
-        if (parsed.metadata.description and not metadata.get("description") and
-            parsed.metadata.author != "PrompTrek Sync"):
+        if (
+            parsed.metadata.description
+            and not metadata.get("description")
+            and parsed.metadata.author != "PrompTrek Sync"
+        ):
             metadata["description"] = parsed.metadata.description
 
         # Update timestamp from parsed data or current time
@@ -171,14 +177,16 @@ def _merge_prompts(
             existing_context["technologies"] = sorted(existing_techs | new_techs)
 
         # Update project type if not set or if parsed is more specific
-        if (parsed_context.get("project_type") and
-            (not existing_context.get("project_type") or
-             existing_context.get("project_type") == "application")):
+        if parsed_context.get("project_type") and (
+            not existing_context.get("project_type")
+            or existing_context.get("project_type") == "application"
+        ):
             existing_context["project_type"] = parsed_context["project_type"]
 
         # Update description if parsed has better info
-        if (parsed_context.get("description") and
-            not existing_context.get("description")):
+        if parsed_context.get("description") and not existing_context.get(
+            "description"
+        ):
             existing_context["description"] = parsed_context["description"]
 
         merged_data["context"] = existing_context

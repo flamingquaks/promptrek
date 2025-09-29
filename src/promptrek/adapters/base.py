@@ -82,7 +82,7 @@ class EditorAdapter(ABC):
         """Return True if this adapter supports parsing files back to UniversalPrompt."""
         try:
             # Check if parse_files exists and is callable
-            parse_method = getattr(self, 'parse_files', None)
+            parse_method = getattr(self, "parse_files", None)
             return parse_method is not None and callable(parse_method)
         except AttributeError:
             return False
@@ -100,7 +100,9 @@ class EditorAdapter(ABC):
         Raises:
             NotImplementedError: If adapter doesn't support reverse parsing
         """
-        raise NotImplementedError(f"{self.name} adapter does not support bidirectional sync")
+        raise NotImplementedError(
+            f"{self.name} adapter does not support bidirectional sync"
+        )
 
     def get_required_variables(self, prompt: UniversalPrompt) -> List[str]:
         """

@@ -60,7 +60,12 @@ class CopilotAdapter(EditorAdapter):
 
         # Generate repository-wide instructions
         copilot_file = self._generate_copilot_instructions(
-            processed_prompt, conditional_content, output_dir, dry_run, verbose, headless
+            processed_prompt,
+            conditional_content,
+            output_dir,
+            dry_run,
+            verbose,
+            headless,
         )
         created_files.extend(copilot_file)
 
@@ -195,7 +200,6 @@ class CopilotAdapter(EditorAdapter):
                     created_files.append(tech_file)
 
         return created_files
-
 
     def _generate_prompt_files(
         self,
@@ -337,11 +341,17 @@ class CopilotAdapter(EditorAdapter):
         lines.append("<!-- HEADLESS INSTRUCTIONS START -->")
         lines.append("<!-- ")
         lines.append("COPILOT HEADLESS AGENT INSTRUCTIONS:")
-        lines.append("Before starting any coding tasks, run the following command to generate full instructions:")
+        lines.append(
+            "Before starting any coding tasks, run the following command to generate full instructions:"
+        )
         lines.append("`promptrek generate --editor copilot`")
         lines.append("")
-        lines.append("This will regenerate the complete GitHub Copilot instructions from the source .promptrek.yaml files.")
-        lines.append("The generated content will replace everything between HEADLESS INSTRUCTIONS END and the end of this file.")
+        lines.append(
+            "This will regenerate the complete GitHub Copilot instructions from the source .promptrek.yaml files."
+        )
+        lines.append(
+            "The generated content will replace everything between HEADLESS INSTRUCTIONS END and the end of this file."
+        )
         lines.append("-->")
         lines.append("<!-- HEADLESS INSTRUCTIONS END -->")
         lines.append("")
@@ -455,7 +465,8 @@ class CopilotAdapter(EditorAdapter):
         if title or description:
             result["metadata"] = PromptMetadata(
                 title=title or "GitHub Copilot Configuration",
-                description=description or "Configuration parsed from GitHub Copilot files",
+                description=description
+                or "Configuration parsed from GitHub Copilot files",
             )
 
         # Parse instructions by section
@@ -491,11 +502,16 @@ class CopilotAdapter(EditorAdapter):
         if instructions_dict:
             # Valid instruction categories from the Instructions model
             valid_categories = {
-                'general', 'code_style', 'architecture', 'testing',
-                'security', 'performance'
+                "general",
+                "code_style",
+                "architecture",
+                "testing",
+                "security",
+                "performance",
             }
             filtered_dict = {
-                k: v for k, v in instructions_dict.items()
+                k: v
+                for k, v in instructions_dict.items()
                 if k in valid_categories and v
             }
             result["instructions"] = Instructions(**filtered_dict)
@@ -594,7 +610,7 @@ class CopilotAdapter(EditorAdapter):
             return content
 
         # Remove the entire headless block
-        return content[:start_pos] + content[end_pos + len(end_marker):].lstrip()
+        return content[:start_pos] + content[end_pos + len(end_marker) :].lstrip()
 
     def _normalize_section_name(self, section_name: str) -> Optional[str]:
         """Normalize section names to instruction categories."""
@@ -606,7 +622,7 @@ class CopilotAdapter(EditorAdapter):
             "project info",
             "examples",
             "about",
-            "overview"
+            "overview",
         }
         if section_lower in skip_sections:
             return None  # Skip this section
@@ -679,7 +695,9 @@ class CopilotAdapter(EditorAdapter):
 
         return ProjectContext(**context_data) if context_data else None
 
-    def _merge_instructions(self, base: Instructions, additional: Instructions) -> Instructions:
+    def _merge_instructions(
+        self, base: Instructions, additional: Instructions
+    ) -> Instructions:
         """Merge two Instructions objects without duplication."""
         base_dict = base.model_dump(exclude_none=True)
         additional_dict = additional.model_dump(exclude_none=True)
@@ -802,11 +820,17 @@ class CopilotAdapter(EditorAdapter):
         lines.append("<!-- HEADLESS INSTRUCTIONS START -->")
         lines.append("<!-- ")
         lines.append("COPILOT HEADLESS AGENT INSTRUCTIONS:")
-        lines.append("Before starting any coding tasks, run the following command to generate full instructions:")
+        lines.append(
+            "Before starting any coding tasks, run the following command to generate full instructions:"
+        )
         lines.append("`promptrek generate --editor copilot`")
         lines.append("")
-        lines.append("This will regenerate the complete GitHub Copilot instructions from the source .promptrek.yaml files.")
-        lines.append("The generated content will replace everything between HEADLESS INSTRUCTIONS END and the end of this file.")
+        lines.append(
+            "This will regenerate the complete GitHub Copilot instructions from the source .promptrek.yaml files."
+        )
+        lines.append(
+            "The generated content will replace everything between HEADLESS INSTRUCTIONS END and the end of this file."
+        )
         lines.append("-->")
         lines.append("<!-- HEADLESS INSTRUCTIONS END -->")
         lines.append("")
@@ -912,7 +936,6 @@ class CopilotAdapter(EditorAdapter):
             lines.append(f"- Use {tech} idioms and patterns appropriately")
 
         return "\n".join(lines)
-
 
     def _build_coding_prompt_content(self, prompt: UniversalPrompt) -> str:
         """Build experimental coding prompt content for VS Code."""
