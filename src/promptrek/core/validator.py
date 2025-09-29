@@ -114,14 +114,13 @@ class UPFValidator:
         """Validate target editors."""
         targets = prompt.targets
 
-        if targets is not None and not targets:
-            result.add_error("At least one target editor must be specified")
-            return
-
         # Skip validation if targets is None (optional)
         if targets is None:
             return
 
+        if not targets:
+            result.add_error("At least one target editor must be specified")
+            return
         # Check for unknown editors
         unknown_editors = set(targets) - self.KNOWN_EDITORS
         if unknown_editors:
