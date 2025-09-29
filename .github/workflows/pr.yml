@@ -200,6 +200,9 @@ jobs:
     needs: [build, test-fast, code-quality, security, cli-test, docs-check]
     runs-on: ubuntu-latest
     if: always()
+    permissions:
+      contents: read
+      pull-requests: write
 
     steps:
       - name: PR Validation Summary
