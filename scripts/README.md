@@ -63,5 +63,14 @@ pip install --index-url https://test.pypi.org/simple/ promptrek==X.Y.Z-rc.N
 ## GitHub Actions Integration
 
 These scripts work with `.github/workflows/release.yml`:
-- **RC tags** (vX.Y.Z-rc.N) → Test PyPI only
+- **RC tags** (vX.Y.Z-rc.N) → Test PyPI only (automatically yanks previous RCs)
 - **Release tags** (vX.Y.Z) → PyPI + GitHub Release with changelog
+
+### Required GitHub Secrets
+
+For RC releases with automatic yanking:
+- `TEST_PYPI_API_TOKEN`: API token from Test PyPI with permissions to upload and delete packages
+  - Get from: https://test.pypi.org/manage/account/token/
+  - Set in: Settings → Secrets and variables → Actions
+
+Note: The workflow will automatically yank (delete) previous RC versions when publishing a new RC, ensuring only one RC exists per base version at any time.

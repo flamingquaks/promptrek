@@ -161,6 +161,95 @@ jobs:
       id-token: write
 
     steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Install twine and requests
+        run: |
+          pip install twine requests
+
+      - name: Extract version info
+        id: version
+        run: |
+          # Extract base version from tag (e.g., v0.0.0-rc.1 -> 0.0.0)
+          TAG="${{ github.ref_name }}"
+          BASE_VERSION=$(echo "$TAG" | sed 's/^v//' | sed 's/-.*$//')
+          echo "base_version=$BASE_VERSION" >> $GITHUB_OUTPUT
+          echo "Base version: $BASE_VERSION"
+
+      - name: Yank previous RCs from Test PyPI
+        continue-on-error: true  # Don't fail if yanking fails
+        env:
+          TEST_PYPI_TOKEN: ${{ secrets.TEST_PYPI_API_TOKEN }}
+        run: |
+          BASE_VERSION="${{ steps.version.outputs.base_version }}"
+          echo "Looking for previous RCs of version $BASE_VERSION"
+
+          # Create Python script to find and yank old RCs
+          cat > yank_old_rcs.py << 'EOF'
+          import json
+          import os
+          import sys
+          import requests
+
+          base_version = sys.argv[1]
+          current_tag = sys.argv[2].replace('v', '')
+          token = os.environ.get('TEST_PYPI_TOKEN')
+
+          if not token:
+              print("Warning: TEST_PYPI_API_TOKEN not set, skipping yanking")
+              sys.exit(0)
+
+          # Get package info from Test PyPI
+          response = requests.get('https://test.pypi.org/pypi/promptrek/json')
+          if response.status_code == 404:
+              print("Package not found on Test PyPI yet")
+              sys.exit(0)
+
+          data = response.json()
+          releases = data.get('releases', {})
+
+          # Find all RC versions for this base version
+          yanked_versions = []
+          for version in releases.keys():
+              # Check if this is an RC of our base version
+              if version.startswith(f"{base_version}-rc.") and version != current_tag:
+                  print(f"Found old RC to yank: {version}")
+
+                  # Yank via PyPI API
+                  headers = {
+                      'Authorization': f'Bearer {token}',
+                      'Content-Type': 'application/json'
+                  }
+
+                  # PyPI yanking is done via DELETE request
+                  for file_info in releases[version]:
+                      filename = file_info['filename']
+                      yank_url = f'https://test.pypi.org/legacy/promptrek/{version}/{filename}'
+
+                      try:
+                          resp = requests.delete(yank_url, headers=headers)
+                          if resp.status_code in [200, 204]:
+                              print(f"  Yanked: {filename}")
+                          else:
+                              print(f"  Warning: Could not yank {filename}: {resp.status_code}")
+                      except Exception as e:
+                          print(f"  Warning: Error yanking {filename}: {e}")
+
+                  yanked_versions.append(version)
+
+          if yanked_versions:
+              print(f"Yanked {len(yanked_versions)} old RC version(s): {', '.join(yanked_versions)}")
+          else:
+              print("No old RC versions found to yank")
+          EOF
+
+          python yank_old_rcs.py "$BASE_VERSION" "${{ github.ref_name }}" || true
+
       - name: Download build artifacts
         uses: actions/download-artifact@v5
         with:
