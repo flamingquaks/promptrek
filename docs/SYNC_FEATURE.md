@@ -11,6 +11,7 @@ Many AI editors can self-update their markdown configuration files based on proj
 Currently, the sync feature supports:
 
 - **Continue**: Reads from `config.yaml` and `.continue/rules/*.md` files
+- **GitHub Copilot**: Reads from `.github/copilot-instructions.md`, `.github/instructions/*.instructions.md`, and `.github/prompts/*.prompt.md` files
 
 ## Usage
 
@@ -19,6 +20,9 @@ Currently, the sync feature supports:
 ```bash
 # Sync from Continue editor files to PrompTrek configuration
 promptrek sync --source-dir . --editor continue --output project.promptrek.yaml
+
+# Sync from GitHub Copilot files to PrompTrek configuration
+promptrek sync --source-dir . --editor copilot --output project.promptrek.yaml
 ```
 
 ### Preview Changes (Dry Run)
@@ -49,15 +53,18 @@ The sync command reads editor-specific files and extracts:
 
 When syncing to an existing PrompTrek file:
 
-- **Preserves existing data**: Examples, variables, and custom configuration
-- **Merges instructions**: Combines new instructions with existing ones
-- **Avoids duplicates**: Ensures no instruction appears twice
-- **Updates metadata**: Refreshes timestamps and adds sync information
+- **Preserves user-defined metadata**: Keeps custom titles/descriptions over auto-generated ones
+- **Merges instructions additively**: Combines new instructions with existing ones without data loss
+- **Smart duplicate detection**: Ensures no instruction appears twice across categories
+- **Context preservation**: Merges technologies and project information intelligently
+- **Timestamp tracking**: Updates sync timestamps while preserving creation dates
+- **Source attribution**: Distinguishes between user-defined and auto-generated content
 
 ### 3. Instruction Categories
 
 The sync feature maps editor files to PrompTrek instruction categories:
 
+#### Continue Editor
 | Editor File | PrompTrek Category |
 |-------------|-------------------|
 | `general.md` | `instructions.general` |
@@ -67,6 +74,15 @@ The sync feature maps editor files to PrompTrek instruction categories:
 | `performance.md` | `instructions.performance` |
 | `architecture.md` | `instructions.architecture` |
 | `*-rules.md` | `instructions.general` (with tech detection) |
+
+#### GitHub Copilot
+| Editor File | PrompTrek Category |
+|-------------|-------------------|
+| `.github/copilot-instructions.md` → `## General Instructions` | `instructions.general` |
+| `.github/copilot-instructions.md` → `## Code Style Guidelines` | `instructions.code_style` |
+| `.github/instructions/testing.instructions.md` | `instructions.testing` |
+| `.github/instructions/code-style.instructions.md` | `instructions.code_style` |
+| `.github/prompts/*.prompt.md` | `instructions.general` |
 
 ## Example Workflow
 
@@ -109,12 +125,42 @@ The sync command provides clear error messages for common issues:
 - **Parse errors**: Continues processing even if some files can't be parsed
 - **Permission issues**: Handles file access problems gracefully
 
+## Advanced Features
+
+### Headless Agent Instructions
+
+GitHub Copilot supports headless agent instructions that provide autonomous regeneration capability:
+
+```bash
+# Generate Copilot files with headless instructions
+promptrek generate project.promptrek.yaml --editor copilot --headless
+```
+
+This creates files with embedded instructions for Copilot to regenerate its own configuration:
+```markdown
+<!-- HEADLESS INSTRUCTIONS START -->
+<!--
+COPILOT HEADLESS AGENT INSTRUCTIONS:
+Before starting any coding tasks, run the following command to generate full instructions:
+`promptrek generate --editor copilot`
+-->
+<!-- HEADLESS INSTRUCTIONS END -->
+```
+
+### Round-trip Compatibility
+
+The sync system ensures complete round-trip compatibility:
+- **Generate → Sync → Generate** maintains data integrity
+- No information loss during bidirectional conversion
+- User customizations are preserved across sync operations
+
 ## Future Enhancements
 
 Planned improvements include:
 
-- Support for more AI editors (Cursor, Copilot, etc.)
-- Conflict resolution strategies
+- Support for more AI editors (Cursor, Claude Code, etc.)
+- Conflict resolution strategies with user preferences
 - Selective sync (choose which categories to sync)
 - Backup and restore functionality
 - Integration with version control workflows
+- Smart sync scheduling and automation

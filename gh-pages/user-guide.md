@@ -63,14 +63,14 @@ The Universal Prompt Format is the core of PrompTrek. It's a YAML-based format t
 schema_version: "1.0.0"
 
 metadata:
-  title: "Project Assistant"
-  description: "AI assistant configuration"
-  version: "1.0.0"
-  author: "Your Name <email@example.com>"
-  created: "2024-01-01"
-  updated: "2024-01-01"
+  title: "Project Assistant"           # Required
+  description: "AI assistant configuration"  # Required
+  version: "1.0.0"                     # Optional
+  author: "Your Name <email@example.com>"    # Optional
+  created: "2024-01-01"                # Optional
+  updated: "2024-01-01"                # Optional
 
-targets: ["copilot", "cursor", "continue"]
+targets: ["copilot", "cursor", "continue"]  # Optional
 
 context:
   project_type: "web_application"
@@ -105,12 +105,12 @@ Project metadata and authorship information.
 **Fields:**
 - `title` (required): Human-readable title
 - `description` (required): Brief description
-- `version` (required): Semantic version
-- `author` (required): Author name and email
+- `version` (optional): Semantic version
+- `author` (optional): Author name and email
 - `created` (optional): Creation date (ISO 8601)
 - `updated` (optional): Last update date (ISO 8601)
 
-#### targets (required)
+#### targets (optional)
 List of target editors for prompt generation.
 
 **Supported values:**
@@ -220,6 +220,44 @@ promptrek generate --all --input my-project.promptrek.yaml
 
 # Dry run to see what would be generated
 promptrek generate --all --input my-project.promptrek.yaml --dry-run
+```
+
+### `promptrek sync`
+
+Sync editor-specific files back to PrompTrek configuration for bidirectional workflow.
+
+```bash
+promptrek sync [OPTIONS]
+```
+
+**Options:**
+- `--source-dir DIRECTORY`: Directory containing editor files to sync from
+- `--editor TEXT`: Editor type to sync from (continue, copilot) (required)
+- `--output PATH`: Output PrompTrek file (defaults to project.promptrek.yaml)
+- `--dry-run`: Show what would be updated without making changes
+- `--force`: Overwrite existing files without confirmation
+
+**Examples:**
+```bash
+# Sync from Copilot files to PrompTrek configuration
+promptrek sync --source-dir . --editor copilot --output project.promptrek.yaml
+
+# Preview changes without making them
+promptrek sync --source-dir . --editor copilot --dry-run
+
+# Force overwrite existing configuration
+promptrek sync --source-dir . --editor copilot --force
+```
+
+**Advanced Features:**
+```bash
+# Generate with headless instructions (Copilot only)
+promptrek generate --editor copilot --headless --input my-project.promptrek.yaml
+
+# Round-trip workflow: PrompTrek → Copilot → PrompTrek
+promptrek generate --editor copilot --input project.promptrek.yaml
+# ... AI editor modifies files ...
+promptrek sync --editor copilot --source-dir . --force
 ```
 
 ### `promptrek list-editors`

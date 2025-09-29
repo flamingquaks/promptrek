@@ -114,10 +114,13 @@ class UPFValidator:
         """Validate target editors."""
         targets = prompt.targets
 
+        # Skip validation if targets is None (optional)
+        if targets is None:
+            return
+
         if not targets:
             result.add_error("At least one target editor must be specified")
             return
-
         # Check for unknown editors
         unknown_editors = set(targets) - self.KNOWN_EDITORS
         if unknown_editors:
@@ -142,12 +145,12 @@ class UPFValidator:
         if not metadata.description.strip():
             result.add_error("Metadata description cannot be empty")
 
-        if not metadata.author.strip():
+        if metadata.author is not None and not metadata.author.strip():
             result.add_error("Metadata author cannot be empty")
 
         # Check version format
         version = metadata.version
-        if not version or not self._is_valid_semver(version):
+        if version is not None and (not version or not self._is_valid_semver(version)):
             result.add_warning(
                 f"Metadata version '{version}' is not a valid semantic " f"version"
             )

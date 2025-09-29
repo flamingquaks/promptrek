@@ -425,22 +425,19 @@ class TestCoverageBoost:
         result1 = runner.invoke(cli, ["validate", str(empty_file)])
         assert result1.exit_code != 0
 
-        # File with only metadata
-        minimal_upf = {
+        # File with invalid metadata (missing title and description)
+        invalid_upf = {
             "schema_version": "1.0.0",
             "metadata": {
-                "title": "Minimal",
-                "description": "Minimal file",
-                "version": "1.0.0",
-                "author": "test",
+                # Missing required title and description fields
             },
         }
-        minimal_file = temp_dir / "minimal.promptrek.yaml"
-        with open(minimal_file, "w") as f:
-            yaml.dump(minimal_upf, f)
+        invalid_file = temp_dir / "invalid.promptrek.yaml"
+        with open(invalid_file, "w") as f:
+            yaml.dump(invalid_upf, f)
 
-        result2 = runner.invoke(cli, ["validate", str(minimal_file)])
-        assert result2.exit_code != 0  # Missing required fields
+        result2 = runner.invoke(cli, ["validate", str(invalid_file)])
+        assert result2.exit_code != 0  # Missing required metadata fields
 
         # File with complex nested structures
         nested_upf = {

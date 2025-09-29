@@ -5,6 +5,7 @@ Handles reading editor-specific markdown files and updating/creating
 PrompTrek configuration from them.
 """
 
+from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
@@ -46,7 +47,7 @@ def sync_command(
         raise PrompTrekError(f"Unsupported editor: {editor}")
 
     # Check if adapter supports reverse parsing
-    if not hasattr(adapter, "parse_files"):
+    if not adapter.supports_bidirectional_sync():
         raise PrompTrekError(f"Editor '{editor}' does not support syncing from files")
 
     # Parse files from the source directory
@@ -84,11 +85,141 @@ def sync_command(
         click.echo(f"✅ Synced {editor} configuration to: {output_file}")
 
 
+def _merge_metadata(existing_data: dict, parsed: UniversalPrompt) -> dict:
+    """
+    Merge metadata intelligently, preserving user-defined data.
+
+    Args:
+        existing_data: Existing configuration data
+        parsed: Newly parsed data from editor files
+
+    Returns:
+        Updated metadata dictionary
+    """
+    if not parsed.metadata:
+        return existing_data
+
+    metadata = existing_data.get("metadata", {})
+
+    # Prefer existing user-defined metadata over auto-generated
+    # Only update if existing is empty or if parsed is from a real source
+    if (
+        parsed.metadata.title
+        and not metadata.get("title")
+        and parsed.metadata.author != "PrompTrek Sync"
+    ):
+        metadata["title"] = parsed.metadata.title
+
+    if (
+        parsed.metadata.description
+        and not metadata.get("description")
+        and parsed.metadata.author != "PrompTrek Sync"
+    ):
+        metadata["description"] = parsed.metadata.description
+
+    # Update timestamp from parsed data or current time
+    if parsed.metadata.updated:
+        metadata["updated"] = parsed.metadata.updated
+    else:
+        metadata["updated"] = datetime.now().isoformat()[:10]  # YYYY-MM-DD
+
+    existing_data["metadata"] = metadata
+    return existing_data
+
+
+def _merge_instructions(existing_data: dict, parsed: UniversalPrompt) -> dict:
+    """
+    Merge instructions intelligently, avoiding duplicates.
+
+    Args:
+        existing_data: Existing configuration data
+        parsed: Newly parsed data from editor files
+
+    Returns:
+        Updated configuration with merged instructions
+    """
+    if not parsed.instructions:
+        return existing_data
+
+    if "instructions" not in existing_data:
+        existing_data["instructions"] = {}
+
+    parsed_instructions = parsed.instructions.model_dump(exclude_none=True)
+    existing_instructions = existing_data.get("instructions", {})
+
+    for category, new_instructions in parsed_instructions.items():
+        if not new_instructions:
+            continue
+
+        if category not in existing_instructions:
+            # New category - add all instructions
+            existing_instructions[category] = list(new_instructions)
+        else:
+            # Merge with existing, preserving order and avoiding duplicates
+            existing_list = existing_instructions[category] or []
+            existing_set = set(existing_list)
+
+            # Add new instructions that don't exist
+            for instruction in new_instructions:
+                if instruction not in existing_set:
+                    existing_list.append(instruction)
+                    existing_set.add(instruction)
+
+            existing_instructions[category] = existing_list
+
+    existing_data["instructions"] = existing_instructions
+    return existing_data
+
+
+def _merge_context(existing_data: dict, parsed: UniversalPrompt) -> dict:
+    """
+    Merge context information intelligently.
+
+    Args:
+        existing_data: Existing configuration data
+        parsed: Newly parsed data from editor files
+
+    Returns:
+        Updated configuration with merged context
+    """
+    if not parsed.context:
+        return existing_data
+
+    existing_context = existing_data.get("context", {})
+    parsed_context = parsed.context.model_dump(exclude_none=True)
+
+    # Merge technologies additively
+    if "technologies" in parsed_context:
+        existing_techs = set(existing_context.get("technologies", []))
+        new_techs = set(parsed_context["technologies"])
+        existing_context["technologies"] = sorted(existing_techs | new_techs)
+
+    # Update project type if not set or if parsed is more specific
+    if parsed_context.get("project_type") and (
+        not existing_context.get("project_type")
+        or existing_context.get("project_type") == "application"
+    ):
+        existing_context["project_type"] = parsed_context["project_type"]
+
+    # Update description if parsed has better info
+    if parsed_context.get("description") and not existing_context.get("description"):
+        existing_context["description"] = parsed_context["description"]
+
+    existing_data["context"] = existing_context
+    return existing_data
+
+
 def _merge_prompts(
     existing: UniversalPrompt, parsed: UniversalPrompt, editor: str
 ) -> UniversalPrompt:
     """
-    Merge parsed prompt data with existing PrompTrek configuration.
+    Intelligently merge parsed prompt data with existing PrompTrek configuration.
+
+    Merge Strategy:
+    1. Preserve user-defined metadata (title, description) unless empty
+    2. Merge instructions additively, avoiding duplicates
+    3. Update context info with parsed data
+    4. Mark sync timestamp and editor
 
     Args:
         existing: Existing PrompTrek configuration
@@ -99,38 +230,20 @@ def _merge_prompts(
         Merged UniversalPrompt
     """
     # Start with existing configuration
-    merged_data = existing.model_dump()
+    merged_data = existing.model_dump(exclude_none=True)
 
-    # Update instructions with parsed data
-    if parsed.instructions:
-        if "instructions" not in merged_data:
-            merged_data["instructions"] = {}
+    # Use helper functions to merge each section
+    merged_data = _merge_metadata(merged_data, parsed)
+    merged_data = _merge_instructions(merged_data, parsed)
+    merged_data = _merge_context(merged_data, parsed)
 
-        parsed_instructions = parsed.instructions.model_dump(exclude_none=True)
-        for category, instructions in parsed_instructions.items():
-            if instructions:  # Only merge non-empty instruction lists
-                if category not in merged_data["instructions"]:
-                    merged_data["instructions"][category] = []
-
-                # Merge instructions, avoiding duplicates
-                existing_list = merged_data["instructions"][category]
-                if existing_list is None:
-                    existing_list = []
-                    merged_data["instructions"][category] = existing_list
-
-                existing_set = set(existing_list)
-                for instruction in instructions:
-                    if instruction not in existing_set:
-                        merged_data["instructions"][category].append(instruction)
-
-    # Update metadata updated timestamp
-    merged_data["metadata"]["updated"] = parsed.metadata.updated
-
-    # Ensure the target editor is included
-    if "targets" not in merged_data:
-        merged_data["targets"] = []
-    if editor not in merged_data["targets"]:
-        merged_data["targets"].append(editor)
+    # Ensure the target editor is included in targets
+    targets = merged_data.get("targets", [])
+    if not targets:
+        targets = [editor]
+    elif editor not in targets:
+        targets.append(editor)
+    merged_data["targets"] = targets
 
     return UniversalPrompt.model_validate(merged_data)
 

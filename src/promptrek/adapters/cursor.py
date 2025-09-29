@@ -32,6 +32,7 @@ class CursorAdapter(EditorAdapter):
         dry_run: bool = False,
         verbose: bool = False,
         variables: Optional[Dict[str, Any]] = None,
+        headless: bool = False,
     ) -> List[Path]:
         """Generate Cursor configuration files."""
 
@@ -246,6 +247,7 @@ class CursorAdapter(EditorAdapter):
         dry_run: bool = False,
         verbose: bool = False,
         variables: Optional[Dict[str, Any]] = None,
+        headless: bool = False,
     ) -> List[Path]:
         """Generate merged Cursor rules from multiple prompt files using modern .mdc format."""
         created_files = []
@@ -657,6 +659,7 @@ class CursorAdapter(EditorAdapter):
         self,
         prompt_files: List[tuple[UniversalPrompt, Path]],
         variables: Optional[Dict[str, Any]] = None,
+        headless: bool = False,
     ) -> str:
         """Build merged Cursor rules content from multiple prompt files."""
         lines = []
@@ -714,6 +717,7 @@ class CursorAdapter(EditorAdapter):
         self,
         prompt_files: List[tuple[UniversalPrompt, Path]],
         variables: Optional[Dict[str, Any]] = None,
+        headless: bool = False,
     ) -> str:
         """Build merged index.mdc content for main project overview."""
         lines = []

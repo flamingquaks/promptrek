@@ -4,7 +4,7 @@ Base adapter class and interface definitions for editor adapters.
 
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from ..core.exceptions import ValidationError
 from ..core.models import UniversalPrompt
@@ -37,6 +37,7 @@ class EditorAdapter(ABC):
         dry_run: bool = False,
         verbose: bool = False,
         variables: Optional[Dict[str, Any]] = None,
+        headless: bool = False,
     ) -> List[Path]:
         """
         Generate editor-specific files from a universal prompt.
@@ -47,6 +48,7 @@ class EditorAdapter(ABC):
             dry_run: If True, don't create files, just show what would be created
             verbose: Enable verbose output
             variables: Additional variables for substitution
+            headless: Generate with headless agent instructions
 
         Returns:
             List of file paths that were created (or would be created in dry run)
@@ -77,6 +79,32 @@ class EditorAdapter(ABC):
     def supports_hooks(self) -> bool:
         """Return True if this adapter supports hooks system."""
         return False
+
+    def supports_bidirectional_sync(self) -> bool:
+        """Return True if this adapter supports parsing files back to UniversalPrompt."""
+        try:
+            # Check if parse_files exists and is callable
+            parse_method = getattr(self, "parse_files", None)
+            return parse_method is not None and callable(parse_method)
+        except AttributeError:
+            return False
+
+    def parse_files(self, source_dir: Path) -> "UniversalPrompt":
+        """
+        Parse editor-specific files back into a UniversalPrompt.
+
+        Args:
+            source_dir: Directory containing editor-specific files
+
+        Returns:
+            UniversalPrompt object parsed from editor files
+
+        Raises:
+            NotImplementedError: If adapter doesn't support reverse parsing
+        """
+        raise NotImplementedError(
+            f"{self.name} adapter does not support bidirectional sync"
+        )
 
     def get_required_variables(self, prompt: UniversalPrompt) -> List[str]:
         """
@@ -131,3 +159,69 @@ class EditorAdapter(ABC):
         eval_variables["EDITOR"] = self.name
 
         return self._conditional_processor.process_conditions(prompt, eval_variables)
+
+    def generate_multiple(
+        self,
+        prompt_files: List[Tuple[UniversalPrompt, Path]],
+        output_dir: Path,
+        dry_run: bool = False,
+        verbose: bool = False,
+        variables: Optional[Dict[str, Any]] = None,
+        headless: bool = False,
+    ) -> List[Path]:
+        """
+        Generate separate files for each prompt (optional method).
+
+        This method is used by adapters that support generating separate files
+        for each input prompt file.
+
+        Args:
+            prompt_files: List of (UniversalPrompt, Path) tuples
+            output_dir: Directory to generate files in
+            dry_run: If True, don't create files, just show what would be created
+            verbose: Enable verbose output
+            variables: Additional variables for substitution
+            headless: Generate with headless agent instructions
+
+        Returns:
+            List of paths to generated files (empty if not supported)
+
+        Raises:
+            NotImplementedError: If adapter doesn't support multiple file generation
+        """
+        raise NotImplementedError(
+            f"{self.name} adapter does not support multiple file generation"
+        )
+
+    def generate_merged(
+        self,
+        prompt_files: List[Tuple[UniversalPrompt, Path]],
+        output_dir: Path,
+        dry_run: bool = False,
+        verbose: bool = False,
+        variables: Optional[Dict[str, Any]] = None,
+        headless: bool = False,
+    ) -> List[Path]:
+        """
+        Generate merged files from multiple prompts (optional method).
+
+        This method is used by adapters that support merging multiple prompt
+        files into a single configuration.
+
+        Args:
+            prompt_files: List of (UniversalPrompt, Path) tuples
+            output_dir: Directory to generate files in
+            dry_run: If True, don't create files, just show what would be created
+            verbose: Enable verbose output
+            variables: Additional variables for substitution
+            headless: Generate with headless agent instructions
+
+        Returns:
+            List of paths to generated files (empty if not supported)
+
+        Raises:
+            NotImplementedError: If adapter doesn't support merged file generation
+        """
+        raise NotImplementedError(
+            f"{self.name} adapter does not support merged file generation"
+        )

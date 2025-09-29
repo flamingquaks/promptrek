@@ -2,13 +2,20 @@
 GitHub Copilot adapter implementation.
 """
 
+import re
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 import click
 
 from ..core.exceptions import ValidationError
-from ..core.models import UniversalPrompt
+from ..core.models import (
+    Instructions,
+    ProjectContext,
+    PromptMetadata,
+    UniversalPrompt,
+)
 from .base import EditorAdapter
 
 
@@ -23,9 +30,6 @@ class CopilotAdapter(EditorAdapter):
         ".github/copilot-instructions.md",
         ".github/instructions/*.instructions.md",
         ".github/prompts/*.prompt.md",
-        "AGENTS.md",
-        "CLAUDE.md",
-        "GEMINI.md",
     ]
 
     def __init__(self):
@@ -42,6 +46,7 @@ class CopilotAdapter(EditorAdapter):
         dry_run: bool = False,
         verbose: bool = False,
         variables: Optional[Dict[str, Any]] = None,
+        headless: bool = False,
     ) -> List[Path]:
         """Generate GitHub Copilot configuration files."""
 
@@ -55,7 +60,12 @@ class CopilotAdapter(EditorAdapter):
 
         # Generate repository-wide instructions
         copilot_file = self._generate_copilot_instructions(
-            processed_prompt, conditional_content, output_dir, dry_run, verbose
+            processed_prompt,
+            conditional_content,
+            output_dir,
+            dry_run,
+            verbose,
+            headless,
         )
         created_files.extend(copilot_file)
 
@@ -64,12 +74,6 @@ class CopilotAdapter(EditorAdapter):
             processed_prompt, output_dir, dry_run, verbose
         )
         created_files.extend(path_files)
-
-        # Generate agent instructions
-        agent_files = self._generate_agent_instructions(
-            processed_prompt, output_dir, dry_run, verbose
-        )
-        created_files.extend(agent_files)
 
         # Generate experimental prompt files
         prompt_files = self._generate_prompt_files(
@@ -86,11 +90,16 @@ class CopilotAdapter(EditorAdapter):
         output_dir: Path,
         dry_run: bool,
         verbose: bool,
+        headless: bool = False,
     ) -> List[Path]:
         """Generate repository-wide .github/copilot-instructions.md."""
         github_dir = output_dir / ".github"
         output_file = github_dir / "copilot-instructions.md"
-        content = self._build_repository_content(prompt, conditional_content)
+
+        if headless:
+            content = self._build_headless_content(prompt, conditional_content)
+        else:
+            content = self._build_repository_content(prompt, conditional_content)
 
         if dry_run:
             click.echo(f"  📁 Would create: {output_file}")
@@ -192,56 +201,6 @@ class CopilotAdapter(EditorAdapter):
 
         return created_files
 
-    def _generate_agent_instructions(
-        self,
-        prompt: UniversalPrompt,
-        output_dir: Path,
-        dry_run: bool,
-        verbose: bool,
-    ) -> List[Path]:
-        """Generate agent instruction files (AGENTS.md, CLAUDE.md, GEMINI.md)."""
-        created_files = []
-
-        # Generate general AGENTS.md
-        agents_file = output_dir / "AGENTS.md"
-        agents_content = self._build_agents_content(prompt)
-
-        if dry_run:
-            click.echo(f"  📁 Would create: {agents_file}")
-            if verbose:
-                preview = (
-                    agents_content[:200] + "..."
-                    if len(agents_content) > 200
-                    else agents_content
-                )
-                click.echo(f"    {preview}")
-        else:
-            with open(agents_file, "w", encoding="utf-8") as f:
-                f.write(agents_content)
-            click.echo(f"✅ Generated: {agents_file}")
-            created_files.append(agents_file)
-
-        # Generate CLAUDE.md for Claude-specific instructions
-        claude_file = output_dir / "CLAUDE.md"
-        claude_content = self._build_claude_content(prompt)
-
-        if dry_run:
-            click.echo(f"  📁 Would create: {claude_file}")
-            if verbose:
-                preview = (
-                    claude_content[:200] + "..."
-                    if len(claude_content) > 200
-                    else claude_content
-                )
-                click.echo(f"    {preview}")
-        else:
-            with open(claude_file, "w", encoding="utf-8") as f:
-                f.write(claude_content)
-            click.echo(f"✅ Generated: {claude_file}")
-            created_files.append(claude_file)
-
-        return created_files
-
     def _generate_prompt_files(
         self,
         prompt: UniversalPrompt,
@@ -282,11 +241,15 @@ class CopilotAdapter(EditorAdapter):
         dry_run: bool = False,
         verbose: bool = False,
         variables: Optional[Dict[str, Any]] = None,
+        headless: bool = False,
     ) -> List[Path]:
         """Generate merged GitHub Copilot instructions from multiple prompt files."""
 
         # Build merged content
-        content = self._build_merged_content(prompt_files, variables)
+        if headless:
+            content = self._build_merged_headless_content(prompt_files, variables)
+        else:
+            content = self._build_merged_content(prompt_files, variables)
 
         # Determine output path
         github_dir = output_dir / ".github"
@@ -366,6 +329,395 @@ class CopilotAdapter(EditorAdapter):
 
         return "\n".join(lines)
 
+    def _build_merged_headless_content(
+        self,
+        prompt_files: List[Tuple[UniversalPrompt, Path]],
+        variables: Optional[Dict[str, Any]] = None,
+    ) -> str:
+        """Build merged headless content with embedded generation instructions."""
+        lines = []
+
+        # Headless instructions block
+        lines.append("<!-- HEADLESS INSTRUCTIONS START -->")
+        lines.append("<!-- ")
+        lines.append("COPILOT HEADLESS AGENT INSTRUCTIONS:")
+        lines.append(
+            "Before starting any coding tasks, run the following command to generate full instructions:"
+        )
+        lines.append("`promptrek generate --editor copilot`")
+        lines.append("")
+        lines.append(
+            "This will regenerate the complete GitHub Copilot instructions from the source .promptrek.yaml files."
+        )
+        lines.append(
+            "The generated content will replace everything between HEADLESS INSTRUCTIONS END and the end of this file."
+        )
+        lines.append("-->")
+        lines.append("<!-- HEADLESS INSTRUCTIONS END -->")
+        lines.append("")
+
+        # Full merged content
+        full_content = self._build_merged_content(prompt_files, variables)
+        lines.append(full_content)
+
+        return "\n".join(lines)
+
+    def parse_files(self, source_dir: Path) -> UniversalPrompt:
+        """
+        Parse GitHub Copilot files back into a UniversalPrompt.
+
+        Args:
+            source_dir: Directory containing Copilot configuration files
+
+        Returns:
+            UniversalPrompt object parsed from Copilot files
+        """
+        # Initialize parsed data with defaults
+        metadata = PromptMetadata(
+            title="GitHub Copilot Configuration",
+            description="Configuration parsed from GitHub Copilot files",
+        )
+
+        instructions = Instructions()
+        context = None
+        technologies = []
+
+        # Parse main copilot-instructions.md
+        main_file = source_dir / ".github" / "copilot-instructions.md"
+        if main_file.exists():
+            parsed_main = self._parse_copilot_instructions_file(main_file)
+            if "metadata" in parsed_main:
+                metadata = parsed_main["metadata"]
+            if "instructions" in parsed_main:
+                instructions = parsed_main["instructions"]
+            if "context" in parsed_main:
+                context = parsed_main["context"]
+
+        # Parse path-specific instruction files
+        instructions_dir = source_dir / ".github" / "instructions"
+        if instructions_dir.exists():
+            parsed_instructions = self._parse_instructions_directory(instructions_dir)
+            # Merge with existing instructions
+            instructions = self._merge_instructions(instructions, parsed_instructions)
+
+        # Parse prompt files
+        prompts_dir = source_dir / ".github" / "prompts"
+        if prompts_dir.exists():
+            # Prompt files mainly contain examples and patterns
+            parsed_prompts = self._parse_prompts_directory(prompts_dir)
+            instructions = self._merge_instructions(instructions, parsed_prompts)
+
+        # Create context from detected technologies
+        if technologies:
+            if context is None:
+                context = ProjectContext()
+            if not context.technologies:
+                context.technologies = technologies
+
+        return UniversalPrompt(
+            schema_version="1.0.0",
+            metadata=metadata,
+            targets=["copilot"],
+            context=context,
+            instructions=instructions,
+        )
+
+    def _parse_copilot_instructions_file(self, file_path: Path) -> Dict[str, Any]:
+        """Parse the main copilot-instructions.md file."""
+        result: Dict[str, Any] = {}
+
+        with open(file_path, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        # Skip headless instructions block if present
+        content = self._strip_headless_instructions(content)
+
+        # Parse metadata from header
+        lines = content.split("\n")
+        title = None
+        description = None
+
+        # Extract title (first # header)
+        for line in lines:
+            line = line.strip()
+            if line.startswith("# ") and not title:
+                title = line[2:].strip()
+                break
+
+        # Find description (text after title, before first ##)
+        in_description = False
+        desc_lines = []
+        for line in lines:
+            line = line.strip()
+            if line.startswith("# ") and title:
+                in_description = True
+                continue
+            elif in_description:
+                if line.startswith("##"):
+                    break
+                elif line:
+                    desc_lines.append(line)
+
+        if desc_lines:
+            description = " ".join(desc_lines)
+
+        # Update metadata
+        if title or description:
+            result["metadata"] = PromptMetadata(
+                title=title or "GitHub Copilot Configuration",
+                description=description
+                or "Configuration parsed from GitHub Copilot files",
+            )
+
+        # Parse instructions by section
+        instructions_dict = {}
+        current_section = None
+        current_items = []
+
+        for line in lines:
+            line = line.strip()
+
+            # Section headers
+            if line.startswith("## "):
+                # Save previous section
+                if current_section and current_items:
+                    instructions_dict[current_section] = current_items
+
+                # Start new section
+                section_name = line[3:].strip()
+                current_section = self._normalize_section_name(section_name)
+                current_items = []
+
+            # Bullet points
+            elif line.startswith("- ") and current_section is not None:
+                instruction = line[2:].strip()
+                if instruction and instruction not in current_items:
+                    current_items.append(instruction)
+
+        # Save final section
+        if current_section and current_items:
+            instructions_dict[current_section] = current_items
+
+        # Create Instructions object
+        if instructions_dict:
+            # Valid instruction categories from the Instructions model
+            valid_categories = {
+                "general",
+                "code_style",
+                "architecture",
+                "testing",
+                "security",
+                "performance",
+            }
+            filtered_dict = {
+                k: v
+                for k, v in instructions_dict.items()
+                if k in valid_categories and v
+            }
+            result["instructions"] = Instructions(**filtered_dict)
+
+        # Extract project context
+        context_info = self._extract_project_context(content)
+        if context_info:
+            result["context"] = context_info
+
+        return result
+
+    def _parse_instructions_directory(self, instructions_dir: Path) -> Instructions:
+        """Parse .github/instructions/*.instructions.md files."""
+        instructions_dict = {}
+
+        for file_path in instructions_dir.glob("*.instructions.md"):
+            category = self._filename_to_category(file_path.stem)
+            parsed_instructions = self._parse_instruction_file(file_path)
+            if parsed_instructions:
+                instructions_dict[category] = parsed_instructions
+
+        return Instructions(**instructions_dict)
+
+    def _parse_prompts_directory(self, prompts_dir: Path) -> Instructions:
+        """Parse .github/prompts/*.prompt.md files."""
+        instructions_dict = {}
+
+        for file_path in prompts_dir.glob("*.prompt.md"):
+            # Prompts usually contain general guidelines
+            parsed_prompts = self._parse_prompt_file(file_path)
+            if parsed_prompts:
+                # Most prompts go to general category
+                if "general" not in instructions_dict:
+                    instructions_dict["general"] = []
+                instructions_dict["general"].extend(parsed_prompts)
+
+        return Instructions(**instructions_dict)
+
+    def _parse_instruction_file(self, file_path: Path) -> List[str]:
+        """Parse individual .instructions.md file."""
+        with open(file_path, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        # Skip YAML frontmatter
+        if content.startswith("---"):
+            parts = content.split("---", 2)
+            if len(parts) >= 3:
+                content = parts[2].strip()
+
+        instructions = []
+        for line in content.split("\n"):
+            line = line.strip()
+            if line.startswith("- "):
+                instruction = line[2:].strip()
+                if instruction:
+                    instructions.append(instruction)
+
+        return instructions
+
+    def _parse_prompt_file(self, file_path: Path) -> List[str]:
+        """Parse individual .prompt.md file."""
+        with open(file_path, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        instructions = []
+        in_guidelines = False
+
+        for line in content.split("\n"):
+            line = line.strip()
+
+            # Look for guideline sections
+            if "guideline" in line.lower() or "instruction" in line.lower():
+                in_guidelines = True
+                continue
+            elif line.startswith("#"):
+                in_guidelines = False
+
+            if in_guidelines and line.startswith("- "):
+                instruction = line[2:].strip()
+                if instruction:
+                    instructions.append(instruction)
+
+        return instructions
+
+    def _strip_headless_instructions(self, content: str) -> str:
+        """Remove headless instruction block from content."""
+        start_marker = "<!-- HEADLESS INSTRUCTIONS START -->"
+        end_marker = "<!-- HEADLESS INSTRUCTIONS END -->"
+
+        start_pos = content.find(start_marker)
+        if start_pos == -1:
+            return content
+
+        end_pos = content.find(end_marker)
+        if end_pos == -1:
+            return content
+
+        # Remove the entire headless block
+        return content[:start_pos] + content[end_pos + len(end_marker) :].lstrip()
+
+    def _normalize_section_name(self, section_name: str) -> Optional[str]:
+        """Normalize section names to instruction categories."""
+        section_lower = section_name.lower()
+
+        # Skip non-instruction sections
+        skip_sections = {
+            "project information",
+            "project info",
+            "examples",
+            "about",
+            "overview",
+        }
+        if section_lower in skip_sections:
+            return None  # Skip this section
+
+        mapping = {
+            "general instructions": "general",
+            "general guidelines": "general",
+            "general": "general",
+            "code style guidelines": "code_style",
+            "code style": "code_style",
+            "testing guidelines": "testing",
+            "testing": "testing",
+            "architecture": "architecture",
+            "architecture guidelines": "architecture",
+            "security": "security",
+            "security guidelines": "security",
+            "performance": "performance",
+            "performance guidelines": "performance",
+        }
+        return mapping.get(section_lower, "general")
+
+    def _filename_to_category(self, filename: str) -> str:
+        """Convert filename to instruction category."""
+        # Remove .instructions suffix if present
+        if filename.endswith(".instructions"):
+            filename = filename[:-12]
+
+        mapping = {
+            "code-style": "code_style",
+            "testing": "testing",
+            "architecture": "architecture",
+            "security": "security",
+            "performance": "performance",
+        }
+        return mapping.get(filename, "general")
+
+    def _extract_project_context(self, content: str) -> Optional[ProjectContext]:
+        """Extract project context information from content."""
+        context_data = {}
+
+        # Look for technology mentions
+        tech_patterns = [
+            r"Technologies?:\s*([^\n]+)",
+            r"Tech stack:\s*([^\n]+)",
+            r"Using\s+([^,\n]+(?:,\s*[^,\n]+)*)",
+        ]
+
+        technologies = []
+        for pattern in tech_patterns:
+            matches = re.findall(pattern, content, re.IGNORECASE)
+            for match in matches:
+                # Split on commas and clean up
+                techs = [t.strip() for t in match.split(",")]
+                technologies.extend([t for t in techs if t and len(t) < 30])
+
+        if technologies:
+            context_data["technologies"] = list(set(technologies))
+
+        # Look for project type
+        type_patterns = [
+            r"Type:\s*([^\n]+)",
+            r"Project\s+type:\s*([^\n]+)",
+        ]
+
+        for pattern in type_patterns:
+            match = re.search(pattern, content, re.IGNORECASE)
+            if match:
+                context_data["project_type"] = match.group(1).strip()
+                break
+
+        return ProjectContext(**context_data) if context_data else None
+
+    def _merge_instructions(
+        self, base: Instructions, additional: Instructions
+    ) -> Instructions:
+        """Merge two Instructions objects without duplication."""
+        base_dict = base.model_dump(exclude_none=True)
+        additional_dict = additional.model_dump(exclude_none=True)
+
+        # Merge each category
+        for category, new_instructions in additional_dict.items():
+            if isinstance(new_instructions, list) and new_instructions:
+                if category not in base_dict:
+                    base_dict[category] = []
+                elif not isinstance(base_dict[category], list):
+                    base_dict[category] = []
+
+                # Add new instructions, avoiding duplicates
+                existing_set = set(base_dict[category])
+                for instruction in new_instructions:
+                    if instruction not in existing_set:
+                        base_dict[category].append(instruction)
+
+        return Instructions(**base_dict)
+
     def validate(self, prompt: UniversalPrompt) -> List[ValidationError]:
         """Validate prompt for Copilot."""
         errors = []
@@ -434,13 +786,13 @@ class CopilotAdapter(EditorAdapter):
                 lines.append(f"- {instruction}")
             lines.append("")
 
-            if prompt.instructions.code_style:
+            if prompt.instructions and prompt.instructions.code_style:
                 lines.append("## Code Style Guidelines")
                 for guideline in prompt.instructions.code_style:
                     lines.append(f"- {guideline}")
                 lines.append("")
 
-            if prompt.instructions.testing:
+            if prompt.instructions and prompt.instructions.testing:
                 lines.append("## Testing Guidelines")
                 for guideline in prompt.instructions.testing:
                     lines.append(f"- {guideline}")
@@ -453,6 +805,39 @@ class CopilotAdapter(EditorAdapter):
                 lines.append(f"### {name.title()}")
                 lines.append(example)
                 lines.append("")
+
+        return "\n".join(lines)
+
+    def _build_headless_content(
+        self,
+        prompt: UniversalPrompt,
+        conditional_content: Optional[Dict[str, Any]] = None,
+    ) -> str:
+        """Build headless agent content with embedded generation instructions."""
+        lines = []
+
+        # Headless instructions block
+        lines.append("<!-- HEADLESS INSTRUCTIONS START -->")
+        lines.append("<!-- ")
+        lines.append("COPILOT HEADLESS AGENT INSTRUCTIONS:")
+        lines.append(
+            "Before starting any coding tasks, run the following command to generate full instructions:"
+        )
+        lines.append("`promptrek generate --editor copilot`")
+        lines.append("")
+        lines.append(
+            "This will regenerate the complete GitHub Copilot instructions from the source .promptrek.yaml files."
+        )
+        lines.append(
+            "The generated content will replace everything between HEADLESS INSTRUCTIONS END and the end of this file."
+        )
+        lines.append("-->")
+        lines.append("<!-- HEADLESS INSTRUCTIONS END -->")
+        lines.append("")
+
+        # Full generated content
+        full_content = self._build_repository_content(prompt, conditional_content)
+        lines.append(full_content)
 
         return "\n".join(lines)
 
@@ -549,112 +934,6 @@ class CopilotAdapter(EditorAdapter):
             lines.append(f"- Follow {tech} best practices and conventions")
             lines.append(f"- Maintain consistency with existing {tech} code")
             lines.append(f"- Use {tech} idioms and patterns appropriately")
-
-        return "\n".join(lines)
-
-    def _build_agents_content(self, prompt: UniversalPrompt) -> str:
-        """Build general agent instructions content."""
-        lines = []
-
-        lines.append(f"# {prompt.metadata.title} - Agent Instructions")
-        lines.append("")
-        lines.append(prompt.metadata.description)
-        lines.append("")
-
-        # Project Context
-        if prompt.context:
-            lines.append("## Project Context")
-            if prompt.context.project_type:
-                lines.append(f"**Project Type:** {prompt.context.project_type}")
-            if prompt.context.technologies:
-                lines.append(
-                    f"**Technologies:** {', '.join(prompt.context.technologies)}"
-                )
-            if prompt.context.description:
-                lines.append("")
-                lines.append("**Project Description:**")
-                lines.append(prompt.context.description)
-            lines.append("")
-
-        # Instructions for AI agents
-        lines.append("## AI Agent Guidelines")
-        lines.append("")
-
-        if prompt.instructions:
-            if prompt.instructions.general:
-                lines.append("### General Instructions")
-                for instruction in prompt.instructions.general:
-                    lines.append(f"- {instruction}")
-                lines.append("")
-
-            if prompt.instructions.code_style:
-                lines.append("### Code Style Requirements")
-                for guideline in prompt.instructions.code_style:
-                    lines.append(f"- {guideline}")
-                lines.append("")
-
-            if prompt.instructions.testing:
-                lines.append("### Testing Requirements")
-                for guideline in prompt.instructions.testing:
-                    lines.append(f"- {guideline}")
-                lines.append("")
-
-        # AI-specific guidance
-        lines.append("### AI Assistance Guidelines")
-        lines.append("- Provide clear, well-documented code solutions")
-        lines.append("- Explain complex logic and design decisions")
-        lines.append("- Suggest best practices and improvements")
-        lines.append("- Consider security and performance implications")
-        if prompt.context and prompt.context.technologies:
-            tech_list = ", ".join(prompt.context.technologies)
-            lines.append(f"- Follow {tech_list} conventions and idioms")
-
-        return "\n".join(lines)
-
-    def _build_claude_content(self, prompt: UniversalPrompt) -> str:
-        """Build Claude-specific instruction content."""
-        lines = []
-
-        lines.append(f"# {prompt.metadata.title} - Claude Instructions")
-        lines.append("")
-        lines.append(f"Claude-specific instructions for: {prompt.metadata.description}")
-        lines.append("")
-
-        # Project Context
-        if prompt.context:
-            lines.append("## Project Context")
-            if prompt.context.project_type:
-                lines.append(f"- **Project Type:** {prompt.context.project_type}")
-            if prompt.context.technologies:
-                lines.append(
-                    f"- **Technologies:** {', '.join(prompt.context.technologies)}"
-                )
-            lines.append("")
-
-        # Claude-specific instructions
-        lines.append("## Instructions for Claude")
-        lines.append("")
-
-        if prompt.instructions:
-            if prompt.instructions.general:
-                lines.append("### General Guidelines")
-                for instruction in prompt.instructions.general:
-                    lines.append(f"- {instruction}")
-                lines.append("")
-
-            if prompt.instructions.code_style:
-                lines.append("### Code Style Guidelines")
-                for guideline in prompt.instructions.code_style:
-                    lines.append(f"- {guideline}")
-                lines.append("")
-
-        # Claude-specific guidance
-        lines.append("### Claude-Specific Guidelines")
-        lines.append("- Provide step-by-step reasoning for complex problems")
-        lines.append("- Suggest multiple approaches when appropriate")
-        lines.append("- Include relevant documentation references")
-        lines.append("- Explain trade-offs and considerations")
-        lines.append("- Be thorough in code reviews and suggestions")
 
         return "\n".join(lines)
 

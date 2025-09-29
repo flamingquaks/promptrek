@@ -56,9 +56,11 @@ schema_version: "1.0.0"
 metadata:
   title: "My Project Assistant"
   description: "AI assistant for my project"
-  version: "1.0.0"
-  author: "Your Name <your.email@example.com>"
+  # Optional fields:
+  # version: "1.0.0"
+  # author: "Your Name <your.email@example.com>"
 
+# Optional - defaults to all supported editors if not specified
 targets: ["copilot", "cursor", "continue"]
 
 context:
@@ -117,7 +119,9 @@ PrompTrek generates sophisticated configuration files for each editor:
 ### GitHub Copilot
 - `.github/copilot-instructions.md` - Repository-wide instructions
 - `.github/instructions/*.instructions.md` - Path-specific instructions with YAML frontmatter
-- `AGENTS.md`, `CLAUDE.md`, `GEMINI.md` - Agent-specific instructions
+- `.github/prompts/*.prompt.md` - Reusable prompt templates
+- **Bidirectional sync support**: Changes can be synced back to PrompTrek configuration
+- **Headless agent instructions**: Autonomous regeneration capability for background tasks
 
 ### Cursor (Modernized 2025)
 - `.cursor/rules/index.mdc` - Main project overview (Always rule)
@@ -183,9 +187,16 @@ promptrek validate <file> --strict  # Strict validation
 
 ### Generation
 ```bash
-promptrek generate --editor <editor> --input <file>   # Single editor
-promptrek generate --all --input <file>               # All editors
-promptrek generate --all --input <file> --output <dir> # Custom output
+promptrek generate --editor <editor> --input <file>     # Single editor
+promptrek generate --all --input <file>                 # All editors
+promptrek generate --all --input <file> --output <dir>  # Custom output
+promptrek generate --editor copilot --headless <file>   # Generate with headless instructions
+```
+
+### Synchronization
+```bash
+promptrek sync --editor copilot --source-dir . --output <file>  # Sync editor changes back
+promptrek sync --editor continue --source-dir . --dry-run       # Preview sync changes
 ```
 
 ### Information

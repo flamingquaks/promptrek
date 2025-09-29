@@ -35,6 +35,7 @@ class ContinueAdapter(EditorAdapter):
         dry_run: bool = False,
         verbose: bool = False,
         variables: Optional[Dict[str, Any]] = None,
+        headless: bool = False,
     ) -> List[Path]:
         """Generate Continue configuration files."""
 
