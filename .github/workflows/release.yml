@@ -79,10 +79,11 @@ jobs:
           uv run twine check dist/*
           echo "Package validation successful"
 
-  # Create GitHub release
+  # Create GitHub release - only for main PyPI releases
   github-release:
     needs: [build, test, validate-package]
     runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/') && !contains(github.ref, 'rc') && !contains(github.ref, 'beta') && !contains(github.ref, 'alpha')
     permissions:
       contents: write
 
@@ -124,7 +125,7 @@ jobs:
 
   # Publish to PyPI (using the same artifacts) - only for non-RC releases
   publish-pypi:
-    needs: [build, test, validate-package]
+    needs: [build, test, validate-package, github-release]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/') && !contains(github.ref, 'rc') && !contains(github.ref, 'beta') && !contains(github.ref, 'alpha')
     environment:
@@ -175,33 +176,42 @@ jobs:
 
   # Final success check
   release-success:
-    needs: [github-release, publish-pypi, publish-test-pypi]
+    needs: [build, test, validate-package]
     runs-on: ubuntu-latest
-    if: always()
+    if: always() && startsWith(github.ref, 'refs/tags/')
 
     steps:
       - name: Check Release Status
         run: |
           echo "## Release Summary"
-          echo "GitHub Release: ${{ needs.github-release.result }}"
-          echo "PyPI Publish: ${{ needs.publish-pypi.result }}"
-          echo "Test PyPI Publish: ${{ needs.publish-test-pypi.result }}"
 
           # Check based on what type of release this is
           if [[ "${{ github.ref }}" == *"rc"* ]] || [[ "${{ github.ref }}" == *"beta"* ]] || [[ "${{ github.ref }}" == *"alpha"* ]]; then
-            # For pre-releases, check GitHub release and Test PyPI
-            if [ "${{ needs.github-release.result }}" != "success" ] || \
-               [ "${{ needs.publish-test-pypi.result }}" != "success" ]; then
-              echo "Pre-release failed"
-              exit 1
-            fi
-          else
-            # For regular releases, check GitHub release and PyPI
-            if [ "${{ needs.github-release.result }}" != "success" ] || \
-               [ "${{ needs.publish-pypi.result }}" != "success" ]; then
-              echo "Release failed"
-              exit 1
-            fi
-          fi
+            # For pre-releases, only Test PyPI should run
+            echo "Pre-release to Test PyPI"
+            echo "Build: ${{ needs.build.result }}"
+            echo "Test: ${{ needs.test.result }}"
+            echo "Validate: ${{ needs.validate-package.result }}"
 
-          echo "Release completed successfully! 🎉"
+            if [ "${{ needs.build.result }}" != "success" ] || \
+               [ "${{ needs.test.result }}" != "success" ] || \
+               [ "${{ needs.validate-package.result }}" != "success" ]; then
+              echo "Pre-release preparation failed"
+              exit 1
+            fi
+            echo "Pre-release to Test PyPI ready! 🚀"
+          else
+            # For regular releases, check all components
+            echo "Full release to PyPI"
+            echo "Build: ${{ needs.build.result }}"
+            echo "Test: ${{ needs.test.result }}"
+            echo "Validate: ${{ needs.validate-package.result }}"
+
+            if [ "${{ needs.build.result }}" != "success" ] || \
+               [ "${{ needs.test.result }}" != "success" ] || \
+               [ "${{ needs.validate-package.result }}" != "success" ]; then
+              echo "Release preparation failed"
+              exit 1
+            fi
+            echo "Release to PyPI ready! 🎉"
+          fi
