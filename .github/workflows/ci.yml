@@ -192,8 +192,9 @@ jobs:
             CURRENT=$((CURRENT + 1))
             echo "Validating commit ${CURRENT}/${TOTAL_COMMITS}: ${commit_sha}"
 
+            git reset --hard HEAD
+            git clean -fd
             git checkout ${commit_sha} --quiet
-            rm -rf dist/ build/ *.egg-info/ || true
 
             if ! uv sync --all-groups --quiet; then
               FAILED_COMMITS="${FAILED_COMMITS}\n- ${commit_sha}: Dependency installation failed"
