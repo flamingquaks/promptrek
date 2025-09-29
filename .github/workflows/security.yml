@@ -1,4 +1,6 @@
 name: Reusable Security Workflow
+permissions:
+  contents: read
 
 on:
   workflow_call:
