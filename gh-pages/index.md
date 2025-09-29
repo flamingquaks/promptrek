@@ -49,49 +49,70 @@ title: Home
 
     <div class="editors-grid">
       <div class="editor-card">
-        <div class="editor-icon">🐙</div>
+        <div class="editor-icon">
+          <img src="https://github.githubassets.com/images/modules/site/copilot/copilot.png" alt="GitHub Copilot" width="32" height="32" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+          <span style="display:none;">🐙</span>
+        </div>
         <h4>GitHub Copilot</h4>
         <p>Repository-wide and path-specific instructions</p>
         <span class="status-badge supported">Fully Supported</span>
       </div>
 
       <div class="editor-card">
-        <div class="editor-icon">🎯</div>
+        <div class="editor-icon">
+          <img src="https://cursor.com/brand/icon.svg" alt="Cursor" width="32" height="32" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+          <span style="display:none;">🎯</span>
+        </div>
         <h4>Cursor</h4>
         <p>Modern 2025 rules with Always/Auto Attached types and project overview</p>
         <span class="status-badge supported">Fully Supported</span>
       </div>
 
       <div class="editor-card">
-        <div class="editor-icon">⚡</div>
+        <div class="editor-icon">
+          <img src="https://avatars.githubusercontent.com/u/125663687?s=200&v=4" alt="Continue" width="32" height="32" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+          <span style="display:none;">⚡</span>
+        </div>
         <h4>Continue</h4>
         <p>Complete YAML configuration system</p>
         <span class="status-badge supported">Fully Supported</span>
       </div>
 
       <div class="editor-card">
-        <div class="editor-icon">☁️</div>
+        <div class="editor-icon">
+          <img src="assets/q-logo.svg" alt="Amazon Q" width="32" height="32" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+          <span style="display:none;">☁️</span>
+        </div>
         <h4>Amazon Q</h4>
         <p>Comment-based assistance templates</p>
         <span class="status-badge supported">Fully Supported</span>
       </div>
 
       <div class="editor-card">
-        <div class="editor-icon">🧠</div>
+        <div class="editor-icon">
+          <img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.png" alt="JetBrains AI" width="32" height="32" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+          <span style="display:none;">🧠</span>
+        </div>
         <h4>JetBrains AI</h4>
         <p>IDE-integrated prompts</p>
         <span class="status-badge supported">Fully Supported</span>
       </div>
 
       <div class="editor-card">
-        <div class="editor-icon">🤖</div>
+        <div class="editor-icon">
+          <img src="https://kiro.dev/favicon.ico" alt="Kiro" width="32" height="32" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+          <span style="display:none;">🤖</span>
+        </div>
         <h4>Kiro</h4>
         <p>AI-powered steering, specs, hooks, and prompts</p>
         <span class="status-badge supported">Fully Supported</span>
       </div>
 
       <div class="editor-card">
-        <div class="editor-icon">📝</div>
+        <div class="editor-icon">
+          <img src="assets/cline-logo.svg" alt="Cline" width="32" height="32" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+          <span style="display:none;">📝</span>
+        </div>
         <h4>Cline</h4>
         <p>Markdown-based rules</p>
         <span class="status-badge supported">Fully Supported</span>
@@ -288,7 +309,7 @@ instructions:
   <div class="container">
     <div class="cta-content">
       <h2>Ready to Unify Your AI Coding Experience?</h2>
-      <p>Join thousands of developers who have streamlined their AI editor workflows with PrompTrek.</p>
+      <p>Join developers who have streamlined their AI editor workflows with PrompTrek.</p>
       <div class="cta-buttons">
         <a href="quick-start.html" class="btn-cta primary">Get Started Now</a>
         <a href="{{ site.github_url }}" class="btn-cta secondary" target="_blank">View on GitHub</a>
