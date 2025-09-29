@@ -99,13 +99,40 @@ jobs:
 
       - name: Install conventional-changelog
         run: |
-          npm install -g conventional-changelog-cli conventional-commits-parser
+          npm install -g conventional-changelog-cli@5.0.0
 
       - name: Generate release notes
         run: |
-          # Generate release notes from git history using conventional commits
-          conventional-changelog -p angular -s -r 1 > RELEASE_NOTES.md || \
-            echo "Release notes generated from conventional commits" > RELEASE_NOTES.md
+          # Try conventional-changelog with better configuration
+          if conventional-changelog -p angular -i RELEASE_NOTES.md -s -r 0 --pkg-path . --tag-prefix v; then
+            echo "Successfully generated release notes with conventional-changelog"
+          else
+            echo "conventional-changelog failed, generating basic release notes"
+
+            # Fallback: Generate basic release notes from git log
+            CURRENT_TAG="${{ github.ref_name }}"
+            PREVIOUS_TAG=$(git tag --sort=-version:refname | grep -v "$CURRENT_TAG" | head -n1)
+
+            echo "# Release $CURRENT_TAG" > RELEASE_NOTES.md
+            echo "" >> RELEASE_NOTES.md
+
+            if [ -n "$PREVIOUS_TAG" ]; then
+              echo "## What's Changed" >> RELEASE_NOTES.md
+              echo "" >> RELEASE_NOTES.md
+              git log --pretty=format:"- %s" "$PREVIOUS_TAG..$CURRENT_TAG" >> RELEASE_NOTES.md
+              echo "" >> RELEASE_NOTES.md
+              echo "" >> RELEASE_NOTES.md
+              echo "**Full Changelog**: https://github.com/${{ github.repository }}/compare/$PREVIOUS_TAG...$CURRENT_TAG" >> RELEASE_NOTES.md
+            else
+              echo "## Initial Release" >> RELEASE_NOTES.md
+              echo "" >> RELEASE_NOTES.md
+              echo "This is the initial release of the project." >> RELEASE_NOTES.md
+            fi
+          fi
+
+          # Show what was generated
+          echo "Generated release notes:"
+          cat RELEASE_NOTES.md
 
       - name: Download build artifacts
         uses: actions/download-artifact@v5
