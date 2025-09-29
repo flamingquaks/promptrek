@@ -309,7 +309,7 @@ instructions:
   <div class="container">
     <div class="cta-content">
       <h2>Ready to Unify Your AI Coding Experience?</h2>
-      <p>Join thousands of developers who have streamlined their AI editor workflows with PrompTrek.</p>
+      <p>Join developers who have streamlined their AI editor workflows with PrompTrek.</p>
       <div class="cta-buttons">
         <a href="quick-start.html" class="btn-cta primary">Get Started Now</a>
         <a href="{{ site.github_url }}" class="btn-cta secondary" target="_blank">View on GitHub</a>
