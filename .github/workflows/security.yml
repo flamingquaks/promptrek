@@ -73,11 +73,6 @@ jobs:
           uv run bandit -r src/ ${SEVERITY} -f json -o bandit-report.json || true
           uv run bandit -r src/ ${SEVERITY} || true
 
-      - name: Check for known vulnerabilities with Safety CLI
-        uses: pyupio/safety-action@v1
-        with:
-          api_key: ${{ secrets.SAFETY_API_KEY }}
-
       - name: Run pip-audit for dependency vulnerabilities
         run: |
           echo "Running pip-audit for dependency vulnerabilities..."
