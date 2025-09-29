@@ -127,6 +127,8 @@ jobs:
 
   # Security scan for PRs
   security:
+    permissions:
+      contents: read
     uses: ./.github/workflows/security.yml
     with:
       python-version: "3.11"
