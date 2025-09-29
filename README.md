@@ -78,7 +78,7 @@ All planning documents are available in the [`docs/`](./docs/) directory:
 ## 🎨 Supported Editors
 
 ### ✅ All Implemented
-- **GitHub Copilot** - `.github/copilot-instructions.md`, `.github/instructions/*.instructions.md`, `AGENTS.md` - Path-specific instructions with YAML frontmatter
+- **GitHub Copilot** - `.github/copilot-instructions.md`, `.github/instructions/*.instructions.md`, `.github/prompts/*.prompt.md` - Repository-wide and path-specific instructions
 - **Cursor** - `.cursor/rules/index.mdc`, `.cursor/rules/*.mdc`, `AGENTS.md` - Modern 2025 rules system with Always/Auto Attached rule types and project overview
 - **Continue** - `config.yaml`, `.continue/rules/*.md` - Modern YAML configuration with advanced rules directory
 - **Kiro** - `.kiro/steering/*.md`, `.kiro/specs/*.md` - Comprehensive steering and specs system with YAML frontmatter

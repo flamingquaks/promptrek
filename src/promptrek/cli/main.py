@@ -159,6 +159,11 @@ def sync(
     multiple=True,
     help="Override variables (e.g., -V KEY=value)",
 )
+@click.option(
+    "--headless",
+    is_flag=True,
+    help="Generate with headless agent instructions for autonomous operation",
+)
 @click.pass_context
 def generate(
     ctx: click.Context,
@@ -170,6 +175,7 @@ def generate(
     dry_run: bool,
     all_editors: bool,
     variables: tuple,
+    headless: bool,
 ) -> None:
     """Generate editor-specific prompts from universal prompt files."""
     try:
@@ -193,6 +199,7 @@ def generate(
             dry_run,
             all_editors,
             var_dict,
+            headless,
         )
     except PrompTrekError as e:
         click.echo(f"Error: {e}", err=True)

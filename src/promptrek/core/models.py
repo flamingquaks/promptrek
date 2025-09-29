@@ -16,8 +16,8 @@ class PromptMetadata(BaseModel):
 
     title: str = Field(..., description="Human-readable title")
     description: str = Field(..., description="Brief description of purpose")
-    version: str = Field(..., description="Semantic version of this prompt")
-    author: str = Field(..., description="Author name or email")
+    version: Optional[str] = Field(default=None, description="Semantic version of this prompt")
+    author: Optional[str] = Field(default=None, description="Author name or email")
     created: Optional[str] = Field(
         default=None, description="ISO 8601 date (YYYY-MM-DD)"
     )
@@ -128,7 +128,7 @@ class UniversalPrompt(BaseModel):
 
     schema_version: str = Field(..., description="UPF schema version")
     metadata: PromptMetadata = Field(..., description="Prompt metadata")
-    targets: List[str] = Field(..., description="Target editors this prompt supports")
+    targets: Optional[List[str]] = Field(default=None, description="Target editors this prompt supports")
     context: Optional[ProjectContext] = Field(
         default=None, description="Project context information"
     )
@@ -161,10 +161,10 @@ class UniversalPrompt(BaseModel):
 
     @field_validator("targets")
     @classmethod
-    def validate_targets(cls, v: List[str]) -> List[str]:
+    def validate_targets(cls, v: Optional[List[str]]) -> Optional[List[str]]:
         """Validate target editors."""
-        if not v:
-            raise ValueError("At least one target editor must be specified")
+        if v is not None and not v:
+            raise ValueError("If targets are specified, at least one target editor must be provided")
         return v
 
     model_config = ConfigDict(

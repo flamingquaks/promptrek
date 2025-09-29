@@ -23,9 +23,6 @@ class CopilotAdapter(EditorAdapter):
         ".github/copilot-instructions.md",
         ".github/instructions/*.instructions.md",
         ".github/prompts/*.prompt.md",
-        "AGENTS.md",
-        "CLAUDE.md",
-        "GEMINI.md",
     ]
 
     def __init__(self):
@@ -42,6 +39,7 @@ class CopilotAdapter(EditorAdapter):
         dry_run: bool = False,
         verbose: bool = False,
         variables: Optional[Dict[str, Any]] = None,
+        headless: bool = False,
     ) -> List[Path]:
         """Generate GitHub Copilot configuration files."""
 
@@ -55,7 +53,7 @@ class CopilotAdapter(EditorAdapter):
 
         # Generate repository-wide instructions
         copilot_file = self._generate_copilot_instructions(
-            processed_prompt, conditional_content, output_dir, dry_run, verbose
+            processed_prompt, conditional_content, output_dir, dry_run, verbose, headless
         )
         created_files.extend(copilot_file)
 
@@ -64,12 +62,6 @@ class CopilotAdapter(EditorAdapter):
             processed_prompt, output_dir, dry_run, verbose
         )
         created_files.extend(path_files)
-
-        # Generate agent instructions
-        agent_files = self._generate_agent_instructions(
-            processed_prompt, output_dir, dry_run, verbose
-        )
-        created_files.extend(agent_files)
 
         # Generate experimental prompt files
         prompt_files = self._generate_prompt_files(
@@ -86,11 +78,16 @@ class CopilotAdapter(EditorAdapter):
         output_dir: Path,
         dry_run: bool,
         verbose: bool,
+        headless: bool = False,
     ) -> List[Path]:
         """Generate repository-wide .github/copilot-instructions.md."""
         github_dir = output_dir / ".github"
         output_file = github_dir / "copilot-instructions.md"
-        content = self._build_repository_content(prompt, conditional_content)
+
+        if headless:
+            content = self._build_headless_content(prompt, conditional_content)
+        else:
+            content = self._build_repository_content(prompt, conditional_content)
 
         if dry_run:
             click.echo(f"  📁 Would create: {output_file}")
@@ -192,55 +189,6 @@ class CopilotAdapter(EditorAdapter):
 
         return created_files
 
-    def _generate_agent_instructions(
-        self,
-        prompt: UniversalPrompt,
-        output_dir: Path,
-        dry_run: bool,
-        verbose: bool,
-    ) -> List[Path]:
-        """Generate agent instruction files (AGENTS.md, CLAUDE.md, GEMINI.md)."""
-        created_files = []
-
-        # Generate general AGENTS.md
-        agents_file = output_dir / "AGENTS.md"
-        agents_content = self._build_agents_content(prompt)
-
-        if dry_run:
-            click.echo(f"  📁 Would create: {agents_file}")
-            if verbose:
-                preview = (
-                    agents_content[:200] + "..."
-                    if len(agents_content) > 200
-                    else agents_content
-                )
-                click.echo(f"    {preview}")
-        else:
-            with open(agents_file, "w", encoding="utf-8") as f:
-                f.write(agents_content)
-            click.echo(f"✅ Generated: {agents_file}")
-            created_files.append(agents_file)
-
-        # Generate CLAUDE.md for Claude-specific instructions
-        claude_file = output_dir / "CLAUDE.md"
-        claude_content = self._build_claude_content(prompt)
-
-        if dry_run:
-            click.echo(f"  📁 Would create: {claude_file}")
-            if verbose:
-                preview = (
-                    claude_content[:200] + "..."
-                    if len(claude_content) > 200
-                    else claude_content
-                )
-                click.echo(f"    {preview}")
-        else:
-            with open(claude_file, "w", encoding="utf-8") as f:
-                f.write(claude_content)
-            click.echo(f"✅ Generated: {claude_file}")
-            created_files.append(claude_file)
-
-        return created_files
 
     def _generate_prompt_files(
         self,
@@ -282,11 +230,15 @@ class CopilotAdapter(EditorAdapter):
         dry_run: bool = False,
         verbose: bool = False,
         variables: Optional[Dict[str, Any]] = None,
+        headless: bool = False,
     ) -> List[Path]:
         """Generate merged GitHub Copilot instructions from multiple prompt files."""
 
         # Build merged content
-        content = self._build_merged_content(prompt_files, variables)
+        if headless:
+            content = self._build_merged_headless_content(prompt_files, variables)
+        else:
+            content = self._build_merged_content(prompt_files, variables)
 
         # Determine output path
         github_dir = output_dir / ".github"
@@ -366,6 +318,33 @@ class CopilotAdapter(EditorAdapter):
 
         return "\n".join(lines)
 
+    def _build_merged_headless_content(
+        self,
+        prompt_files: List[Tuple[UniversalPrompt, Path]],
+        variables: Optional[Dict[str, Any]] = None,
+    ) -> str:
+        """Build merged headless content with embedded generation instructions."""
+        lines = []
+
+        # Headless instructions block
+        lines.append("<!-- HEADLESS INSTRUCTIONS START -->")
+        lines.append("<!-- ")
+        lines.append("COPILOT HEADLESS AGENT INSTRUCTIONS:")
+        lines.append("Before starting any coding tasks, run the following command to generate full instructions:")
+        lines.append("`promptrek generate --editor copilot`")
+        lines.append("")
+        lines.append("This will regenerate the complete GitHub Copilot instructions from the source .promptrek.yaml files.")
+        lines.append("The generated content will replace everything between HEADLESS INSTRUCTIONS END and the end of this file.")
+        lines.append("-->")
+        lines.append("<!-- HEADLESS INSTRUCTIONS END -->")
+        lines.append("")
+
+        # Full merged content
+        full_content = self._build_merged_content(prompt_files, variables)
+        lines.append(full_content)
+
+        return "\n".join(lines)
+
     def validate(self, prompt: UniversalPrompt) -> List[ValidationError]:
         """Validate prompt for Copilot."""
         errors = []
@@ -434,13 +413,13 @@ class CopilotAdapter(EditorAdapter):
                 lines.append(f"- {instruction}")
             lines.append("")
 
-            if prompt.instructions.code_style:
+            if prompt.instructions and prompt.instructions.code_style:
                 lines.append("## Code Style Guidelines")
                 for guideline in prompt.instructions.code_style:
                     lines.append(f"- {guideline}")
                 lines.append("")
 
-            if prompt.instructions.testing:
+            if prompt.instructions and prompt.instructions.testing:
                 lines.append("## Testing Guidelines")
                 for guideline in prompt.instructions.testing:
                     lines.append(f"- {guideline}")
@@ -453,6 +432,33 @@ class CopilotAdapter(EditorAdapter):
                 lines.append(f"### {name.title()}")
                 lines.append(example)
                 lines.append("")
+
+        return "\n".join(lines)
+
+    def _build_headless_content(
+        self,
+        prompt: UniversalPrompt,
+        conditional_content: Optional[Dict[str, Any]] = None,
+    ) -> str:
+        """Build headless agent content with embedded generation instructions."""
+        lines = []
+
+        # Headless instructions block
+        lines.append("<!-- HEADLESS INSTRUCTIONS START -->")
+        lines.append("<!-- ")
+        lines.append("COPILOT HEADLESS AGENT INSTRUCTIONS:")
+        lines.append("Before starting any coding tasks, run the following command to generate full instructions:")
+        lines.append("`promptrek generate --editor copilot`")
+        lines.append("")
+        lines.append("This will regenerate the complete GitHub Copilot instructions from the source .promptrek.yaml files.")
+        lines.append("The generated content will replace everything between HEADLESS INSTRUCTIONS END and the end of this file.")
+        lines.append("-->")
+        lines.append("<!-- HEADLESS INSTRUCTIONS END -->")
+        lines.append("")
+
+        # Full generated content
+        full_content = self._build_repository_content(prompt, conditional_content)
+        lines.append(full_content)
 
         return "\n".join(lines)
 
@@ -552,111 +558,6 @@ class CopilotAdapter(EditorAdapter):
 
         return "\n".join(lines)
 
-    def _build_agents_content(self, prompt: UniversalPrompt) -> str:
-        """Build general agent instructions content."""
-        lines = []
-
-        lines.append(f"# {prompt.metadata.title} - Agent Instructions")
-        lines.append("")
-        lines.append(prompt.metadata.description)
-        lines.append("")
-
-        # Project Context
-        if prompt.context:
-            lines.append("## Project Context")
-            if prompt.context.project_type:
-                lines.append(f"**Project Type:** {prompt.context.project_type}")
-            if prompt.context.technologies:
-                lines.append(
-                    f"**Technologies:** {', '.join(prompt.context.technologies)}"
-                )
-            if prompt.context.description:
-                lines.append("")
-                lines.append("**Project Description:**")
-                lines.append(prompt.context.description)
-            lines.append("")
-
-        # Instructions for AI agents
-        lines.append("## AI Agent Guidelines")
-        lines.append("")
-
-        if prompt.instructions:
-            if prompt.instructions.general:
-                lines.append("### General Instructions")
-                for instruction in prompt.instructions.general:
-                    lines.append(f"- {instruction}")
-                lines.append("")
-
-            if prompt.instructions.code_style:
-                lines.append("### Code Style Requirements")
-                for guideline in prompt.instructions.code_style:
-                    lines.append(f"- {guideline}")
-                lines.append("")
-
-            if prompt.instructions.testing:
-                lines.append("### Testing Requirements")
-                for guideline in prompt.instructions.testing:
-                    lines.append(f"- {guideline}")
-                lines.append("")
-
-        # AI-specific guidance
-        lines.append("### AI Assistance Guidelines")
-        lines.append("- Provide clear, well-documented code solutions")
-        lines.append("- Explain complex logic and design decisions")
-        lines.append("- Suggest best practices and improvements")
-        lines.append("- Consider security and performance implications")
-        if prompt.context and prompt.context.technologies:
-            tech_list = ", ".join(prompt.context.technologies)
-            lines.append(f"- Follow {tech_list} conventions and idioms")
-
-        return "\n".join(lines)
-
-    def _build_claude_content(self, prompt: UniversalPrompt) -> str:
-        """Build Claude-specific instruction content."""
-        lines = []
-
-        lines.append(f"# {prompt.metadata.title} - Claude Instructions")
-        lines.append("")
-        lines.append(f"Claude-specific instructions for: {prompt.metadata.description}")
-        lines.append("")
-
-        # Project Context
-        if prompt.context:
-            lines.append("## Project Context")
-            if prompt.context.project_type:
-                lines.append(f"- **Project Type:** {prompt.context.project_type}")
-            if prompt.context.technologies:
-                lines.append(
-                    f"- **Technologies:** {', '.join(prompt.context.technologies)}"
-                )
-            lines.append("")
-
-        # Claude-specific instructions
-        lines.append("## Instructions for Claude")
-        lines.append("")
-
-        if prompt.instructions:
-            if prompt.instructions.general:
-                lines.append("### General Guidelines")
-                for instruction in prompt.instructions.general:
-                    lines.append(f"- {instruction}")
-                lines.append("")
-
-            if prompt.instructions.code_style:
-                lines.append("### Code Style Guidelines")
-                for guideline in prompt.instructions.code_style:
-                    lines.append(f"- {guideline}")
-                lines.append("")
-
-        # Claude-specific guidance
-        lines.append("### Claude-Specific Guidelines")
-        lines.append("- Provide step-by-step reasoning for complex problems")
-        lines.append("- Suggest multiple approaches when appropriate")
-        lines.append("- Include relevant documentation references")
-        lines.append("- Explain trade-offs and considerations")
-        lines.append("- Be thorough in code reviews and suggestions")
-
-        return "\n".join(lines)
 
     def _build_coding_prompt_content(self, prompt: UniversalPrompt) -> str:
         """Build experimental coding prompt content for VS Code."""
