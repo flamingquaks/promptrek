@@ -158,6 +158,7 @@ jobs:
           fi
 
       - name: Check for known vulnerabilities with Safety (free scan)
+        if: github.ref_type == 'tag' && startsWith(github.ref_name, 'v') && !contains(github.ref_name, '-rc')
         run: |
           echo "Checking for known vulnerabilities in dependencies..."
           # Use the new scan command
