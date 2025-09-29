@@ -36,13 +36,8 @@ class TestCLICoverageBoost:
         """Create file with invalid schema for validation error testing."""
         upf_content = {
             "schema_version": "1.0.0",
-            "metadata": {
-                "title": "Test",
-                "description": "Test",
-                "version": "1.0.0",
-                "author": "test",
-            },
-            # Missing required 'targets' field
+            # Missing required 'metadata' field entirely
+            "targets": ["claude"],
             "instructions": {"general": ["Test instruction"]},
         }
         upf_file = temp_dir / "invalid_schema.promptrek.yaml"

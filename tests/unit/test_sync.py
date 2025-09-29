@@ -285,6 +285,7 @@ Some other text that should be ignored.
         with patch("promptrek.cli.commands.sync.registry") as mock_registry:
             mock_adapter = MagicMock()
             del mock_adapter.parse_files  # Remove the parse_files attribute
+            mock_adapter.supports_bidirectional_sync.return_value = False
             mock_registry.get.return_value = mock_adapter
 
             ctx = MagicMock()

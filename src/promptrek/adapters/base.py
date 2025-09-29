@@ -78,6 +78,30 @@ class EditorAdapter(ABC):
         """Return True if this adapter supports hooks system."""
         return False
 
+    def supports_bidirectional_sync(self) -> bool:
+        """Return True if this adapter supports parsing files back to UniversalPrompt."""
+        try:
+            # Check if parse_files exists and is callable
+            parse_method = getattr(self, 'parse_files', None)
+            return parse_method is not None and callable(parse_method)
+        except AttributeError:
+            return False
+
+    def parse_files(self, source_dir: Path) -> "UniversalPrompt":
+        """
+        Parse editor-specific files back into a UniversalPrompt.
+
+        Args:
+            source_dir: Directory containing editor-specific files
+
+        Returns:
+            UniversalPrompt object parsed from editor files
+
+        Raises:
+            NotImplementedError: If adapter doesn't support reverse parsing
+        """
+        raise NotImplementedError(f"{self.name} adapter does not support bidirectional sync")
+
     def get_required_variables(self, prompt: UniversalPrompt) -> List[str]:
         """
         Get list of variables required by this adapter for the given prompt.
