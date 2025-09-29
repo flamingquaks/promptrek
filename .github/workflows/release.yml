@@ -213,12 +213,15 @@ jobs:
           data = response.json()
           releases = data.get('releases', {})
 
-          # Find all RC versions for this base version
+          # Find all RC versions for this base version (including current if it exists)
           yanked_versions = []
           for version in releases.keys():
               # Check if this is an RC of our base version
-              if version.startswith(f"{base_version}-rc.") and version != current_tag:
-                  print(f"Found old RC to yank: {version}")
+              if version.startswith(f"{base_version}-rc."):
+                  if version == current_tag:
+                      print(f"Found current RC already on Test PyPI, will yank and re-upload: {version}")
+                  else:
+                      print(f"Found old RC to yank: {version}")
 
                   # Yank via PyPI API
                   headers = {
