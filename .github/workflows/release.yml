@@ -122,11 +122,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  # Publish to PyPI (using the same artifacts)
+  # Publish to PyPI (using the same artifacts) - only for non-RC releases
   publish-pypi:
     needs: [build, test, validate-package]
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
+    if: startsWith(github.ref, 'refs/tags/') && !contains(github.ref, 'rc') && !contains(github.ref, 'beta') && !contains(github.ref, 'alpha')
     environment:
       name: pypi
       url: https://pypi.org/project/promptrek/
@@ -147,11 +147,11 @@ jobs:
           print-hash: true
           verify-metadata: true
 
-  # Optional: Publish to Test PyPI first
+  # Publish to Test PyPI for RC, beta, and alpha releases
   publish-test-pypi:
     needs: [build, test, validate-package]
     runs-on: ubuntu-latest
-    if: contains(github.ref, 'rc') || contains(github.ref, 'beta')
+    if: startsWith(github.ref, 'refs/tags/') && (contains(github.ref, 'rc') || contains(github.ref, 'beta') || contains(github.ref, 'alpha'))
     environment:
       name: testpypi
       url: https://test.pypi.org/project/promptrek/
@@ -175,7 +175,7 @@ jobs:
 
   # Final success check
   release-success:
-    needs: [github-release, publish-pypi]
+    needs: [github-release, publish-pypi, publish-test-pypi]
     runs-on: ubuntu-latest
     if: always()
 
@@ -185,11 +185,23 @@ jobs:
           echo "## Release Summary"
           echo "GitHub Release: ${{ needs.github-release.result }}"
           echo "PyPI Publish: ${{ needs.publish-pypi.result }}"
+          echo "Test PyPI Publish: ${{ needs.publish-test-pypi.result }}"
 
-          if [ "${{ needs.github-release.result }}" != "success" ] || \
-             [ "${{ needs.publish-pypi.result }}" != "success" ]; then
-            echo "Release failed"
-            exit 1
+          # Check based on what type of release this is
+          if [[ "${{ github.ref }}" == *"rc"* ]] || [[ "${{ github.ref }}" == *"beta"* ]] || [[ "${{ github.ref }}" == *"alpha"* ]]; then
+            # For pre-releases, check GitHub release and Test PyPI
+            if [ "${{ needs.github-release.result }}" != "success" ] || \
+               [ "${{ needs.publish-test-pypi.result }}" != "success" ]; then
+              echo "Pre-release failed"
+              exit 1
+            fi
+          else
+            # For regular releases, check GitHub release and PyPI
+            if [ "${{ needs.github-release.result }}" != "success" ] || \
+               [ "${{ needs.publish-pypi.result }}" != "success" ]; then
+              echo "Release failed"
+              exit 1
+            fi
           fi
 
           echo "Release completed successfully! 🎉"
