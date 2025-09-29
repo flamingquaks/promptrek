@@ -20,6 +20,8 @@ jobs:
   # Fast tests on primary platform
   test-fast:
     needs: build
+    permissions:
+      contents: read
     uses: ./.github/workflows/test.yml
     with:
       python-version: "3.11"
