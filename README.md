@@ -51,27 +51,35 @@ promptrek generate --all
 
 ## 📋 Project Status
 
-This project is currently in **active development** with core functionality implemented and working. Current status:
+**Version 0.0.1** - Production Ready ✅
 
-- ✅ **Core Functionality Complete**: UPF parser, validation, and CLI interface
-- ✅ **Multi-Editor Support**: GitHub Copilot, Cursor, and Continue editors implemented
-- ✅ **Template System**: Built-in templates for common project types
-- ✅ **Comprehensive Testing**: 41 tests covering unit and integration scenarios
-- ✅ **Documentation**: Getting Started guide and comprehensive CLI help
-- ⏳ **Advanced Features**: Variable substitution, conditional templates, more editors
+- ✅ **Core Functionality**: UPF parser, validation, and comprehensive CLI interface
+- ✅ **10 Editor Adapters**: Support for all major AI coding assistants
+- ✅ **Advanced Features**: Variable substitution, conditional instructions, bidirectional sync
+- ✅ **Comprehensive Testing**: 442 tests with 82% code coverage
+- ✅ **Rich Documentation**: Complete guides, examples, and API reference
+- ✅ **Published to PyPI**: Install with `pip install promptrek`
 
-**Ready for use!** The tool can create, validate, and generate editor-specific prompts for the three major AI editors.
+**Production ready!** Actively used for managing AI editor configurations across multiple platforms.
 
 ## 📖 Documentation
 
-All planning documents are available in the [`docs/`](./docs/) directory:
+Comprehensive documentation is available in the [`docs/`](./docs/) directory:
 
-- [Project Planning](./docs/PLANNING.md) - Overall project goals and requirements
-- [Editor Research](./docs/EDITOR_RESEARCH.md) - Research on different AI editors
-- [System Architecture](./docs/ARCHITECTURE.md) - Technical architecture and design
-- [Universal Prompt Format](./docs/UPF_SPECIFICATION.md) - Complete format specification
-- [Implementation Roadmap](./docs/IMPLEMENTATION_ROADMAP.md) - Development timeline and phases
-- [Project Structure](./docs/PROJECT_STRUCTURE.md) - Repository organization and conventions
+### Getting Started
+- [Getting Started Guide](./GETTING_STARTED.md) - Complete setup and usage guide
+- [Universal Prompt Format](./docs/UPF_SPECIFICATION.md) - UPF specification and examples
+
+### Features & Usage
+- [Advanced Features](./docs/ADVANCED_FEATURES.md) - Variables, conditionals, and imports
+- [Editor Adapters](./docs/ADAPTERS.md) - Detailed guide to all supported editors
+- [Adapter Capabilities](./docs/ADAPTER_CAPABILITIES.md) - Feature comparison matrix
+- [Sync Feature](./docs/SYNC_FEATURE.md) - Bidirectional synchronization guide
+
+### Architecture & Planning
+- [System Architecture](./docs/ARCHITECTURE.md) - Technical design and structure
+- [Implementation Roadmap](./docs/IMPLEMENTATION_ROADMAP.md) - Development status and future plans
+- [Project Structure](./docs/PROJECT_STRUCTURE.md) - Repository organization
 
 ## 🎨 Supported Editors
 
@@ -91,8 +99,19 @@ All planning documents are available in the [`docs/`](./docs/) directory:
 
 See the [`examples/`](./examples/) directory for sample configurations:
 
+### Basic Examples
 - [React TypeScript Project](./examples/basic/react-typescript.promptrek.yaml)
 - [Node.js API Service](./examples/basic/node-api.promptrek.yaml)
+
+### Advanced Examples
+- [NX Monorepo](./examples/advanced/monorepo-nx.promptrek.yaml) - Multi-package workspace with NX
+- [Microservices + Kubernetes](./examples/advanced/microservices-k8s.promptrek.yaml) - Cloud-native architecture
+- [React Native Mobile](./examples/advanced/mobile-react-native.promptrek.yaml) - Cross-platform mobile apps
+- [FastAPI Backend](./examples/advanced/python-fastapi.promptrek.yaml) - Modern Python async API
+- [Next.js Full-Stack](./examples/advanced/fullstack-nextjs.promptrek.yaml) - App Router with SSR
+- [Rust CLI Tool](./examples/advanced/rust-cli.promptrek.yaml) - Systems programming
+- [Go Backend Service](./examples/advanced/golang-backend.promptrek.yaml) - High-performance APIs
+- [Data Science ML](./examples/advanced/data-science-python.promptrek.yaml) - MLOps and experiments
 
 ## 🚀 Installation & Quick Start
 
@@ -144,6 +163,9 @@ ls .continue/config.json
 - `promptrek init` - Create a new universal prompt file with templates
 - `promptrek validate` - Check your configuration for errors
 - `promptrek generate` - Create editor-specific prompts
+- `promptrek preview` - Preview generated output without creating files
+- `promptrek sync` - Sync editor files back to PrompTrek format
+- `promptrek agents` - Generate agent-specific instructions
 - `promptrek list-editors` - Show supported editors and their status
 
 For detailed usage instructions, see [`GETTING_STARTED.md`](./GETTING_STARTED.md).

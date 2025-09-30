@@ -100,7 +100,26 @@ Preview what would be generated (dry run):
 promptrek generate my-project.promptrek.yaml --editor copilot --dry-run
 ```
 
-### 4. List Supported Editors
+### 4. Preview Generated Output
+
+Preview what will be generated without creating files:
+```bash
+# Preview for a specific editor
+promptrek preview my-project.promptrek.yaml --editor copilot
+
+# Preview with variable overrides
+promptrek preview my-project.promptrek.yaml --editor cursor \
+  -V PROJECT_NAME="MyApp" \
+  -V AUTHOR="Team Lead"
+```
+
+The preview command shows:
+- Files that would be created
+- Output from the generator
+- Any warnings or notices
+- No actual files are written
+
+### 5. List Supported Editors
 
 ```bash
 promptrek list-editors
@@ -150,6 +169,42 @@ promptrek generate my-react-app.promptrek.yaml --all
 ls .github/copilot-instructions.md
 ls .cursor/rules/
 ls config.yaml .continue/rules/
+```
+
+## Real-World Examples
+
+PrompTrek includes comprehensive example configurations for various project types:
+
+### Basic Examples
+- **React TypeScript** ([examples/basic/react-typescript.promptrek.yaml](./examples/basic/react-typescript.promptrek.yaml))
+- **Node.js API** ([examples/basic/node-api.promptrek.yaml](./examples/basic/node-api.promptrek.yaml))
+
+### Advanced Examples
+The `examples/advanced/` directory contains production-ready configurations:
+
+- **[monorepo-nx.promptrek.yaml](./examples/advanced/monorepo-nx.promptrek.yaml)** - NX/Turborepo monorepo with multiple apps and libraries
+- **[microservices-k8s.promptrek.yaml](./examples/advanced/microservices-k8s.promptrek.yaml)** - Kubernetes microservices architecture
+- **[mobile-react-native.promptrek.yaml](./examples/advanced/mobile-react-native.promptrek.yaml)** - Cross-platform mobile development
+- **[python-fastapi.promptrek.yaml](./examples/advanced/python-fastapi.promptrek.yaml)** - Modern async Python backend
+- **[fullstack-nextjs.promptrek.yaml](./examples/advanced/fullstack-nextjs.promptrek.yaml)** - Next.js full-stack with App Router
+- **[rust-cli.promptrek.yaml](./examples/advanced/rust-cli.promptrek.yaml)** - Rust command-line tools
+- **[golang-backend.promptrek.yaml](./examples/advanced/golang-backend.promptrek.yaml)** - Go backend services
+- **[data-science-python.promptrek.yaml](./examples/advanced/data-science-python.promptrek.yaml)** - ML/Data Science projects
+
+Each example includes:
+- Comprehensive instructions by category
+- Architecture and testing guidelines
+- Security and performance best practices
+- Real-world code examples
+- Technology-specific workflows
+
+Use these as starting points for your own projects:
+```bash
+# Copy an example to start your project
+cp examples/advanced/fullstack-nextjs.promptrek.yaml my-project.promptrek.yaml
+
+# Customize and generate
+promptrek generate my-project.promptrek.yaml --all
 ```
 
 ## Universal Prompt Format (UPF)

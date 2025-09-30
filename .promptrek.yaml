@@ -43,14 +43,7 @@ context:
 
 instructions:
   general:
-    - "Follow Python best practices and PEP 8 conventions"
-    - "Use type hints for all function signatures and class attributes"
-    - "Write comprehensive docstrings following Google/NumPy style"
-    - "Maintain backward compatibility with Python 3.9+"
-    - "Follow the existing adapter pattern for new AI editor integrations"
-    - "Use Pydantic models for data validation and serialization"
-    - "Implement proper error handling with custom exceptions"
-    - "You are trying to update the PrompTrek project itself, not generated outputs"
+    - "When updating documentation, make sure to update the documents in the docs/ directory. Also review the gh-pages/ directory for updating the GitHub Pages site."
   
   code_style:
     - "Format code with Black (line length 88)"
