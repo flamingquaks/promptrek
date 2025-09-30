@@ -74,17 +74,17 @@ def preview_command(
 
         # Capture output
         old_stdout = sys.stdout
-        sys.stdout = captured_output = StringIO()
+        captured_output = StringIO()
+        try:
+            sys.stdout = captured_output
 
-        # Run generation in dry-run mode
-        output_dir = Path.cwd()
-        files = adapter.generate(
-            prompt, output_dir, dry_run=True, verbose=True, variables=variables
-        )
-
-        # Restore stdout
-        sys.stdout = old_stdout
-
+            # Run generation in dry-run mode
+            output_dir = Path.cwd()
+            files = adapter.generate(
+                prompt, output_dir, dry_run=True, verbose=True, variables=variables
+            )
+        finally:
+            sys.stdout = old_stdout
         # Show captured output
         output_text = captured_output.getvalue()
         if output_text:
