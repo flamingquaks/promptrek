@@ -69,8 +69,8 @@ def preview_command(
 
     # Generate with dry_run mode
     try:
-        from io import StringIO
         import sys
+        from io import StringIO
 
         # Capture output
         old_stdout = sys.stdout

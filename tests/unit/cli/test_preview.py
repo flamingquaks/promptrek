@@ -159,7 +159,9 @@ class TestPreviewCLI:
     def test_preview_cli_missing_file(self):
         """Test error with non-existent file."""
         runner = CliRunner()
-        result = runner.invoke(cli, ["preview", "nonexistent.yaml", "--editor", "copilot"])
+        result = runner.invoke(
+            cli, ["preview", "nonexistent.yaml", "--editor", "copilot"]
+        )
 
         assert result.exit_code != 0
 
@@ -177,7 +179,9 @@ class TestPreviewCLI:
 
         with patch("promptrek.cli.commands.preview.registry") as mock_registry:
             with patch("promptrek.cli.commands.preview.UPFParser") as mock_parser_class:
-                with patch("promptrek.cli.commands.preview.UPFValidator") as mock_validator_class:
+                with patch(
+                    "promptrek.cli.commands.preview.UPFValidator"
+                ) as mock_validator_class:
                     # Setup mocks
                     mock_parser = Mock()
                     mock_parser.parse_file.return_value = UniversalPrompt(

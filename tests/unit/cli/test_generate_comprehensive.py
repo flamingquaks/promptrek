@@ -27,7 +27,9 @@ class TestAdapterSupportsHeadless:
         """Test adapter with headless parameter."""
 
         class MockAdapter:
-            def generate(self, prompt, output_dir, dry_run, verbose, variables, headless=False):
+            def generate(
+                self, prompt, output_dir, dry_run, verbose, variables, headless=False
+            ):
                 pass
 
         adapter = MockAdapter()
@@ -148,7 +150,9 @@ class TestGenerateForEditor:
         """Test generation with headless mode support."""
 
         class MockAdapter:
-            def generate(self, prompt, output_dir, dry_run, verbose, variables, headless=False):
+            def generate(
+                self, prompt, output_dir, dry_run, verbose, variables, headless=False
+            ):
                 return []
 
         mock_adapter = MockAdapter()
@@ -192,7 +196,9 @@ class TestGenerateForEditor:
 
         # Should warn about unsupported headless mode
         mock_echo.assert_called()
-        warning_calls = [call for call in mock_echo.call_args_list if "Warning" in str(call)]
+        warning_calls = [
+            call for call in mock_echo.call_args_list if "Warning" in str(call)
+        ]
         assert len(warning_calls) > 0
 
     @patch("promptrek.cli.commands.generate.registry")
@@ -282,7 +288,9 @@ class TestGenerateForEditorMultiple:
         mock_adapter.generate.assert_called_once()
         # Should warn about fallback
         warning_calls = [
-            call for call in mock_echo.call_args_list if "doesn't support merging" in str(call)
+            call
+            for call in mock_echo.call_args_list
+            if "doesn't support merging" in str(call)
         ]
         assert len(warning_calls) > 0
 
@@ -450,7 +458,12 @@ class TestGenerateCommand:
     @patch("promptrek.cli.commands.generate.UPFValidator")
     @patch("promptrek.cli.commands.generate.UPFParser")
     def test_generate_with_variables(
-        self, mock_parser_class, mock_validator_class, mock_generate, tmp_path, sample_upf_file
+        self,
+        mock_parser_class,
+        mock_validator_class,
+        mock_generate,
+        tmp_path,
+        sample_upf_file,
     ):
         """Test generation with variable overrides."""
         mock_parser = Mock()
@@ -668,7 +681,12 @@ class TestProcessSingleFile:
     @patch("promptrek.cli.commands.generate.UPFValidator")
     @patch("promptrek.cli.commands.generate.UPFParser")
     def test_process_single_file_all_editors(
-        self, mock_parser_class, mock_validator_class, mock_generate, sample_upf_file, tmp_path
+        self,
+        mock_parser_class,
+        mock_validator_class,
+        mock_generate,
+        sample_upf_file,
+        tmp_path,
     ):
         """Test processing single file with --all flag."""
         from promptrek.cli.commands.generate import _process_single_file
@@ -707,7 +725,12 @@ class TestProcessSingleFile:
     @patch("promptrek.cli.commands.generate.UPFParser")
     @patch("click.echo")
     def test_process_single_file_global_config_only(
-        self, mock_echo, mock_parser_class, mock_validator_class, sample_upf_file, tmp_path
+        self,
+        mock_echo,
+        mock_parser_class,
+        mock_validator_class,
+        sample_upf_file,
+        tmp_path,
     ):
         """Test processing file with global config only adapter."""
         from promptrek.cli.commands.generate import _process_single_file
@@ -743,7 +766,9 @@ class TestProcessSingleFile:
 
             # Should echo info about global config
             info_calls = [
-                call for call in mock_echo.call_args_list if "global" in str(call).lower()
+                call
+                for call in mock_echo.call_args_list
+                if "global" in str(call).lower()
             ]
             assert len(info_calls) > 0
 
@@ -751,7 +776,12 @@ class TestProcessSingleFile:
     @patch("promptrek.cli.commands.generate.UPFParser")
     @patch("click.echo")
     def test_process_single_file_ide_plugin_only(
-        self, mock_echo, mock_parser_class, mock_validator_class, sample_upf_file, tmp_path
+        self,
+        mock_echo,
+        mock_parser_class,
+        mock_validator_class,
+        sample_upf_file,
+        tmp_path,
     ):
         """Test processing file with IDE plugin only adapter."""
         from promptrek.cli.commands.generate import _process_single_file
@@ -822,7 +852,14 @@ class TestProcessSingleFile:
 
             with pytest.raises(CLIError, match="not available"):
                 _process_single_file(
-                    ctx, sample_upf_file, "unknown_editor", tmp_path, False, False, None, False
+                    ctx,
+                    sample_upf_file,
+                    "unknown_editor",
+                    tmp_path,
+                    False,
+                    False,
+                    None,
+                    False,
                 )
 
     @patch("promptrek.cli.commands.generate._generate_for_editor")
@@ -830,7 +867,13 @@ class TestProcessSingleFile:
     @patch("promptrek.cli.commands.generate.UPFParser")
     @patch("click.echo")
     def test_process_single_file_with_verbose_errors(
-        self, mock_echo, mock_parser_class, mock_validator_class, mock_generate, sample_upf_file, tmp_path
+        self,
+        mock_echo,
+        mock_parser_class,
+        mock_validator_class,
+        mock_generate,
+        sample_upf_file,
+        tmp_path,
     ):
         """Test processing file with generation errors in verbose mode."""
         from promptrek.cli.commands.generate import _process_single_file
@@ -882,7 +925,9 @@ class TestGenerateCLIIntegration:
     def test_generate_cli_missing_file(self):
         """Test error with non-existent file."""
         runner = CliRunner()
-        result = runner.invoke(cli, ["generate", "nonexistent.yaml", "--editor", "copilot"])
+        result = runner.invoke(
+            cli, ["generate", "nonexistent.yaml", "--editor", "copilot"]
+        )
 
         assert result.exit_code != 0
 
