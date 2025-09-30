@@ -1,0 +1,157 @@
+schema_version: "1.0.0"
+metadata:
+  title: "React Native Mobile App Assistant"
+  description: "AI assistant for cross-platform React Native mobile development"
+  version: "1.0.0"
+  author: "Mobile Team"
+  tags: ["react-native", "mobile", "ios", "android", "typescript"]
+
+targets:
+  - copilot
+  - cursor
+  - continue
+  - claude
+
+context:
+  project_type: "mobile_application"
+  technologies:
+    - "react-native"
+    - "typescript"
+    - "expo"
+    - "redux"
+    - "react-navigation"
+    - "jest"
+    - "detox"
+  description: |
+    Cross-platform mobile application built with React Native targeting
+    both iOS and Android platforms with shared codebase.
+
+instructions:
+  general:
+    - "Write platform-agnostic code whenever possible"
+    - "Use Platform-specific code only when necessary (Platform.select)"
+    - "Optimize for mobile performance - avoid unnecessary re-renders"
+    - "Follow React Native best practices for navigation and state management"
+    - "Test on both iOS and Android simulators regularly"
+
+  code_style:
+    - "Use functional components with hooks exclusively"
+    - "Follow React Native's StyleSheet for styling (no inline styles)"
+    - "Use TypeScript for type safety across the codebase"
+    - "Keep components small and focused (max 200 lines)"
+    - "Use absolute imports with path mapping (@screens, @components)"
+
+  architecture:
+    - "Organize code by feature, not by type"
+    - "Use React Navigation for routing and deep linking"
+    - "Implement Redux or Context API for global state management"
+    - "Keep business logic separate from UI components"
+    - "Use custom hooks for reusable logic and API calls"
+
+  testing:
+    - "Write unit tests for all business logic and custom hooks"
+    - "Use React Native Testing Library for component tests"
+    - "Implement E2E tests with Detox for critical user flows"
+    - "Test on real devices before releases, not just simulators"
+    - "Include snapshot tests for complex UI components"
+
+  performance:
+    - "Use FlatList or SectionList for large lists (never ScrollView)"
+    - "Implement proper list item memoization with React.memo"
+    - "Optimize images with appropriate resolutions and formats"
+    - "Use Hermes engine for improved startup time"
+    - "Profile with React DevTools and Flipper for performance bottlenecks"
+
+  security:
+    - "Never store sensitive data in AsyncStorage - use secure storage"
+    - "Implement certificate pinning for API calls"
+    - "Obfuscate source code in production builds"
+    - "Use biometric authentication for sensitive operations"
+    - "Validate all user inputs on both client and server"
+
+examples:
+  screen_component: |
+    ```typescript
+    import React from 'react';
+    import { View, Text, StyleSheet } from 'react-native';
+    import { useNavigation } from '@react-navigation/native';
+
+    interface Props {
+      userId: string;
+    }
+
+    export const ProfileScreen: React.FC<Props> = ({ userId }) => {
+      const navigation = useNavigation();
+
+      return (
+        <View style={styles.container}>
+          <Text style={styles.title}>Profile</Text>
+        </View>
+      );
+    };
+
+    const styles = StyleSheet.create({
+      container: {
+        flex: 1,
+        padding: 16,
+        backgroundColor: '#ffffff',
+      },
+      title: {
+        fontSize: 24,
+        fontWeight: 'bold',
+      },
+    });
+    ```
+
+  custom_hook: |
+    ```typescript
+    import { useState, useEffect } from 'react';
+    import { fetchUserData } from '@api/users';
+
+    export const useUser = (userId: string) => {
+      const [user, setUser] = useState(null);
+      const [loading, setLoading] = useState(true);
+      const [error, setError] = useState(null);
+
+      useEffect(() => {
+        const loadUser = async () => {
+          try {
+            setLoading(true);
+            const data = await fetchUserData(userId);
+            setUser(data);
+          } catch (err) {
+            setError(err);
+          } finally {
+            setLoading(false);
+          }
+        };
+
+        loadUser();
+      }, [userId]);
+
+      return { user, loading, error };
+    };
+    ```
+
+  navigation_setup: |
+    ```typescript
+    import { NavigationContainer } from '@react-navigation/native';
+    import { createNativeStackNavigator } from '@react-navigation/native-stack';
+
+    const Stack = createNativeStackNavigator();
+
+    export const AppNavigator = () => {
+      return (
+        <NavigationContainer>
+          <Stack.Navigator>
+            <Stack.Screen name="Home" component={HomeScreen} />
+            <Stack.Screen name="Profile" component={ProfileScreen} />
+          </Stack.Navigator>
+        </NavigationContainer>
+      );
+    };
+    ```
+
+variables:
+  APP_NAME: "MyMobileApp"
+  BUNDLE_ID: "com.company.myapp"

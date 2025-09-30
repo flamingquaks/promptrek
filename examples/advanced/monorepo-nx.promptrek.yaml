@@ -1,0 +1,108 @@
+schema_version: "1.0.0"
+metadata:
+  title: "NX Monorepo Assistant"
+  description: "AI assistant for NX/Turborepo monorepo projects with multiple apps and libraries"
+  version: "1.0.0"
+  author: "Development Team"
+  tags: ["monorepo", "nx", "turborepo", "typescript"]
+
+targets:
+  - copilot
+  - cursor
+  - continue
+  - claude
+
+context:
+  project_type: "monorepo"
+  technologies:
+    - "typescript"
+    - "nx"
+    - "turborepo"
+    - "react"
+    - "node.js"
+    - "jest"
+    - "eslint"
+  description: |
+    A large-scale monorepo using NX/Turborepo for managing multiple applications
+    and shared libraries. Includes frontend apps, backend services, and common utilities.
+
+instructions:
+  general:
+    - "Follow monorepo best practices for code sharing and dependency management"
+    - "Always consider the impact of changes across multiple packages"
+    - "Use workspace protocols for internal package dependencies"
+    - "Keep shared libraries focused and single-purpose"
+    - "Document cross-package dependencies and usage patterns"
+
+  code_style:
+    - "Use consistent TypeScript configuration across all packages"
+    - "Follow the repository's shared ESLint and Prettier configurations"
+    - "Prefix package names consistently (e.g., @company/package-name)"
+    - "Use barrel exports (index.ts) for clean package APIs"
+    - "Keep import paths clean using TypeScript path mappings"
+
+  architecture:
+    - "Place shared code in libs/ directory, apps in apps/ directory"
+    - "Use dependency graph constraints to prevent circular dependencies"
+    - "Keep apps thin - business logic should be in libraries"
+    - "Use affected commands (nx affected) for efficient CI/CD"
+    - "Implement module boundaries to enforce architectural constraints"
+
+  testing:
+    - "Write unit tests for all shared libraries (libs/)"
+    - "Use integration tests for app-level functionality"
+    - "Run only affected tests using NX affected commands"
+    - "Maintain minimum 80% coverage for shared libraries"
+    - "Mock cross-package dependencies appropriately"
+
+  workflows:
+    - "Always run `nx affected:test` before committing"
+    - "Use `nx graph` to visualize package dependencies"
+    - "Generate new libraries with `nx g @nx/workspace:library`"
+    - "Update dependencies across workspace with `nx migrate`"
+    - "Build affected projects only in CI: `nx affected:build`"
+
+examples:
+  shared_library: |
+    ```typescript
+    // libs/shared-utils/src/index.ts
+    export { formatDate } from './lib/date-utils';
+    export { validateEmail } from './lib/validators';
+    export type { User, ApiResponse } from './lib/types';
+    ```
+
+  app_import: |
+    ```typescript
+    // apps/web-app/src/main.ts
+    import { formatDate, validateEmail } from '@company/shared-utils';
+
+    const isValid = validateEmail(userInput);
+    const formattedDate = formatDate(new Date());
+    ```
+
+  project_json: |
+    ```json
+    {
+      "name": "shared-utils",
+      "targets": {
+        "build": {
+          "executor": "@nx/js:tsc",
+          "options": {
+            "outputPath": "dist/libs/shared-utils",
+            "main": "libs/shared-utils/src/index.ts",
+            "tsConfig": "libs/shared-utils/tsconfig.lib.json"
+          }
+        },
+        "test": {
+          "executor": "@nx/jest:jest",
+          "options": {
+            "jestConfig": "libs/shared-utils/jest.config.ts"
+          }
+        }
+      }
+    }
+    ```
+
+variables:
+  WORKSPACE_NAME: "my-workspace"
+  COMPANY_SCOPE: "@company"

@@ -2,6 +2,13 @@
 
 import pytest
 
+from promptrek.core.models import (
+    Instructions,
+    ProjectContext,
+    PromptMetadata,
+    UniversalPrompt,
+)
+
 
 @pytest.fixture
 def sample_upf_data():
@@ -74,3 +81,32 @@ def invalid_upf_data():
         },
         "targets": [],  # Invalid: no targets
     }
+
+
+@pytest.fixture
+def sample_prompt():
+    """Create a sample UniversalPrompt object for testing."""
+    return UniversalPrompt(
+        schema_version="1.0.0",
+        metadata=PromptMetadata(
+            title="Test Project Assistant",
+            description="AI assistant for testing",
+            version="1.0.0",
+            author="Test Author <test@example.com>",
+            created="2024-01-01",
+            updated="2024-01-01",
+            tags=["test", "sample"],
+        ),
+        targets=["copilot", "cursor"],
+        context=ProjectContext(
+            project_type="web_application",
+            technologies=["python", "javascript"],
+            description="A test project",
+        ),
+        instructions=Instructions(
+            general=["Write clean code", "Follow conventions"],
+            code_style=["Use meaningful names", "Add comments"],
+        ),
+        examples={"function": '```python\ndef hello():\n    return "world"\n```'},
+        variables={"PROJECT_NAME": "Test Project", "AUTHOR": "Test Author"},
+    )
