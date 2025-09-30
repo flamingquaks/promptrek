@@ -170,9 +170,9 @@ title: Home
         <div class="step-content">
           <h3>Create Universal Prompt</h3>
           <div class="code-block">
-            <code>promptrek init --output my-project.promptrek.yaml</code>
+            <code>promptrek init --setup-hooks --output my-project.promptrek.yaml</code>
           </div>
-          <p>Initialize your first universal prompt configuration file</p>
+          <p>Initialize your first universal prompt with pre-commit hooks</p>
         </div>
       </div>
 
@@ -308,6 +308,12 @@ instructions:
         <div class="feature-icon">🎨</div>
         <h3>Multi-Editor Support</h3>
         <p>Generate prompts for 10 major AI coding assistants from a single source. Never write the same prompt twice.</p>
+      </div>
+
+      <div class="feature-card-modern">
+        <div class="feature-icon">🔒</div>
+        <h3>Pre-commit Integration</h3>
+        <p>Automatic validation and protection. Pre-commit hooks ensure your .promptrek.yaml files are valid and prevent accidental commits of generated files.</p>
       </div>
 
       <div class="feature-card-modern">

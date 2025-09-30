@@ -41,8 +41,14 @@ Repository = "https://github.com/flamingquaks/promptrek"
 Documentation = "https://github.com/flamingquaks/promptrek/tree/main/docs"
 Issues = "https://github.com/flamingquaks/promptrek/issues"
 
+[tool.setuptools]
+include-package-data = true
+
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+promptrek = ["../.pre-commit-hooks.yaml"]
 
 [tool.black]
 line-length = 88

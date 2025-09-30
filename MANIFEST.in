@@ -1,0 +1,19 @@
+# Include important package files
+include README.md
+include LICENSE
+include .pre-commit-hooks.yaml
+
+# Include documentation
+recursive-include docs *.md
+
+# Include examples
+recursive-include examples *.yaml *.yml
+
+# Exclude test files and dev tools
+exclude .gitignore
+exclude .pre-commit-config.yaml
+exclude .yamllint
+recursive-exclude tests *
+recursive-exclude scripts *
+prune .github
+prune gh-pages

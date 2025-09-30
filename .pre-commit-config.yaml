@@ -60,15 +60,15 @@ repos:
         language: system
         files: ^(src/|tests/).*\.py$
 
-      # Basic file checks
-      - id: trailing-whitespace
-        name: Trim trailing whitespace
-        entry: >
-          bash -c 'if command -v sed >/dev/null 2>&1; then
-          sed -i "s/[[:space:]]*$//" "$@"; else
-          echo "Warning: sed not available, skipping whitespace trim"; fi' --
-        language: system
-        types: [text]
+      # # Basic file checks
+      # - id: trailing-whitespace
+      #   name: Trim trailing whitespace
+      #   entry: >
+      #     bash -c 'if command -v sed >/dev/null 2>&1; then
+      #     sed -i "s/[[:space:]]*$//" "$@"; else
+      #     echo "Warning: sed not available, skipping whitespace trim"; fi' --
+      #   language: system
+      #   types: [text]
 
       - id: end-of-file-fixer
         name: Fix end of files

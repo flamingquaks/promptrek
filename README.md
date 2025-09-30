@@ -142,9 +142,9 @@ uv sync
 ### Quick Start
 
 ```bash
-# 1. Initialize a new project (choose from basic, react, api templates)
-uv run promptrek init --template react --output my-project.promptrek.yaml
-# or with traditional pip: promptrek init --template react --output my-project.promptrek.yaml
+# 1. Initialize a new project with pre-commit hooks (recommended)
+uv run promptrek init --template react --output my-project.promptrek.yaml --setup-hooks
+# or with traditional pip: promptrek init --template react --output my-project.promptrek.yaml --setup-hooks
 
 # 2. Validate your configuration
 uv run promptrek validate my-project.promptrek.yaml
@@ -158,14 +158,17 @@ ls .cursorrules
 ls .continue/config.json
 ```
 
+**Note:** The `--setup-hooks` flag automatically configures pre-commit hooks to validate your `.promptrek.yaml` files and prevent accidental commits of generated files.
+
 ### Available Commands
 
-- `promptrek init` - Create a new universal prompt file with templates
+- `promptrek init` - Create a new universal prompt file with templates (use `--setup-hooks` to automatically configure pre-commit)
 - `promptrek validate` - Check your configuration for errors
 - `promptrek generate` - Create editor-specific prompts
 - `promptrek preview` - Preview generated output without creating files
 - `promptrek sync` - Sync editor files back to PrompTrek format
 - `promptrek agents` - Generate agent-specific instructions
+- `promptrek install-hooks` - Set up pre-commit hooks (use `--activate` to activate automatically)
 - `promptrek list-editors` - Show supported editors and their status
 
 For detailed usage instructions, see [`GETTING_STARTED.md`](./GETTING_STARTED.md).
