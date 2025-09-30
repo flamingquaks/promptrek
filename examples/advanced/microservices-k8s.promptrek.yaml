@@ -1,0 +1,158 @@
+schema_version: "1.0.0"
+metadata:
+  title: "Microservices with Kubernetes Assistant"
+  description: "AI assistant for microservices architecture deployed on Kubernetes"
+  version: "1.0.0"
+  author: "Platform Team"
+  tags: ["microservices", "kubernetes", "docker", "cloud-native"]
+
+targets:
+  - copilot
+  - cursor
+  - continue
+  - claude
+
+context:
+  project_type: "microservices"
+  technologies:
+    - "kubernetes"
+    - "docker"
+    - "node.js"
+    - "python"
+    - "golang"
+    - "helm"
+    - "prometheus"
+    - "grpc"
+  description: |
+    Cloud-native microservices architecture running on Kubernetes with
+    service mesh, observability, and CI/CD automation.
+
+instructions:
+  general:
+    - "Design services following the single responsibility principle"
+    - "Use asynchronous communication between services where possible"
+    - "Implement proper health checks (liveness and readiness probes)"
+    - "Follow 12-factor app principles for cloud-native development"
+    - "Design for failure - implement circuit breakers and retry logic"
+
+  code_style:
+    - "Use structured logging with correlation IDs for distributed tracing"
+    - "Include OpenTelemetry instrumentation for observability"
+    - "Follow consistent API versioning across all services (e.g., /api/v1/)"
+    - "Use Protocol Buffers for service-to-service communication"
+    - "Implement graceful shutdown handlers for all services"
+
+  architecture:
+    - "Keep services small and focused on specific business domains"
+    - "Use API Gateway pattern for external-facing endpoints"
+    - "Implement service discovery using Kubernetes DNS"
+    - "Store configuration in ConfigMaps and secrets in Secrets"
+    - "Use StatefulSets for stateful services, Deployments for stateless"
+
+  testing:
+    - "Write contract tests for service interfaces"
+    - "Implement integration tests using testcontainers"
+    - "Test Kubernetes manifests with kubeval or kube-score"
+    - "Include chaos engineering tests for resilience"
+    - "Load test services to determine resource requirements"
+
+  security:
+    - "Never commit secrets - use Kubernetes Secrets or external vaults"
+    - "Implement mutual TLS between services using service mesh"
+    - "Use RBAC for Kubernetes access control"
+    - "Scan container images for vulnerabilities in CI pipeline"
+    - "Implement network policies to restrict pod-to-pod communication"
+
+  workflows:
+    - "Build Docker images with multi-stage builds for size optimization"
+    - "Use Helm charts for templated Kubernetes deployments"
+    - "Implement blue-green or canary deployments for zero-downtime updates"
+    - "Monitor service metrics with Prometheus and Grafana"
+    - "Set up alerting for critical service health indicators"
+
+examples:
+  dockerfile: |
+    ```dockerfile
+    # Multi-stage build for production
+    FROM node:18-alpine AS builder
+    WORKDIR /app
+    COPY package*.json ./
+    RUN npm ci --only=production
+    COPY . .
+    RUN npm run build
+
+    FROM node:18-alpine
+    WORKDIR /app
+    COPY --from=builder /app/dist ./dist
+    COPY --from=builder /app/node_modules ./node_modules
+    USER node
+    EXPOSE 3000
+    CMD ["node", "dist/main.js"]
+    ```
+
+  k8s_deployment: |
+    ```yaml
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: user-service
+    spec:
+      replicas: 3
+      selector:
+        matchLabels:
+          app: user-service
+      template:
+        metadata:
+          labels:
+            app: user-service
+        spec:
+          containers:
+          - name: user-service
+            image: myregistry/user-service:1.0.0
+            ports:
+            - containerPort: 3000
+            env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: url
+            livenessProbe:
+              httpGet:
+                path: /health/live
+                port: 3000
+              initialDelaySeconds: 30
+              periodSeconds: 10
+            readinessProbe:
+              httpGet:
+                path: /health/ready
+                port: 3000
+              initialDelaySeconds: 5
+              periodSeconds: 5
+            resources:
+              requests:
+                memory: "128Mi"
+                cpu: "100m"
+              limits:
+                memory: "256Mi"
+                cpu: "500m"
+    ```
+
+  service_mesh_config: |
+    ```yaml
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: user-service
+    spec:
+      selector:
+        app: user-service
+      ports:
+      - protocol: TCP
+        port: 80
+        targetPort: 3000
+    ```
+
+variables:
+  NAMESPACE: "production"
+  REGISTRY_URL: "myregistry.io"

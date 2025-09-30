@@ -1,0 +1,224 @@
+schema_version: "1.0.0"
+metadata:
+  title: "Go Backend Service Assistant"
+  description: "AI assistant for building backend services in Go"
+  version: "1.0.0"
+  author: "Backend Team"
+  tags: ["golang", "backend", "rest-api", "grpc"]
+
+targets:
+  - copilot
+  - cursor
+  - continue
+  - claude
+
+context:
+  project_type: "api"
+  technologies:
+    - "golang"
+    - "gin"
+    - "gorm"
+    - "grpc"
+    - "postgresql"
+    - "redis"
+    - "docker"
+  description: |
+    High-performance backend service written in Go with REST and gRPC support,
+    database integration, and cloud-native deployment.
+
+instructions:
+  general:
+    - "Follow Go idioms and standard library conventions"
+    - "Use interfaces for testability and abstraction"
+    - "Handle errors explicitly - never ignore error returns"
+    - "Use context.Context for cancellation and deadlines"
+    - "Write idiomatic Go - simple, clear, and efficient"
+
+  code_style:
+    - "Use gofmt and goimports for consistent formatting"
+    - "Run golangci-lint and fix all issues"
+    - "Follow Go naming conventions (MixedCaps for exports)"
+    - "Keep functions under 50 lines when possible"
+    - "Document all exported functions, types, and packages"
+
+  architecture:
+    - "Structure: cmd/, internal/, pkg/, api/"
+    - "Use clean architecture with layers: handler, service, repository"
+    - "Implement dependency injection with interfaces"
+    - "Use environment variables for configuration (viper)"
+    - "Separate domain models from DTOs"
+
+  testing:
+    - "Write table-driven tests for all business logic"
+    - "Use testify for assertions and mocking"
+    - "Mock external dependencies with interfaces"
+    - "Write integration tests for database operations"
+    - "Aim for >75% code coverage"
+
+  performance:
+    - "Use goroutines for concurrent operations"
+    - "Implement proper connection pooling for databases"
+    - "Use sync.Pool for frequently allocated objects"
+    - "Profile with pprof before optimizing"
+    - "Consider using buffered channels for producer-consumer patterns"
+
+  security:
+    - "Validate all inputs at API boundaries"
+    - "Use prepared statements for SQL queries"
+    - "Implement rate limiting middleware"
+    - "Use secure random for tokens (crypto/rand)"
+    - "Never log sensitive data"
+
+examples:
+  http_handler: |
+    ```go
+    package handlers
+
+    import (
+        "net/http"
+        "github.com/gin-gonic/gin"
+    )
+
+    type UserHandler struct {
+        service UserService
+    }
+
+    func NewUserHandler(service UserService) *UserHandler {
+        return &UserHandler{service: service}
+    }
+
+    func (h *UserHandler) CreateUser(c *gin.Context) {
+        var req CreateUserRequest
+        if err := c.ShouldBindJSON(&req); err != nil {
+            c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+            return
+        }
+
+        user, err := h.service.CreateUser(c.Request.Context(), req)
+        if err != nil {
+            c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+            return
+        }
+
+        c.JSON(http.StatusCreated, user)
+    }
+    ```
+
+  service_layer: |
+    ```go
+    package service
+
+    import (
+        "context"
+        "errors"
+    )
+
+    type UserService interface {
+        CreateUser(ctx context.Context, req CreateUserRequest) (*User, error)
+        GetUser(ctx context.Context, id string) (*User, error)
+    }
+
+    type userService struct {
+        repo UserRepository
+    }
+
+    func NewUserService(repo UserRepository) UserService {
+        return &userService{repo: repo}
+    }
+
+    func (s *userService) CreateUser(ctx context.Context, req CreateUserRequest) (*User, error) {
+        // Validate request
+        if err := req.Validate(); err != nil {
+            return nil, errors.New("invalid request")
+        }
+
+        // Create user
+        user := &User{
+            Email:    req.Email,
+            Username: req.Username,
+        }
+
+        if err := s.repo.Create(ctx, user); err != nil {
+            return nil, err
+        }
+
+        return user, nil
+    }
+    ```
+
+  repository_pattern: |
+    ```go
+    package repository
+
+    import (
+        "context"
+        "gorm.io/gorm"
+    )
+
+    type UserRepository interface {
+        Create(ctx context.Context, user *User) error
+        FindByID(ctx context.Context, id string) (*User, error)
+        Update(ctx context.Context, user *User) error
+        Delete(ctx context.Context, id string) error
+    }
+
+    type userRepository struct {
+        db *gorm.DB
+    }
+
+    func NewUserRepository(db *gorm.DB) UserRepository {
+        return &userRepository{db: db}
+    }
+
+    func (r *userRepository) Create(ctx context.Context, user *User) error {
+        return r.db.WithContext(ctx).Create(user).Error
+    }
+
+    func (r *userRepository) FindByID(ctx context.Context, id string) (*User, error) {
+        var user User
+        err := r.db.WithContext(ctx).First(&user, "id = ?", id).Error
+        return &user, err
+    }
+    ```
+
+  table_driven_test: |
+    ```go
+    func TestUserService_CreateUser(t *testing.T) {
+        tests := []struct {
+            name    string
+            req     CreateUserRequest
+            wantErr bool
+        }{
+            {
+                name: "valid user",
+                req: CreateUserRequest{
+                    Email:    "user@example.com",
+                    Username: "testuser",
+                },
+                wantErr: false,
+            },
+            {
+                name: "invalid email",
+                req: CreateUserRequest{
+                    Email:    "invalid",
+                    Username: "testuser",
+                },
+                wantErr: true,
+            },
+        }
+
+        for _, tt := range tests {
+            t.Run(tt.name, func(t *testing.T) {
+                service := NewUserService(mockRepo)
+                _, err := service.CreateUser(context.Background(), tt.req)
+                if (err != nil) != tt.wantErr {
+                    t.Errorf("CreateUser() error = %v, wantErr %v", err, tt.wantErr)
+                }
+            })
+        }
+    }
+    ```
+
+variables:
+  SERVICE_NAME: "user-service"
+  GO_VERSION: "1.21"

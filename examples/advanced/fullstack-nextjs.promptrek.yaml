@@ -1,0 +1,163 @@
+schema_version: "1.0.0"
+metadata:
+  title: "Next.js Full-Stack App Assistant"
+  description: "AI assistant for modern Next.js full-stack web applications"
+  version: "1.0.0"
+  author: "Web Team"
+  tags: ["nextjs", "react", "typescript", "fullstack", "ssr"]
+
+targets:
+  - copilot
+  - cursor
+  - continue
+  - claude
+
+context:
+  project_type: "web_application"
+  technologies:
+    - "next.js"
+    - "react"
+    - "typescript"
+    - "tailwindcss"
+    - "prisma"
+    - "trpc"
+    - "nextauth"
+  description: |
+    Modern full-stack web application using Next.js with App Router,
+    server and client components, and end-to-end type safety.
+
+instructions:
+  general:
+    - "Use App Router for all new pages (not Pages Router)"
+    - "Leverage Server Components by default, use Client Components only when needed"
+    - "Implement proper SEO with metadata exports"
+    - "Use tRPC for end-to-end type-safe API calls"
+    - "Follow Next.js best practices for performance and caching"
+
+  code_style:
+    - "Use TypeScript strictly - no 'any' types"
+    - "Follow functional component patterns with hooks"
+    - "Use Tailwind CSS utility classes for styling"
+    - "Keep components in separate files (one component per file)"
+    - "Use named exports for components and utilities"
+
+  architecture:
+    - "Organize by feature: app/[feature]/page.tsx structure"
+    - "Use Server Components for data fetching"
+    - "Implement API routes under app/api/"
+    - "Store shared components in components/ directory"
+    - "Use server actions for mutations when appropriate"
+
+  testing:
+    - "Write unit tests for utilities and business logic"
+    - "Test React components with Testing Library"
+    - "Use Playwright for E2E tests of critical user flows"
+    - "Test API routes independently"
+    - "Include accessibility tests with jest-axe"
+
+  performance:
+    - "Optimize images with next/image component"
+    - "Implement proper code splitting and lazy loading"
+    - "Use dynamic imports for heavy client-side components"
+    - "Enable static generation where possible (generateStaticParams)"
+    - "Implement proper caching strategies (force-cache, no-store)"
+
+  security:
+    - "Use NextAuth.js for authentication"
+    - "Implement CSRF protection for forms"
+    - "Validate all inputs on both client and server"
+    - "Use environment variables for sensitive configuration"
+    - "Set secure headers in next.config.js"
+
+examples:
+  server_component: |
+    ```typescript
+    // app/dashboard/page.tsx (Server Component)
+    import { getServerSession } from 'next-auth';
+    import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+    import { prisma } from '@/lib/prisma';
+
+    export default async function DashboardPage() {
+      const session = await getServerSession(authOptions);
+
+      if (!session) {
+        redirect('/login');
+      }
+
+      const user = await prisma.user.findUnique({
+        where: { id: session.user.id },
+      });
+
+      return (
+        <div>
+          <h1>Welcome, {user.name}</h1>
+        </div>
+      );
+    }
+    ```
+
+  client_component: |
+    ```typescript
+    'use client';
+
+    import { useState } from 'react';
+    import { Button } from '@/components/ui/button';
+
+    export function Counter() {
+      const [count, setCount] = useState(0);
+
+      return (
+        <div className="flex items-center gap-4">
+          <Button onClick={() => setCount(count - 1)}>-</Button>
+          <span className="text-2xl font-bold">{count}</span>
+          <Button onClick={() => setCount(count + 1)}>+</Button>
+        </div>
+      );
+    }
+    ```
+
+  trpc_router: |
+    ```typescript
+    import { z } from 'zod';
+    import { router, publicProcedure } from '../trpc';
+
+    export const userRouter = router({
+      getById: publicProcedure
+        .input(z.object({ id: z.string() }))
+        .query(async ({ input }) => {
+          return await prisma.user.findUnique({
+            where: { id: input.id },
+          });
+        }),
+
+      create: publicProcedure
+        .input(z.object({
+          email: z.string().email(),
+          name: z.string(),
+        }))
+        .mutation(async ({ input }) => {
+          return await prisma.user.create({
+            data: input,
+          });
+        }),
+    });
+    ```
+
+  metadata_export: |
+    ```typescript
+    import type { Metadata } from 'next';
+
+    export const metadata: Metadata = {
+      title: 'Dashboard | MyApp',
+      description: 'User dashboard for managing your account',
+      openGraph: {
+        title: 'Dashboard',
+        description: 'User dashboard',
+        images: ['/og-image.jpg'],
+      },
+    };
+    ```
+
+variables:
+  APP_NAME: "MyNextApp"
+  APP_URL: "https://myapp.com"

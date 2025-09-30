@@ -2,6 +2,28 @@
 
 PrompTrek supports multiple AI-powered code editors and assistants. Each adapter generates editor-specific configuration files optimized for that particular tool.
 
+## Quick Reference
+
+| Editor | Status | Sync | Headless | Type | Generated Files |
+|--------|:------:|:----:|:--------:|------|-----------------|
+| [GitHub Copilot](#github-copilot) | ✅ | ✅ | ✅ | Project | `.github/copilot-instructions.md`, path-specific |
+| [Cursor](#cursor) | ✅ | - | - | Project | `.cursor/rules/*.mdc`, `AGENTS.md` |
+| [Continue](#continue) | ✅ | ✅ | - | Project | `config.yaml`, `.continue/rules/*.md` |
+| [Kiro](#kiro) | ✅ | - | - | Project | `.kiro/steering/*.md`, `.kiro/specs/*.md` |
+| [Cline](#cline) | ✅ | - | - | Project | `.clinerules` |
+| [Claude Code](#claude-code) | ✅ | - | - | Project | `.claude/context.md` |
+| [Codeium](#codeium) | ✅ | - | - | Project | `.codeium/context.json` |
+| [Tabnine](#tabnine) | ✅ | - | - | Global | Global settings |
+| [Amazon Q](#amazon-q) | ✅ | - | - | Project | `.amazonq/context.md` |
+| [JetBrains AI](#jetbrains-ai) | ✅ | - | - | IDE | `.idea/ai-assistant.xml` |
+
+**Legend**:
+- **Sync**: Bidirectional synchronization (read editor files → PrompTrek)
+- **Headless**: Supports autonomous agent instructions
+- **Type**: Configuration scope (Project files / Global settings / IDE interface)
+
+For detailed capability comparison, see [ADAPTER_CAPABILITIES.md](./ADAPTER_CAPABILITIES.md).
+
 ## Supported Editors
 
 ### ✅ Claude Code

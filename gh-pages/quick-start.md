@@ -46,6 +46,18 @@ promptrek init --template api --output my-api.promptrek.yaml
 - `react` - React/TypeScript web application
 - `api` - Node.js/Python API service
 
+**Advanced Examples**: PrompTrek includes 8 production-ready examples for complex projects:
+- `monorepo-nx` - NX/Turborepo monorepo with multiple apps
+- `microservices-k8s` - Kubernetes microservices architecture
+- `mobile-react-native` - Cross-platform mobile development
+- `python-fastapi` - Modern async Python backend
+- `fullstack-nextjs` - Next.js full-stack with App Router
+- `rust-cli` - Rust command-line tools
+- `golang-backend` - Go backend services
+- `data-science-python` - ML/Data Science projects
+
+See [examples on GitHub](https://github.com/flamingquaks/promptrek/tree/main/examples)
+
 ### 2. Customize Your Prompt
 
 Edit the generated `.promptrek.yaml` file to match your project needs:
@@ -97,7 +109,27 @@ Use `--strict` to treat warnings as errors:
 promptrek validate my-project.promptrek.yaml --strict
 ```
 
-### 4. Generate Editor-Specific Prompts
+### 4. Preview Generated Output (Optional)
+
+Preview what will be generated without creating files:
+
+```bash
+# Preview for a specific editor
+promptrek preview my-project.promptrek.yaml --editor copilot
+
+# Preview with variable overrides
+promptrek preview my-project.promptrek.yaml --editor cursor \
+  -V PROJECT_NAME="MyApp" \
+  -V AUTHOR="Team Lead"
+```
+
+The preview shows:
+- Files that would be created
+- Output from the generator
+- Any warnings or notices
+- No actual files are written
+
+### 5. Generate Editor-Specific Prompts
 
 Now generate prompts for your preferred editors:
 
@@ -134,11 +166,30 @@ PrompTrek generates sophisticated configuration files for each editor:
 - `config.yaml` - Main configuration in modern YAML format
 - `.continue/rules/*.md` - Organized rule files by category and technology
 
-### Other Editors
-- **Amazon Q**: `.amazonq/context.md`, `.amazonq/comments.template`
-- **JetBrains AI**: `.idea/ai-assistant.xml`, `.jetbrains/config.json`
-- **Kiro**: `.kiro/steering/*.md`, `.kiro/specs/*/requirements.md`, `.kiro/hooks/*.md`, `.prompts/*.md`
-- **Cline**: `.clinerules`
+### Kiro
+- `.kiro/steering/*.md` - Steering files (product, tech, structure)
+- `.kiro/specs/*.md` - Specification files (requirements, design, tasks)
+
+### Cline
+- `.clinerules` - Markdown-based rules configuration
+
+### Claude Code
+- `.claude/context.md` - Rich context format with project information
+
+### Codeium
+- `.codeium/context.json` - JSON context with team patterns
+- `.codeiumrc` - Configuration file
+
+### Tabnine
+- Global configuration only (configured through admin panel)
+
+### Amazon Q
+- `.amazonq/context.md` - Context information
+- `.amazonq/comments.template` - Comment-based templates
+
+### JetBrains AI
+- `.idea/ai-assistant.xml` - IDE-integrated configuration
+- `.jetbrains/config.json` - JSON configuration
 
 ## Example Workflow
 

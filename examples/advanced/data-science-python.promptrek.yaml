@@ -1,0 +1,205 @@
+schema_version: "1.0.0"
+metadata:
+  title: "Data Science Project Assistant"
+  description: "AI assistant for ML and data science projects in Python"
+  version: "1.0.0"
+  author: "Data Science Team"
+  tags: ["python", "machine-learning", "data-science", "mlops"]
+
+targets:
+  - copilot
+  - cursor
+  - continue
+  - claude
+
+context:
+  project_type: "data_science"
+  technologies:
+    - "python"
+    - "pandas"
+    - "numpy"
+    - "scikit-learn"
+    - "pytorch"
+    - "jupyter"
+    - "mlflow"
+    - "dvc"
+  description: |
+    Machine learning and data science project with reproducible experiments,
+    version-controlled datasets, and MLOps best practices.
+
+instructions:
+  general:
+    - "Make all experiments reproducible with fixed random seeds"
+    - "Version control both code and data (use DVC)"
+    - "Document data sources, processing steps, and assumptions"
+    - "Track experiments with MLflow or Weights & Biases"
+    - "Follow scientific method - hypothesis, experiment, analysis, conclusion"
+
+  code_style:
+    - "Use type hints for function signatures"
+    - "Follow PEP 8 with Black formatting"
+    - "Keep notebooks clean - refactor reusable code to .py files"
+    - "Use meaningful variable names (avoid x, y, z for non-coordinates)"
+    - "Document all custom functions with docstrings"
+
+  architecture:
+    - "Structure: notebooks/, src/, data/, models/, reports/"
+    - "Keep raw data immutable in data/raw/"
+    - "Store processed data in data/processed/"
+    - "Save trained models in models/ with version metadata"
+    - "Separate data processing, training, and evaluation code"
+
+  testing:
+    - "Write unit tests for data processing functions"
+    - "Validate data schemas with pandera or great_expectations"
+    - "Test model performance on held-out validation set"
+    - "Include smoke tests for training pipelines"
+    - "Verify model predictions are within expected ranges"
+
+  performance:
+    - "Profile code with cProfile before optimizing"
+    - "Use vectorized operations (numpy/pandas) instead of loops"
+    - "Consider Dask for datasets larger than memory"
+    - "Use appropriate data types (int8 vs int64) to save memory"
+    - "Implement batch processing for large-scale inference"
+
+  data_quality:
+    - "Check for missing values and handle appropriately"
+    - "Identify and handle outliers systematically"
+    - "Validate data distributions match expectations"
+    - "Document all feature engineering transformations"
+    - "Split data properly (train/val/test) with stratification"
+
+  mlops:
+    - "Use configuration files for hyperparameters (yaml/json)"
+    - "Log all metrics and artifacts with experiment tracking"
+    - "Implement model versioning and registry"
+    - "Create reproducible training pipelines"
+    - "Monitor model performance in production"
+
+examples:
+  data_processing: |
+    ```python
+    import pandas as pd
+    import numpy as np
+    from sklearn.preprocessing import StandardScaler
+
+    def load_and_clean_data(filepath: str) -> pd.DataFrame:
+        """Load data and perform initial cleaning."""
+        df = pd.read_csv(filepath)
+
+        # Handle missing values
+        df = df.dropna(subset=['target'])
+        df['feature1'] = df['feature1'].fillna(df['feature1'].median())
+
+        # Remove outliers using IQR method
+        Q1 = df['feature2'].quantile(0.25)
+        Q3 = df['feature2'].quantile(0.75)
+        IQR = Q3 - Q1
+        df = df[(df['feature2'] >= Q1 - 1.5*IQR) & (df['feature2'] <= Q3 + 1.5*IQR)]
+
+        return df
+
+    def create_features(df: pd.DataFrame) -> pd.DataFrame:
+        """Engineer features for modeling."""
+        df['feature_ratio'] = df['feature1'] / (df['feature2'] + 1)
+        df['feature_log'] = np.log1p(df['feature3'])
+        return df
+    ```
+
+  model_training: |
+    ```python
+    from sklearn.ensemble import RandomForestClassifier
+    from sklearn.model_selection import cross_val_score
+    import mlflow
+    import joblib
+
+    def train_model(X_train, y_train, params: dict):
+        """Train model with experiment tracking."""
+        with mlflow.start_run():
+            # Log parameters
+            mlflow.log_params(params)
+
+            # Train model
+            model = RandomForestClassifier(**params, random_state=42)
+            model.fit(X_train, y_train)
+
+            # Evaluate with cross-validation
+            scores = cross_val_score(model, X_train, y_train, cv=5)
+            mlflow.log_metric("cv_mean", scores.mean())
+            mlflow.log_metric("cv_std", scores.std())
+
+            # Save model
+            joblib.dump(model, 'models/model.pkl')
+            mlflow.sklearn.log_model(model, "model")
+
+            return model
+    ```
+
+  config_file: |
+    ```yaml
+    # config.yaml
+    data:
+      train_path: "data/processed/train.csv"
+      test_path: "data/processed/test.csv"
+      target_column: "target"
+
+    model:
+      type: "random_forest"
+      params:
+        n_estimators: 100
+        max_depth: 10
+        min_samples_split: 5
+        random_state: 42
+
+    training:
+      test_size: 0.2
+      cv_folds: 5
+      stratify: true
+
+    mlflow:
+      experiment_name: "customer_churn"
+      tracking_uri: "http://localhost:5000"
+    ```
+
+  model_evaluation: |
+    ```python
+    from sklearn.metrics import classification_report, confusion_matrix
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+
+    def evaluate_model(model, X_test, y_test):
+        """Comprehensive model evaluation."""
+        y_pred = model.predict(X_test)
+
+        # Classification metrics
+        print(classification_report(y_test, y_pred))
+
+        # Confusion matrix
+        cm = confusion_matrix(y_test, y_pred)
+        plt.figure(figsize=(8, 6))
+        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
+        plt.title('Confusion Matrix')
+        plt.ylabel('True Label')
+        plt.xlabel('Predicted Label')
+        plt.savefig('reports/confusion_matrix.png')
+        plt.close()
+
+        # Feature importance
+        if hasattr(model, 'feature_importances_'):
+            importances = pd.DataFrame({
+                'feature': X_test.columns,
+                'importance': model.feature_importances_
+            }).sort_values('importance', ascending=False)
+
+            plt.figure(figsize=(10, 6))
+            sns.barplot(data=importances.head(10), x='importance', y='feature')
+            plt.title('Top 10 Feature Importances')
+            plt.tight_layout()
+            plt.savefig('reports/feature_importance.png')
+            plt.close()
+    ```
+
+variables:
+  PROJECT_NAME: "ml-project"
+  RANDOM_SEED: "42"

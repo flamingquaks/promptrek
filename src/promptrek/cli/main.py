@@ -12,6 +12,7 @@ from ..core.exceptions import PrompTrekError
 from .commands.agents import agents_command
 from .commands.generate import generate_command
 from .commands.init import init_command
+from .commands.preview import preview_command
 from .commands.sync import sync_command
 from .commands.validate import validate_command
 
@@ -63,6 +64,51 @@ def validate(ctx: click.Context, file: Path, strict: bool) -> None:
     """Validate a universal prompt file."""
     try:
         validate_command(ctx, file, strict)
+    except PrompTrekError as e:
+        click.echo(f"Error: {e}", err=True)
+        ctx.exit(1)
+    except Exception as e:
+        if ctx.obj.get("verbose"):
+            raise
+        click.echo(f"Unexpected error: {e}", err=True)
+        ctx.exit(1)
+
+
+@cli.command()
+@click.argument("file", type=click.Path(exists=True, path_type=Path))
+@click.option(
+    "--editor",
+    "-e",
+    type=str,
+    required=True,
+    help="Target editor for preview",
+)
+@click.option(
+    "--var",
+    "-V",
+    "variables",
+    multiple=True,
+    help="Variable override in KEY=VALUE format",
+)
+@click.pass_context
+def preview(
+    ctx: click.Context,
+    file: Path,
+    editor: str,
+    variables: tuple,
+) -> None:
+    """Preview generated output without creating files."""
+    try:
+        # Parse variables
+        var_dict = {}
+        for var in variables:
+            if "=" not in var:
+                click.echo(f"Invalid variable format: {var}. Use KEY=VALUE", err=True)
+                ctx.exit(1)
+            key, value = var.split("=", 1)
+            var_dict[key] = value
+
+        preview_command(ctx, file, editor, var_dict if var_dict else None)
     except PrompTrekError as e:
         click.echo(f"Error: {e}", err=True)
         ctx.exit(1)

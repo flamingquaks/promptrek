@@ -44,8 +44,8 @@ title: Home
 
 <section class="editors-section">
   <div class="container">
-    <h2 class="section-title">Supported AI Editors</h2>
-    <p class="section-description">Generate perfect configurations for all major AI coding assistants</p>
+    <h2 class="section-title">10 Supported AI Editors</h2>
+    <p class="section-description">Generate perfect configurations for all major AI coding assistants from one universal format</p>
 
     <div class="editors-grid">
       <div class="editor-card">
@@ -54,8 +54,8 @@ title: Home
           <span style="display:none;">🐙</span>
         </div>
         <h4>GitHub Copilot</h4>
-        <p>Repository-wide and path-specific instructions</p>
-        <span class="status-badge supported">Fully Supported</span>
+        <p>Repository-wide, path-specific, and agent instructions</p>
+        <span class="status-badge supported">✅ Sync + Headless</span>
       </div>
 
       <div class="editor-card">
@@ -64,8 +64,8 @@ title: Home
           <span style="display:none;">🎯</span>
         </div>
         <h4>Cursor</h4>
-        <p>Modern 2025 rules with Always/Auto Attached types and project overview</p>
-        <span class="status-badge supported">Fully Supported</span>
+        <p>Modern .mdc rules system with Always/Auto Attached</p>
+        <span class="status-badge supported">✅ Fully Supported</span>
       </div>
 
       <div class="editor-card">
@@ -74,8 +74,55 @@ title: Home
           <span style="display:none;">⚡</span>
         </div>
         <h4>Continue</h4>
-        <p>Complete YAML configuration system</p>
-        <span class="status-badge supported">Fully Supported</span>
+        <p>YAML configuration with advanced rules directory</p>
+        <span class="status-badge supported">✅ Sync Supported</span>
+      </div>
+
+      <div class="editor-card">
+        <div class="editor-icon">
+          <img src="https://kiro.dev/favicon.ico" alt="Kiro" width="32" height="32" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+          <span style="display:none;">🤖</span>
+        </div>
+        <h4>Kiro</h4>
+        <p>Comprehensive steering and specs system</p>
+        <span class="status-badge supported">✅ Fully Supported</span>
+      </div>
+
+      <div class="editor-card">
+        <div class="editor-icon">
+          <img src="assets/cline-logo.svg" alt="Cline" width="32" height="32" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+          <span style="display:none;">📝</span>
+        </div>
+        <h4>Cline</h4>
+        <p>Markdown-based rules configuration</p>
+        <span class="status-badge supported">✅ Fully Supported</span>
+      </div>
+
+      <div class="editor-card">
+        <div class="editor-icon">
+          <span>🤖</span>
+        </div>
+        <h4>Claude Code</h4>
+        <p>Rich context format with project information</p>
+        <span class="status-badge supported">✅ Fully Supported</span>
+      </div>
+
+      <div class="editor-card">
+        <div class="editor-icon">
+          <span>💻</span>
+        </div>
+        <h4>Codeium</h4>
+        <p>JSON context with team patterns</p>
+        <span class="status-badge supported">✅ Fully Supported</span>
+      </div>
+
+      <div class="editor-card">
+        <div class="editor-icon">
+          <span>🔮</span>
+        </div>
+        <h4>Tabnine</h4>
+        <p>Team-specific configurations</p>
+        <span class="status-badge supported">✅ Global Config</span>
       </div>
 
       <div class="editor-card">
@@ -85,7 +132,7 @@ title: Home
         </div>
         <h4>Amazon Q</h4>
         <p>Comment-based assistance templates</p>
-        <span class="status-badge supported">Fully Supported</span>
+        <span class="status-badge supported">✅ Fully Supported</span>
       </div>
 
       <div class="editor-card">
@@ -94,30 +141,11 @@ title: Home
           <span style="display:none;">🧠</span>
         </div>
         <h4>JetBrains AI</h4>
-        <p>IDE-integrated prompts</p>
-        <span class="status-badge supported">Fully Supported</span>
-      </div>
-
-      <div class="editor-card">
-        <div class="editor-icon">
-          <img src="https://kiro.dev/favicon.ico" alt="Kiro" width="32" height="32" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
-          <span style="display:none;">🤖</span>
-        </div>
-        <h4>Kiro</h4>
-        <p>AI-powered steering, specs, hooks, and prompts</p>
-        <span class="status-badge supported">Fully Supported</span>
-      </div>
-
-      <div class="editor-card">
-        <div class="editor-icon">
-          <img src="assets/cline-logo.svg" alt="Cline" width="32" height="32" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
-          <span style="display:none;">📝</span>
-        </div>
-        <h4>Cline</h4>
-        <p>Markdown-based rules</p>
-        <span class="status-badge supported">Fully Supported</span>
+        <p>IDE-integrated XML and JSON prompts</p>
+        <span class="status-badge supported">✅ Fully Supported</span>
       </div>
     </div>
+    <p class="section-note">See the <a href="https://github.com/flamingquaks/promptrek/blob/main/docs/ADAPTER_CAPABILITIES.md">capability matrix</a> for detailed feature comparison</p>
   </div>
 </section>
 
@@ -253,15 +281,39 @@ instructions:
       </div>
 
       <div class="feature-card-modern">
+        <div class="feature-icon">🔄</div>
+        <h3>Bidirectional Sync</h3>
+        <p>Sync editor configurations back to PrompTrek format. Works with GitHub Copilot and Continue for seamless two-way updates.</p>
+      </div>
+
+      <div class="feature-card-modern">
+        <div class="feature-icon">👁️</div>
+        <h3>Preview Mode</h3>
+        <p>Preview generated output before creating files. Test configurations with variable overrides without making changes.</p>
+      </div>
+
+      <div class="feature-card-modern">
         <div class="feature-icon">📦</div>
         <h3>Import System</h3>
         <p>Organize and reuse prompt components across multiple configurations. Build a library of reusable prompt templates.</p>
       </div>
 
       <div class="feature-card-modern">
+        <div class="feature-icon">📚</div>
+        <h3>Rich Examples</h3>
+        <p>8 production-ready templates for monorepos, microservices, mobile apps, ML projects, and more. Get started instantly.</p>
+      </div>
+
+      <div class="feature-card-modern">
         <div class="feature-icon">🎨</div>
         <h3>Multi-Editor Support</h3>
-        <p>Generate prompts for all major AI coding assistants from a single source. Never write the same prompt twice.</p>
+        <p>Generate prompts for 10 major AI coding assistants from a single source. Never write the same prompt twice.</p>
+      </div>
+
+      <div class="feature-card-modern">
+        <div class="feature-icon">🧪</div>
+        <h3>Production Ready</h3>
+        <p>442 tests with 82% coverage. Published to PyPI with automated CI/CD. Battle-tested and ready for production use.</p>
       </div>
     </div>
   </div>
