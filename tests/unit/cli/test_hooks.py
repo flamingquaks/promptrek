@@ -102,6 +102,22 @@ class TestCheckGeneratedCommand:
             check_generated_command(ctx, files)
             ctx.exit.assert_called_once_with(1)
 
+    def test_check_windows_paths(self):
+        """Test Windows-style backslash paths are handled correctly."""
+        ctx = Mock()
+        ctx.obj = {"verbose": False}
+        ctx.exit = Mock()
+
+        # Windows paths with backslashes
+        files = [
+            ".github\\copilot-instructions.md",
+            ".cursor\\rules\\index.mdc",
+        ]
+
+        with patch("click.echo"):
+            check_generated_command(ctx, files)
+            ctx.exit.assert_called_once_with(1)
+
 
 class TestInstallHooksCommand:
     """Test install_hooks_command function."""

@@ -66,20 +66,23 @@ def check_generated_command(ctx: click.Context, files: List[str]) -> None:
         """Check if a file path matches a pattern (supports simple wildcards)."""
         path = Path(file_path)
 
+        # Normalize path to use forward slashes for cross-platform compatibility
+        normalized_path = str(path).replace("\\", "/")
+
         # Direct match
-        if str(path) == pattern or str(path) == pattern.rstrip("/"):
+        if normalized_path == pattern or normalized_path == pattern.rstrip("/"):
             return True
 
         # Directory match
         if pattern.endswith("/"):
-            return str(path).startswith(pattern) or any(
+            return normalized_path.startswith(pattern) or any(
                 parent.name == pattern.rstrip("/") for parent in path.parents
             )
 
         # Wildcard match
         if "*" in pattern:
             pattern_parts = pattern.split("/")
-            path_parts = str(path).split("/")
+            path_parts = normalized_path.split("/")
 
             if len(pattern_parts) != len(path_parts):
                 return False
