@@ -42,24 +42,29 @@ repos:
         pass_filenames: true
 
       # Basic code formatting and linting (local versions)
-      - id: black-check
-        name: Check code formatting with black
-        entry: uv run black --check --diff
+      - id: black
+        name: black pyton linting
+        entry: uv run black
         language: system
-        files: ^(src/|tests/).*\.py$
+        types: [python]
+        args: ['--check', '--diff', 'src/', 'tests/'] 
+        pass_filenames: true 
 
       - id: isort-check
         name: Check import sorting with isort
-        entry: isort --check-only --diff
+        entry: uv run isort 
+        args: ['--check', '--diff', 'src/', 'tests/']
         language: system
-        files: ^(src/|tests/).*\.py$
+        types: [python]
+        pass_filenames: true
 
       - id: flake8-check
         name: Check code style with flake8
         entry: uv run flake8
+        args: ['--check', '--diff', 'src/', 'tests/']
         language: system
-        files: ^(src/|tests/).*\.py$
-
+        types: [python]
+        pass_filenames: true
 
       - id: end-of-file-fixer
         name: Fix end of files
