@@ -247,7 +247,7 @@ instructions:
           </div>
           <div class="file-item">
             <span class="file-icon">📄</span>
-            <span class="file-name">.cline_rules.md</span>
+            <span class="file-name">.clinerules</span>
           </div>
           <div class="file-item">
             <span class="file-icon">📄</span>

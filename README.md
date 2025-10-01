@@ -2,7 +2,6 @@
 
 [![CI](https://github.com/flamingquaks/promptrek/actions/workflows/ci.yml/badge.svg)](https://github.com/flamingquaks/promptrek/actions/workflows/ci.yml)
 [![PR Validation](https://github.com/flamingquaks/promptrek/actions/workflows/pr.yml/badge.svg)](https://github.com/flamingquaks/promptrek/actions/workflows/pr.yml)
-[![Test Matrix](https://github.com/flamingquaks/promptrek/actions/workflows/test-matrix.yml/badge.svg)](https://github.com/flamingquaks/promptrek/actions/workflows/test-matrix.yml)
 [![Python Versions](https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-blue)](https://github.com/flamingquaks/promptrek)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -49,37 +48,24 @@ promptrek generate --all
 
 3. Use the generated prompts in your preferred editor!
 
-## 📋 Project Status
-
-**Version 0.0.1** - Production Ready ✅
-
-- ✅ **Core Functionality**: UPF parser, validation, and comprehensive CLI interface
-- ✅ **10 Editor Adapters**: Support for all major AI coding assistants
-- ✅ **Advanced Features**: Variable substitution, conditional instructions, bidirectional sync
-- ✅ **Comprehensive Testing**: 442 tests with 82% code coverage
-- ✅ **Rich Documentation**: Complete guides, examples, and API reference
-- ✅ **Published to PyPI**: Install with `pip install promptrek`
-
-**Production ready!** Actively used for managing AI editor configurations across multiple platforms.
-
 ## 📖 Documentation
 
-Comprehensive documentation is available in the [`docs/`](./docs/) directory:
+Comprehensive documentation is available in the [`docs/`](https://github.com/flamingquaks/promptrek/tree/main/docs) directory:
 
 ### Getting Started
 - [Getting Started Guide](./GETTING_STARTED.md) - Complete setup and usage guide
 - [Universal Prompt Format](./docs/UPF_SPECIFICATION.md) - UPF specification and examples
 
 ### Features & Usage
-- [Advanced Features](./docs/ADVANCED_FEATURES.md) - Variables, conditionals, and imports
-- [Editor Adapters](./docs/ADAPTERS.md) - Detailed guide to all supported editors
-- [Adapter Capabilities](./docs/ADAPTER_CAPABILITIES.md) - Feature comparison matrix
-- [Sync Feature](./docs/SYNC_FEATURE.md) - Bidirectional synchronization guide
+- [Advanced Features](https://github.com/flamingquaks/promptrek/tree/main/docs/ADVANCED_FEATURES.md) - Variables, conditionals, and imports
+- [Editor Adapters](https://github.com/flamingquaks/promptrek/tree/main/docs/ADAPTERS.md) - Detailed guide to all supported editors
+- [Adapter Capabilities](https://github.com/flamingquaks/promptrek/tree/main/docs/ADAPTER_CAPABILITIES.md) - Feature comparison matrix
+- [Sync Feature](https://github.com/flamingquaks/promptrek/tree/main/docs/SYNC_FEATURE.md) - Bidirectional synchronization guide
 
 ### Architecture & Planning
-- [System Architecture](./docs/ARCHITECTURE.md) - Technical design and structure
-- [Implementation Roadmap](./docs/IMPLEMENTATION_ROADMAP.md) - Development status and future plans
-- [Project Structure](./docs/PROJECT_STRUCTURE.md) - Repository organization
+- [System Architecture](https://github.com/flamingquaks/promptrek/tree/main/docs/ARCHITECTURE.md) - Technical design and structure
+- [Implementation Roadmap](https://github.com/flamingquaks/promptrek/tree/main/docs/IMPLEMENTATION_ROADMAP.md) - Development status and future plans
+- [Project Structure](https://github.com/flamingquaks/promptrek/tree/main/docs/PROJECT_STRUCTURE.md) - Repository organization
 
 ## 🎨 Supported Editors
 
@@ -97,21 +83,21 @@ Comprehensive documentation is available in the [`docs/`](./docs/) directory:
 
 ## 🗂️ Example Configurations
 
-See the [`examples/`](./examples/) directory for sample configurations:
+See the [`examples/`](.https://github.com/flamingquaks/promptrek/tree/main/examples/) directory for sample configurations:
 
 ### Basic Examples
-- [React TypeScript Project](./examples/basic/react-typescript.promptrek.yaml)
-- [Node.js API Service](./examples/basic/node-api.promptrek.yaml)
+- [React TypeScript Project](https://github.com/flamingquaks/promptrek/tree/main/examples/basic/react-typescript.promptrek.yaml)
+- [Node.js API Service](https://github.com/flamingquaks/promptrek/tree/main/examples/basic/node-api.promptrek.yaml)
 
 ### Advanced Examples
-- [NX Monorepo](./examples/advanced/monorepo-nx.promptrek.yaml) - Multi-package workspace with NX
-- [Microservices + Kubernetes](./examples/advanced/microservices-k8s.promptrek.yaml) - Cloud-native architecture
-- [React Native Mobile](./examples/advanced/mobile-react-native.promptrek.yaml) - Cross-platform mobile apps
-- [FastAPI Backend](./examples/advanced/python-fastapi.promptrek.yaml) - Modern Python async API
-- [Next.js Full-Stack](./examples/advanced/fullstack-nextjs.promptrek.yaml) - App Router with SSR
-- [Rust CLI Tool](./examples/advanced/rust-cli.promptrek.yaml) - Systems programming
-- [Go Backend Service](./examples/advanced/golang-backend.promptrek.yaml) - High-performance APIs
-- [Data Science ML](./examples/advanced/data-science-python.promptrek.yaml) - MLOps and experiments
+- [NX Monorepo](https://github.com/flamingquaks/promptrek/tree/main/examples/advanced/monorepo-nx.promptrek.yaml) - Multi-package workspace with NX
+- [Microservices + Kubernetes](https://github.com/flamingquaks/promptrek/tree/main/examples/advanced/microservices-k8s.promptrek.yaml) - Cloud-native architecture
+- [React Native Mobile](https://github.com/flamingquaks/promptrek/tree/main/examples/advanced/mobile-react-native.promptrek.yaml) - Cross-platform mobile apps
+- [FastAPI Backend](https://github.com/flamingquaks/promptrek/tree/main/examples/advanced/python-fastapi.promptrek.yaml) - Modern Python async API
+- [Next.js Full-Stack](https://github.com/flamingquaks/promptrek/tree/main/examples/advanced/fullstack-nextjs.promptrek.yaml) - App Router with SSR
+- [Rust CLI Tool](https://github.com/flamingquaks/promptrek/tree/main/examples/advanced/rust-cli.promptrek.yaml) - Systems programming
+- [Go Backend Service](https://github.com/flamingquaks/promptrek/tree/main/examples/advanced/golang-backend.promptrek.yaml) - High-performance APIs
+- [Data Science ML](https://github.com/flamingquaks/promptrek/tree/main/examples/advanced/data-science-python.promptrek.yaml) - MLOps and experiments
 
 ## 🚀 Installation & Quick Start
 
