@@ -49,8 +49,9 @@ class TestKiroAdapter(TestAdapterBase):
 
         # Should generate steering files only
         assert len(files) >= 1
+        # Check using path components for cross-platform compatibility
         file_strs = [str(f) for f in files]
-        assert any(".kiro/steering" in f for f in file_strs)
+        assert any("kiro" in f and "steering" in f for f in file_strs)
         assert mock_mkdir.called
         assert mock_file.called
 

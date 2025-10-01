@@ -67,8 +67,10 @@ class TestContinueAdapter(TestAdapterBase):
 
         # Should generate multiple rules files in .continue/rules/
         assert len(files) >= 3  # At least general, code-style, testing
-        assert any(".continue/rules/general.md" in str(f) for f in files)
-        assert any(".continue/rules/code-style.md" in str(f) for f in files)
+        # Use Path for cross-platform path checking
+        file_names = [f.name for f in files]
+        assert "general.md" in file_names
+        assert "code-style.md" in file_names
 
         # Check that mkdir and file operations were called
         assert mock_mkdir.called

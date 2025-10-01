@@ -85,5 +85,6 @@ class TestWindsurfAdapter(TestAdapterBase):
 
         assert len(files) > 0
         # Should generate general, code-style, testing, and tech-specific rules
-        assert any(".windsurf/rules/general.md" in str(f) for f in files)
-        assert any(".windsurf/rules/code-style.md" in str(f) for f in files)
+        file_names = [f.name for f in files]
+        assert "general.md" in file_names
+        assert "code-style.md" in file_names
