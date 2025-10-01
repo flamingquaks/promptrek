@@ -25,17 +25,19 @@ This document provides a comprehensive comparison of features supported by each 
 ## Feature Descriptions
 
 ### Variable Substitution
-Ability to replace template variables (e.g., `{{{ PROJECT_NAME }}}`) with actual values during generation.
+Ability to replace template variables (e.g., `{% raw %}{{{ PROJECT_NAME }}}{% endraw %}`) with actual values during generation.
 
 **Supported by**: All adapters
 
 **Example**:
+{% raw %}
 ```yaml
 metadata:
   title: "{{{ PROJECT_NAME }}} Assistant"
 variables:
   PROJECT_NAME: "MyProject"
 ```
+{% endraw %}
 
 ### Conditional Instructions
 Ability to provide editor-specific instructions using conditional logic.

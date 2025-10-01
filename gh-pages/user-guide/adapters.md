@@ -634,11 +634,3 @@ promptrek generate --editor claude --output ./output project.promptrek.yaml
 
 # Incorrect  
 - if: "EDITOR = \"claude\""  # Single = instead of ==
-```
-
-### Getting Help
-
-- Use `promptrek list-editors` to see all supported editors
-- Use `--dry-run` to preview generated content
-- Use `--verbose` for detailed operation logs
-- Check the generated files match your editor's expected format

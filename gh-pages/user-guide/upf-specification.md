@@ -348,6 +348,7 @@ Editor-specific configurations and additional instructions.
 - `settings`: Editor-specific settings
 
 **Example**:
+{% raw %}
 ```yaml
 editor_specific:
   copilot:
@@ -377,6 +378,7 @@ editor_specific:
       temperature: 0.7
       max_tokens: 1000
 ```
+{% endraw %}
 
 ### conditions (optional)
 
