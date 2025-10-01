@@ -19,7 +19,7 @@ class JetBrainsAdapter(MarkdownSyncMixin, EditorAdapter):
     _description = "JetBrains AI (.assistant/rules/)"
     _file_patterns = [".assistant/rules/*.md"]
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             name="jetbrains",
             description=self._description,

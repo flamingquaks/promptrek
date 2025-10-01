@@ -19,7 +19,7 @@ class WindsurfAdapter(MarkdownSyncMixin, EditorAdapter):
     _description = "Windsurf (.windsurf/rules/)"
     _file_patterns = [".windsurf/rules/*.md"]
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             name="windsurf",
             description=self._description,

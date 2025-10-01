@@ -13,6 +13,9 @@ from ..core.models import UniversalPrompt
 from .base import EditorAdapter
 from .sync_mixin import MarkdownSyncMixin
 
+# Maximum number of instructions to include in agent configuration
+MAX_AGENT_INSTRUCTIONS = 3
+
 
 class AmazonQAdapter(MarkdownSyncMixin, EditorAdapter):
     """Adapter for Amazon Q AI assistant."""
@@ -20,7 +23,7 @@ class AmazonQAdapter(MarkdownSyncMixin, EditorAdapter):
     _description = "Amazon Q (.amazonq/rules/, .amazonq/cli-agents/)"
     _file_patterns = [".amazonq/rules/*.md", ".amazonq/cli-agents/*.json"]
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             name="amazon-q",
             description=self._description,
@@ -225,7 +228,7 @@ class AmazonQAdapter(MarkdownSyncMixin, EditorAdapter):
                     "name": "code-review-agent",
                     "description": "Reviews code for style and quality issues",
                     "instructions": "Focus on code style, readability, and best practices. "
-                    + " ".join(prompt.instructions.code_style[:3]),
+                    + " ".join(prompt.instructions.code_style[:MAX_AGENT_INSTRUCTIONS]),
                 }
             )
 

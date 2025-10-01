@@ -19,7 +19,7 @@ class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
     _description = "Cursor (.cursor/rules/index.mdc, .cursor/rules/*.mdc, AGENTS.md)"
     _file_patterns = [".cursor/rules/index.mdc", ".cursor/rules/*.mdc", "AGENTS.md"]
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             name="cursor",
             description=self._description,

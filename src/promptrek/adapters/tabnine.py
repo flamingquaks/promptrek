@@ -19,7 +19,7 @@ class TabnineAdapter(EditorAdapter):
     _description = "Tabnine (.tabnine_commands)"
     _file_patterns = [".tabnine_commands"]
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             name="tabnine",
             description=self._description,

@@ -19,7 +19,7 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
     _description = "Claude Code (context-based)"
     _file_patterns = [".claude/CLAUDE.md", ".claude-context.md"]
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             name="claude",
             description=self._description,
@@ -155,9 +155,10 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
 
     def parse_files(self, source_dir: Path) -> UniversalPrompt:
         """Parse Claude Code files back into a UniversalPrompt."""
-        claude_file = source_dir / ".claude" / "CLAUDE.md"
+        file_path = ".claude/CLAUDE.md"
         return self.parse_single_markdown_file(
-            file_path=str(claude_file),
+            source_dir=source_dir,
+            file_path=file_path,
             editor_name="Claude Code",
         )
 

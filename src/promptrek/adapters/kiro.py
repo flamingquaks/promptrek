@@ -19,7 +19,7 @@ class KiroAdapter(MarkdownSyncMixin, EditorAdapter):
     _description = "Kiro (.kiro/steering/)"
     _file_patterns = [".kiro/steering/*.md"]
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             name="kiro",
             description=self._description,

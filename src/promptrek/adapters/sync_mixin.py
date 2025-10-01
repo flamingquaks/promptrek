@@ -58,7 +58,7 @@ class MarkdownSyncMixin:
         # Parse markdown files from rules directory
         rules_dir = source_dir / rules_subdir
         if rules_dir.exists():
-            instructions_dict = {}
+            instructions_dict: Dict[str, List[str]] = {}
 
             pattern = f"*.{file_extension}"
             for md_file in rules_dir.glob(pattern):
@@ -279,8 +279,8 @@ class SingleFileMarkdownSyncMixin:
         Returns:
             Dictionary mapping categories to instruction lists
         """
-        instructions_dict = {}
-        current_section = None
+        instructions_dict: Dict[str, List[str]] = {}
+        current_section: Optional[str] = None
 
         lines = content.split("\n")
         for line in lines:

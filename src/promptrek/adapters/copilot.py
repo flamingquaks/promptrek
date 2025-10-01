@@ -32,7 +32,7 @@ class CopilotAdapter(EditorAdapter):
         ".github/prompts/*.prompt.md",
     ]
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             name="copilot",
             description=self._description,

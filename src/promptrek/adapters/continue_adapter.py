@@ -20,7 +20,7 @@ class ContinueAdapter(EditorAdapter):
     _description = "Continue (.continue/rules/)"
     _file_patterns = [".continue/rules/*.md"]
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             name="continue",
             description=self._description,
