@@ -114,7 +114,20 @@ Use `--strict` to treat warnings as errors:
 promptrek validate my-project.promptrek.yaml --strict
 ```
 
-### 4. Preview Generated Output (Optional)
+### 4. (Optional) Create Local Variables File
+
+For user-specific variables like names, emails, or API keys that should NOT be committed:
+
+```yaml
+# variables.promptrek.yaml (automatically added to .gitignore by init)
+AUTHOR_NAME: "Your Name"
+AUTHOR_EMAIL: "your.email@example.com"
+API_KEY: "your-secret-key"
+```
+
+Variables from this file override defaults in your `.promptrek.yaml` file. See [Local Variables](user-guide.html#local-variables-file) for details.
+
+### 5. Preview Generated Output (Optional)
 
 Preview what will be generated without creating files:
 
@@ -134,7 +147,7 @@ The preview shows:
 - Any warnings or notices
 - No actual files are written
 
-### 5. Generate Editor-Specific Prompts
+### 6. Generate Editor-Specific Prompts
 
 Now generate prompts for your preferred editors:
 

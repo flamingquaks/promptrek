@@ -22,6 +22,35 @@ def check_generated_command(ctx: click.Context, files: List[str]) -> None:
         ctx: Click context
         files: List of file paths to check
     """
+    # Check for local variables file first
+    local_vars_files = [f for f in files if "variables.promptrek" in f]
+    if local_vars_files:
+        click.echo("❌ ERROR: Attempting to commit local variables file!", err=True)
+        click.echo(
+            "\nThe following file contains user-specific variables "
+            "and should not be committed:",
+            err=True,
+        )
+        for file_path in local_vars_files:
+            click.echo(f"  - {file_path}", err=True)
+
+        click.echo(
+            "\n💡 This file should be:",
+            err=True,
+        )
+        click.echo("   • Added to .gitignore (should already be there)", err=True)
+        click.echo("   • Kept local to your machine", err=True)
+        click.echo("   • Not shared in version control", err=True)
+
+        click.echo("\nTo fix this:", err=True)
+        click.echo(
+            "1. Remove from staging: git reset HEAD variables.promptrek.yaml", err=True
+        )
+        click.echo("2. Ensure it's in .gitignore", err=True)
+        click.echo("3. Only commit .promptrek.yaml source files", err=True)
+
+        ctx.exit(1)
+
     generated_file_patterns = {
         # GitHub Copilot files
         ".github/copilot-instructions.md",
@@ -231,6 +260,16 @@ def install_hooks_command(
                 r"^(\.idea/ai-assistant\.xml|\.jetbrains/.*)$|"
                 r"^\.ai-prompts/.*"
                 r")",
+                "stages": ["commit"],
+                "always_run": False,
+                "pass_filenames": True,
+            },
+            {
+                "id": "promptrek-check-local-vars",
+                "name": "Prevent committing local variables",
+                "entry": "promptrek check-generated",
+                "language": "system",
+                "files": r"variables\.promptrek\.ya?ml$",
                 "stages": ["commit"],
                 "always_run": False,
                 "pass_filenames": True,

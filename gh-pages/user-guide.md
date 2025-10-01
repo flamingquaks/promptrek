@@ -466,9 +466,56 @@ variables:
 
 instructions:
   general:
-    - "This is the {{ PROJECT_NAME }} project"
-    - "Contact {{ TEAM_EMAIL }} for questions"
+    - "This is the {{{ PROJECT_NAME }}} project"
+    - "Contact {{{ TEAM_EMAIL }}} for questions"
 ```
+
+#### Local Variables File
+
+PrompTrek supports a `variables.promptrek.yaml` file for user-specific variables that should NOT be committed to version control. This is ideal for storing local paths, API keys, personal information, or any variable that differs between team members.
+
+**Creating a local variables file:**
+
+```yaml
+# variables.promptrek.yaml
+# User-specific variables (automatically added to .gitignore)
+
+AUTHOR_NAME: "Your Name"
+AUTHOR_EMAIL: "your.email@example.com"
+API_KEY: "your-secret-key"
+LOCAL_DEV_PATH: "/Users/you/projects"
+```
+
+**How it works:**
+
+1. Run `promptrek init` - automatically adds `variables.promptrek.yaml` to `.gitignore`
+2. Create `variables.promptrek.yaml` with your personal values
+3. Variables are automatically loaded during generation
+4. Pre-commit hooks prevent accidental commits
+
+**Variable Precedence:**
+
+1. **CLI overrides** (highest): `-V KEY=value`
+2. **Local file**: `variables.promptrek.yaml`
+3. **Prompt file** (lowest): `variables:` section in `.promptrek.yaml`
+
+**Example:**
+
+```yaml
+# project.promptrek.yaml (committed to repository)
+metadata:
+  author: "{{{ AUTHOR_NAME }}}"
+variables:
+  AUTHOR_NAME: "Team"  # Default fallback
+```
+
+```yaml
+# variables.promptrek.yaml (local, in .gitignore)
+AUTHOR_NAME: "Jane Smith"
+AUTHOR_EMAIL: "jane@example.com"
+```
+
+When you generate, your local values override the defaults.
 
 ### Conditional Instructions
 

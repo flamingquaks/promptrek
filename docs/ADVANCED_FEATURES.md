@@ -38,6 +38,59 @@ instructions:
     - "Deploy to ${ENVIRONMENT} environment"
 ```
 
+### Local Variables File
+
+PrompTrek supports a `variables.promptrek.yaml` file for user-specific variables that should not be committed to version control. This is perfect for storing local paths, API keys, personal information, or any variable that varies between team members.
+
+**Creating a local variables file:**
+
+```yaml
+# variables.promptrek.yaml
+# This file contains local variables that should NOT be committed
+# Add this file to .gitignore
+
+# User-specific variables
+AUTHOR_NAME: "Your Name"
+AUTHOR_EMAIL: "your.email@example.com"
+API_KEY: "your-api-key-here"
+LOCAL_PATH: "/path/to/local/resource"
+ENVIRONMENT: "development"
+```
+
+**How it works:**
+
+1. When you run `promptrek init`, it automatically adds `variables.promptrek.yaml` to your `.gitignore`
+2. Create your local variables file manually with user-specific values
+3. PrompTrek automatically loads variables from this file when generating
+4. Pre-commit hooks prevent accidental commits of this file
+
+**Variable Precedence (highest to lowest):**
+
+1. CLI overrides (`-V KEY=value`)
+2. Local variables file (`variables.promptrek.yaml`)
+3. Prompt file variables section
+
+**Example usage:**
+
+```yaml
+# project.promptrek.yaml (committed to git)
+metadata:
+  title: "{{{ PROJECT_NAME }}} Assistant"
+  author: "{{{ AUTHOR_NAME }}}"
+
+variables:
+  PROJECT_NAME: "MyProject"
+  AUTHOR_NAME: "Team"  # Default fallback
+```
+
+```yaml
+# variables.promptrek.yaml (local, in .gitignore)
+AUTHOR_NAME: "John Doe"
+AUTHOR_EMAIL: "john@example.com"
+```
+
+When generating, `AUTHOR_NAME` will be "John Doe" from the local file, overriding the default in the prompt file.
+
 ### CLI Variable Overrides
 
 Override variables from the command line using `-V` or `--var`:
@@ -47,6 +100,8 @@ promptrek generate --editor claude --output ./output project.promptrek.yaml \
   -V PROJECT_NAME="CustomProject" \
   -V AUTHOR_EMAIL="custom@example.com"
 ```
+
+CLI overrides have the highest precedence and will override both local variables and prompt file variables.
 
 ## Conditional Instructions
 

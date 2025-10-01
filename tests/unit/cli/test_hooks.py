@@ -142,12 +142,13 @@ class TestInstallHooksCommand:
             assert "repos" in config
             assert len(config["repos"]) == 1
             assert config["repos"][0]["repo"] == "local"
-            assert len(config["repos"][0]["hooks"]) == 2
+            assert len(config["repos"][0]["hooks"]) == 3
 
             # Verify hook IDs
             hook_ids = [h["id"] for h in config["repos"][0]["hooks"]]
             assert "promptrek-validate" in hook_ids
             assert "promptrek-prevent-generated" in hook_ids
+            assert "promptrek-check-local-vars" in hook_ids
 
             # Should echo success
             assert mock_echo.called
@@ -219,6 +220,7 @@ class TestInstallHooksCommand:
             hook_ids = [h["id"] for h in config["repos"][0]["hooks"]]
             assert "promptrek-validate" in hook_ids
             assert "promptrek-prevent-generated" in hook_ids
+            assert "promptrek-check-local-vars" in hook_ids
             # Entry should be updated
             validate_hook = next(
                 h
@@ -261,6 +263,7 @@ class TestInstallHooksCommand:
             hook_ids = [h["id"] for h in config["repos"][0]["hooks"]]
             assert "promptrek-validate" in hook_ids
             assert "promptrek-prevent-generated" in hook_ids
+            assert "promptrek-check-local-vars" in hook_ids
 
     def test_install_decline_update(self, tmp_path):
         """Test declining to update existing hooks."""

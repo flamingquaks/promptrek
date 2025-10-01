@@ -273,7 +273,7 @@ instructions:
       <div class="feature-card-modern">
         <div class="feature-icon">🔄</div>
         <h3>Variable Substitution</h3>
-        <p>Use dynamic variables in your prompts that get substituted during generation. Perfect for project-specific configurations.</p>
+        <p>Dynamic variables with local file support. Keep sensitive values like API keys in variables.promptrek.yaml (automatically gitignored).</p>
       </div>
 
       <div class="feature-card-modern">

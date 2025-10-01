@@ -245,7 +245,11 @@ class ClineAdapter(EditorAdapter):
             complexity_score += len(prompt.instructions.general)
         if prompt.instructions and prompt.instructions.code_style:
             complexity_score += len(prompt.instructions.code_style)
-        if hasattr(prompt.instructions, "testing") and prompt.instructions.testing:
+        if (
+            prompt.instructions
+            and hasattr(prompt.instructions, "testing")
+            and prompt.instructions.testing
+        ):
             complexity_score += len(prompt.instructions.testing)
         if prompt.examples:
             complexity_score += len(prompt.examples)
@@ -257,7 +261,8 @@ class ClineAdapter(EditorAdapter):
                     bool(prompt.instructions and prompt.instructions.general),
                     bool(prompt.instructions and prompt.instructions.code_style),
                     bool(
-                        hasattr(prompt.instructions, "testing")
+                        prompt.instructions
+                        and hasattr(prompt.instructions, "testing")
                         and prompt.instructions.testing
                     ),
                     bool(prompt.examples),
@@ -289,7 +294,7 @@ class ClineAdapter(EditorAdapter):
                 output_file = clinerules_dir / filename
                 click.echo(f"  📄 Would create: {output_file}")
                 if verbose:
-                    click.echo(f"      Content preview:")
+                    click.echo("      Content preview:")
                     preview = content[:200] + "..." if len(content) > 200 else content
                     click.echo(f"      {preview}")
                 created_files.append(output_file)
@@ -324,7 +329,7 @@ class ClineAdapter(EditorAdapter):
         if dry_run:
             click.echo(f"  📄 Would create: {output_file}")
             if verbose:
-                click.echo(f"      Content preview:")
+                click.echo("      Content preview:")
                 preview = content[:200] + "..." if len(content) > 200 else content
                 click.echo(f"      {preview}")
         else:

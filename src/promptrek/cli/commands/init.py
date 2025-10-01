@@ -59,6 +59,10 @@ def init_command(
         raise CLIError(f"Failed to write file {output_path}: {e}")
 
     click.echo(f"✅ Initialized universal prompt file: {output_path}")
+
+    # Add variables.promptrek.yaml to .gitignore
+    _add_to_gitignore(output_path.parent)
+
     click.echo("📝 Edit the file to customize your prompt configuration")
     click.echo(f"🔍 Run 'promptrek validate {output_path}' to check your configuration")
 
@@ -255,3 +259,48 @@ async def create_user(user: UserCreate):
         raise HTTPException(status_code=500, detail=str(e))
 ```"""
     return template
+
+
+def _add_to_gitignore(project_dir: Path) -> None:
+    """
+    Add variables.promptrek.yaml to .gitignore if not already present.
+
+    Args:
+        project_dir: Project directory containing or to contain .gitignore
+    """
+    gitignore_path = project_dir / ".gitignore"
+    pattern = "variables.promptrek.yaml"
+
+    # Check if .gitignore exists
+    if gitignore_path.exists():
+        # Read existing content
+        try:
+            with open(gitignore_path, "r", encoding="utf-8") as f:
+                content = f.read()
+
+            # Check if pattern already exists
+            if pattern in content:
+                return
+
+            # Add pattern to existing file
+            with open(gitignore_path, "a", encoding="utf-8") as f:
+                # Ensure file ends with newline before adding
+                if content and not content.endswith("\n"):
+                    f.write("\n")
+                f.write(
+                    "\n# PrompTrek local variables (user-specific, not committed)\n"
+                )
+                f.write(f"{pattern}\n")
+
+            click.echo(f"📝 Added {pattern} to .gitignore")
+        except Exception as e:
+            click.echo(f"⚠️  Could not update .gitignore: {e}", err=True)
+    else:
+        # Create new .gitignore with pattern
+        try:
+            with open(gitignore_path, "w", encoding="utf-8") as f:
+                f.write("# PrompTrek local variables (user-specific, not committed)\n")
+                f.write(f"{pattern}\n")
+            click.echo(f"📝 Created .gitignore and added {pattern}")
+        except Exception as e:
+            click.echo(f"⚠️  Could not create .gitignore: {e}", err=True)

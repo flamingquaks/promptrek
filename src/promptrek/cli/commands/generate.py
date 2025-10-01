@@ -16,6 +16,7 @@ from ...core.exceptions import AdapterNotFoundError, CLIError, UPFParsingError
 from ...core.models import UniversalPrompt
 from ...core.parser import UPFParser
 from ...core.validator import UPFValidator
+from ...utils.variables import VariableSubstitution
 
 
 def _adapter_supports_headless(adapter, method_name: str) -> bool:
@@ -70,6 +71,19 @@ def generate_command(
         variables: Variable overrides
     """
     verbose = ctx.obj.get("verbose", False)
+
+    # Load local variables from variables.promptrek.yaml
+    var_sub = VariableSubstitution()
+    local_vars = var_sub.load_local_variables()
+
+    # Merge variables with precedence: CLI > local file > prompt file
+    # Start with local variables, then merge CLI overrides
+    merged_variables = local_vars.copy()
+    if variables:
+        merged_variables.update(variables)
+
+    if verbose and local_vars:
+        click.echo(f"📋 Loaded {len(local_vars)} variable(s) from local variables file")
 
     # Collect all files to process
     files_to_process = []
@@ -191,7 +205,7 @@ def generate_command(
                 output,
                 dry_run,
                 verbose,
-                variables,
+                merged_variables,
                 headless,
             )
         except AdapterNotFoundError:
