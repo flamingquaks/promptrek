@@ -160,7 +160,7 @@ PrompTrek generates sophisticated configuration files for each editor:
 - **Bidirectional sync support**: Changes can be synced back to PrompTrek configuration
 - **Headless agent instructions**: Autonomous regeneration capability for background tasks
 
-### Cursor (Modernized 2025)
+### Cursor
 - `.cursor/rules/index.mdc` - Main project overview (Always rule)
 - `.cursor/rules/*.mdc` - Category-specific rules (Auto Attached)
 - `AGENTS.md` - Simple agent instructions
@@ -176,7 +176,7 @@ PrompTrek generates sophisticated configuration files for each editor:
 - `.kiro/specs/*.md` - Specification files (requirements, design, tasks)
 
 ### Cline
-- `.clinerules` - Markdown-based rules configuration
+- `.clinerules/*.md` - Markdown-based rules configuration
 
 ### Claude Code
 - `.claude/context.md` - Rich context format with project information

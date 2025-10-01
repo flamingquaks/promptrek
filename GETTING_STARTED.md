@@ -132,7 +132,6 @@ The tool generates sophisticated configuration systems for each editor:
 - **GitHub Copilot**: 
   - `.github/copilot-instructions.md` (repository-wide instructions)
   - `.github/instructions/*.instructions.md` (path-specific instructions with YAML frontmatter)
-  - `AGENTS.md`, `CLAUDE.md`, `GEMINI.md` (agent-specific instructions)
   
 - **Cursor**: 
   - `.cursor/rules/*.mdc` (modern rules with YAML frontmatter and glob patterns)

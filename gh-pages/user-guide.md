@@ -342,7 +342,6 @@ PrompTrek generates comprehensive Copilot configurations:
 **Generated files:**
 - `.github/copilot-instructions.md` - Repository-wide instructions
 - `.github/instructions/*.instructions.md` - Path-specific instructions
-- `AGENTS.md`, `CLAUDE.md`, `GEMINI.md` - Agent-specific instructions
 
 **Features:**
 - Repository-wide prompt configuration
@@ -357,7 +356,6 @@ Advanced rule system following Cursor IDE's 2025 best practices:
 **Generated files:**
 - `.cursor/rules/index.mdc` - Main project overview (Always rule)
 - `.cursor/rules/*.mdc` - Category-specific rules (Auto Attached)
-- `AGENTS.md` - Agent instructions
 - `.cursorignore` - Enhanced exclusion patterns
 - `.cursorindexingignore` - Intelligent indexing control
 
