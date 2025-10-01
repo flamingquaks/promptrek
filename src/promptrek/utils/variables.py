@@ -214,7 +214,7 @@ class VariableSubstitution:
                         if isinstance(data, dict):
                             return data
                         return {}
-                except Exception:
+                except (OSError, UnicodeDecodeError, yaml.YAMLError):
                     # If file exists but can't be loaded, return empty dict
                     return {}
 
