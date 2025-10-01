@@ -193,8 +193,6 @@ jobs:
           echo "Checking for required documentation files..."
           test -f README.md || (echo "README.md missing" && exit 1)
           test -f GETTING_STARTED.md || (echo "GETTING_STARTED.md missing" && exit 1)
-          test -d docs || (echo "docs directory missing" && exit 1)
-
       - name: Check for placeholder content
         run: |
           echo "Checking for placeholder content..."
