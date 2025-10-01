@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "promptrek"
-version = "0.0.5"
+version = "0.0.6"
 description = "Universal AI Editor prompt storage solution"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -13,7 +13,6 @@ authors = [
 ]
 keywords = ["ai", "prompts", "copilot", "cursor", "continue", "cli"]
 classifiers = [
-    "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
