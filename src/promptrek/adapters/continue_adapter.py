@@ -2,7 +2,6 @@
 Continue editor adapter implementation.
 """
 
-import re
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -18,8 +17,8 @@ from .base import EditorAdapter
 class ContinueAdapter(EditorAdapter):
     """Adapter for Continue editor."""
 
-    _description = "Continue (config.yaml, .continue/rules/)"
-    _file_patterns = ["config.yaml", ".continue/rules/*.md"]
+    _description = "Continue (.continue/rules/)"
+    _file_patterns = [".continue/rules/*.md"]
 
     def __init__(self):
         super().__init__(
@@ -45,46 +44,12 @@ class ContinueAdapter(EditorAdapter):
         # Process conditionals if supported
         conditional_content = self.process_conditionals(processed_prompt, variables)
 
-        created_files = []
-
-        # Generate main config.yaml
-        config_file = self._generate_main_config(
-            processed_prompt, conditional_content, output_dir, dry_run, verbose
-        )
-        created_files.extend(config_file)
-
-        # Generate advanced rules directory system
+        # Generate rules directory system
         rules_files = self._generate_rules_system(
             processed_prompt, conditional_content, output_dir, dry_run, verbose
         )
-        created_files.extend(rules_files)
 
-        return created_files
-
-    def _generate_main_config(
-        self,
-        prompt: UniversalPrompt,
-        conditional_content: Optional[Dict[str, Any]],
-        output_dir: Path,
-        dry_run: bool,
-        verbose: bool,
-    ) -> List[Path]:
-        """Generate main config.yaml file."""
-        content = self._build_content(prompt, conditional_content)
-        output_file = output_dir / "config.yaml"
-
-        if dry_run:
-            click.echo(f"  📁 Would create: {output_file}")
-            if verbose:
-                click.echo("  📄 Config content preview:")
-                preview = content[:200] + "..." if len(content) > 200 else content
-                click.echo(f"    {preview}")
-            return [output_file]
-        else:
-            with open(output_file, "w", encoding="utf-8") as f:
-                f.write(content)
-            click.echo(f"✅ Generated: {output_file}")
-            return [output_file]
+        return rules_files
 
     def _generate_rules_system(
         self,
@@ -253,66 +218,6 @@ class ContinueAdapter(EditorAdapter):
     def supports_conditionals(self) -> bool:
         """Continue supports conditional configuration."""
         return True
-
-    def _build_content(
-        self,
-        prompt: UniversalPrompt,
-        conditional_content: Optional[Dict[str, Any]] = None,
-    ) -> str:
-        """Build Continue configuration content in YAML format."""
-        config = {
-            "name": prompt.metadata.title,
-            "version": getattr(prompt.metadata, "version", "0.0.1"),
-            "schema": "v1",
-            "models": [],
-            "systemMessage": (
-                f"{prompt.metadata.title}\n\n{prompt.metadata.description}"
-            ),
-            "completionOptions": {},
-            "allowAnonymousTelemetry": False,
-        }
-
-        # Collect all instructions (original + conditional)
-        all_instructions = []
-        if prompt.instructions and prompt.instructions.general:
-            all_instructions.extend(prompt.instructions.general)
-
-        # Add conditional general instructions
-        if (
-            conditional_content
-            and "instructions" in conditional_content
-            and "general" in conditional_content["instructions"]
-        ):
-            all_instructions.extend(conditional_content["instructions"]["general"])
-
-        # Add instructions as rules instead of system message
-        if all_instructions:
-            config["rules"] = all_instructions
-
-        # Add code style instructions if available
-        if prompt.instructions and prompt.instructions.code_style:
-            if "rules" not in config:
-                config["rules"] = []
-            config["rules"].extend(prompt.instructions.code_style)
-
-        # Add context providers
-        config["context"] = [
-            {"provider": "file"},
-            {"provider": "code"},
-        ]
-
-        # Add project-specific context if available
-        if prompt.context:
-            if prompt.context.technologies:
-                tech_list = ", ".join(prompt.context.technologies)
-                config["context"].append(
-                    {
-                        "provider": "docs",
-                        "query": f"documentation for {tech_list}",
-                    }
-                )
-
-        return yaml.dump(config, default_flow_style=False, sort_keys=False)
 
     def _build_rules_content(self, title: str, instructions: List[str]) -> str:
         """Build markdown rules content for .continue/rules/ files."""

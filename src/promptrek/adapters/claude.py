@@ -10,9 +10,10 @@ import click
 from ..core.exceptions import ValidationError
 from ..core.models import UniversalPrompt
 from .base import EditorAdapter
+from .sync_mixin import SingleFileMarkdownSyncMixin
 
 
-class ClaudeAdapter(EditorAdapter):
+class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
     """Adapter for Claude Code."""
 
     _description = "Claude Code (context-based)"
@@ -151,6 +152,14 @@ class ClaudeAdapter(EditorAdapter):
     def supports_conditionals(self) -> bool:
         """Claude supports conditional instructions."""
         return True
+
+    def parse_files(self, source_dir: Path) -> UniversalPrompt:
+        """Parse Claude Code files back into a UniversalPrompt."""
+        claude_file = source_dir / ".claude" / "CLAUDE.md"
+        return self.parse_single_markdown_file(
+            file_path=claude_file,
+            editor_name="Claude Code",
+        )
 
     def _build_content(
         self,

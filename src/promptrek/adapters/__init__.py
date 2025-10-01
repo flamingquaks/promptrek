@@ -4,7 +4,6 @@ from .amazon_q import AmazonQAdapter
 from .base import EditorAdapter
 from .claude import ClaudeAdapter
 from .cline import ClineAdapter
-from .codeium import CodeiumAdapter
 from .continue_adapter import ContinueAdapter
 from .copilot import CopilotAdapter
 from .cursor import CursorAdapter
@@ -12,6 +11,7 @@ from .jetbrains import JetBrainsAdapter
 from .kiro import KiroAdapter
 from .registry import AdapterCapability, AdapterRegistry, registry
 from .tabnine import TabnineAdapter
+from .windsurf import WindsurfAdapter
 
 # Register built-in adapters with their capabilities
 
@@ -79,19 +79,39 @@ registry.register_class(
 
 # Tools that only support global configuration (don't generate project files)
 registry.register_class(
-    "amazon-q", AmazonQAdapter, [AdapterCapability.GLOBAL_CONFIG_ONLY]
+    "amazon-q",
+    AmazonQAdapter,
+    [
+        AdapterCapability.GENERATES_PROJECT_FILES,
+        AdapterCapability.SUPPORTS_VARIABLES,
+        AdapterCapability.SUPPORTS_CONDITIONALS,
+    ],
 )
 
 registry.register_class(
-    "jetbrains", JetBrainsAdapter, [AdapterCapability.IDE_PLUGIN_ONLY]
+    "jetbrains",
+    JetBrainsAdapter,
+    [
+        AdapterCapability.GENERATES_PROJECT_FILES,
+        AdapterCapability.SUPPORTS_VARIABLES,
+        AdapterCapability.SUPPORTS_CONDITIONALS,
+    ],
 )
 
 registry.register_class(
     "tabnine", TabnineAdapter, [AdapterCapability.GLOBAL_CONFIG_ONLY]
 )
 
-# Windsurf (replaces Codeium) - IDE-based configuration only
-registry.register_class("windsurf", CodeiumAdapter, [AdapterCapability.IDE_PLUGIN_ONLY])
+# Windsurf (replaces Codeium) - generates project-level rules files
+registry.register_class(
+    "windsurf",
+    WindsurfAdapter,
+    [
+        AdapterCapability.GENERATES_PROJECT_FILES,
+        AdapterCapability.SUPPORTS_VARIABLES,
+        AdapterCapability.SUPPORTS_CONDITIONALS,
+    ],
+)
 
 __all__ = [
     "EditorAdapter",
@@ -103,7 +123,7 @@ __all__ = [
     "ContinueAdapter",
     "ClaudeAdapter",
     "ClineAdapter",
-    "CodeiumAdapter",
+    "WindsurfAdapter",
     "KiroAdapter",
     "TabnineAdapter",
     "AmazonQAdapter",

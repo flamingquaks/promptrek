@@ -10,9 +10,10 @@ import click
 from ..core.exceptions import ValidationError
 from ..core.models import UniversalPrompt
 from .base import EditorAdapter
+from .sync_mixin import MarkdownSyncMixin
 
 
-class ClineAdapter(EditorAdapter):
+class ClineAdapter(MarkdownSyncMixin, EditorAdapter):
     """Adapter for Cline terminal-based AI assistant."""
 
     _description = "Cline (.clinerules, .clinerules/*.md)"
@@ -91,6 +92,15 @@ class ClineAdapter(EditorAdapter):
     def supports_conditionals(self) -> bool:
         """Cline supports conditional configuration."""
         return True
+
+    def parse_files(self, source_dir: Path) -> UniversalPrompt:
+        """Parse Cline files back into a UniversalPrompt."""
+        return self.parse_markdown_rules_files(
+            source_dir=source_dir,
+            rules_subdir=".clinerules",
+            file_extension="md",
+            editor_name="Cline",
+        )
 
     def _generate_rule_files(
         self,

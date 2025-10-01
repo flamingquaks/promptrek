@@ -1,8 +1,7 @@
 """
-Amazon Q adapter implementation.
+Windsurf adapter implementation.
 """
 
-import json
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -14,15 +13,15 @@ from .base import EditorAdapter
 from .sync_mixin import MarkdownSyncMixin
 
 
-class AmazonQAdapter(MarkdownSyncMixin, EditorAdapter):
-    """Adapter for Amazon Q AI assistant."""
+class WindsurfAdapter(MarkdownSyncMixin, EditorAdapter):
+    """Adapter for Windsurf AI assistant."""
 
-    _description = "Amazon Q (.amazonq/rules/, .amazonq/cli-agents/)"
-    _file_patterns = [".amazonq/rules/*.md", ".amazonq/cli-agents/*.json"]
+    _description = "Windsurf (.windsurf/rules/)"
+    _file_patterns = [".windsurf/rules/*.md"]
 
     def __init__(self):
         super().__init__(
-            name="amazon-q",
+            name="windsurf",
             description=self._description,
             file_patterns=self._file_patterns,
         )
@@ -36,7 +35,7 @@ class AmazonQAdapter(MarkdownSyncMixin, EditorAdapter):
         variables: Optional[Dict[str, Any]] = None,
         headless: bool = False,
     ) -> List[Path]:
-        """Generate Amazon Q configuration files."""
+        """Generate Windsurf configuration files."""
 
         # Apply variable substitution if supported
         processed_prompt = self.substitute_variables(prompt, variables)
@@ -44,22 +43,45 @@ class AmazonQAdapter(MarkdownSyncMixin, EditorAdapter):
         # Process conditionals if supported
         conditional_content = self.process_conditionals(processed_prompt, variables)
 
-        created_files = []
-
         # Generate rules directory system
         rules_files = self._generate_rules_system(
             processed_prompt, conditional_content, output_dir, dry_run, verbose
         )
-        created_files.extend(rules_files)
 
-        # Generate CLI agents if headless is enabled
-        if headless:
-            agent_files = self._generate_cli_agents(
-                processed_prompt, output_dir, dry_run, verbose
+        return rules_files
+
+    def validate(self, prompt: UniversalPrompt) -> List[ValidationError]:
+        """Validate prompt for Windsurf."""
+        errors = []
+
+        # Windsurf works well with structured instructions
+        if not prompt.instructions:
+            errors.append(
+                ValidationError(
+                    field="instructions",
+                    message="Windsurf works best with structured instructions",
+                    severity="warning",
+                )
             )
-            created_files.extend(agent_files)
 
-        return created_files
+        return errors
+
+    def supports_variables(self) -> bool:
+        """Windsurf supports variable substitution."""
+        return True
+
+    def supports_conditionals(self) -> bool:
+        """Windsurf supports conditional configuration."""
+        return True
+
+    def parse_files(self, source_dir: Path) -> UniversalPrompt:
+        """Parse Windsurf files back into a UniversalPrompt."""
+        return self.parse_markdown_rules_files(
+            source_dir=source_dir,
+            rules_subdir=".windsurf/rules",
+            file_extension="md",
+            editor_name="Windsurf",
+        )
 
     def _generate_rules_system(
         self,
@@ -69,8 +91,8 @@ class AmazonQAdapter(MarkdownSyncMixin, EditorAdapter):
         dry_run: bool,
         verbose: bool,
     ) -> List[Path]:
-        """Generate .amazonq/rules/ directory with markdown files."""
-        rules_dir = output_dir / ".amazonq" / "rules"
+        """Generate .windsurf/rules/ directory with markdown files."""
+        rules_dir = output_dir / ".windsurf" / "rules"
         created_files = []
 
         # Generate general coding rules
@@ -155,30 +177,6 @@ class AmazonQAdapter(MarkdownSyncMixin, EditorAdapter):
                 click.echo(f"✅ Generated: {testing_file}")
                 created_files.append(testing_file)
 
-        # Generate security rules if defined
-        if prompt.instructions and prompt.instructions.security:
-            security_file = rules_dir / "security.md"
-            security_content = self._build_rules_content(
-                "Security Rules", prompt.instructions.security
-            )
-
-            if dry_run:
-                click.echo(f"  📁 Would create: {security_file}")
-                if verbose:
-                    preview = (
-                        security_content[:200] + "..."
-                        if len(security_content) > 200
-                        else security_content
-                    )
-                    click.echo(f"    {preview}")
-                created_files.append(security_file)
-            else:
-                rules_dir.mkdir(parents=True, exist_ok=True)
-                with open(security_file, "w", encoding="utf-8") as f:
-                    f.write(security_content)
-                click.echo(f"✅ Generated: {security_file}")
-                created_files.append(security_file)
-
         # Generate technology-specific rules
         if prompt.context and prompt.context.technologies:
             for tech in prompt.context.technologies[:2]:  # Limit to 2 main technologies
@@ -204,74 +202,8 @@ class AmazonQAdapter(MarkdownSyncMixin, EditorAdapter):
 
         return created_files
 
-    def _generate_cli_agents(
-        self,
-        prompt: UniversalPrompt,
-        output_dir: Path,
-        dry_run: bool,
-        verbose: bool,
-    ) -> List[Path]:
-        """Generate .amazonq/cli-agents/ directory with agent JSON files."""
-        agents_dir = output_dir / ".amazonq" / "cli-agents"
-        created_files = []
-
-        # Generate default agents based on instructions
-        agents = []
-
-        # Code review agent
-        if prompt.instructions and prompt.instructions.code_style:
-            agents.append(
-                {
-                    "name": "code-review-agent",
-                    "description": "Reviews code for style and quality issues",
-                    "instructions": "Focus on code style, readability, and best practices. "
-                    + " ".join(prompt.instructions.code_style[:3]),
-                }
-            )
-
-        # Security review agent
-        if prompt.instructions and prompt.instructions.security:
-            agents.append(
-                {
-                    "name": "security-review-agent",
-                    "description": "Reviews code for security vulnerabilities",
-                    "instructions": "Always focus on OWASP Top 10 vulnerabilities. "
-                    + " ".join(prompt.instructions.security[:3]),
-                }
-            )
-
-        # Testing agent
-        if prompt.instructions and prompt.instructions.testing:
-            agents.append(
-                {
-                    "name": "test-generation-agent",
-                    "description": "Generates unit and integration tests",
-                    "instructions": "Follow testing best practices. "
-                    + " ".join(prompt.instructions.testing[:3]),
-                }
-            )
-
-        # Generate agent files
-        for agent in agents:
-            agent_file = agents_dir / f"{agent['name']}.json"
-            agent_content = json.dumps(agent, indent=2)
-
-            if dry_run:
-                click.echo(f"  📁 Would create: {agent_file}")
-                if verbose:
-                    click.echo(f"    {agent_content[:150]}...")
-                created_files.append(agent_file)
-            else:
-                agents_dir.mkdir(parents=True, exist_ok=True)
-                with open(agent_file, "w", encoding="utf-8") as f:
-                    f.write(agent_content)
-                click.echo(f"✅ Generated: {agent_file}")
-                created_files.append(agent_file)
-
-        return created_files
-
     def _build_rules_content(self, title: str, instructions: List[str]) -> str:
-        """Build markdown rules content for .amazonq/rules/ files."""
+        """Build markdown rules content for .windsurf/rules/ files."""
         lines = []
 
         lines.append(f"# {title}")
@@ -305,6 +237,18 @@ class AmazonQAdapter(MarkdownSyncMixin, EditorAdapter):
         # Add tech-specific best practices
         lines.append(f"## {tech.title()} Best Practices")
         tech_practices = {
+            "typescript": [
+                "Use strict TypeScript configuration",
+                "Prefer interfaces over types for object shapes",
+                "Use proper typing for all function parameters and returns",
+                "Leverage TypeScript's utility types when appropriate",
+            ],
+            "react": [
+                "Use functional components with hooks",
+                "Implement proper prop typing with TypeScript",
+                "Follow React best practices for state management",
+                "Use React.memo for performance optimization when needed",
+            ],
             "python": [
                 "Follow PEP 8 style guidelines",
                 "Use type hints for function signatures",
@@ -317,18 +261,6 @@ class AmazonQAdapter(MarkdownSyncMixin, EditorAdapter):
                 "Use arrow functions appropriately",
                 "Implement proper error handling with try/catch blocks",
             ],
-            "typescript": [
-                "Use strict TypeScript configuration",
-                "Prefer interfaces over types for object shapes",
-                "Use proper typing for all function parameters and returns",
-                "Leverage TypeScript's utility types when appropriate",
-            ],
-            "java": [
-                "Follow Java coding conventions",
-                "Use meaningful names for classes, methods, and variables",
-                "Implement proper exception handling",
-                "Leverage modern Java features appropriately",
-            ],
         }
 
         if tech.lower() in tech_practices:
@@ -340,36 +272,3 @@ class AmazonQAdapter(MarkdownSyncMixin, EditorAdapter):
             lines.append(f"- Use {tech} idioms and patterns appropriately")
 
         return "\n".join(lines)
-
-    def validate(self, prompt: UniversalPrompt) -> List[ValidationError]:
-        """Validate prompt for Amazon Q."""
-        errors = []
-
-        # Amazon Q works well with structured instructions
-        if not prompt.instructions:
-            errors.append(
-                ValidationError(
-                    field="instructions",
-                    message="Amazon Q benefits from structured instructions",
-                    severity="warning",
-                )
-            )
-
-        return errors
-
-    def supports_variables(self) -> bool:
-        """Amazon Q supports variable substitution."""
-        return True
-
-    def supports_conditionals(self) -> bool:
-        """Amazon Q supports conditional configuration."""
-        return True
-
-    def parse_files(self, source_dir: Path) -> UniversalPrompt:
-        """Parse Amazon Q files back into a UniversalPrompt."""
-        return self.parse_markdown_rules_files(
-            source_dir=source_dir,
-            rules_subdir=".amazonq/rules",
-            file_extension="md",
-            editor_name="Amazon Q",
-        )

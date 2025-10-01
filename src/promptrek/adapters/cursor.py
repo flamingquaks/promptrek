@@ -10,9 +10,10 @@ import click
 from ..core.exceptions import ValidationError
 from ..core.models import UniversalPrompt
 from .base import EditorAdapter
+from .sync_mixin import MarkdownSyncMixin
 
 
-class CursorAdapter(EditorAdapter):
+class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
     """Adapter for Cursor editor."""
 
     _description = "Cursor (.cursor/rules/index.mdc, .cursor/rules/*.mdc, AGENTS.md)"
@@ -973,3 +974,20 @@ class CursorAdapter(EditorAdapter):
                     config["globs"] = tech_patterns[main_tech]
 
         return config
+
+    def parse_files(self, source_dir: Path) -> UniversalPrompt:
+        """
+        Parse Cursor files back into a UniversalPrompt.
+
+        Args:
+            source_dir: Directory containing Cursor configuration files
+
+        Returns:
+            UniversalPrompt object parsed from Cursor files
+        """
+        return self.parse_markdown_rules_files(
+            source_dir=source_dir,
+            rules_subdir=".cursor/rules",
+            file_extension="mdc",
+            editor_name="Cursor",
+        )

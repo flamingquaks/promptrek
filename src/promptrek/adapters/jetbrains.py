@@ -1,8 +1,7 @@
 """
-JetBrains AI (IDE-integrated) adapter implementation.
+JetBrains AI adapter implementation.
 """
 
-import json
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -11,13 +10,14 @@ import click
 from ..core.exceptions import ValidationError
 from ..core.models import UniversalPrompt
 from .base import EditorAdapter
+from .sync_mixin import MarkdownSyncMixin
 
 
-class JetBrainsAdapter(EditorAdapter):
-    """Adapter for JetBrains AI IDE-integrated assistance."""
+class JetBrainsAdapter(MarkdownSyncMixin, EditorAdapter):
+    """Adapter for JetBrains AI assistance."""
 
-    _description = "JetBrains AI (IDE-integrated)"
-    _file_patterns = [".idea/ai-assistant.xml", ".jetbrains/config.json"]
+    _description = "JetBrains AI (.assistant/rules/)"
+    _file_patterns = [".assistant/rules/*.md"]
 
     def __init__(self):
         super().__init__(
@@ -40,44 +40,15 @@ class JetBrainsAdapter(EditorAdapter):
         # Apply variable substitution if supported
         processed_prompt = self.substitute_variables(prompt, variables)
 
-        # Create IDE configuration content
-        xml_content = self._build_ide_config(processed_prompt)
+        # Process conditionals if supported
+        conditional_content = self.process_conditionals(processed_prompt, variables)
 
-        # Create JSON configuration content
-        json_content = self._build_json_config(processed_prompt)
+        # Generate rules directory system
+        rules_files = self._generate_rules_system(
+            processed_prompt, conditional_content, output_dir, dry_run, verbose
+        )
 
-        # Determine output paths
-        idea_dir = output_dir / ".idea"
-        jetbrains_dir = output_dir / ".jetbrains"
-        xml_file = idea_dir / "ai-assistant.xml"
-        json_file = jetbrains_dir / "config.json"
-
-        created_files = []
-
-        if dry_run:
-            click.echo(f"  📁 Would create: {xml_file}")
-            click.echo(f"  📁 Would create: {json_file}")
-            if verbose:
-                click.echo("  📄 XML config preview:")
-                preview = (
-                    xml_content[:200] + "..." if len(xml_content) > 200 else xml_content
-                )
-                click.echo(f"    {preview}")
-        else:
-            # Create directories and files
-            idea_dir.mkdir(exist_ok=True)
-            with open(xml_file, "w", encoding="utf-8") as f:
-                f.write(xml_content)
-            created_files.append(xml_file)
-            click.echo(f"✅ Generated: {xml_file}")
-
-            jetbrains_dir.mkdir(exist_ok=True)
-            with open(json_file, "w", encoding="utf-8") as f:
-                f.write(json_content)
-            created_files.append(json_file)
-            click.echo(f"✅ Generated: {json_file}")
-
-        return created_files or [xml_file, json_file]
+        return rules_files
 
     def validate(self, prompt: UniversalPrompt) -> List[ValidationError]:
         """Validate prompt for JetBrains AI."""
@@ -103,152 +74,201 @@ class JetBrainsAdapter(EditorAdapter):
         """JetBrains supports conditional configuration."""
         return True
 
-    def _build_ide_config(self, prompt: UniversalPrompt) -> str:
-        """Build JetBrains IDE configuration XML content."""
+    def parse_files(self, source_dir: Path) -> UniversalPrompt:
+        """Parse JetBrains files back into a UniversalPrompt."""
+        return self.parse_markdown_rules_files(
+            source_dir=source_dir,
+            rules_subdir=".assistant/rules",
+            file_extension="md",
+            editor_name="JetBrains AI",
+        )
+
+    def _generate_rules_system(
+        self,
+        prompt: UniversalPrompt,
+        conditional_content: Optional[Dict[str, Any]],
+        output_dir: Path,
+        dry_run: bool,
+        verbose: bool,
+    ) -> List[Path]:
+        """Generate .assistant/rules/ directory with markdown files."""
+        rules_dir = output_dir / ".assistant" / "rules"
+        created_files = []
+
+        # Generate general coding rules
+        all_instructions = []
+        if prompt.instructions and prompt.instructions.general:
+            all_instructions.extend(prompt.instructions.general)
+        if (
+            conditional_content
+            and "instructions" in conditional_content
+            and "general" in conditional_content["instructions"]
+        ):
+            all_instructions.extend(conditional_content["instructions"]["general"])
+
+        if all_instructions:
+            general_file = rules_dir / "general.md"
+            general_content = self._build_rules_content(
+                "General Coding Rules", all_instructions
+            )
+
+            if dry_run:
+                click.echo(f"  📁 Would create: {general_file}")
+                if verbose:
+                    preview = (
+                        general_content[:200] + "..."
+                        if len(general_content) > 200
+                        else general_content
+                    )
+                    click.echo(f"    {preview}")
+                created_files.append(general_file)
+            else:
+                rules_dir.mkdir(parents=True, exist_ok=True)
+                with open(general_file, "w", encoding="utf-8") as f:
+                    f.write(general_content)
+                click.echo(f"✅ Generated: {general_file}")
+                created_files.append(general_file)
+
+        # Generate code style rules
+        if prompt.instructions and prompt.instructions.code_style:
+            style_file = rules_dir / "code-style.md"
+            style_content = self._build_rules_content(
+                "Code Style Rules", prompt.instructions.code_style
+            )
+
+            if dry_run:
+                click.echo(f"  📁 Would create: {style_file}")
+                if verbose:
+                    preview = (
+                        style_content[:200] + "..."
+                        if len(style_content) > 200
+                        else style_content
+                    )
+                    click.echo(f"    {preview}")
+                created_files.append(style_file)
+            else:
+                rules_dir.mkdir(parents=True, exist_ok=True)
+                with open(style_file, "w", encoding="utf-8") as f:
+                    f.write(style_content)
+                click.echo(f"✅ Generated: {style_file}")
+                created_files.append(style_file)
+
+        # Generate testing rules
+        if prompt.instructions and prompt.instructions.testing:
+            testing_file = rules_dir / "testing.md"
+            testing_content = self._build_rules_content(
+                "Testing Rules", prompt.instructions.testing
+            )
+
+            if dry_run:
+                click.echo(f"  📁 Would create: {testing_file}")
+                if verbose:
+                    preview = (
+                        testing_content[:200] + "..."
+                        if len(testing_content) > 200
+                        else testing_content
+                    )
+                    click.echo(f"    {preview}")
+                created_files.append(testing_file)
+            else:
+                rules_dir.mkdir(parents=True, exist_ok=True)
+                with open(testing_file, "w", encoding="utf-8") as f:
+                    f.write(testing_content)
+                click.echo(f"✅ Generated: {testing_file}")
+                created_files.append(testing_file)
+
+        # Generate technology-specific rules
+        if prompt.context and prompt.context.technologies:
+            for tech in prompt.context.technologies[:2]:  # Limit to 2 main technologies
+                tech_file = rules_dir / f"{tech.lower()}-rules.md"
+                tech_content = self._build_tech_rules_content(tech, prompt)
+
+                if dry_run:
+                    click.echo(f"  📁 Would create: {tech_file}")
+                    if verbose:
+                        preview = (
+                            tech_content[:200] + "..."
+                            if len(tech_content) > 200
+                            else tech_content
+                        )
+                        click.echo(f"    {preview}")
+                    created_files.append(tech_file)
+                else:
+                    rules_dir.mkdir(parents=True, exist_ok=True)
+                    with open(tech_file, "w", encoding="utf-8") as f:
+                        f.write(tech_content)
+                    click.echo(f"✅ Generated: {tech_file}")
+                    created_files.append(tech_file)
+
+        return created_files
+
+    def _build_rules_content(self, title: str, instructions: List[str]) -> str:
+        """Build markdown rules content for .assistant/rules/ files."""
         lines = []
 
-        # XML header
-        lines.append('<?xml version="1.0" encoding="UTF-8"?>')
-        lines.append("<application>")
-        lines.append('  <component name="AIAssistant">')
-        lines.append(
-            f'    <option name="projectName" value="{prompt.metadata.title}" />'
-        )
-        lines.append(
-            f'    <option name="projectDescription" value="{prompt.metadata.description}" />'
-        )
-        lines.append('    <option name="aiAssistanceEnabled" value="true" />')
-        lines.append('    <option name="smartCompletions" value="true" />')
-        lines.append('    <option name="contextAware" value="true" />')
+        lines.append(f"# {title}")
         lines.append("")
 
-        # Project settings
-        if prompt.context:
-            lines.append("    <projectSettings>")
-            if prompt.context.project_type:
-                lines.append(
-                    f'      <option name="projectType" value="{prompt.context.project_type}" />'
-                )
-            if prompt.context.technologies:
-                lines.append("      <technologies>")
-                for tech in prompt.context.technologies:
-                    lines.append(f'        <technology name="{tech}" enabled="true" />')
-                lines.append("      </technologies>")
-            lines.append("    </projectSettings>")
-            lines.append("")
+        for instruction in instructions:
+            lines.append(f"- {instruction}")
 
-        # Code style settings
-        if prompt.instructions and prompt.instructions.code_style:
-            lines.append("    <codeStyle>")
-            for guideline in prompt.instructions.code_style:
-                escaped_guideline = (
-                    guideline.replace('"', "&quot;")
-                    .replace("<", "&lt;")
-                    .replace(">", "&gt;")
-                )
-                lines.append(f'      <rule description="{escaped_guideline}" />')
-            lines.append("    </codeStyle>")
-            lines.append("")
-
-        # AI behavior settings
-        lines.append("    <aiBehavior>")
-        lines.append('      <option name="suggestionLevel" value="medium" />')
-        lines.append('      <option name="autoImports" value="true" />')
-        lines.append('      <option name="refactoringHints" value="true" />')
-        lines.append('      <option name="codeGeneration" value="true" />')
-        lines.append('      <option name="testGeneration" value="true" />')
-        lines.append("    </aiBehavior>")
         lines.append("")
-
-        # Close XML
-        lines.append("  </component>")
-        lines.append("</application>")
+        lines.append("## Additional Guidelines")
+        lines.append("- Follow project-specific patterns and conventions")
+        lines.append("- Maintain consistency with existing codebase")
+        lines.append("- Consider performance and security implications")
 
         return "\n".join(lines)
 
-    def _build_json_config(self, prompt: UniversalPrompt) -> str:
-        """Build JetBrains JSON configuration content."""
-        config = {
-            "version": "1.0",
-            "project": {
-                "name": prompt.metadata.title,
-                "description": prompt.metadata.description,
-                "version": prompt.metadata.version,
-            },
-            "ai_assistant": {
-                "enabled": True,
-                "features": {
-                    "code_completion": True,
-                    "code_generation": True,
-                    "refactoring_suggestions": True,
-                    "test_generation": True,
-                    "documentation_generation": True,
-                    "error_analysis": True,
-                },
-                "behavior": {
-                    "suggestion_frequency": "medium",
-                    "context_awareness": "high",
-                    "learning_mode": True,
-                },
-            },
+    def _build_tech_rules_content(self, tech: str, prompt: UniversalPrompt) -> str:
+        """Build technology-specific rules content."""
+        lines = []
+
+        lines.append(f"# {tech.title()} Rules")
+        lines.append("")
+
+        # Add general instructions that apply to this tech
+        if prompt.instructions and prompt.instructions.general:
+            lines.append("## General Guidelines")
+            for instruction in prompt.instructions.general:
+                lines.append(f"- {instruction}")
+            lines.append("")
+
+        # Add tech-specific best practices
+        lines.append(f"## {tech.title()} Best Practices")
+        tech_practices = {
+            "java": [
+                "Follow Java coding conventions",
+                "Use meaningful names for classes, methods, and variables",
+                "Implement proper exception handling",
+                "Leverage modern Java features appropriately",
+            ],
+            "kotlin": [
+                "Use Kotlin idioms and best practices",
+                "Prefer immutability with val over var",
+                "Leverage null safety features",
+                "Use extension functions appropriately",
+            ],
+            "python": [
+                "Follow PEP 8 style guidelines",
+                "Use type hints for function signatures",
+                "Implement proper error handling with try/except blocks",
+                "Use docstrings for all functions and classes",
+            ],
+            "javascript": [
+                "Use modern ES6+ syntax",
+                "Prefer const and let over var",
+                "Use arrow functions appropriately",
+                "Implement proper error handling with try/catch blocks",
+            ],
         }
 
-        # Add language-specific settings
-        if prompt.context and prompt.context.technologies:
-            config["languages"] = {}
-            for tech in prompt.context.technologies:
-                tech_lower = tech.lower()
-                config["languages"][tech_lower] = {
-                    "enabled": True,
-                    "completion_level": "advanced",
-                    "framework_support": True,
-                }
+        if tech.lower() in tech_practices:
+            for practice in tech_practices[tech.lower()]:
+                lines.append(f"- {practice}")
+        else:
+            lines.append(f"- Follow {tech} best practices and conventions")
+            lines.append(f"- Maintain consistency with existing {tech} code")
+            lines.append(f"- Use {tech} idioms and patterns appropriately")
 
-        # Add development guidelines
-        if prompt.instructions:
-            config["guidelines"] = {}
-
-            if prompt.instructions.general:
-                config["guidelines"]["general"] = prompt.instructions.general
-
-            if prompt.instructions.code_style:
-                config["guidelines"]["code_style"] = prompt.instructions.code_style
-
-            if prompt.instructions.testing:
-                config["guidelines"]["testing"] = prompt.instructions.testing
-
-        # Add IDE-specific features
-        config["ide_integration"] = {
-            "inspection_hints": True,
-            "quick_fixes": True,
-            "live_templates": True,
-            "intention_actions": True,
-            "debugging_assistance": True,
-        }
-
-        # Add project type specific features
-        if prompt.context and prompt.context.project_type:
-            project_type = prompt.context.project_type
-            if project_type in ["web_application", "api_service"]:
-                config["ide_integration"]["web_development"] = {
-                    "html_completion": True,
-                    "css_assistance": True,
-                    "api_testing": True,
-                }
-            elif project_type in ["mobile_app"]:
-                config["ide_integration"]["mobile_development"] = {
-                    "ui_generation": True,
-                    "platform_specific": True,
-                }
-
-        # Add custom templates if examples exist
-        if prompt.examples:
-            config["templates"] = {}
-            for name, example in prompt.examples.items():
-                config["templates"][name] = {
-                    "description": f"Template for {name.replace('_', ' ')}",
-                    "content": example[:500] + "..." if len(example) > 500 else example,
-                    "type": "code_snippet",
-                }
-
-        return json.dumps(config, indent=2)
+        return "\n".join(lines)
