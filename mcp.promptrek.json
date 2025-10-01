@@ -1,0 +1,48 @@
+{
+  "schema_version": "1.0.0",
+  "metadata": {
+    "title": "MCP Servers for PrompTrek Project Development",
+    "description": "MCP server configuration for development project",
+    "version": "1.0.0",
+    "author": "PrompTrek Dev Team",
+    "created": "2025-10-01",
+    "updated": "2025-10-01"
+  },
+  "config": {
+    "allow_custom_servers": true,
+    "require_all_servers": false
+  },
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/Users/username/projects"
+      ],
+      "description": "Provides filesystem access for reading and writing files",
+      "required": true
+    },
+    "git": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-git"
+      ],
+      "description": "Git repository operations and version control",
+      "required": false
+    },
+    "github": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-github"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+      },
+      "description": "GitHub API access for issues, PRs, and repository management",
+      "required": false
+    }
+  }
+}

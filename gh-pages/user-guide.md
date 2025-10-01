@@ -12,11 +12,12 @@ Welcome to the complete PrompTrek user guide! This documentation covers everythi
 1. [Installation and Setup](#installation-and-setup)
 2. [Universal Prompt Format (UPF)](#universal-prompt-format-upf)
 3. [Command Reference](#command-reference)
-4. [Editor-Specific Features](#editor-specific-features)
-5. [Advanced Features](#advanced-features)
-6. [Pre-commit Integration](#pre-commit-integration)
-7. [Best Practices](#best-practices)
-8. [Troubleshooting](#troubleshooting)
+4. [MCP Server Management](#mcp-server-management)
+5. [Editor-Specific Features](#editor-specific-features)
+6. [Advanced Features](#advanced-features)
+7. [Pre-commit Integration](#pre-commit-integration)
+8. [Best Practices](#best-practices)
+9. [Troubleshooting](#troubleshooting)
 
 ## Installation and Setup
 
@@ -332,6 +333,152 @@ git diff --cached --name-only | xargs promptrek check-generated
 **Exit codes:**
 - `0`: No generated files found
 - `1`: Generated files detected (blocks commit)
+
+## MCP Server Management
+
+PrompTrek supports managing Model Context Protocol (MCP) servers across multiple AI editors. MCP enables AI assistants to connect to external tools and data sources like filesystems, databases, APIs, and development tools.
+
+### Quick Start
+
+Create an `mcp.promptrek.json` file in your project root:
+
+```json
+{
+  "schema_version": "1.0.0",
+  "metadata": {
+    "title": "Project MCP Servers",
+    "description": "MCP configuration for this project"
+  },
+  "config": {
+    "allow_custom_servers": true,
+    "require_all_servers": false
+  },
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "."],
+      "description": "Filesystem access",
+      "required": true
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+      },
+      "description": "GitHub API access"
+    }
+  }
+}
+```
+
+Then run: `promptrek mcp`
+
+### Configuration Options
+
+**`allow_custom_servers`**:
+- `true` (default): Merge with existing servers
+- `false`: Replace all existing servers
+
+**`require_all_servers`**:
+- `false` (default): Users can select specific servers
+- `true`: All servers must be installed together
+
+**Server configuration**:
+- `command` (required): Executable (e.g., `npx`, `python`)
+- `args` (optional): Command-line arguments
+- `env` (optional): Environment variables (supports `${VAR}` substitution)
+- `description` (optional): Human-readable description
+- `required` (optional): Whether server is required
+
+### Common MCP Servers
+
+**Git Integration**
+```json
+"git": {
+  "command": "uvx",
+  "args": ["mcp-server-git", "--repository", "${PROJECT_PATH}"],
+  "description": "Git operations and history",
+  "required": true
+}
+```
+
+**GitHub Integration**
+```json
+"github": {
+  "command": "npx",
+  "args": ["-y", "@modelcontextprotocol/server-github"],
+  "env": {
+    "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+  },
+  "description": "GitHub API access",
+  "required": false
+}
+```
+
+**PostgreSQL Database**
+```json
+"postgres": {
+  "command": "npx",
+  "args": ["-y", "@modelcontextprotocol/server-postgres", "${DATABASE_URL}"],
+  "description": "PostgreSQL database access",
+  "required": false
+}
+```
+
+**Web Search (Brave)**
+```json
+"brave-search": {
+  "command": "npx",
+  "args": ["-y", "@modelcontextprotocol/server-brave-search"],
+  "env": {
+    "BRAVE_API_KEY": "${BRAVE_API_KEY}"
+  },
+  "description": "Web search capabilities",
+  "required": false
+}
+```
+
+### Team Workflows
+
+**Development Team Setup:**
+1. Commit `mcp.promptrek.json` to repository
+2. Team members run: `promptrek mcp`
+3. Each developer selects relevant servers for their work
+4. Custom servers (if allowed) are preserved per developer
+
+**CI/CD Integration:**
+```bash
+# In CI pipeline, generate MCP configs
+promptrek mcp --editor cursor --server filesystem,git --force
+```
+
+### Command Reference
+
+```bash
+# Interactive mode - prompts for editor and servers
+promptrek mcp
+
+# Generate for specific editor
+promptrek mcp --editor cursor
+
+# Generate for multiple editors
+promptrek mcp --editor cursor,continue
+
+# Select specific servers
+promptrek mcp --editor cursor --server filesystem,git,github
+
+# Provide variables
+promptrek mcp --editor cursor --var PROJECT_PATH=/path/to/project --var GITHUB_TOKEN=ghp_xxx
+
+# Dry run to preview changes
+promptrek mcp --editor cursor --dry-run
+
+# Force overwrite without prompts
+promptrek mcp --editor cursor --force
+```
+
+For complete documentation, see the [MCP User Guide](https://github.com/flamingquaks/promptrek/blob/main/docs/mcp-user-guide.md).
 
 ## Editor-Specific Features
 

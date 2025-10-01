@@ -176,3 +176,87 @@ class UniversalPrompt(BaseModel):
     model_config = ConfigDict(
         validate_assignment=True, extra="forbid"  # Strict validation for the main model
     )
+
+
+class MCPServerConfig(BaseModel):
+    """Configuration for a single MCP server."""
+
+    command: str = Field(..., description="Executable command to run the server")
+    args: Optional[List[str]] = Field(
+        default=None, description="Command-line arguments"
+    )
+    env: Optional[Dict[str, str]] = Field(
+        default=None, description="Environment variables for the server"
+    )
+    description: Optional[str] = Field(
+        default=None, description="Human-readable description of the server"
+    )
+    required: bool = Field(
+        default=False, description="Whether this server is required for the project"
+    )
+
+    model_config = ConfigDict(extra="allow")
+
+
+class MCPMetadata(BaseModel):
+    """Metadata for MCP configuration."""
+
+    title: str = Field(..., description="Human-readable title")
+    description: str = Field(..., description="Description of MCP configuration")
+    version: str = Field(default="1.0.0", description="Configuration version")
+    author: Optional[str] = Field(default=None, description="Author name or email")
+    created: Optional[str] = Field(
+        default=None, description="ISO 8601 date (YYYY-MM-DD)"
+    )
+    updated: Optional[str] = Field(
+        default=None, description="ISO 8601 date (YYYY-MM-DD)"
+    )
+
+    @field_validator("created", "updated")
+    @classmethod
+    def validate_dates(cls, v: Optional[str]) -> Optional[str]:
+        """Validate date format when provided."""
+        if v is None:
+            return v
+        try:
+            datetime.fromisoformat(v)
+        except ValueError:
+            raise ValueError("Date must be in YYYY-MM-DD format")
+        return v
+
+
+class MCPConfig(BaseModel):
+    """Configuration settings for MCP management."""
+
+    allow_custom_servers: bool = Field(
+        default=True,
+        description="Allow custom project MCP servers to coexist with managed ones",
+    )
+    require_all_servers: bool = Field(
+        default=False,
+        description="Require installation of all MCP servers"
+        "(no selective installation)",
+    )
+
+
+class MCPConfiguration(BaseModel):
+    """Root MCP configuration model."""
+
+    schema_version: str = Field(..., description="MCP schema version")
+    metadata: MCPMetadata = Field(..., description="MCP configuration metadata")
+    config: MCPConfig = Field(
+        default_factory=MCPConfig, description="MCP management settings"
+    )
+    mcpServers: Dict[str, MCPServerConfig] = Field(
+        default_factory=dict, description="MCP server configurations"
+    )
+
+    @field_validator("schema_version")
+    @classmethod
+    def validate_schema_version(cls, v: str) -> str:
+        """Validate schema version format."""
+        if not v.count(".") == 2:
+            raise ValueError("Schema version must be in format 'x.y.z'")
+        return v
+
+    model_config = ConfigDict(validate_assignment=True, extra="forbid")

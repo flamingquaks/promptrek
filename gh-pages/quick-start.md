@@ -309,6 +309,16 @@ promptrek sync --editor copilot --source-dir . --output <file>  # Sync editor ch
 promptrek sync --editor continue --source-dir . --dry-run       # Preview sync changes
 ```
 
+### MCP Server Management
+```bash
+promptrek mcp                                          # Interactive mode
+promptrek mcp --editor cursor                          # Generate for Cursor
+promptrek mcp --editor cursor,continue                 # Multiple editors
+promptrek mcp --server filesystem --server git         # Select specific servers
+promptrek mcp --var GITHUB_TOKEN=xxx --editor cursor   # With variables
+promptrek mcp --dry-run --editor cursor                # Preview changes
+```
+
 ### Information
 ```bash
 promptrek list-editors              # Show supported editors

@@ -317,6 +317,12 @@ instructions:
         <h3>Pre-commit Integration</h3>
         <p>Automatic validation and protection. Pre-commit hooks ensure your .promptrek.yaml files are valid and prevent accidental commits of generated files.</p>
       </div>
+
+      <div class="feature-card-modern">
+        <div class="feature-icon">🔌</div>
+        <h3>MCP Server Management</h3>
+        <p>Manage Model Context Protocol servers across editors. Define MCP servers once and generate editor-specific configurations automatically.</p>
+      </div>
     </div>
   </div>
 </section>

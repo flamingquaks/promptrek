@@ -100,3 +100,27 @@ class CLIError(PrompTrekError):
     """Raised for CLI-specific errors."""
 
     pass
+
+
+class MCPError(PrompTrekError):
+    """Base exception for MCP-related errors."""
+
+    pass
+
+
+class MCPParsingError(MCPError):
+    """Raised when MCP configuration parsing fails."""
+
+    pass
+
+
+class MCPGenerationError(MCPError):
+    """Raised when MCP configuration generation fails."""
+
+    pass
+
+
+class MCPValidationError(MCPError):
+    """Raised when MCP configuration validation fails."""
+
+    pass

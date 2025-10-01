@@ -15,6 +15,7 @@ from .commands.agents import agents_command
 from .commands.generate import generate_command
 from .commands.hooks import check_generated_command, install_hooks_command
 from .commands.init import init_command
+from .commands.mcp import mcp_command
 from .commands.preview import preview_command
 from .commands.sync import sync_command
 from .commands.validate import validate_command
@@ -309,6 +310,113 @@ def agents(
     """
     try:
         agents_command(ctx, prompt_file, output, dry_run, force)
+    except PrompTrekError as e:
+        click.echo(f"Error: {e}", err=True)
+        ctx.exit(1)
+    except Exception as e:
+        if ctx.obj.get("verbose"):
+            raise
+        click.echo(f"Unexpected error: {e}", err=True)
+        ctx.exit(1)
+
+
+@cli.command()
+@click.option(
+    "--file",
+    "-f",
+    "mcp_file",
+    type=click.Path(exists=True, path_type=Path),
+    help="Path to mcp.promptrek.json file (auto-detects if not specified)",
+)
+@click.option(
+    "--editor",
+    "-e",
+    type=str,
+    help="Target editor(s), comma-separated (e.g., cursor,continue)",
+)
+@click.option(
+    "--output",
+    "-o",
+    type=click.Path(path_type=Path),
+    help="Output directory (default: current directory)",
+)
+@click.option(
+    "--server",
+    "-s",
+    "servers",
+    multiple=True,
+    help="Select specific server(s) to install (can be repeated)",
+)
+@click.option(
+    "--dry-run",
+    is_flag=True,
+    help="Show what would be generated without creating files",
+)
+@click.option(
+    "--force",
+    is_flag=True,
+    help="Force overwrite without confirmation",
+)
+@click.option(
+    "--var",
+    "-V",
+    "variables",
+    multiple=True,
+    help="Override variables (e.g., -V API_KEY=value)",
+)
+@click.pass_context
+def mcp(
+    ctx: click.Context,
+    mcp_file: Optional[Path],
+    editor: Optional[str],
+    output: Optional[Path],
+    servers: tuple[str, ...],
+    dry_run: bool,
+    force: bool,
+    variables: tuple[str, ...],
+) -> None:
+    """Generate MCP server configurations for AI editors.
+
+    This command generates editor-specific MCP (Model Context Protocol) server
+    configurations from a universal mcp.promptrek.json file. MCP servers provide
+    additional context and tools to AI editors.
+
+    If run without options, it will interactively prompt for
+    editor and server selection.
+
+    Examples:
+        # Interactive mode
+        promptrek mcp
+
+        # Generate for Cursor with specific servers
+        promptrek mcp --editor cursor --server github --server filesystem
+
+        # Generate for multiple editors with variables
+        promptrek mcp --editor cursor,continue --var API_KEY=secret
+    """
+    try:
+        # Parse variable overrides
+        var_dict = {}
+        for var in variables:
+            if "=" not in var:
+                raise click.BadParameter(
+                    f"Variable must be in format KEY=value, got: {var}"
+                )
+            key, value = var.split("=", 1)
+            var_dict[key.strip()] = value.strip()
+
+        server_list = list(servers) if servers else None
+
+        mcp_command(
+            ctx,
+            mcp_file,
+            editor,
+            output,
+            server_list,
+            dry_run,
+            force,
+            var_dict if var_dict else None,
+        )
     except PrompTrekError as e:
         click.echo(f"Error: {e}", err=True)
         ctx.exit(1)

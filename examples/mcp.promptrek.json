@@ -1,0 +1,101 @@
+{
+  "schema_version": "1.0.0",
+  "metadata": {
+    "title": "Example Project MCP Servers",
+    "description": "MCP server configuration for development project with filesystem, git, and database access",
+    "version": "1.0.0",
+    "author": "Development Team",
+    "created": "2025-10-01",
+    "updated": "2025-10-01"
+  },
+  "config": {
+    "allow_custom_servers": true,
+    "require_all_servers": false
+  },
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/Users/username/projects"
+      ],
+      "description": "Provides filesystem access for reading and writing files",
+      "required": true
+    },
+    "git": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-git"
+      ],
+      "description": "Git repository operations and version control",
+      "required": false
+    },
+    "github": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-github"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+      },
+      "description": "GitHub API access for issues, PRs, and repository management",
+      "required": false
+    },
+    "postgres": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres",
+        "postgresql://localhost/mydb"
+      ],
+      "env": {
+        "PGPASSWORD": "${DATABASE_PASSWORD}"
+      },
+      "description": "PostgreSQL database access for queries and schema inspection",
+      "required": false
+    },
+    "brave-search": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-brave-search"
+      ],
+      "env": {
+        "BRAVE_API_KEY": "${BRAVE_API_KEY}"
+      },
+      "description": "Web search capabilities using Brave Search API",
+      "required": false
+    },
+    "fetch": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-fetch"
+      ],
+      "description": "HTTP fetch capabilities for retrieving web content",
+      "required": false
+    },
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@playwright/mcp@latest"
+      ],
+      "description": "Browser automation and web scraping with Playwright",
+      "required": false
+    },
+    "sqlite": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sqlite",
+        "/path/to/database.db"
+      ],
+      "description": "SQLite database access for local data storage",
+      "required": false
+    }
+  }
+}
