@@ -1,3 +1,8 @@
+---
+layout: default
+title: Changelog Process
+---
+
 # Changelog Process
 
 This document describes how PrompTrek uses conventional commits to automatically generate changelogs.

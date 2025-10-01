@@ -1,3 +1,8 @@
+---
+layout: default
+title: Architecture
+---
+
 # System Architecture
 
 ## High-Level Architecture

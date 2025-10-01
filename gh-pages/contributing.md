@@ -69,7 +69,7 @@ Found a bug? Help us fix it!
 
 Have an idea for a new feature?
 
-1. **Check the roadmap** in our [Implementation Roadmap](https://github.com/flamingquaks/promptrek/blob/main/docs/IMPLEMENTATION_ROADMAP.md)
+1. **Check the roadmap** in our [Implementation Roadmap](https://flamingquaks.github.io/promptrek/developer/roadmap.html)
 2. **Search existing issues** for similar requests
 3. **Create a feature request** using our template
 4. **Describe the use case** and expected benefits
@@ -158,8 +158,6 @@ Want to add support for a new AI editor?
 4. **Add comprehensive tests**
 5. **Update documentation**
 
-See our [Editor Research](https://github.com/flamingquaks/promptrek/blob/main/docs/EDITOR_RESEARCH.md) for examples.
-
 ## 🛠 Development Guidelines
 
 ### Coding Standards
@@ -213,7 +211,6 @@ promptrek/
 │   ├── unit/                    # Unit tests
 │   ├── integration/             # Integration tests
 │   └── fixtures/                # Test data
-├── docs/                        # Documentation
 ├── examples/                    # Example configurations
 └── scripts/                     # Development scripts
 ```
@@ -341,10 +338,10 @@ Contributors are recognized in:
 
 ## 🔗 Useful Resources
 
-- [Implementation Roadmap](https://github.com/flamingquaks/promptrek/blob/main/docs/IMPLEMENTATION_ROADMAP.md)
-- [System Architecture](https://github.com/flamingquaks/promptrek/blob/main/docs/ARCHITECTURE.md)
-- [UPF Specification](https://github.com/flamingquaks/promptrek/blob/main/docs/UPF_SPECIFICATION.md)
-- [Editor Research](https://github.com/flamingquaks/promptrek/blob/main/docs/EDITOR_RESEARCH.md)
+- [Implementation Roadmap](https://flamingquaks.github.io/promptrek/developer/roadmap.html)
+- [System Architecture](https://flamingquaks.github.io/promptrek/developer/architecture.html)
+- [UPF Specification](https://flamingquaks.github.io/promptrek/user-guide/upf-specification.html)
+- [Project Structure](https://flamingquaks.github.io/promptrek/developer/project-structure.html)
 
 ## 📞 Contact
 
