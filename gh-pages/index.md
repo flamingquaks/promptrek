@@ -70,7 +70,7 @@ title: Home
 
       <div class="editor-card">
         <div class="editor-icon">
-          <img src="https://avatars.githubusercontent.com/u/125663687?s=200&v=4" alt="Continue" width="32" height="32" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+          <img src="https://cdn.prod.website-files.com/663e06c56841363663ffbbcf/664c918ec47bacdd3acdc167_favicon%408x.png" alt="Continue" width="32" height="32" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
           <span style="display:none;">⚡</span>
         </div>
         <h4>Continue</h4>
@@ -247,7 +247,7 @@ instructions:
           </div>
           <div class="file-item">
             <span class="file-icon">📄</span>
-            <span class="file-name">.clinerules</span>
+            <span class="file-name">.cline_rules.md</span>
           </div>
           <div class="file-item">
             <span class="file-icon">📄</span>
@@ -314,12 +314,6 @@ instructions:
         <div class="feature-icon">🔒</div>
         <h3>Pre-commit Integration</h3>
         <p>Automatic validation and protection. Pre-commit hooks ensure your .promptrek.yaml files are valid and prevent accidental commits of generated files.</p>
-      </div>
-
-      <div class="feature-card-modern">
-        <div class="feature-icon">🧪</div>
-        <h3>Production Ready</h3>
-        <p>442 tests with 82% coverage. Published to PyPI with automated CI/CD. Battle-tested and ready for production use.</p>
       </div>
     </div>
   </div>
