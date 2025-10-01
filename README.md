@@ -50,22 +50,23 @@ promptrek generate --all
 
 ## 📖 Documentation
 
-Comprehensive documentation is available in the [`docs/`](https://github.com/flamingquaks/promptrek/tree/main/docs) directory:
+**📚 Complete documentation is available on our [GitHub Pages site](https://flamingquaks.github.io/promptrek):**
 
-### Getting Started
-- [Getting Started Guide](./GETTING_STARTED.md) - Complete setup and usage guide
-- [Universal Prompt Format](./docs/UPF_SPECIFICATION.md) - UPF specification and examples
+- **[Quick Start Guide](https://flamingquaks.github.io/promptrek/quick-start.html)** - Get up and running in minutes
+- **[User Guide](https://flamingquaks.github.io/promptrek/user-guide.html)** - Comprehensive documentation covering:
+  - UPF Specification - Universal Prompt Format details
+  - Advanced Features - Variables, conditionals, and imports
+  - Editor Adapters - All supported AI editors
+  - Adapter Capabilities - Feature comparison matrix
+  - Sync Feature - Bidirectional synchronization
+  - Pre-commit Integration - Automated workflows
+- **[Contributing Guide](https://flamingquaks.github.io/promptrek/contributing.html)** - How to contribute to the project
 
-### Features & Usage
-- [Advanced Features](https://github.com/flamingquaks/promptrek/tree/main/docs/ADVANCED_FEATURES.md) - Variables, conditionals, and imports
-- [Editor Adapters](https://github.com/flamingquaks/promptrek/tree/main/docs/ADAPTERS.md) - Detailed guide to all supported editors
-- [Adapter Capabilities](https://github.com/flamingquaks/promptrek/tree/main/docs/ADAPTER_CAPABILITIES.md) - Feature comparison matrix
-- [Sync Feature](https://github.com/flamingquaks/promptrek/tree/main/docs/SYNC_FEATURE.md) - Bidirectional synchronization guide
-
-### Architecture & Planning
-- [System Architecture](https://github.com/flamingquaks/promptrek/tree/main/docs/ARCHITECTURE.md) - Technical design and structure
-- [Implementation Roadmap](https://github.com/flamingquaks/promptrek/tree/main/docs/IMPLEMENTATION_ROADMAP.md) - Development status and future plans
-- [Project Structure](https://github.com/flamingquaks/promptrek/tree/main/docs/PROJECT_STRUCTURE.md) - Repository organization
+### Additional Resources
+For technical architecture and development planning, see the [`docs/`](https://github.com/flamingquaks/promptrek/tree/main/docs) directory:
+- [System Architecture](./docs/ARCHITECTURE.md) - Technical design and structure
+- [Implementation Roadmap](./docs/IMPLEMENTATION_ROADMAP.md) - Development status and future plans
+- [Project Structure](./docs/PROJECT_STRUCTURE.md) - Repository organization
 
 ## 🎨 Supported Editors
 

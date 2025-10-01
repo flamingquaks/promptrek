@@ -2846,3 +2846,222 @@ a.btn.btn-secondary:hover {
     height: 1.5rem;
   }
 }
+
+/* User Guide Layout with Sidebar */
+.guide-page {
+  padding-top: 80px; /* Compensate for fixed header */
+}
+
+.guide-layout {
+  display: flex;
+  max-width: 1400px;
+  margin: 0 auto;
+  min-height: calc(100vh - 80px);
+  gap: 2rem;
+}
+
+.guide-sidebar {
+  width: 280px;
+  flex-shrink: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--border-light);
+  padding: 2rem 0;
+  position: sticky;
+  top: 80px;
+  height: fit-content;
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+}
+
+.guide-nav {
+  padding: 0 1.5rem;
+}
+
+.guide-nav-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid var(--border-light);
+}
+
+.guide-nav-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.guide-nav-list li {
+  margin-bottom: 0.5rem;
+}
+
+.guide-nav-link {
+  display: block;
+  padding: 0.75rem 1rem;
+  color: var(--text-secondary);
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  transition: all 0.2s ease;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.guide-nav-link:hover {
+  background: var(--bg-secondary);
+  color: var(--primary);
+  transform: translateX(4px);
+}
+
+.guide-nav-link.active {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+  color: white;
+  font-weight: 600;
+}
+
+.guide-content {
+  flex: 1;
+  min-width: 0;
+  padding: 2rem clamp(1rem, 3vw, 3rem);
+  background: var(--bg-primary);
+}
+
+.guide-article {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.guide-article h1 {
+  font-size: clamp(2.5rem, 5vw, 3rem);
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 2rem;
+  line-height: 1.2;
+}
+
+.guide-article h2 {
+  font-size: clamp(1.75rem, 3vw, 2rem);
+  font-weight: 700;
+  color: var(--primary);
+  margin: 3rem 0 1.5rem 0;
+  position: relative;
+  padding-left: 2rem;
+}
+
+.guide-article h2::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 2rem;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  border-radius: 2px;
+}
+
+.guide-article h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--primary);
+  margin: 2rem 0 1rem 0;
+}
+
+.guide-article h4 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 1.5rem 0 0.75rem 0;
+}
+
+.guide-article p {
+  font-size: 1.1rem;
+  line-height: 1.7;
+  margin-bottom: 1.5rem;
+  color: var(--text-secondary);
+}
+
+.guide-article ul, .guide-article ol {
+  margin: 1.5rem 0;
+  padding-left: 2rem;
+}
+
+.guide-article li {
+  font-size: 1.05rem;
+  line-height: 1.6;
+  margin-bottom: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.guide-article table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 2rem 0;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.guide-article th {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  color: white;
+  padding: 1rem 1.5rem;
+  font-weight: 600;
+  text-align: left;
+}
+
+.guide-article td {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.guide-article tr:hover {
+  background: rgba(102, 126, 234, 0.04);
+}
+
+/* Mobile responsive for guide layout */
+@media (max-width: 1024px) {
+  .guide-layout {
+    flex-direction: column;
+  }
+
+  .guide-sidebar {
+    width: 100%;
+    position: static;
+    max-height: none;
+    border-right: none;
+    border-bottom: 1px solid var(--border-light);
+    padding: 1.5rem 0;
+  }
+
+  .guide-nav {
+    padding: 0 1rem;
+  }
+
+  .guide-nav-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .guide-nav-list li {
+    margin-bottom: 0;
+  }
+
+  .guide-nav-link {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .guide-nav-link:hover {
+    transform: none;
+  }
+
+  .guide-content {
+    padding: 1rem;
+  }
+}

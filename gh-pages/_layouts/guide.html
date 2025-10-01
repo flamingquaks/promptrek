@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="{{ page.lang | default: site.lang | default: "en" }}">
+
+  {%- include head.html -%}
+
+  <body class="guide-page content-page">
+
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    {%- include header.html -%}
+
+    <div class="guide-layout">
+      <aside class="guide-sidebar" role="navigation" aria-label="User Guide Navigation">
+        <nav class="guide-nav">
+          <h3 class="guide-nav-title">User Guide</h3>
+          <ul class="guide-nav-list">
+            <li><a href="{{ '/user-guide.html' | relative_url }}" class="guide-nav-link {% if page.url == '/user-guide.html' %}active{% endif %}">Overview</a></li>
+            <li><a href="{{ '/user-guide/upf-specification.html' | relative_url }}" class="guide-nav-link {% if page.url contains 'upf-specification' %}active{% endif %}">UPF Specification</a></li>
+            <li><a href="{{ '/user-guide/advanced-features.html' | relative_url }}" class="guide-nav-link {% if page.url contains 'advanced-features' %}active{% endif %}">Advanced Features</a></li>
+            <li><a href="{{ '/user-guide/adapters.html' | relative_url }}" class="guide-nav-link {% if page.url contains 'adapters' %}active{% endif %}">Editor Adapters</a></li>
+            <li><a href="{{ '/user-guide/adapter-capabilities.html' | relative_url }}" class="guide-nav-link {% if page.url contains 'adapter-capabilities' %}active{% endif %}">Adapter Capabilities</a></li>
+            <li><a href="{{ '/user-guide/sync.html' | relative_url }}" class="guide-nav-link {% if page.url contains 'sync' %}active{% endif %}">Sync Feature</a></li>
+            <li><a href="{{ '/user-guide/pre-commit.html' | relative_url }}" class="guide-nav-link {% if page.url contains 'pre-commit' %}active{% endif %}">Pre-commit Integration</a></li>
+          </ul>
+        </nav>
+      </aside>
+
+      <main class="guide-content" aria-label="Content" id="main-content">
+        <article class="guide-article">
+          {{ content }}
+        </article>
+      </main>
+    </div>
+
+    {%- include footer.html -%}
+
+  </body>
+
+</html>
