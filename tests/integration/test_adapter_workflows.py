@@ -201,7 +201,14 @@ class TestAdapterWorkflows:
                 "version": "1.0.0",
                 "author": "test@example.com",
             },
-            "targets": ["amazon-q", "kiro", "cline", "codeium", "jetbrains", "tabnine"],
+            "targets": [
+                "amazon-q",
+                "kiro",
+                "cline",
+                "windsurf",
+                "jetbrains",
+                "tabnine",
+            ],
             "context": {
                 "project_type": "full_stack_application",
                 "technologies": ["python", "javascript", "react", "django"],
@@ -497,18 +504,18 @@ class TestAdapterWorkflows:
             assert result.exit_code == 0
 
     @pytest.fixture
-    def codeium_upf_file(self, temp_dir):
-        """Create UPF file configured for Codeium adapter."""
+    def windsurf_upf_file(self, temp_dir):
+        """Create UPF file configured for Windsurf adapter."""
         upf_content = {
             "schema_version": "1.0.0",
             "metadata": {
-                "title": "Codeium Assistant",
-                "description": "Codeium integration test project",
+                "title": "Windsurf Assistant",
+                "description": "Windsurf integration test project",
                 "version": "1.0.0",
                 "author": "test@example.com",
-                "tags": ["test", "codeium", "ai-coding"],
+                "tags": ["test", "windsurf", "ai-coding"],
             },
-            "targets": ["codeium"],
+            "targets": ["windsurf"],
             "context": {
                 "project_type": "api_service",
                 "technologies": ["python", "fastapi", "pydantic"],
@@ -534,7 +541,7 @@ class TestAdapterWorkflows:
             },
             "variables": {"SERVICE_NAME": "codeium-api", "API_VERSION": "v1"},
         }
-        upf_file = temp_dir / "codeium_test.promptrek.yaml"
+        upf_file = temp_dir / "windsurf_test.promptrek.yaml"
         with open(upf_file, "w") as f:
             yaml.dump(upf_content, f, default_flow_style=False)
         return upf_file
@@ -613,11 +620,11 @@ class TestAdapterWorkflows:
             yaml.dump(upf_content, f, default_flow_style=False)
         return upf_file
 
-    def test_codeium_basic_generation(self, runner, codeium_upf_file, temp_dir):
-        """Test Codeium adapter basic generation workflow."""
+    def test_windsurf_basic_generation(self, runner, windsurf_upf_file, temp_dir):
+        """Test Windsurf adapter basic generation workflow."""
         with runner.isolated_filesystem(temp_dir=temp_dir):
             result = runner.invoke(
-                cli, ["generate", str(codeium_upf_file), "--editor", "codeium"]
+                cli, ["generate", str(windsurf_upf_file), "--editor", "windsurf"]
             )
 
             assert result.exit_code == 0
@@ -625,16 +632,16 @@ class TestAdapterWorkflows:
                 "Generated:" in result.output or "not yet implemented" in result.output
             )
 
-    def test_codeium_with_variables(self, runner, codeium_upf_file, temp_dir):
-        """Test Codeium adapter with variable substitution."""
+    def test_windsurf_with_variables(self, runner, windsurf_upf_file, temp_dir):
+        """Test Windsurf adapter with variable substitution."""
         with runner.isolated_filesystem(temp_dir=temp_dir):
             result = runner.invoke(
                 cli,
                 [
                     "generate",
-                    str(codeium_upf_file),
+                    str(windsurf_upf_file),
                     "--editor",
-                    "codeium",
+                    "windsurf",
                     "-V",
                     "SERVICE_NAME=custom-service",
                     "-V",
@@ -644,24 +651,24 @@ class TestAdapterWorkflows:
 
             assert result.exit_code == 0
 
-    def test_codeium_error_scenarios(self, runner, codeium_upf_file):
-        """Test Codeium adapter error handling scenarios."""
+    def test_windsurf_error_scenarios(self, runner, windsurf_upf_file):
+        """Test Windsurf adapter error handling scenarios."""
         result = runner.invoke(
-            cli, ["generate", str(codeium_upf_file), "--editor", "invalid-editor"]
+            cli, ["generate", str(windsurf_upf_file), "--editor", "invalid-editor"]
         )
 
         assert result.exit_code != 0
 
-    def test_codeium_dry_run_verbose(self, runner, codeium_upf_file):
-        """Test Codeium adapter dry-run with verbose output."""
+    def test_windsurf_dry_run_verbose(self, runner, windsurf_upf_file):
+        """Test Windsurf adapter dry-run with verbose output."""
         result = runner.invoke(
             cli,
             [
                 "--verbose",
                 "generate",
-                str(codeium_upf_file),
+                str(windsurf_upf_file),
                 "--editor",
-                "codeium",
+                "windsurf",
                 "--dry-run",
             ],
         )
