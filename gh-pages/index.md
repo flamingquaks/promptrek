@@ -251,7 +251,7 @@ instructions:
           </div>
           <div class="file-item">
             <span class="file-icon">📄</span>
-            <span class="file-name">.kiro/steering/product.md</span>
+            <span class="file-name">.kiro/steering/product.md,requirements.md,design.md</span>
           </div>
         </div>
         <div class="command-example">
