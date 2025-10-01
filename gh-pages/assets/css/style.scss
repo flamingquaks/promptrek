@@ -2899,24 +2899,27 @@ a.btn.btn-secondary:hover {
 .guide-nav-link {
   display: block;
   padding: 0.75rem 1rem;
-  color: var(--text-secondary);
+  color: var(--text-primary);
   text-decoration: none;
   border-radius: var(--radius-md);
   transition: all 0.2s ease;
   font-weight: 500;
   font-size: 0.95rem;
+  border: 2px solid transparent;
 }
 
 .guide-nav-link:hover {
   background: var(--bg-secondary);
   color: var(--primary);
   transform: translateX(4px);
+  border-color: var(--border-medium);
 }
 
 .guide-nav-link.active {
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+  background: var(--primary);
   color: white;
   font-weight: 600;
+  border-color: var(--primary-dark);
 }
 
 .guide-content {
@@ -3021,6 +3024,64 @@ a.btn.btn-secondary:hover {
 
 .guide-article tr:hover {
   background: rgba(102, 126, 234, 0.04);
+}
+
+/* Table wrapper for mobile scrolling */
+.guide-article table {
+  display: block;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 768px) {
+  .guide-article table {
+    width: 100%;
+    min-width: 600px;
+  }
+}
+
+/* Back to top button */
+.back-to-top {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 50px;
+  height: 50px;
+  background: var(--primary);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  z-index: 999;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: none;
+  font-size: 1.5rem;
+  text-decoration: none;
+}
+
+.back-to-top:hover {
+  background: var(--primary-dark);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.back-to-top.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+@media (max-width: 768px) {
+  .back-to-top {
+    bottom: 1rem;
+    right: 1rem;
+    width: 45px;
+    height: 45px;
+  }
 }
 
 /* Mobile responsive for guide layout */

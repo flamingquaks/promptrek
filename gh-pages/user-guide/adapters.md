@@ -7,27 +7,7 @@ title: Editor Adapters
 
 PrompTrek supports 10 AI-powered code editors and assistants. Each adapter generates editor-specific configuration files optimized for that particular tool.
 
-## Feature Support Matrix
-
-| Editor | Project Files | Variables | Conditionals | Sync | Headless* | Generated Files |
-|--------|:-------------:|:---------:|:------------:|:----:|:---------:|-----------------|
-| [GitHub Copilot](#github-copilot) | ✅ | ✅ | ✅ | ✅ | ✅ | `.github/copilot-instructions.md` + instructions/ + prompts/ |
-| [Cursor](#cursor) | ✅ | ✅ | ✅ | ✅ | N/A | `.cursor/rules/*.mdc`, `AGENTS.md`, ignore files |
-| [Continue](#continue) | ✅ | ✅ | ✅ | ✅ | N/A | `.continue/rules/*.md` |
-| [Cline](#cline) | ✅ | ✅ | ✅ | ✅ | N/A | `.clinerules/*.md` |
-| [Claude Code](#claude-code) | ✅ | ✅ | ✅ | ✅ | N/A | `.claude/CLAUDE.md` |
-| [Windsurf](#windsurf) | ✅ | ✅ | ✅ | ✅ | N/A | `.windsurf/rules/*.md` |
-| [Kiro](#kiro) | ✅ | ✅ | ✅ | ✅ | N/A | `.kiro/steering/*.md` |
-| [JetBrains AI](#jetbrains-ai) | ✅ | ✅ | ✅ | ✅ | N/A | `.assistant/rules/*.md` |
-| [Tabnine](#tabnine) | ⚠️ | ✅ | ✅ | ✅ | N/A | `.tabnine_commands` (limited) |
-| [Amazon Q](#amazon-q) | ✅ | ✅ | ✅ | ✅ | N/A | `.amazonq/rules/*.md`, `.amazonq/cli-agents/*.json` |
-
-**Feature Definitions**:
-- **Project Files**: Generates project-level configuration files that can be committed to version control
-- **Variables**: Supports variable substitution from `variables.promptrek.yaml`
-- **Conditionals**: Supports conditional instructions based on context or target
-- **Sync**: Bidirectional synchronization - reads editor-specific config files back to PrompTrek format
-- **Headless***: Managed development agents (cloud-based AI agents like GitHub Copilot Workspace). **N/A** = Feature doesn't exist in that tool (not a lack of PrompTrek support)
+> **📊 Looking for a detailed feature comparison?** See the [Adapter Capabilities Matrix](adapter-capabilities.html) for a comprehensive breakdown of features supported by each adapter.
 
 For detailed capability comparison, see [ADAPTER_CAPABILITIES.md](./ADAPTER_CAPABILITIES.md).
 
