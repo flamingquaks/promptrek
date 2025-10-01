@@ -83,7 +83,7 @@ Comprehensive documentation is available in the [`docs/`](https://github.com/fla
 
 ## 🗂️ Example Configurations
 
-See the [`examples/`](.https://github.com/flamingquaks/promptrek/tree/main/examples/) directory for sample configurations:
+See the [`examples/`](https://github.com/flamingquaks/promptrek/tree/main/examples/) directory for sample configurations:
 
 ### Basic Examples
 - [React TypeScript Project](https://github.com/flamingquaks/promptrek/tree/main/examples/basic/react-typescript.promptrek.yaml)
