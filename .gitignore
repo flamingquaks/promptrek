@@ -119,3 +119,6 @@ _site/
 Gemfile.lock
 vendor/
 .bundle/
+
+# PrompTrek local variables (user-specific, not committed)
+variables.promptrek.yaml

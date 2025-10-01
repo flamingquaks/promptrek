@@ -6,7 +6,10 @@ Handles variable replacement in templates and UPF content.
 
 import os
 import re
+from pathlib import Path
 from typing import Any, Dict, List, Optional
+
+import yaml
 
 from ..core.exceptions import TemplateError
 from ..core.models import UniversalPrompt
@@ -14,6 +17,8 @@ from ..core.models import UniversalPrompt
 
 class VariableSubstitution:
     """Handles variable substitution in templates and content."""
+
+    LOCAL_VARIABLES_FILE = "variables.promptrek.yaml"
 
     def __init__(self) -> None:
         """Initialize variable substitution system."""
@@ -182,3 +187,42 @@ class VariableSubstitution:
             ]
         else:
             return data
+
+    def load_local_variables(self, search_dir: Optional[Path] = None) -> Dict[str, Any]:
+        """
+        Load variables from local variables.promptrek.yaml file.
+
+        Searches for variables.promptrek.yaml starting from search_dir
+        (or current directory) and walking up parent directories.
+
+        Args:
+            search_dir: Directory to start search from (defaults to current dir)
+
+        Returns:
+            Dictionary of variables loaded from file, empty dict if not found
+        """
+        start_dir = search_dir if search_dir else Path.cwd()
+
+        # Search current directory and parents
+        current = start_dir.resolve()
+        while True:
+            var_file = current / self.LOCAL_VARIABLES_FILE
+            if var_file.exists():
+                try:
+                    with open(var_file, "r", encoding="utf-8") as f:
+                        data = yaml.safe_load(f)
+                        if isinstance(data, dict):
+                            return data
+                        return {}
+                except Exception:
+                    # If file exists but can't be loaded, return empty dict
+                    return {}
+
+            # Move to parent directory
+            parent = current.parent
+            if parent == current:
+                # Reached root directory
+                break
+            current = parent
+
+        return {}

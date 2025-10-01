@@ -51,3 +51,13 @@
   stages: [commit]
   always_run: false
   pass_filenames: true
+
+- id: promptrek-check-local-vars
+  name: Prevent committing local variables
+  description: Blocks commits of variables.promptrek.yaml containing user-specific variables
+  entry: promptrek check-generated
+  language: python
+  files: variables\.promptrek\.ya?ml$
+  stages: [commit]
+  always_run: false
+  pass_filenames: true
