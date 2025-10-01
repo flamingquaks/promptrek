@@ -440,7 +440,7 @@ conditions:
           - "Generate comprehensive code completions"
           - "Suggest appropriate TypeScript types"
 
-  - if: "EDITOR in [\"codeium\", \"cursor\"]"
+  - if: "EDITOR in [\"windsurf\", \"cursor\"]"
     then:
       instructions:
         general:
@@ -485,7 +485,7 @@ Each adapter optimizes content for its target editor:
 - **Claude**: Emphasizes detailed context and examples for better understanding
 - **Continue**: Focuses on system messages and completion hints
 - **Cline**: Includes safety settings and terminal-specific guidance
-- **Codeium**: Structures content for AI code assistance patterns
+- **Windsurf**: Structures content as modular markdown rules
 - **Copilot**: Uses GitHub's instruction format and conventions
 - **Cursor**: Follows Cursor's rules file format
 
@@ -600,9 +600,8 @@ Add generated files to `.gitignore` if they contain sensitive information or are
 # Generated AI configuration files
 .claude/
 .continue/
-.codeium/
-.codeiumrc
-cline-context.md
+.windsurf/
+.clinerules/
 
 # Keep these if they're project-wide
 # .github/copilot-instructions.md

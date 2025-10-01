@@ -25,8 +25,7 @@ class TestTabnineAdapter(TestAdapterBase):
         """Test adapter initialization."""
         assert adapter.name == "tabnine"
         assert "Tabnine" in adapter.description
-        assert ".tabnine/config.json" in adapter.file_patterns
-        assert ".tabnine/team.yaml" in adapter.file_patterns
+        assert ".tabnine_commands" in adapter.file_patterns
 
     def test_supports_variables(self, adapter):
         """Test variable support."""
@@ -42,32 +41,15 @@ class TestTabnineAdapter(TestAdapterBase):
         # Should only have warnings, no critical errors
         assert all(error.severity == "warning" for error in errors)
 
-    def test_build_config_content(self, adapter, sample_prompt):
-        """Test config generation."""
-        content = adapter._build_config(sample_prompt)
-
-        # Parse as JSON to verify structure
-        config = json.loads(content)
-
-        assert "version" in config
-        assert "project" in config
-        assert "settings" in config
-        assert config["project"]["name"] == sample_prompt.metadata.title
-
     @patch("builtins.open", new_callable=mock_open)
-    @patch("pathlib.Path.mkdir")
-    def test_generate_actual_files(self, mock_mkdir, mock_file, adapter, sample_prompt):
+    def test_generate_actual_files(self, mock_file, adapter, sample_prompt):
         """Test actual file generation."""
         output_dir = Path("/tmp/test")
         files = adapter.generate(sample_prompt, output_dir, dry_run=False)
 
-        assert len(files) == 2
-        # Use cross-platform path checks
-        file_strs = [str(f) for f in files]
-        assert any(".tabnine" in f and "config.json" in f for f in file_strs)
-        assert any(".tabnine" in f and "team.yaml" in f for f in file_strs)
-        assert mock_mkdir.call_count == 1
-        assert mock_file.call_count == 2
+        assert len(files) == 1
+        assert files[0] == output_dir / ".tabnine_commands"
+        assert mock_file.called
 
     def test_generate_dry_run(self, adapter, sample_prompt, capsys):
         """Test dry run generation."""
@@ -76,4 +58,5 @@ class TestTabnineAdapter(TestAdapterBase):
 
         captured = capsys.readouterr()
         assert "Would create" in captured.out
-        assert len(files) == 2
+        assert len(files) == 1
+        assert files[0] == output_dir / ".tabnine_commands"

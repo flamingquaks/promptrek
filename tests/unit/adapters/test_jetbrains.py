@@ -45,34 +45,7 @@ class TestJetBrainsAdapter:
         """Test adapter initialization."""
         assert adapter.name == "jetbrains"
         assert "JetBrains AI" in adapter.description
-        assert ".idea/ai-assistant.xml" in adapter.file_patterns
-        assert ".jetbrains/config.json" in adapter.file_patterns
-
-    def test_build_ide_config(self, adapter, sample_prompt):
-        """Test IDE XML configuration generation."""
-        content = adapter._build_ide_config(sample_prompt)
-
-        assert "<?xml version" in content
-        assert "<application>" in content
-        assert '<component name="AIAssistant">' in content
-        assert sample_prompt.metadata.title in content
-        assert (
-            "Use proper formatting" in content
-        )  # This should be in code_style section
-        assert "Add comments" in content
-
-    def test_build_json_config(self, adapter, sample_prompt):
-        """Test JSON configuration generation."""
-        content = adapter._build_json_config(sample_prompt)
-
-        # Parse as JSON to verify structure
-        config = json.loads(content)
-
-        assert "project" in config
-        assert "ai_assistant" in config
-        assert "guidelines" in config
-        assert config["project"]["name"] == sample_prompt.metadata.title
-        assert "general" in config["guidelines"]
+        assert ".assistant/rules/*.md" in adapter.file_patterns
 
     @patch("builtins.open", new_callable=mock_open)
     @patch("pathlib.Path.mkdir")
@@ -81,11 +54,12 @@ class TestJetBrainsAdapter:
         output_dir = Path("/tmp/test")
         files = adapter.generate(sample_prompt, output_dir, dry_run=False)
 
-        assert len(files) == 2
-        assert any("ai-assistant.xml" in str(f) for f in files)
-        assert any("config.json" in str(f) for f in files)
-        assert mock_mkdir.call_count == 2  # .idea and .jetbrains directories
-        assert mock_file.call_count == 2  # Two files written
+        # Should generate multiple markdown rules files in .assistant/rules/
+        assert len(files) >= 2
+        assert any(".assistant/rules/general.md" in str(f) for f in files)
+        assert any(".assistant/rules/code-style.md" in str(f) for f in files)
+        assert mock_mkdir.called
+        assert mock_file.called
 
     def test_generate_dry_run(self, adapter, sample_prompt, capsys):
         """Test dry run generation."""
@@ -94,9 +68,8 @@ class TestJetBrainsAdapter:
 
         captured = capsys.readouterr()
         assert "Would create" in captured.out
-        assert len(files) == 2  # Dry run returns paths that would be created
-        assert any("ai-assistant.xml" in str(f) for f in files)
-        assert any("config.json" in str(f) for f in files)
+        assert len(files) >= 2  # Dry run returns paths that would be created
+        assert any(".assistant/rules" in str(f) for f in files)
 
     def test_generate_dry_run_verbose(self, adapter, sample_prompt, capsys):
         """Test dry run generation with verbose output."""
@@ -105,8 +78,7 @@ class TestJetBrainsAdapter:
 
         captured = capsys.readouterr()
         assert "Would create" in captured.out
-        assert "XML config preview:" in captured.out
-        assert len(files) == 2  # Dry run returns paths that would be created
+        assert len(files) >= 2  # Dry run returns paths that would be created
 
     def test_validate_valid_prompt(self, adapter, sample_prompt):
         """Test validation with valid prompt."""
@@ -172,6 +144,5 @@ class TestJetBrainsAdapter:
         """Test file patterns property."""
         patterns = adapter.file_patterns
         assert isinstance(patterns, list)
-        assert len(patterns) == 2
-        assert ".idea/ai-assistant.xml" in patterns
-        assert ".jetbrains/config.json" in patterns
+        assert len(patterns) == 1
+        assert ".assistant/rules/*.md" in patterns
