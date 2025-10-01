@@ -60,7 +60,7 @@ title: Home
 
       <div class="editor-card">
         <div class="editor-icon">
-          <img src="https://cursor.com/brand/icon.svg" alt="Cursor" width="32" height="32" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+          <img src="assets/cursor.png" alt="Cursor" width="32" height="32" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
           <span style="display:none;">🎯</span>
         </div>
         <h4>Cursor</h4>
@@ -100,7 +100,8 @@ title: Home
 
       <div class="editor-card">
         <div class="editor-icon">
-          <span>🤖</span>
+          <img src="assets/claude-code.svg" alt="Claude Code" width="32" height="32" onerror="this.style.display='none'; thisnextElementSibling.style.display='inline';">
+          <span style="display:none;">📝</span>
         </div>
         <h4>Claude Code</h4>
         <p>Rich context format with project information</p>
@@ -109,16 +110,18 @@ title: Home
 
       <div class="editor-card">
         <div class="editor-icon">
-          <span>💻</span>
+          <img src="assets/windsurf.svg" alt="Windsurf" width="32" height="32" onerror="this.style.display='none'; thisnextElementSibling.style.display='inline';">
+          <span style="display:none;">📝</span>
         </div>
-        <h4>Codeium</h4>
+        <h4>Windsurf</h4>
         <p>JSON context with team patterns</p>
         <span class="status-badge supported">✅ Fully Supported</span>
       </div>
 
       <div class="editor-card">
         <div class="editor-icon">
-          <span>🔮</span>
+         <img src="assets/tabnine.png" alt="Tabnine" width="32" height="32" onerror="this.style.display='none'; thisnextElementSibling.style.display='inline';">
+          <span style="display:none;">📝</span>
         </div>
         <h4>Tabnine</h4>
         <p>Team-specific configurations</p>
@@ -145,7 +148,6 @@ title: Home
         <span class="status-badge supported">✅ Fully Supported</span>
       </div>
     </div>
-    <p class="section-note">See the <a href="https://github.com/flamingquaks/promptrek/blob/main/docs/ADAPTER_CAPABILITIES.md">capability matrix</a> for detailed feature comparison</p>
   </div>
 </section>
 
