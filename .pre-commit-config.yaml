@@ -47,13 +47,13 @@ repos:
         entry: uv run black
         language: system
         types: [python]
-        args: ['--check', '--diff', 'src/', 'tests/'] 
+        args: ['--check', '--diff'] 
         pass_filenames: true 
 
       - id: isort-check
         name: Check import sorting with isort
         entry: uv run isort 
-        args: ['--check', '--diff', 'src/', 'tests/']
+        args: ['--check', '--diff']
         language: system
         types: [python]
         pass_filenames: true
@@ -61,7 +61,7 @@ repos:
       - id: flake8-check
         name: Check code style with flake8
         entry: uv run flake8
-        args: ['--check', '--diff', 'src/', 'tests/']
+        args: ['--check', '--diff']
         language: system
         types: [python]
         pass_filenames: true
