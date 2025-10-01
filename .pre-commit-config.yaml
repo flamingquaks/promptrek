@@ -47,13 +47,13 @@ repos:
         entry: uv run black
         language: system
         types: [python]
-        args: ['--check', '--diff'] 
-        pass_filenames: true 
+        args: ["--check", "--diff"]
+        pass_filenames: true
 
       - id: isort-check
         name: Check import sorting with isort
-        entry: uv run isort 
-        args: ['--check', '--diff']
+        entry: uv run isort
+        args: ["--check", "--diff"]
         language: system
         types: [python]
         pass_filenames: true
@@ -61,7 +61,7 @@ repos:
       - id: flake8-check
         name: Check code style with flake8
         entry: uv run flake8
-        args: ['--check', '--diff']
+        args: ["--check", "--diff"]
         language: system
         types: [python]
         pass_filenames: true
@@ -80,7 +80,7 @@ repos:
         entry: python -c "import yaml, sys; [yaml.safe_load(open(f)) for f in sys.argv[1:]]"
         language: system
         files: \.ya?ml$
-        exclude: \.promptrek\.ya?ml$  # Our files have custom format
+        exclude: \.promptrek\.ya?ml$ 
 
       - id: check-merge-conflict
         name: Check for merge conflicts
@@ -89,7 +89,6 @@ repos:
           echo "Error: Merge conflict markers found"; exit 1; fi' --
         language: system
         types: [text]
-
 
       - id: debug-statements
         name: Debug Statements (Python)
