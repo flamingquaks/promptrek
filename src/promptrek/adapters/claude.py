@@ -157,7 +157,7 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
         """Parse Claude Code files back into a UniversalPrompt."""
         claude_file = source_dir / ".claude" / "CLAUDE.md"
         return self.parse_single_markdown_file(
-            file_path=claude_file,
+            file_path=str(claude_file),
             editor_name="Claude Code",
         )
 
