@@ -49,7 +49,7 @@ type(scope): description
 ### Examples
 
 ```bash
-feat(adapters): add support for new Windsurf editor
+feat(adapters): add support for Visual Studio Code extension
 fix(parser): handle empty instructions gracefully
 docs(readme): update installation instructions
 refactor(core): simplify variable substitution logic

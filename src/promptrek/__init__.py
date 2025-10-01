@@ -7,9 +7,9 @@ A universal AI Editor prompt storage solution that allows developers to:
 3. Support multiple AI editors and tools with different prompt formats
 """
 
-__version__ = "0.1.0"
-__author__ = "PrompTrek Team"
-__email__ = "team@promptrek.dev"
+import importlib.metadata
+
+__version__ = importlib.metadata.version("promptrek")
 
 from .core.models import UniversalPrompt
 from .core.parser import UPFParser

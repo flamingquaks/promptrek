@@ -9,6 +9,7 @@ from typing import Optional
 
 import click
 
+from .. import __version__
 from ..core.exceptions import PrompTrekError
 from .commands.agents import agents_command
 from .commands.generate import generate_command
@@ -20,7 +21,7 @@ from .commands.validate import validate_command
 
 
 @click.group()
-@click.version_option(version="0.1.0")
+@click.version_option(version=__version__)
 @click.option("--verbose", "-v", is_flag=True, help="Enable verbose output")
 @click.pass_context
 def cli(ctx: click.Context, verbose: bool) -> None:

@@ -16,7 +16,6 @@ This document provides a comprehensive comparison of features supported by each 
 | **Tabnine** | ✅ | ✅ | - | - | - | ✅ | - |
 | **Amazon Q** | ✅ | ✅ | - | - | ✅ | - | - |
 | **JetBrains AI** | ✅ | ✅ | - | - | ✅ | - | - |
-| **Windsurf** | ✅ | ✅ | - | - | - | - | ✅ |
 
 ## Feature Descriptions
 
@@ -71,7 +70,7 @@ promptrek generate project.promptrek.yaml --editor copilot --headless
 ### Project Files
 Generates project-level configuration files that can be committed to version control.
 
-**Supported by**: Most adapters except Tabnine and Windsurf
+**Supported by**: Most adapters except Tabnine
 
 **Examples**:
 - `.github/copilot-instructions.md`
@@ -84,13 +83,6 @@ Editor configuration is managed globally, not per-project.
 **Supported by**: Tabnine
 
 **Note**: PrompTrek can still generate configuration guidance, but setup is done through the editor's global settings.
-
-### IDE Plugin Only
-Editor is configured entirely through IDE interface, not configuration files.
-
-**Supported by**: Windsurf (Codeium-based IDE)
-
-**Note**: Windsurf uses IDE settings rather than project files.
 
 ## Detailed Adapter Capabilities
 
@@ -244,14 +236,6 @@ Editor is configured entirely through IDE interface, not configuration files.
 **Best For**: JetBrains IDE users (IntelliJ, PyCharm, etc.)
 
 ---
-
-### Windsurf
-
-**Configuration Method**:
-- IDE settings only (Codeium-based)
-- No project files generated
-
-**Best For**: Users of Windsurf IDE
 
 ## Migration Guide
 

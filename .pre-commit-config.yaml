@@ -61,7 +61,6 @@ repos:
       - id: flake8-check
         name: Check code style with flake8
         entry: uv run flake8
-        args: ["--check", "--diff"]
         language: system
         types: [python]
         pass_filenames: true
