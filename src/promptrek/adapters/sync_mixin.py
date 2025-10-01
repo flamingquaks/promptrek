@@ -90,10 +90,7 @@ class MarkdownSyncMixin:
             for category, instrs in instructions_dict.items():
                 if instrs:
                     # Deduplicate instructions
-                    unique_instrs = []
-                    for instr in instrs:
-                        if instr not in unique_instrs:
-                            unique_instrs.append(instr)
+                    unique_instrs = list(dict.fromkeys(instrs))
                     setattr(instructions, category, unique_instrs)
 
         # Create context if technologies were found
