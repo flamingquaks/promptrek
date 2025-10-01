@@ -1,26 +1,28 @@
 # Editor Adapters
 
-PrompTrek supports multiple AI-powered code editors and assistants. Each adapter generates editor-specific configuration files optimized for that particular tool.
+PrompTrek supports 10 AI-powered code editors and assistants. Each adapter generates editor-specific configuration files optimized for that particular tool.
 
-## Quick Reference
+## Feature Support Matrix
 
-| Editor | Status | Sync | Headless | Type | Generated Files |
-|--------|:------:|:----:|:--------:|------|-----------------|
-| [GitHub Copilot](#github-copilot) | ✅ | ✅ | ✅ | Project | `.github/copilot-instructions.md`, path-specific |
-| [Cursor](#cursor) | ✅ | - | - | Project | `.cursor/rules/*.mdc`, `AGENTS.md` |
-| [Continue](#continue) | ✅ | ✅ | - | Project | `config.yaml`, `.continue/rules/*.md` |
-| [Kiro](#kiro) | ✅ | - | - | Project | `.kiro/steering/*.md`, `.kiro/specs/*.md` |
-| [Cline](#cline) | ✅ | - | - | Project | `.clinerules` |
-| [Claude Code](#claude-code) | ✅ | - | - | Project | `.claude/context.md` |
-| [Codeium](#codeium) | ✅ | - | - | Project | `.codeium/context.json` |
-| [Tabnine](#tabnine) | ✅ | - | - | Global | Global settings |
-| [Amazon Q](#amazon-q) | ✅ | - | - | Project | `.amazonq/context.md` |
-| [JetBrains AI](#jetbrains-ai) | ✅ | - | - | IDE | `.idea/ai-assistant.xml` |
+| Editor | Project Files | Variables | Conditionals | Sync | Headless* | Generated Files |
+|--------|:-------------:|:---------:|:------------:|:----:|:---------:|-----------------|
+| [GitHub Copilot](#github-copilot) | ✅ | ✅ | ✅ | ✅ | ✅ | `.github/copilot-instructions.md` + instructions/ + prompts/ |
+| [Cursor](#cursor) | ✅ | ✅ | ✅ | ✅ | N/A | `.cursor/rules/*.mdc`, `AGENTS.md`, ignore files |
+| [Continue](#continue) | ✅ | ✅ | ✅ | ✅ | N/A | `.continue/rules/*.md` |
+| [Cline](#cline) | ✅ | ✅ | ✅ | ✅ | N/A | `.clinerules/*.md` |
+| [Claude Code](#claude-code) | ✅ | ✅ | ✅ | ✅ | N/A | `.claude/CLAUDE.md` |
+| [Windsurf](#windsurf) | ✅ | ✅ | ✅ | ✅ | N/A | `.windsurf/rules/*.md` |
+| [Kiro](#kiro) | ✅ | ✅ | ✅ | ✅ | N/A | `.kiro/steering/*.md` |
+| [JetBrains AI](#jetbrains-ai) | ✅ | ✅ | ✅ | ✅ | N/A | `.assistant/rules/*.md` |
+| [Tabnine](#tabnine) | ⚠️ | ✅ | ✅ | ✅ | N/A | `.tabnine_commands` (limited) |
+| [Amazon Q](#amazon-q) | ✅ | ✅ | ✅ | ✅ | N/A | `.amazonq/rules/*.md`, `.amazonq/cli-agents/*.json` |
 
-**Legend**:
-- **Sync**: Bidirectional synchronization (read editor files → PrompTrek)
-- **Headless**: Supports autonomous agent instructions
-- **Type**: Configuration scope (Project files / Global settings / IDE interface)
+**Feature Definitions**:
+- **Project Files**: Generates project-level configuration files that can be committed to version control
+- **Variables**: Supports variable substitution from `variables.promptrek.yaml`
+- **Conditionals**: Supports conditional instructions based on context or target
+- **Sync**: Bidirectional synchronization - reads editor-specific config files back to PrompTrek format
+- **Headless***: Managed development agents (cloud-based AI agents like GitHub Copilot Workspace). **N/A** = Feature doesn't exist in that tool (not a lack of PrompTrek support)
 
 For detailed capability comparison, see [ADAPTER_CAPABILITIES.md](./ADAPTER_CAPABILITIES.md).
 
@@ -64,35 +66,32 @@ When working on this project:
 ```
 
 ### ✅ Continue
-**Generated Files**: `config.yaml`, `.continue/rules/*.md`  
-**Features**: Variable substitution, Conditional instructions, Technology-specific rules
+**Generated Files**: `.continue/rules/*.md`
+**Features**: ✅ Project Files, ✅ Variables, ✅ Conditionals, ✅ Sync
 
-Continue adapter generates modern YAML configuration with organized rule files for enhanced AI-powered code completion and chat.
-
-**Main Configuration (config.yaml)**:
-```yaml
-name: My Project
-version: 0.0.1
-schema: v1
-models: []
-systemMessage: "My Project\n\nA modern web application"
-completionOptions: {}
-allowAnonymousTelemetry: false
-rules:
-  - "Write clean, maintainable code"
-  - "Follow TypeScript best practices"
-context:
-  - provider: file
-  - provider: code
-  - provider: docs
-    query: "documentation for typescript, react"
-```
+Continue adapter generates organized markdown rule files for enhanced AI-powered code completion and chat.
 
 **Rule Files (.continue/rules/)**:
 - `general.md` - General coding guidelines
 - `code-style.md` - Code style rules
-- `testing.md` - Testing guidelines  
-- `{technology}-rules.md` - Technology-specific rules (typescript-rules.md, react-rules.md)
+- `testing.md` - Testing guidelines
+- `{technology}-rules.md` - Technology-specific rules (e.g., `python-rules.md`, `typescript-rules.md`)
+
+**Example Rule File (general.md)**:
+```markdown
+# General Coding Rules
+
+- Write clean, maintainable code with proper error handling
+- Follow SOLID principles and design patterns
+- Include comprehensive documentation
+
+## Additional Guidelines
+- Follow project-specific patterns and conventions
+- Maintain consistency with existing codebase
+- Consider performance and security implications
+```
+
+**Sync Support**: Continue adapter supports bidirectional sync - you can import existing Continue configurations back to PrompTrek format using `promptrek sync`.
 
 ### ✅ Cline (Terminal-based AI)
 **Generated Files**: `.clinerules`  
@@ -121,38 +120,45 @@ A modern web application built with React and TypeScript.
 - Add appropriate comments
 ```
 
-### ✅ Codeium
-**Generated Files**: `.codeium/context.json`, `.codeiumrc`  
-**Features**: Variable substitution, Conditional instructions
+### ✅ Windsurf
+**Generated Files**: `.windsurf/rules/*.md`
+**Features**: ✅ Project Files, ✅ Variables, ✅ Conditionals
 
-Codeium adapter generates structured JSON context files and RC configuration files that integrate with Codeium's AI code assistance.
+Windsurf adapter (formerly Codeium) generates organized markdown rule files for AI-powered coding assistance.
 
-**Context JSON Example**:
-```json
-{
-  "project": {
-    "name": "My Project",
-    "technologies": ["typescript", "react"],
-    "type": "web_application"
-  },
-  "guidelines": [
-    {"category": "general", "rule": "Write clean code"},
-    {"category": "style", "rule": "Use consistent indentation"}
-  ],
-  "patterns": [
-    {
-      "name": "component",
-      "description": "Example component",
-      "example": "const Button = ..."
-    }
-  ],
-  "preferences": {
-    "style": "consistent",
-    "verbosity": "medium",
-    "languages": ["typescript", "react"]
-  }
-}
+**Rule Files (.windsurf/rules/)**:
+- `general.md` - General coding guidelines
+- `code-style.md` - Code style rules
+- `testing.md` - Testing guidelines
+- `{technology}-rules.md` - Technology-specific rules (e.g., `python-rules.md`, `javascript-rules.md`)
+
+**Example Rule File (code-style.md)**:
+```markdown
+# Code Style Rules
+
+- Use consistent indentation (4 spaces for Python, 2 for JavaScript)
+- Follow language-specific style guides (PEP 8 for Python, StandardJS for JavaScript)
+- Prefer const and let over var in JavaScript
+
+## Additional Guidelines
+- Follow project-specific patterns and conventions
+- Maintain consistency with existing codebase
+- Consider performance and security implications
 ```
+
+### ✅ JetBrains AI
+**Generated Files**: `.assistant/rules/*.md`
+**Features**: ✅ Project Files, ✅ Variables, ✅ Conditionals
+
+JetBrains AI adapter generates markdown rules for AI assistance integrated into JetBrains IDEs (IntelliJ IDEA, PyCharm, WebStorm, etc.).
+
+**Rule Files (.assistant/rules/)**:
+- `general.md` - General coding guidelines
+- `code-style.md` - Code style rules
+- `testing.md` - Testing guidelines
+- `{technology}-rules.md` - Technology-specific rules (e.g., `java-rules.md`, `kotlin-rules.md`)
+
+**Note**: Prompts and MCP configurations for JetBrains AI are only configurable through the IDE UI, not via project files.
 
 ### ✅ GitHub Copilot
 **Generated Files**: `.github/copilot-instructions.md`, `.github/instructions/*.instructions.md`, `.github/prompts/*.prompt.md`
@@ -285,46 +291,98 @@ alwaysApply: false
 - Intelligent rule application based on file patterns and conversation context
 
 ### ✅ Kiro
-**Generated Files**: `.kiro/steering/*.md`, `.kiro/specs/*/requirements.md`, `.kiro/specs/*/design.md`, `.kiro/specs/*/tasks.md`, `.kiro/hooks/*.md`, `.prompts/*.md`
-**Features**: Variable substitution, Conditional instructions, Hooks system, Multi-file merging, Enhanced content structure
+**Generated Files**: `.kiro/steering/*.md`
+**Features**: ✅ Project Files, ✅ Variables, ✅ Conditionals
 
-Kiro adapter generates comprehensive AI-powered development assistance with steering files, specifications, hooks, and reusable prompts.
+Kiro adapter generates steering documents that guide AI-powered coding assistants with context-aware instructions.
 
 **Steering System (.kiro/steering/)**:
-```yaml
+```markdown
 ---
 inclusion: always
 ---
 
-# Product Overview
+# PrompTrek AI Editor Prompts
 
-This steering file provides comprehensive guidelines for the project...
+AI assistant configuration for developing PrompTrek
 
-## Why These Conventions Matter
-- **Consistency**: Predictable patterns improve developer experience
-- **Security**: Proper implementation prevents common vulnerabilities
-- **Maintainability**: Clear patterns reduce cognitive load
+## Project Context
+**Type:** cli_tool
+**Technologies:** python, click, pyyaml, pydantic
+
+## Core Guidelines
+- Write clean, maintainable code
+- Follow established patterns and conventions
 ```
 
-**Specifications System (.kiro/specs/)**:
-- `requirements.md` - Functional and non-functional requirements with acceptance criteria
-- `design.md` - Technical architecture and implementation guidelines
-- `tasks.md` - Implementation task breakdown with progress tracking
+**Generated Steering Files**:
+- `project.md` - Main project overview and core guidelines
+- `general.md` - General coding instructions
+- `code-style.md` - Code style guidelines
+- `testing.md` - Testing standards
+- `architecture.md` - Architecture patterns (if defined)
+- `{category}.md` - Additional instruction category files
 
-**Hooks System (.kiro/hooks/)**:
-- `code-quality.md` - Automated quality checks triggered on file save and commits
-- `pre-commit.md` - Pre-commit validation with test requirements and quality gates
+Each steering document includes YAML frontmatter with `inclusion: always` to ensure it's always loaded by Kiro.
 
-**Prompts System (.prompts/)**:
-- `development.md` - Reusable prompts for feature development and bug fixes
-- `refactoring.md` - Structured prompts for code improvement and optimization
+### ⚠️ Tabnine
+**Generated Files**: `.tabnine_commands`
+**Features**: ⚠️ Limited Support, ✅ Variables, ✅ Conditionals
 
-**Multi-File Support**:
-Kiro adapter supports merging multiple `.promptrek.yaml` files, combining:
-- Instructions (concatenated)
-- Technologies (deduplicated)
-- Variables (later files take precedence)
-- Targets (combined)
+Tabnine adapter generates a single commands file with project context for code completion.
+
+**Commands File (.tabnine_commands)**:
+```markdown
+# Tabnine Commands for My Project
+
+# A modern web application
+
+## Project Context
+# Type: web_application
+# Technologies: typescript, react, node
+
+## Coding Guidelines
+
+# Write clean, maintainable code
+# Follow TypeScript best practices
+# Use React functional components with hooks
+
+## Usage
+# This file provides context to Tabnine for better code completions
+# Tabnine will use these guidelines to suggest more relevant code
+```
+
+**Note**: Tabnine does not support full project-level configuration via files. Prompts and MCP are configured through the IDE/editor interface. The `.tabnine_commands` file provides basic context guidance.
+
+### ✅ Amazon Q
+**Generated Files**: `.amazonq/rules/*.md`, `.amazonq/cli-agents/*.json`
+**Features**: ✅ Project Files, ✅ Variables, ✅ Conditionals, ✅ Sync
+
+Amazon Q adapter generates markdown rules for AI assistance and JSON-based CLI agents for AWS development.
+
+**Rule Files (.amazonq/rules/)**:
+- `general.md` - General coding guidelines
+- `code-style.md` - Code style rules
+- `testing.md` - Testing guidelines
+- `security.md` - Security best practices (if defined)
+- `{technology}-rules.md` - Technology-specific rules (e.g., `python-rules.md`, `java-rules.md`)
+
+**CLI Agents (.amazonq/cli-agents/)**:
+CLI agents are JSON files that define custom Amazon Q agents for code review, security analysis, and test generation. These are local development tools, not managed cloud agents.
+
+**Example Agent (security-review-agent.json)**:
+```json
+{
+  "name": "security-review-agent",
+  "description": "Reviews code for security vulnerabilities",
+  "instructions": "Always focus on OWASP Top 10 vulnerabilities. Validate all user inputs..."
+}
+```
+
+**Generated Agents**:
+- `code-review-agent.json` - Reviews code for style and quality
+- `security-review-agent.json` - Reviews code for security vulnerabilities
+- `test-generation-agent.json` - Generates unit and integration tests
 
 ## Using Adapters
 
@@ -382,7 +440,7 @@ conditions:
           - "Generate comprehensive code completions"
           - "Suggest appropriate TypeScript types"
 
-  - if: "EDITOR in [\"codeium\", \"cursor\"]"
+  - if: "EDITOR in [\"windsurf\", \"cursor\"]"
     then:
       instructions:
         general:
@@ -427,7 +485,7 @@ Each adapter optimizes content for its target editor:
 - **Claude**: Emphasizes detailed context and examples for better understanding
 - **Continue**: Focuses on system messages and completion hints
 - **Cline**: Includes safety settings and terminal-specific guidance
-- **Codeium**: Structures content for AI code assistance patterns
+- **Windsurf**: Structures content as modular markdown rules
 - **Copilot**: Uses GitHub's instruction format and conventions
 - **Cursor**: Follows Cursor's rules file format
 
@@ -542,9 +600,8 @@ Add generated files to `.gitignore` if they contain sensitive information or are
 # Generated AI configuration files
 .claude/
 .continue/
-.codeium/
-.codeiumrc
-cline-context.md
+.windsurf/
+.clinerules/
 
 # Keep these if they're project-wide
 # .github/copilot-instructions.md

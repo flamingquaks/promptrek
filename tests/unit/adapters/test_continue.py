@@ -24,8 +24,8 @@ class TestContinueAdapter(TestAdapterBase):
     def test_init(self, adapter):
         """Test adapter initialization."""
         assert adapter.name == "continue"
-        assert adapter.description == "Continue (config.yaml, .continue/rules/)"
-        assert adapter.file_patterns == ["config.yaml", ".continue/rules/*.md"]
+        assert adapter.description == "Continue (.continue/rules/)"
+        assert adapter.file_patterns == [".continue/rules/*.md"]
 
     def test_supports_variables(self, adapter):
         """Test variable support."""
@@ -58,24 +58,6 @@ class TestContinueAdapter(TestAdapterBase):
         assert len(errors) == 1
         assert errors[0].field == "metadata.description"
 
-    def test_build_content(self, adapter, sample_prompt):
-        """Test content generation."""
-        content = adapter._build_content(sample_prompt)
-
-        # Parse as YAML to verify structure
-        import yaml
-
-        config = yaml.safe_load(content)
-
-        assert "name" in config
-        assert "systemMessage" in config
-        assert "completionOptions" in config
-        assert "allowAnonymousTelemetry" in config
-
-        assert sample_prompt.metadata.title == config["name"]
-        assert sample_prompt.metadata.title in config["systemMessage"]
-        assert sample_prompt.metadata.description in config["systemMessage"]
-
     @patch("builtins.open", new_callable=mock_open)
     @patch("pathlib.Path.mkdir")
     def test_generate_actual_files(self, mock_mkdir, mock_file, adapter, sample_prompt):
@@ -83,10 +65,12 @@ class TestContinueAdapter(TestAdapterBase):
         output_dir = Path("/tmp/test")
         files = adapter.generate(sample_prompt, output_dir, dry_run=False)
 
-        # Should generate config.yaml + rules files
-        assert len(files) >= 1
-        config_file = output_dir / "config.yaml"
-        assert config_file in files
+        # Should generate multiple rules files in .continue/rules/
+        assert len(files) >= 3  # At least general, code-style, testing
+        # Use Path for cross-platform path checking
+        file_names = [f.name for f in files]
+        assert "general.md" in file_names
+        assert "code-style.md" in file_names
 
         # Check that mkdir and file operations were called
         assert mock_mkdir.called

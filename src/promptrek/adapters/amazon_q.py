@@ -1,7 +1,8 @@
 """
-Amazon Q (comment-based) adapter implementation.
+Amazon Q adapter implementation.
 """
 
+import json
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -10,15 +11,19 @@ import click
 from ..core.exceptions import ValidationError
 from ..core.models import UniversalPrompt
 from .base import EditorAdapter
+from .sync_mixin import MarkdownSyncMixin
+
+# Maximum number of instructions to include in agent configuration
+MAX_AGENT_INSTRUCTIONS = 3
 
 
-class AmazonQAdapter(EditorAdapter):
-    """Adapter for Amazon Q comment-based assistance."""
+class AmazonQAdapter(MarkdownSyncMixin, EditorAdapter):
+    """Adapter for Amazon Q AI assistant."""
 
-    _description = "Amazon Q (comment-based)"
-    _file_patterns = [".amazonq/context.md", ".amazonq/comments.template"]
+    _description = "Amazon Q (.amazonq/rules/, .amazonq/cli-agents/)"
+    _file_patterns = [".amazonq/rules/*.md", ".amazonq/cli-agents/*.json"]
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             name="amazon-q",
             description=self._description,
@@ -39,58 +44,316 @@ class AmazonQAdapter(EditorAdapter):
         # Apply variable substitution if supported
         processed_prompt = self.substitute_variables(prompt, variables)
 
-        # Create context content
-        context_content = self._build_context(processed_prompt)
-
-        # Create comment templates
-        template_content = self._build_comment_templates(processed_prompt)
-
-        # Determine output paths
-        amazonq_dir = output_dir / ".amazonq"
-        context_file = amazonq_dir / "context.md"
-        template_file = amazonq_dir / "comments.template"
+        # Process conditionals if supported
+        conditional_content = self.process_conditionals(processed_prompt, variables)
 
         created_files = []
 
-        if dry_run:
-            click.echo(f"  📁 Would create: {context_file}")
-            click.echo(f"  📁 Would create: {template_file}")
-            if verbose:
-                click.echo("  📄 Context preview:")
-                preview = (
-                    context_content[:200] + "..."
-                    if len(context_content) > 200
-                    else context_content
-                )
-                click.echo(f"    {preview}")
+        # Generate rules directory system
+        rules_files = self._generate_rules_system(
+            processed_prompt, conditional_content, output_dir, dry_run, verbose
+        )
+        created_files.extend(rules_files)
+
+        # Generate CLI agents if headless is enabled
+        if headless:
+            agent_files = self._generate_cli_agents(
+                processed_prompt, output_dir, dry_run, verbose
+            )
+            created_files.extend(agent_files)
+
+        return created_files
+
+    def _generate_rules_system(
+        self,
+        prompt: UniversalPrompt,
+        conditional_content: Optional[Dict[str, Any]],
+        output_dir: Path,
+        dry_run: bool,
+        verbose: bool,
+    ) -> List[Path]:
+        """Generate .amazonq/rules/ directory with markdown files."""
+        rules_dir = output_dir / ".amazonq" / "rules"
+        created_files = []
+
+        # Generate general coding rules
+        all_instructions = []
+        if prompt.instructions and prompt.instructions.general:
+            all_instructions.extend(prompt.instructions.general)
+        if (
+            conditional_content
+            and "instructions" in conditional_content
+            and "general" in conditional_content["instructions"]
+        ):
+            all_instructions.extend(conditional_content["instructions"]["general"])
+
+        if all_instructions:
+            general_file = rules_dir / "general.md"
+            general_content = self._build_rules_content(
+                "General Coding Rules", all_instructions
+            )
+
+            if dry_run:
+                click.echo(f"  📁 Would create: {general_file}")
+                if verbose:
+                    preview = (
+                        general_content[:200] + "..."
+                        if len(general_content) > 200
+                        else general_content
+                    )
+                    click.echo(f"    {preview}")
+                created_files.append(general_file)
+            else:
+                rules_dir.mkdir(parents=True, exist_ok=True)
+                with open(general_file, "w", encoding="utf-8") as f:
+                    f.write(general_content)
+                click.echo(f"✅ Generated: {general_file}")
+                created_files.append(general_file)
+
+        # Generate code style rules
+        if prompt.instructions and prompt.instructions.code_style:
+            style_file = rules_dir / "code-style.md"
+            style_content = self._build_rules_content(
+                "Code Style Rules", prompt.instructions.code_style
+            )
+
+            if dry_run:
+                click.echo(f"  📁 Would create: {style_file}")
+                if verbose:
+                    preview = (
+                        style_content[:200] + "..."
+                        if len(style_content) > 200
+                        else style_content
+                    )
+                    click.echo(f"    {preview}")
+                created_files.append(style_file)
+            else:
+                rules_dir.mkdir(parents=True, exist_ok=True)
+                with open(style_file, "w", encoding="utf-8") as f:
+                    f.write(style_content)
+                click.echo(f"✅ Generated: {style_file}")
+                created_files.append(style_file)
+
+        # Generate testing rules
+        if prompt.instructions and prompt.instructions.testing:
+            testing_file = rules_dir / "testing.md"
+            testing_content = self._build_rules_content(
+                "Testing Rules", prompt.instructions.testing
+            )
+
+            if dry_run:
+                click.echo(f"  📁 Would create: {testing_file}")
+                if verbose:
+                    preview = (
+                        testing_content[:200] + "..."
+                        if len(testing_content) > 200
+                        else testing_content
+                    )
+                    click.echo(f"    {preview}")
+                created_files.append(testing_file)
+            else:
+                rules_dir.mkdir(parents=True, exist_ok=True)
+                with open(testing_file, "w", encoding="utf-8") as f:
+                    f.write(testing_content)
+                click.echo(f"✅ Generated: {testing_file}")
+                created_files.append(testing_file)
+
+        # Generate security rules if defined
+        if prompt.instructions and prompt.instructions.security:
+            security_file = rules_dir / "security.md"
+            security_content = self._build_rules_content(
+                "Security Rules", prompt.instructions.security
+            )
+
+            if dry_run:
+                click.echo(f"  📁 Would create: {security_file}")
+                if verbose:
+                    preview = (
+                        security_content[:200] + "..."
+                        if len(security_content) > 200
+                        else security_content
+                    )
+                    click.echo(f"    {preview}")
+                created_files.append(security_file)
+            else:
+                rules_dir.mkdir(parents=True, exist_ok=True)
+                with open(security_file, "w", encoding="utf-8") as f:
+                    f.write(security_content)
+                click.echo(f"✅ Generated: {security_file}")
+                created_files.append(security_file)
+
+        # Generate technology-specific rules
+        if prompt.context and prompt.context.technologies:
+            for tech in prompt.context.technologies[:2]:  # Limit to 2 main technologies
+                tech_file = rules_dir / f"{tech.lower()}-rules.md"
+                tech_content = self._build_tech_rules_content(tech, prompt)
+
+                if dry_run:
+                    click.echo(f"  📁 Would create: {tech_file}")
+                    if verbose:
+                        preview = (
+                            tech_content[:200] + "..."
+                            if len(tech_content) > 200
+                            else tech_content
+                        )
+                        click.echo(f"    {preview}")
+                    created_files.append(tech_file)
+                else:
+                    rules_dir.mkdir(parents=True, exist_ok=True)
+                    with open(tech_file, "w", encoding="utf-8") as f:
+                        f.write(tech_content)
+                    click.echo(f"✅ Generated: {tech_file}")
+                    created_files.append(tech_file)
+
+        return created_files
+
+    def _generate_cli_agents(
+        self,
+        prompt: UniversalPrompt,
+        output_dir: Path,
+        dry_run: bool,
+        verbose: bool,
+    ) -> List[Path]:
+        """Generate .amazonq/cli-agents/ directory with agent JSON files."""
+        agents_dir = output_dir / ".amazonq" / "cli-agents"
+        created_files = []
+
+        # Generate default agents based on instructions
+        agents = []
+
+        # Code review agent
+        if prompt.instructions and prompt.instructions.code_style:
+            agents.append(
+                {
+                    "name": "code-review-agent",
+                    "description": "Reviews code for style and quality issues",
+                    "instructions": "Focus on code style, readability, and best practices. "
+                    + " ".join(prompt.instructions.code_style[:MAX_AGENT_INSTRUCTIONS]),
+                }
+            )
+
+        # Security review agent
+        if prompt.instructions and prompt.instructions.security:
+            agents.append(
+                {
+                    "name": "security-review-agent",
+                    "description": "Reviews code for security vulnerabilities",
+                    "instructions": "Always focus on OWASP Top 10 vulnerabilities. "
+                    + " ".join(prompt.instructions.security[:3]),
+                }
+            )
+
+        # Testing agent
+        if prompt.instructions and prompt.instructions.testing:
+            agents.append(
+                {
+                    "name": "test-generation-agent",
+                    "description": "Generates unit and integration tests",
+                    "instructions": "Follow testing best practices. "
+                    + " ".join(prompt.instructions.testing[:3]),
+                }
+            )
+
+        # Generate agent files
+        for agent in agents:
+            agent_file = agents_dir / f"{agent['name']}.json"
+            agent_content = json.dumps(agent, indent=2)
+
+            if dry_run:
+                click.echo(f"  📁 Would create: {agent_file}")
+                if verbose:
+                    click.echo(f"    {agent_content[:150]}...")
+                created_files.append(agent_file)
+            else:
+                agents_dir.mkdir(parents=True, exist_ok=True)
+                with open(agent_file, "w", encoding="utf-8") as f:
+                    f.write(agent_content)
+                click.echo(f"✅ Generated: {agent_file}")
+                created_files.append(agent_file)
+
+        return created_files
+
+    def _build_rules_content(self, title: str, instructions: List[str]) -> str:
+        """Build markdown rules content for .amazonq/rules/ files."""
+        lines = []
+
+        lines.append(f"# {title}")
+        lines.append("")
+
+        for instruction in instructions:
+            lines.append(f"- {instruction}")
+
+        lines.append("")
+        lines.append("## Additional Guidelines")
+        lines.append("- Follow project-specific patterns and conventions")
+        lines.append("- Maintain consistency with existing codebase")
+        lines.append("- Consider performance and security implications")
+
+        return "\n".join(lines)
+
+    def _build_tech_rules_content(self, tech: str, prompt: UniversalPrompt) -> str:
+        """Build technology-specific rules content."""
+        lines = []
+
+        lines.append(f"# {tech.title()} Rules")
+        lines.append("")
+
+        # Add general instructions that apply to this tech
+        if prompt.instructions and prompt.instructions.general:
+            lines.append("## General Guidelines")
+            for instruction in prompt.instructions.general:
+                lines.append(f"- {instruction}")
+            lines.append("")
+
+        # Add tech-specific best practices
+        lines.append(f"## {tech.title()} Best Practices")
+        tech_practices = {
+            "python": [
+                "Follow PEP 8 style guidelines",
+                "Use type hints for function signatures",
+                "Implement proper error handling with try/except blocks",
+                "Use docstrings for all functions and classes",
+            ],
+            "javascript": [
+                "Use modern ES6+ syntax",
+                "Prefer const and let over var",
+                "Use arrow functions appropriately",
+                "Implement proper error handling with try/catch blocks",
+            ],
+            "typescript": [
+                "Use strict TypeScript configuration",
+                "Prefer interfaces over types for object shapes",
+                "Use proper typing for all function parameters and returns",
+                "Leverage TypeScript's utility types when appropriate",
+            ],
+            "java": [
+                "Follow Java coding conventions",
+                "Use meaningful names for classes, methods, and variables",
+                "Implement proper exception handling",
+                "Leverage modern Java features appropriately",
+            ],
+        }
+
+        if tech.lower() in tech_practices:
+            for practice in tech_practices[tech.lower()]:
+                lines.append(f"- {practice}")
         else:
-            # Create directory and files
-            amazonq_dir.mkdir(exist_ok=True)
-            with open(context_file, "w", encoding="utf-8") as f:
-                f.write(context_content)
-            created_files.append(context_file)
-            click.echo(f"✅ Generated: {context_file}")
+            lines.append(f"- Follow {tech} best practices and conventions")
+            lines.append(f"- Maintain consistency with existing {tech} code")
+            lines.append(f"- Use {tech} idioms and patterns appropriately")
 
-            with open(template_file, "w", encoding="utf-8") as f:
-                f.write(template_content)
-            created_files.append(template_file)
-            click.echo(f"✅ Generated: {template_file}")
-
-        return created_files or [context_file, template_file]
+        return "\n".join(lines)
 
     def validate(self, prompt: UniversalPrompt) -> List[ValidationError]:
         """Validate prompt for Amazon Q."""
         errors = []
 
-        # Amazon Q works well with clear documentation and examples
-        if not prompt.examples:
+        # Amazon Q works well with structured instructions
+        if not prompt.instructions:
             errors.append(
                 ValidationError(
-                    field="examples",
-                    message=(
-                        "Amazon Q benefits from code examples for better "
-                        "comment-based assistance"
-                    ),
+                    field="instructions",
+                    message="Amazon Q benefits from structured instructions",
                     severity="warning",
                 )
             )
@@ -102,171 +365,14 @@ class AmazonQAdapter(EditorAdapter):
         return True
 
     def supports_conditionals(self) -> bool:
-        """Amazon Q supports conditional templates."""
+        """Amazon Q supports conditional configuration."""
         return True
 
-    def _build_context(self, prompt: UniversalPrompt) -> str:
-        """Build Amazon Q context content."""
-        lines = []
-
-        # Header
-        lines.append(f"# {prompt.metadata.title} - Amazon Q Context")
-        lines.append("")
-        lines.append("## Project Overview")
-        lines.append(prompt.metadata.description)
-        lines.append("")
-
-        # Project details
-        if prompt.context:
-            lines.append("## Project Information")
-            if prompt.context.project_type:
-                lines.append(f"**Project Type:** {prompt.context.project_type}")
-            if prompt.context.technologies:
-                tech_list = ", ".join(prompt.context.technologies)
-                lines.append(f"**Technologies:** {tech_list}")
-            if prompt.context.description:
-                lines.append("")
-                lines.append("**Description:**")
-                lines.append(prompt.context.description)
-            lines.append("")
-
-        # Development guidelines for Q
-        lines.append("## Amazon Q Guidelines")
-        lines.append("")
-        lines.append("When using Amazon Q comment-based assistance:")
-        lines.append("- Use clear, descriptive comments to request help")
-        lines.append("- Provide context about the desired functionality")
-        lines.append("- Follow the project's established patterns")
-        lines.append("- Ask for specific improvements or implementations")
-        lines.append("")
-
-        # Instructions
-        if prompt.instructions:
-            lines.append("## Development Standards")
-
-            if prompt.instructions.general:
-                lines.append("### General Guidelines")
-                for instruction in prompt.instructions.general:
-                    lines.append(f"- {instruction}")
-                lines.append("")
-
-            if prompt.instructions.code_style:
-                lines.append("### Code Style")
-                for guideline in prompt.instructions.code_style:
-                    lines.append(f"- {guideline}")
-                lines.append("")
-
-            if prompt.instructions.testing:
-                lines.append("### Testing Standards")
-                for guideline in prompt.instructions.testing:
-                    lines.append(f"- {guideline}")
-                lines.append("")
-
-        # Comment-based interaction examples
-        lines.append("## Comment Templates")
-        lines.append("")
-        lines.append("Use these comment patterns to interact with Amazon Q:")
-        lines.append("")
-        lines.append("```")
-        lines.append("// Q: Create a function that handles user authentication")
-        lines.append("// Q: Optimize this database query for better performance")
-        lines.append("// Q: Add error handling to this API endpoint")
-        lines.append("// Q: Generate unit tests for this function")
-        lines.append("```")
-        lines.append("")
-
-        # Examples if available
-        if prompt.examples:
-            lines.append("## Code Examples")
-            lines.append("")
-            lines.append("Reference patterns for Amazon Q assistance:")
-            lines.append("")
-
-            for name, example in prompt.examples.items():
-                lines.append(f"### {name.replace('_', ' ').title()}")
-                lines.append(example)
-                lines.append("")
-
-        return "\n".join(lines)
-
-    def _build_comment_templates(self, prompt: UniversalPrompt) -> str:
-        """Build Amazon Q comment templates."""
-        lines = []
-
-        # Header
-        lines.append("# Amazon Q Comment Templates")
-        lines.append("")
-        lines.append("# Use these comment patterns to request Amazon Q assistance")
-        lines.append("")
-
-        # General templates
-        lines.append("# === GENERAL ASSISTANCE ===")
-        lines.append("")
-        lines.append("# Q: Explain this code and suggest improvements")
-        lines.append("# Q: Refactor this function for better readability")
-        lines.append("# Q: Add comprehensive error handling")
-        lines.append("# Q: Generate documentation for this module")
-        lines.append("")
-
-        # Technology-specific templates
-        if prompt.context and prompt.context.technologies:
-            for tech in prompt.context.technologies:
-                tech_upper = tech.upper()
-                lines.append(f"# === {tech_upper} SPECIFIC ===")
-                lines.append("")
-
-                if tech.lower() in ["javascript", "typescript", "node.js"]:
-                    lines.append(
-                        "# Q: Create an async function with proper error handling"
-                    )
-                    lines.append("# Q: Optimize this for better performance in Node.js")
-                    lines.append("# Q: Add TypeScript types to this function")
-                elif tech.lower() in ["python"]:
-                    lines.append("# Q: Create a Python class following best practices")
-                    lines.append("# Q: Add type hints and docstrings to this function")
-                    lines.append("# Q: Optimize this code for better performance")
-                elif tech.lower() in ["react", "vue", "angular"]:
-                    lines.append(
-                        "# Q: Create a reusable component for this functionality"
-                    )
-                    lines.append("# Q: Add proper state management to this component")
-                    lines.append("# Q: Optimize this component for performance")
-                elif tech.lower() in ["sql", "postgresql", "mysql"]:
-                    lines.append("# Q: Optimize this SQL query for better performance")
-                    lines.append("# Q: Add proper indexing strategy for this table")
-                    lines.append("# Q: Create a secure parameterized query")
-                else:
-                    lines.append(f"# Q: Implement {tech} best practices in this code")
-                    lines.append(f"# Q: Optimize this {tech} implementation")
-                    lines.append(f"# Q: Add {tech}-specific error handling")
-
-                lines.append("")
-
-        # Testing templates
-        if prompt.instructions and prompt.instructions.testing:
-            lines.append("# === TESTING ===")
-            lines.append("")
-            lines.append("# Q: Generate comprehensive unit tests for this function")
-            lines.append("# Q: Create integration tests for this API endpoint")
-            lines.append("# Q: Add mock objects for this test scenario")
-            lines.append("# Q: Generate test data for this test case")
-            lines.append("")
-
-        # Security templates
-        lines.append("# === SECURITY ===")
-        lines.append("")
-        lines.append("# Q: Review this code for security vulnerabilities")
-        lines.append("# Q: Add input validation and sanitization")
-        lines.append("# Q: Implement secure authentication for this endpoint")
-        lines.append("# Q: Add rate limiting to this API")
-        lines.append("")
-
-        # Performance templates
-        lines.append("# === PERFORMANCE ===")
-        lines.append("")
-        lines.append("# Q: Optimize this code for better performance")
-        lines.append("# Q: Add caching to improve response times")
-        lines.append("# Q: Reduce memory usage in this implementation")
-        lines.append("# Q: Profile and optimize this algorithm")
-
-        return "\n".join(lines)
+    def parse_files(self, source_dir: Path) -> UniversalPrompt:
+        """Parse Amazon Q files back into a UniversalPrompt."""
+        return self.parse_markdown_rules_files(
+            source_dir=source_dir,
+            rules_subdir=".amazonq/rules",
+            file_extension="md",
+            editor_name="Amazon Q",
+        )

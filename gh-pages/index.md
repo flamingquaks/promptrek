@@ -55,7 +55,12 @@ title: Home
         </div>
         <h4>GitHub Copilot</h4>
         <p>Repository-wide, path-specific, and agent instructions</p>
-        <span class="status-badge supported">✅ Sync + Headless</span>
+        <div class="feature-badges">
+          <span class="feature-badge">📁 Project</span>
+          <span class="feature-badge">🔄 Variables</span>
+          <span class="feature-badge">↔️ Sync</span>
+          <span class="feature-badge">🤖 Headless</span>
+        </div>
       </div>
 
       <div class="editor-card">
@@ -65,7 +70,11 @@ title: Home
         </div>
         <h4>Cursor</h4>
         <p>Modern .mdc rules system with Always/Auto Attached</p>
-        <span class="status-badge supported">✅ Fully Supported</span>
+        <div class="feature-badges">
+          <span class="feature-badge">📁 Project</span>
+          <span class="feature-badge">🔄 Variables</span>
+          <span class="feature-badge">🎯 Conditionals</span>
+        </div>
       </div>
 
       <div class="editor-card">
@@ -74,8 +83,12 @@ title: Home
           <span style="display:none;">⚡</span>
         </div>
         <h4>Continue</h4>
-        <p>YAML configuration with advanced rules directory</p>
-        <span class="status-badge supported">✅ Sync Supported</span>
+        <p>Rules directory with markdown guidelines</p>
+        <div class="feature-badges">
+          <span class="feature-badge">📁 Project</span>
+          <span class="feature-badge">🔄 Variables</span>
+          <span class="feature-badge">↔️ Sync</span>
+        </div>
       </div>
 
       <div class="editor-card">
@@ -84,8 +97,12 @@ title: Home
           <span style="display:none;">🤖</span>
         </div>
         <h4>Kiro</h4>
-        <p>Comprehensive steering and specs system</p>
-        <span class="status-badge supported">✅ Fully Supported</span>
+        <p>Steering documents for AI-powered coding</p>
+        <div class="feature-badges">
+          <span class="feature-badge">📁 Project</span>
+          <span class="feature-badge">🔄 Variables</span>
+          <span class="feature-badge">🎯 Conditionals</span>
+        </div>
       </div>
 
       <div class="editor-card">
@@ -95,7 +112,11 @@ title: Home
         </div>
         <h4>Cline</h4>
         <p>Markdown-based rules configuration</p>
-        <span class="status-badge supported">✅ Fully Supported</span>
+        <div class="feature-badges">
+          <span class="feature-badge">📁 Project</span>
+          <span class="feature-badge">🔄 Variables</span>
+          <span class="feature-badge">🎯 Conditionals</span>
+        </div>
       </div>
 
       <div class="editor-card">
@@ -105,7 +126,11 @@ title: Home
         </div>
         <h4>Claude Code</h4>
         <p>Rich context format with project information</p>
-        <span class="status-badge supported">✅ Fully Supported</span>
+        <div class="feature-badges">
+          <span class="feature-badge">📁 Project</span>
+          <span class="feature-badge">🔄 Variables</span>
+          <span class="feature-badge">🎯 Conditionals</span>
+        </div>
       </div>
 
       <div class="editor-card">
@@ -114,8 +139,12 @@ title: Home
           <span style="display:none;">📝</span>
         </div>
         <h4>Windsurf</h4>
-        <p>JSON context with team patterns</p>
-        <span class="status-badge supported">✅ Fully Supported</span>
+        <p>Rules directory with markdown guidelines</p>
+        <div class="feature-badges">
+          <span class="feature-badge">📁 Project</span>
+          <span class="feature-badge">🔄 Variables</span>
+          <span class="feature-badge">🎯 Conditionals</span>
+        </div>
       </div>
 
       <div class="editor-card">
@@ -124,8 +153,11 @@ title: Home
           <span style="display:none;">📝</span>
         </div>
         <h4>Tabnine</h4>
-        <p>Team-specific configurations</p>
-        <span class="status-badge supported">✅ Global Config</span>
+        <p>Commands file for code completion context</p>
+        <div class="feature-badges">
+          <span class="feature-badge">⚠️ Limited</span>
+          <span class="feature-badge">🔄 Variables</span>
+        </div>
       </div>
 
       <div class="editor-card">
@@ -134,8 +166,12 @@ title: Home
           <span style="display:none;">☁️</span>
         </div>
         <h4>Amazon Q</h4>
-        <p>Comment-based assistance templates</p>
-        <span class="status-badge supported">✅ Fully Supported</span>
+        <p>Rules directory and CLI agents for AWS AI assistance</p>
+        <div class="feature-badges">
+          <span class="feature-badge">📁 Project</span>
+          <span class="feature-badge">🔄 Variables</span>
+          <span class="feature-badge">🤖 CLI Agents</span>
+        </div>
       </div>
 
       <div class="editor-card">
@@ -144,8 +180,12 @@ title: Home
           <span style="display:none;">🧠</span>
         </div>
         <h4>JetBrains AI</h4>
-        <p>IDE-integrated XML and JSON prompts</p>
-        <span class="status-badge supported">✅ Fully Supported</span>
+        <p>Rules directory for IDE assistance</p>
+        <div class="feature-badges">
+          <span class="feature-badge">📁 Project</span>
+          <span class="feature-badge">🔄 Variables</span>
+          <span class="feature-badge">🎯 Conditionals</span>
+        </div>
       </div>
     </div>
   </div>
@@ -245,15 +285,23 @@ instructions:
           </div>
           <div class="file-item">
             <span class="file-icon">📄</span>
-            <span class="file-name">.continue/config.yaml</span>
+            <span class="file-name">.continue/rules/*.md</span>
           </div>
           <div class="file-item">
             <span class="file-icon">📄</span>
-            <span class="file-name">.clinerules/context.md</span>
+            <span class="file-name">.clinerules/*.md</span>
           </div>
           <div class="file-item">
             <span class="file-icon">📄</span>
-            <span class="file-name">.kiro/steering/product.md,requirements.md,design.md</span>
+            <span class="file-name">.kiro/steering/*.md</span>
+          </div>
+          <div class="file-item">
+            <span class="file-icon">📄</span>
+            <span class="file-name">.windsurf/rules/*.md</span>
+          </div>
+          <div class="file-item">
+            <span class="file-icon">📄</span>
+            <span class="file-name">.assistant/rules/*.md</span>
           </div>
         </div>
         <div class="command-example">
@@ -285,7 +333,7 @@ instructions:
       <div class="feature-card-modern">
         <div class="feature-icon">🔄</div>
         <h3>Bidirectional Sync</h3>
-        <p>Sync editor configurations back to PrompTrek format. Works with GitHub Copilot and Continue for seamless two-way updates.</p>
+        <p>Sync editor configurations back to PrompTrek format. All 10 supported editors now support seamless two-way updates.</p>
       </div>
 
       <div class="feature-card-modern">

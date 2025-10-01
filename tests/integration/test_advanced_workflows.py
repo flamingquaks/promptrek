@@ -41,7 +41,7 @@ class TestAdvancedWorkflows:
                 "copilot",
                 "cursor",
                 "continue",
-                "codeium",
+                "windsurf",
                 "amazon-q",
                 "kiro",
                 "cline",
@@ -234,7 +234,7 @@ class TestAdvancedWorkflows:
         self, runner, multi_adapter_project, temp_dir
     ):
         """Test generating for multiple adapters sequentially."""
-        adapters = ["claude", "copilot", "cursor", "continue", "codeium"]
+        adapters = ["claude", "copilot", "cursor", "continue", "windsurf"]
 
         with runner.isolated_filesystem(temp_dir=temp_dir):
             for adapter in adapters:

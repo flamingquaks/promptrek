@@ -1,25 +1,25 @@
 """
-Tabnine (team configurations) adapter implementation.
+Tabnine adapter implementation.
 """
 
-import json
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import click
 
 from ..core.exceptions import ValidationError
-from ..core.models import UniversalPrompt
+from ..core.models import Instructions, ProjectContext, PromptMetadata, UniversalPrompt
 from .base import EditorAdapter
 
 
 class TabnineAdapter(EditorAdapter):
-    """Adapter for Tabnine team configurations."""
+    """Adapter for Tabnine."""
 
-    _description = "Tabnine (team configurations)"
-    _file_patterns = [".tabnine/config.json", ".tabnine/team.yaml"]
+    _description = "Tabnine (.tabnine_commands)"
+    _file_patterns = [".tabnine_commands"]
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             name="tabnine",
             description=self._description,
@@ -40,55 +40,44 @@ class TabnineAdapter(EditorAdapter):
         # Apply variable substitution if supported
         processed_prompt = self.substitute_variables(prompt, variables)
 
-        # Create configuration content
-        config_content = self._build_config(processed_prompt)
+        # Process conditionals if supported
+        conditional_content = self.process_conditionals(processed_prompt, variables)
 
-        # Create team configuration content
-        team_content = self._build_team_config(processed_prompt)
+        # Create commands content
+        commands_content = self._build_commands_file(
+            processed_prompt, conditional_content
+        )
 
-        # Determine output paths
-        tabnine_dir = output_dir / ".tabnine"
-        config_file = tabnine_dir / "config.json"
-        team_file = tabnine_dir / "team.yaml"
-
-        created_files = []
+        # Determine output path
+        commands_file = output_dir / ".tabnine_commands"
 
         if dry_run:
-            click.echo(f"  📁 Would create: {config_file}")
-            click.echo(f"  📁 Would create: {team_file}")
+            click.echo(f"  📁 Would create: {commands_file}")
             if verbose:
-                click.echo("  📄 Config preview:")
+                click.echo("  📄 Commands preview:")
                 preview = (
-                    config_content[:200] + "..."
-                    if len(config_content) > 200
-                    else config_content
+                    commands_content[:200] + "..."
+                    if len(commands_content) > 200
+                    else commands_content
                 )
                 click.echo(f"    {preview}")
+            return [commands_file]
         else:
-            # Create directory and files
-            tabnine_dir.mkdir(exist_ok=True)
-            with open(config_file, "w", encoding="utf-8") as f:
-                f.write(config_content)
-            created_files.append(config_file)
-            click.echo(f"✅ Generated: {config_file}")
-
-            with open(team_file, "w", encoding="utf-8") as f:
-                f.write(team_content)
-            created_files.append(team_file)
-            click.echo(f"✅ Generated: {team_file}")
-
-        return created_files or [config_file, team_file]
+            with open(commands_file, "w", encoding="utf-8") as f:
+                f.write(commands_content)
+            click.echo(f"✅ Generated: {commands_file}")
+            return [commands_file]
 
     def validate(self, prompt: UniversalPrompt) -> List[ValidationError]:
         """Validate prompt for Tabnine."""
         errors = []
 
-        # Tabnine works well with team-based coding standards
-        if not prompt.instructions or not prompt.instructions.code_style:
+        # Tabnine works well with clear instructions
+        if not prompt.instructions:
             errors.append(
                 ValidationError(
-                    field="instructions.code_style",
-                    message="Tabnine benefits from clear code style guidelines for team consistency",
+                    field="instructions",
+                    message="Tabnine benefits from clear coding guidelines",
                     severity="warning",
                 )
             )
@@ -103,109 +92,198 @@ class TabnineAdapter(EditorAdapter):
         """Tabnine supports conditional configuration."""
         return True
 
-    def _build_config(self, prompt: UniversalPrompt) -> str:
-        """Build Tabnine configuration content."""
-        config = {
-            "version": "1.0",
-            "project": {
-                "name": prompt.metadata.title,
-                "description": prompt.metadata.description,
-                "version": prompt.metadata.version,
-            },
-            "settings": {
-                "enabled": True,
-                "auto_import": True,
-                "deep_completions": True,
-                "team_training": True,
-                "semantic_completion": True,
-            },
-            "team_config_file": "team.yaml",
-        }
+    def parse_files(self, source_dir: Path) -> UniversalPrompt:
+        """Parse Tabnine files back into a UniversalPrompt."""
+        commands_file = source_dir / ".tabnine_commands"
 
-        # Add language settings
-        if prompt.context and prompt.context.technologies:
-            config["languages"] = {}
-            for tech in prompt.context.technologies:
-                tech_lower = tech.lower()
-                config["languages"][tech_lower] = {
-                    "enabled": True,
-                    "completion_level": "advanced",
-                    "team_patterns": True,
-                }
+        if not commands_file.exists():
+            raise FileNotFoundError(f"Tabnine commands file not found: {commands_file}")
 
-        # Add project type specific settings
-        if prompt.context and prompt.context.project_type:
-            config["project"]["type"] = prompt.context.project_type
-            if prompt.context.project_type in ["web_application", "api_service"]:
-                config["settings"]["web_framework_support"] = True
+        # Initialize parsed data
+        metadata = PromptMetadata(
+            title="Tabnine Commands",
+            description="Configuration parsed from Tabnine commands file",
+            version="1.0.0",
+            author="PrompTrek Sync",
+            created=datetime.now().isoformat(),
+            updated=datetime.now().isoformat(),
+            tags=["tabnine", "synced"],
+        )
 
-        return json.dumps(config, indent=2)
+        instructions = Instructions()
+        technologies = []
 
-    def _build_team_config(self, prompt: UniversalPrompt) -> str:
-        """Build Tabnine team configuration YAML content."""
+        with open(commands_file, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        # Parse comment-based format
+        current_section = None
+        general_instructions = []
+        code_style_instructions = []
+        testing_instructions = []
+
+        for line in content.split("\n"):
+            line = line.strip()
+
+            # Skip empty lines
+            if not line:
+                continue
+
+            # Detect section headers
+            if line.startswith("## "):
+                section_name = line[3:].strip()
+                if "Coding Guidelines" in section_name or "General" in section_name:
+                    current_section = "general"
+                elif "Code Style" in section_name:
+                    current_section = "code_style"
+                elif "Testing" in section_name:
+                    current_section = "testing"
+                elif "Technology" in section_name:
+                    current_section = "technology"
+                else:
+                    current_section = None
+                continue
+
+            # Extract title from first header
+            if line.startswith("# ") and metadata.title == "Tabnine Commands":
+                title = line[2:].strip()
+                if "Tabnine Commands for " in title:
+                    metadata.title = title.replace("Tabnine Commands for ", "")
+                continue
+
+            # Extract technologies from comment
+            if "Technologies:" in line:
+                tech_str = line.split("Technologies:", 1)[1].strip()
+                technologies = [t.strip() for t in tech_str.split(",")]
+                continue
+
+            # Extract instructions (lines starting with #)
+            if line.startswith("# ") and current_section:
+                instruction = line[2:].strip()
+                # Skip generic headers and usage notes
+                if any(
+                    skip in instruction
+                    for skip in [
+                        "This file provides",
+                        "Tabnine will use",
+                        "Usage",
+                        "Type:",
+                        "Technologies:",
+                    ]
+                ):
+                    continue
+
+                if current_section == "general":
+                    general_instructions.append(instruction)
+                elif current_section == "code_style":
+                    code_style_instructions.append(instruction)
+                elif current_section == "testing":
+                    testing_instructions.append(instruction)
+
+        # Set instructions
+        if general_instructions:
+            instructions.general = general_instructions
+        if code_style_instructions:
+            instructions.code_style = code_style_instructions
+        if testing_instructions:
+            instructions.testing = testing_instructions
+
+        # Create context if technologies were found
+        context = None
+        if technologies:
+            context = ProjectContext(
+                project_type="application",
+                technologies=technologies,
+                description=f"Project using {', '.join(technologies)}",
+            )
+
+        return UniversalPrompt(
+            schema_version="1.0.0",
+            metadata=metadata,
+            targets=["tabnine"],
+            context=context,
+            instructions=instructions,
+        )
+
+    def _build_commands_file(
+        self,
+        prompt: UniversalPrompt,
+        conditional_content: Optional[Dict[str, Any]] = None,
+    ) -> str:
+        """Build .tabnine_commands file content."""
         lines = []
 
         # Header
-        lines.append(f"# Tabnine Team Configuration for {prompt.metadata.title}")
+        lines.append(f"# Tabnine Commands for {prompt.metadata.title}")
+        lines.append("")
+        lines.append(f"# {prompt.metadata.description}")
         lines.append("")
 
-        # Team settings
-        lines.append("team:")
-        lines.append(f'  name: "{prompt.metadata.title}"')
-        lines.append(f'  description: "{prompt.metadata.description}"')
-        if prompt.metadata.author:
-            lines.append(f'  contact: "{prompt.metadata.author}"')
-        lines.append("")
-
-        # Code standards
-        lines.append("standards:")
-        if prompt.instructions:
-            if prompt.instructions.general:
-                lines.append("  general:")
-                for instruction in prompt.instructions.general:
-                    lines.append(f'    - "{instruction}"')
-                lines.append("")
-
-            if prompt.instructions.code_style:
-                lines.append("  code_style:")
-                for guideline in prompt.instructions.code_style:
-                    lines.append(f'    - "{guideline}"')
-                lines.append("")
-
-            if prompt.instructions.testing:
-                lines.append("  testing:")
-                for guideline in prompt.instructions.testing:
-                    lines.append(f'    - "{guideline}"')
-                lines.append("")
-
-        # Project patterns
-        lines.append("patterns:")
-        if prompt.context and prompt.context.technologies:
-            lines.append("  technologies:")
-            for tech in prompt.context.technologies:
-                lines.append(f"    - {tech}")
+        # Project Context
+        if prompt.context:
+            lines.append("## Project Context")
+            if prompt.context.project_type:
+                lines.append(f"# Type: {prompt.context.project_type}")
+            if prompt.context.technologies:
+                lines.append(
+                    f"# Technologies: {', '.join(prompt.context.technologies)}"
+                )
             lines.append("")
 
-        # Training preferences
-        lines.append("training:")
-        lines.append("  local_patterns: true")
-        lines.append("  team_learning: true")
-        lines.append("  code_consistency: high")
-        lines.append("  suggestion_confidence: medium")
-        lines.append("")
+        # Coding Guidelines as Commands
+        if prompt.instructions:
+            lines.append("## Coding Guidelines")
+            lines.append("")
 
-        # Completion preferences
-        lines.append("completions:")
-        lines.append("  max_suggestions: 5")
-        lines.append("  context_aware: true")
-        lines.append("  multi_line: true")
-        lines.append("  function_signatures: true")
+            # Collect all instructions
+            all_instructions = []
+            if prompt.instructions.general:
+                all_instructions.extend(prompt.instructions.general)
+            if (
+                conditional_content
+                and "instructions" in conditional_content
+                and "general" in conditional_content["instructions"]
+            ):
+                all_instructions.extend(conditional_content["instructions"]["general"])
+
+            if all_instructions:
+                for instruction in all_instructions:
+                    lines.append(f"# {instruction}")
+                lines.append("")
+
+            # Code Style
+            if prompt.instructions.code_style:
+                lines.append("## Code Style")
+                lines.append("")
+                for guideline in prompt.instructions.code_style:
+                    lines.append(f"# {guideline}")
+                lines.append("")
+
+            # Testing
+            if prompt.instructions.testing:
+                lines.append("## Testing")
+                lines.append("")
+                for guideline in prompt.instructions.testing:
+                    lines.append(f"# {guideline}")
+                lines.append("")
+
+        # Technology-Specific Guidance
         if prompt.context and prompt.context.technologies:
-            lines.append("  language_specific:")
+            lines.append("## Technology Guidelines")
+            lines.append("")
             for tech in prompt.context.technologies:
-                tech_lower = tech.lower()
-                lines.append(f"    {tech_lower}:")
-                lines.append("      advanced_completion: true")
-                lines.append("      framework_aware: true")
+                lines.append(
+                    f"# {tech.title()}: Follow {tech} best practices and idioms"
+                )
+            lines.append("")
+
+        # Footer
+        lines.append("## Usage")
+        lines.append(
+            "# This file provides context to Tabnine for better code completions"
+        )
+        lines.append(
+            "# Tabnine will use these guidelines to suggest more relevant code"
+        )
 
         return "\n".join(lines)

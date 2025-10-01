@@ -18,7 +18,11 @@ targets:
   - continue
   - claude
   - cline
-  - codeium
+  - windsurf
+  - kiro
+  - jetbrains
+  - tabnine
+  - amazon-q
 
 context:
   project_type: "cli_tool"
@@ -44,6 +48,7 @@ context:
 instructions:
   general:
     - "When updating documentation, make sure to update the documents in the docs/ directory. Also review the gh-pages/ directory for updating the GitHub Pages site."
+    - When running python or python libraries, use `uv run <command>` to ensure the correct Python version and environment.
   
   code_style:
     - "Format code with Black (line length 88)"

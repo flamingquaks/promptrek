@@ -1,5 +1,5 @@
 """
-JetBrains AI adapter implementation.
+Windsurf adapter implementation.
 """
 
 from pathlib import Path
@@ -13,15 +13,15 @@ from .base import EditorAdapter
 from .sync_mixin import MarkdownSyncMixin
 
 
-class JetBrainsAdapter(MarkdownSyncMixin, EditorAdapter):
-    """Adapter for JetBrains AI assistance."""
+class WindsurfAdapter(MarkdownSyncMixin, EditorAdapter):
+    """Adapter for Windsurf AI assistant."""
 
-    _description = "JetBrains AI (.assistant/rules/)"
-    _file_patterns = [".assistant/rules/*.md"]
+    _description = "Windsurf (.windsurf/rules/)"
+    _file_patterns = [".windsurf/rules/*.md"]
 
     def __init__(self) -> None:
         super().__init__(
-            name="jetbrains",
+            name="windsurf",
             description=self._description,
             file_patterns=self._file_patterns,
         )
@@ -35,7 +35,7 @@ class JetBrainsAdapter(MarkdownSyncMixin, EditorAdapter):
         variables: Optional[Dict[str, Any]] = None,
         headless: bool = False,
     ) -> List[Path]:
-        """Generate JetBrains AI configuration files."""
+        """Generate Windsurf configuration files."""
 
         # Apply variable substitution if supported
         processed_prompt = self.substitute_variables(prompt, variables)
@@ -51,15 +51,15 @@ class JetBrainsAdapter(MarkdownSyncMixin, EditorAdapter):
         return rules_files
 
     def validate(self, prompt: UniversalPrompt) -> List[ValidationError]:
-        """Validate prompt for JetBrains AI."""
+        """Validate prompt for Windsurf."""
         errors = []
 
-        # JetBrains works well with structured development guidelines
+        # Windsurf works well with structured instructions
         if not prompt.instructions:
             errors.append(
                 ValidationError(
                     field="instructions",
-                    message="JetBrains AI benefits from structured development guidelines",
+                    message="Windsurf works best with structured instructions",
                     severity="warning",
                 )
             )
@@ -67,20 +67,20 @@ class JetBrainsAdapter(MarkdownSyncMixin, EditorAdapter):
         return errors
 
     def supports_variables(self) -> bool:
-        """JetBrains supports variable substitution."""
+        """Windsurf supports variable substitution."""
         return True
 
     def supports_conditionals(self) -> bool:
-        """JetBrains supports conditional configuration."""
+        """Windsurf supports conditional configuration."""
         return True
 
     def parse_files(self, source_dir: Path) -> UniversalPrompt:
-        """Parse JetBrains files back into a UniversalPrompt."""
+        """Parse Windsurf files back into a UniversalPrompt."""
         return self.parse_markdown_rules_files(
             source_dir=source_dir,
-            rules_subdir=".assistant/rules",
+            rules_subdir=".windsurf/rules",
             file_extension="md",
-            editor_name="JetBrains AI",
+            editor_name="Windsurf",
         )
 
     def _generate_rules_system(
@@ -91,8 +91,8 @@ class JetBrainsAdapter(MarkdownSyncMixin, EditorAdapter):
         dry_run: bool,
         verbose: bool,
     ) -> List[Path]:
-        """Generate .assistant/rules/ directory with markdown files."""
-        rules_dir = output_dir / ".assistant" / "rules"
+        """Generate .windsurf/rules/ directory with markdown files."""
+        rules_dir = output_dir / ".windsurf" / "rules"
         created_files = []
 
         # Generate general coding rules
@@ -203,7 +203,7 @@ class JetBrainsAdapter(MarkdownSyncMixin, EditorAdapter):
         return created_files
 
     def _build_rules_content(self, title: str, instructions: List[str]) -> str:
-        """Build markdown rules content for .assistant/rules/ files."""
+        """Build markdown rules content for .windsurf/rules/ files."""
         lines = []
 
         lines.append(f"# {title}")
@@ -237,17 +237,17 @@ class JetBrainsAdapter(MarkdownSyncMixin, EditorAdapter):
         # Add tech-specific best practices
         lines.append(f"## {tech.title()} Best Practices")
         tech_practices = {
-            "java": [
-                "Follow Java coding conventions",
-                "Use meaningful names for classes, methods, and variables",
-                "Implement proper exception handling",
-                "Leverage modern Java features appropriately",
+            "typescript": [
+                "Use strict TypeScript configuration",
+                "Prefer interfaces over types for object shapes",
+                "Use proper typing for all function parameters and returns",
+                "Leverage TypeScript's utility types when appropriate",
             ],
-            "kotlin": [
-                "Use Kotlin idioms and best practices",
-                "Prefer immutability with val over var",
-                "Leverage null safety features",
-                "Use extension functions appropriately",
+            "react": [
+                "Use functional components with hooks",
+                "Implement proper prop typing with TypeScript",
+                "Follow React best practices for state management",
+                "Use React.memo for performance optimization when needed",
             ],
             "python": [
                 "Follow PEP 8 style guidelines",

@@ -38,7 +38,7 @@ class TestCLIComprehensive:
                 "updated": "2024-12-01",
                 "tags": ["comprehensive", "cli", "test", "integration"],
             },
-            "targets": ["claude", "copilot", "cursor", "continue", "codeium"],
+            "targets": ["claude", "copilot", "cursor", "continue", "windsurf"],
             "context": {
                 "project_type": "web_application",
                 "technologies": [
@@ -233,7 +233,7 @@ CMD ["gunicorn", "--bind", "0.0.0.0:8000", "project.wsgi:application"]
                         "version": "1.0.0",
                         "author": "test",
                     },
-                    "targets": ["codeium"],
+                    "targets": ["windsurf"],
                     "instructions": {"general": ["Project 3 instructions"]},
                 },
             ),
@@ -582,7 +582,7 @@ CMD ["gunicorn", "--bind", "0.0.0.0:8000", "project.wsgi:application"]
 
         assert result.exit_code == 0
         # Should list available editors
-        expected_editors = ["claude", "copilot", "cursor", "continue", "codeium"]
+        expected_editors = ["claude", "copilot", "cursor", "continue", "windsurf"]
         for editor in expected_editors:
             if editor in result.output.lower():
                 # At least some editors should be listed

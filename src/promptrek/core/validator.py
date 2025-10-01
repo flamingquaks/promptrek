@@ -47,7 +47,7 @@ class UPFValidator:
         "claude",
         "kiro",
         "cline",
-        "codeium",
+        "windsurf",
         "tabnine",
         "amazon-q",
         "jetbrains",

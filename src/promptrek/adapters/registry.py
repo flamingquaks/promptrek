@@ -24,7 +24,7 @@ class AdapterCapability(Enum):
 class AdapterRegistry:
     """Registry for managing editor adapters."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._adapters: Dict[str, EditorAdapter] = {}
         self._adapter_classes: Dict[str, Type[EditorAdapter]] = {}
         self._capabilities: Dict[str, Set[AdapterCapability]] = {}

@@ -43,7 +43,8 @@ class TestAmazonQAdapter:
         """Test adapter initialization."""
         assert adapter.name == "amazon-q"
         assert "Amazon Q" in adapter.description
-        assert ".amazonq/context.md" in adapter.file_patterns
+        assert ".amazonq/rules/*.md" in adapter.file_patterns
+        assert ".amazonq/cli-agents/*.json" in adapter.file_patterns
 
     def test_validate_valid_prompt(self, adapter, sample_prompt):
         """Test validation with valid prompt."""
@@ -105,8 +106,9 @@ class TestAmazonQAdapter:
         """Test file patterns property."""
         patterns = adapter.file_patterns
         assert isinstance(patterns, list)
-        assert len(patterns) >= 1
-        assert ".amazonq/context.md" in patterns
+        assert len(patterns) == 2
+        assert ".amazonq/rules/*.md" in patterns
+        assert ".amazonq/cli-agents/*.json" in patterns
 
     def test_generate_dry_run_basic(self, adapter, sample_prompt, capsys):
         """Test basic dry run generation."""

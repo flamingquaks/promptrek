@@ -466,8 +466,8 @@ variables:
 
 instructions:
   general:
-    - "This is the {{{ PROJECT_NAME }}} project"
-    - "Contact {{{ TEAM_EMAIL }}} for questions"
+    - This is the {{{ PROJECT_NAME }}} project
+    - Contact {{{ TEAM_EMAIL }}} for questions
 ```
 
 #### Local Variables File

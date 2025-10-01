@@ -12,7 +12,7 @@ This document provides a comprehensive comparison of features supported by each 
 | **Kiro** | ✅ | ✅ | - | - | ✅ | - | - |
 | **Cline** | ✅ | ✅ | - | - | ✅ | - | - |
 | **Claude Code** | ✅ | ✅ | - | - | ✅ | - | - |
-| **Codeium** | ✅ | ✅ | - | - | ✅ | - | - |
+| **Windsurf** | ✅ | ✅ | - | - | ✅ | - | - |
 | **Tabnine** | ✅ | ✅ | - | - | - | ✅ | - |
 | **Amazon Q** | ✅ | ✅ | - | - | ✅ | - | - |
 | **JetBrains AI** | ✅ | ✅ | - | - | ✅ | - | - |
@@ -181,18 +181,17 @@ Editor configuration is managed globally, not per-project.
 
 ---
 
-### Codeium
+### Windsurf
 
 **Files Generated**:
-- `.codeium/context.json`
-- `.codeiumrc`
+- `.windsurf/rules/*.md`
 
 **Unique Features**:
-- ✅ JSON context format
-- ✅ Team patterns support
-- ✅ Structured configuration
+- ✅ Markdown rules format
+- ✅ Technology-specific rules
+- ✅ Modular rule organization
 
-**Best For**: Teams using Codeium, structured context
+**Best For**: Teams using Windsurf, organized AI assistance
 
 ---
 
