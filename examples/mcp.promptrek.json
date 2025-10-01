@@ -2,7 +2,7 @@
   "schema_version": "1.0.0",
   "metadata": {
     "title": "Example Project MCP Servers",
-    "description": "MCP server configuration for development project with filesystem, git, and database access",
+    "description": "MCP server configuration demonstrating variable substitution with both ${VAR} and {{{ VAR }}} syntax",
     "version": "1.0.0",
     "author": "Development Team",
     "created": "2025-10-01",
@@ -18,9 +18,9 @@
       "args": [
         "-y",
         "@modelcontextprotocol/server-filesystem",
-        "/Users/username/projects"
+        "{{{ PROJECT_PATH }}}"
       ],
-      "description": "Provides filesystem access for reading and writing files",
+      "description": "Provides filesystem access for reading and writing files. Uses PrompTrek-style variable syntax.",
       "required": true
     },
     "git": {
@@ -41,7 +41,7 @@
       "env": {
         "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
       },
-      "description": "GitHub API access for issues, PRs, and repository management",
+      "description": "GitHub API access for issues, PRs, and repository management. Uses MCP-standard ${VAR} syntax.",
       "required": false
     },
     "postgres": {
@@ -49,12 +49,12 @@
       "args": [
         "-y",
         "@modelcontextprotocol/server-postgres",
-        "postgresql://localhost/mydb"
+        "{{{ DATABASE_URL }}}"
       ],
       "env": {
-        "PGPASSWORD": "${DATABASE_PASSWORD}"
+        "PGPASSWORD": "{{{ DATABASE_PASSWORD }}}"
       },
-      "description": "PostgreSQL database access for queries and schema inspection",
+      "description": "PostgreSQL database access. Both connection string and password use PrompTrek-style variables.",
       "required": false
     },
     "brave-search": {
@@ -64,9 +64,9 @@
         "@modelcontextprotocol/server-brave-search"
       ],
       "env": {
-        "BRAVE_API_KEY": "${BRAVE_API_KEY}"
+        "BRAVE_API_KEY": "{{{ BRAVE_API_KEY }}}"
       },
-      "description": "Web search capabilities using Brave Search API",
+      "description": "Web search capabilities using Brave Search API. Uses PrompTrek-style variable.",
       "required": false
     },
     "fetch": {

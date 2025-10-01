@@ -1,0 +1,37 @@
+# Example local variables file for PrompTrek
+#
+# This file demonstrates how to define local variables that are used
+# in both prompt files (*.promptrek.yaml) and MCP configurations (mcp.promptrek.json).
+#
+# IMPORTANT:
+# - Copy this file to `variables.promptrek.yaml` in your project root
+# - Add `variables.promptrek.yaml` to your .gitignore
+# - Never commit this file with real secrets to version control
+#
+# Variable Precedence:
+# 1. CLI variables (--var KEY=VALUE) - highest priority
+# 2. This file (variables.promptrek.yaml)
+# 3. Environment variables - lowest priority
+#
+# Usage in templates:
+# - Use {{{ VAR_NAME }}} in prompt files
+# - Use ${VAR_NAME} or {{{ VAR_NAME }}} in MCP configurations
+
+# Project Settings
+PROJECT_NAME: my-awesome-project
+PROJECT_PATH: /Users/username/projects/my-awesome-project
+AUTHOR_NAME: Your Name
+AUTHOR_EMAIL: you@example.com
+
+# API Keys and Tokens
+GITHUB_TOKEN: ghp_your_github_token_here
+BRAVE_API_KEY: your_brave_search_api_key
+ANTHROPIC_API_KEY: sk-ant-your-api-key
+
+# Database Configuration
+DATABASE_URL: postgresql://localhost:5432/mydb
+DATABASE_PASSWORD: your_database_password
+
+# Other Service Credentials
+SLACK_WEBHOOK_URL: https://hooks.slack.com/services/YOUR/WEBHOOK/URL
+OPENAI_API_KEY: sk-your-openai-key

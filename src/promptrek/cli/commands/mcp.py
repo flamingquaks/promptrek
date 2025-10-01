@@ -12,6 +12,7 @@ import click
 from ...core.exceptions import CLIError, MCPParsingError
 from ...core.mcp_generator import MCPGenerator
 from ...core.mcp_parser import MCPParser
+from ...utils.variables import VariableSubstitution
 
 
 def mcp_command(
@@ -63,23 +64,32 @@ def mcp_command(
     except MCPParsingError as e:
         raise CLIError(f"Failed to parse MCP configuration: {e}")
 
-    # Validate and substitute variables
+    # Load local variables from variables.promptrek.yaml
+    var_sub = VariableSubstitution()
+    local_vars = var_sub.load_local_variables(output)
+
+    if verbose and local_vars:
+        click.echo(
+            f"📋 Loaded {len(local_vars)} variable(s) from variables.promptrek.yaml"
+        )
+
+    # Merge variables with precedence: local < CLI (CLI overrides local)
+    merged_vars = local_vars.copy()
     if variables:
-        missing = parser.validate_variables(config, variables)
-        if missing:
-            raise CLIError(
-                f"Missing required variables: {', '.join(missing)}. "
-                "Provide with --var KEY=VALUE"
-            )
-        config = parser.substitute_variables(config, variables, use_env=True)
-    else:
-        # Use environment variables only
-        missing = parser.validate_variables(config)
-        if missing:
-            raise CLIError(
-                f"Missing required environment variables: {', '.join(missing)}"
-            )
-        config = parser.substitute_variables(config, use_env=True)
+        merged_vars.update(variables)
+
+    # Validate and substitute variables
+    missing = parser.validate_variables(config, merged_vars)
+    if missing:
+        # Show helpful message about where to define variables
+        click.echo(
+            f"⚠️  Missing variables: {', '.join(missing)}\n"
+            f"   Define them in variables.promptrek.yaml or provide with --var KEY=VALUE",
+            err=True,
+        )
+        raise CLIError(f"Missing required variables: {', '.join(missing)}")
+
+    config = parser.substitute_variables(config, merged_vars, use_env=True)
 
     if dry_run:
         click.echo("🔍 Dry run mode - showing what would be generated:")

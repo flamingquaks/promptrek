@@ -19,7 +19,10 @@ class MCPParser:
 
     def __init__(self):
         """Initialize MCP parser."""
-        self.variable_pattern = re.compile(r"\$\{([A-Z_][A-Z0-9_]*)\}")
+        # MCP standard: ${VAR_NAME}
+        self.mcp_variable_pattern = re.compile(r"\$\{([A-Z_][A-Z0-9_]*)\}")
+        # PrompTrek standard: {{{ VAR_NAME }}}
+        self.promptrek_variable_pattern = re.compile(r"\{\{\{\s*(\w+)\s*\}\}\}")
 
     def parse_file(self, file_path: Path) -> MCPConfiguration:
         """
@@ -60,7 +63,7 @@ class MCPParser:
         """
         Substitute variables in MCP server configurations.
 
-        Supports ${VAR_NAME} syntax in environment variables.
+        Supports both ${VAR_NAME} (MCP standard) and {{{ VAR_NAME }}} (PrompTrek standard).
 
         Args:
             config: MCP configuration to process
@@ -72,13 +75,20 @@ class MCPParser:
         """
         variables = variables or {}
 
-        # Process each server's environment variables
+        # Process each server's environment variables and args
         for server_name, server_config in config.mcpServers.items():
             if server_config.env:
                 new_env = {}
                 for key, value in server_config.env.items():
                     new_env[key] = self._substitute_value(value, variables, use_env)
                 server_config.env = new_env
+
+            # Also substitute in args
+            if server_config.args:
+                new_args = []
+                for arg in server_config.args:
+                    new_args.append(self._substitute_value(arg, variables, use_env))
+                server_config.args = new_args
 
         return config
 
@@ -87,6 +97,8 @@ class MCPParser:
     ) -> str:
         """
         Substitute variables in a single value.
+
+        Supports both ${VAR_NAME} and {{{ VAR_NAME }}} syntax.
 
         Args:
             value: Value to process
@@ -101,14 +113,17 @@ class MCPParser:
             var_name = match.group(1)
             # Check provided variables first
             if var_name in variables:
-                return variables[var_name]
+                return str(variables[var_name])
             # Then check environment
             if use_env and var_name in os.environ:
                 return os.environ[var_name]
             # Leave unresolved variables as-is
             return match.group(0)
 
-        return self.variable_pattern.sub(replace_var, value)
+        # Substitute both patterns
+        result = self.mcp_variable_pattern.sub(replace_var, value)
+        result = self.promptrek_variable_pattern.sub(replace_var, result)
+        return result
 
     def find_mcp_file(self, directory: Path) -> Optional[Path]:
         """
@@ -127,6 +142,8 @@ class MCPParser:
         """
         Extract all variable names used in configuration.
 
+        Extracts from both ${VAR_NAME} and {{{ VAR_NAME }}} syntax.
+
         Args:
             config: MCP configuration
 
@@ -138,8 +155,20 @@ class MCPParser:
         for server_config in config.mcpServers.values():
             if server_config.env:
                 for value in server_config.env.values():
-                    matches = self.variable_pattern.findall(value)
-                    variables.update(matches)
+                    # Extract MCP-style variables: ${VAR}
+                    mcp_matches = self.mcp_variable_pattern.findall(value)
+                    variables.update(mcp_matches)
+                    # Extract PrompTrek-style variables: {{{ VAR }}}
+                    pt_matches = self.promptrek_variable_pattern.findall(value)
+                    variables.update(pt_matches)
+
+            if server_config.args:
+                for arg in server_config.args:
+                    # Extract from args as well
+                    mcp_matches = self.mcp_variable_pattern.findall(arg)
+                    variables.update(mcp_matches)
+                    pt_matches = self.promptrek_variable_pattern.findall(arg)
+                    variables.update(pt_matches)
 
         return variables
 

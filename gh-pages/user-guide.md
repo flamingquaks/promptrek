@@ -374,6 +374,38 @@ Create an `mcp.promptrek.json` file in your project root:
 
 Then run: `promptrek mcp`
 
+### Variable Substitution
+
+MCP supports both `${VAR}` and `{{{ VAR }}}` syntax. Variables are loaded from:
+
+1. CLI variables: `--var KEY=VALUE` (highest priority)
+2. Local file: `variables.promptrek.yaml`
+3. Environment variables (lowest priority)
+
+**Example with local variables file:**
+
+```yaml
+# variables.promptrek.yaml (git-ignored)
+GITHUB_TOKEN: ghp_your_token_here
+PROJECT_PATH: /Users/username/projects/myproject
+```
+
+```json
+{
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "{{{ GITHUB_TOKEN }}}"
+      }
+    }
+  }
+}
+```
+
+This allows you to commit `mcp.promptrek.json` while keeping secrets in `variables.promptrek.yaml`.
+
 ### Configuration Options
 
 **`allow_custom_servers`**:

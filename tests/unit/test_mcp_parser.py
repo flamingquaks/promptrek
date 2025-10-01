@@ -87,6 +87,20 @@ class TestMCPParser:
         with pytest.raises(MCPParsingError, match="Invalid MCP configuration"):
             parser.parse_file(invalid_file)
 
+    def test_parse_file_read_error(self, parser, tmp_path):
+        """Test parsing file with read error."""
+        invalid_file = tmp_path / "unreadable.json"
+        invalid_file.write_text("{}")
+        # Make file unreadable by changing permissions
+        invalid_file.chmod(0o000)
+
+        try:
+            with pytest.raises(MCPParsingError, match="Error reading"):
+                parser.parse_file(invalid_file)
+        finally:
+            # Restore permissions for cleanup
+            invalid_file.chmod(0o644)
+
     def test_substitute_variables_with_provided_vars(self, parser, valid_mcp_config):
         """Test variable substitution with provided variables."""
         config_data = {
@@ -231,3 +245,142 @@ class TestMCPParser:
         missing = parser.validate_variables(config, provided_vars)
         assert "TOKEN" in missing
         assert len(missing) == 1
+
+    def test_substitute_promptrek_style_variables(self, parser, valid_mcp_config):
+        """Test substitution of PrompTrek-style {{{ VAR }}} variables."""
+        config_data = {
+            "schema_version": "1.0.0",
+            "metadata": {"title": "Test", "description": "Test"},
+            "mcpServers": {
+                "server": {
+                    "command": "npx",
+                    "env": {
+                        "API_KEY": "{{{ API_KEY }}}",
+                        "TOKEN": "{{{ TOKEN }}}",
+                    },
+                }
+            },
+        }
+
+        config_file = valid_mcp_config.parent / "pt_vars.json"
+        with open(config_file, "w") as f:
+            json.dump(config_data, f)
+
+        config = parser.parse_file(config_file)
+        variables = {"API_KEY": "secret-key", "TOKEN": "secret-token"}
+
+        result = parser.substitute_variables(config, variables, use_env=False)
+
+        assert result.mcpServers["server"].env["API_KEY"] == "secret-key"
+        assert result.mcpServers["server"].env["TOKEN"] == "secret-token"
+
+    def test_substitute_mixed_variable_styles(self, parser, valid_mcp_config):
+        """Test substitution with both ${VAR} and {{{ VAR }}} styles."""
+        config_data = {
+            "schema_version": "1.0.0",
+            "metadata": {"title": "Test", "description": "Test"},
+            "mcpServers": {
+                "server": {
+                    "command": "npx",
+                    "env": {
+                        "MCP_STYLE": "${API_KEY}",
+                        "PROMPTREK_STYLE": "{{{ TOKEN }}}",
+                    },
+                }
+            },
+        }
+
+        config_file = valid_mcp_config.parent / "mixed_vars.json"
+        with open(config_file, "w") as f:
+            json.dump(config_data, f)
+
+        config = parser.parse_file(config_file)
+        variables = {"API_KEY": "mcp-secret", "TOKEN": "pt-token"}
+
+        result = parser.substitute_variables(config, variables, use_env=False)
+
+        assert result.mcpServers["server"].env["MCP_STYLE"] == "mcp-secret"
+        assert result.mcpServers["server"].env["PROMPTREK_STYLE"] == "pt-token"
+
+    def test_substitute_variables_in_args(self, parser, valid_mcp_config):
+        """Test substitution of variables in args field."""
+        config_data = {
+            "schema_version": "1.0.0",
+            "metadata": {"title": "Test", "description": "Test"},
+            "mcpServers": {
+                "server": {
+                    "command": "npx",
+                    "args": ["--path", "{{{ PROJECT_PATH }}}", "--key", "${API_KEY}"],
+                }
+            },
+        }
+
+        config_file = valid_mcp_config.parent / "args_vars.json"
+        with open(config_file, "w") as f:
+            json.dump(config_data, f)
+
+        config = parser.parse_file(config_file)
+        variables = {"PROJECT_PATH": "/home/user/project", "API_KEY": "secret"}
+
+        result = parser.substitute_variables(config, variables, use_env=False)
+
+        assert result.mcpServers["server"].args[0] == "--path"
+        assert result.mcpServers["server"].args[1] == "/home/user/project"
+        assert result.mcpServers["server"].args[2] == "--key"
+        assert result.mcpServers["server"].args[3] == "secret"
+
+    def test_extract_variables_both_styles(self, parser, valid_mcp_config):
+        """Test extraction of variables from both syntax styles."""
+        config_data = {
+            "schema_version": "1.0.0",
+            "metadata": {"title": "Test", "description": "Test"},
+            "mcpServers": {
+                "server1": {
+                    "command": "npx",
+                    "env": {"KEY1": "${VAR1}", "KEY2": "{{{ VAR2 }}}"},
+                },
+                "server2": {
+                    "command": "npx",
+                    "args": ["--path", "{{{ PROJECT_PATH }}}"],
+                    "env": {"KEY3": "${VAR3}"},
+                },
+            },
+        }
+
+        config_file = valid_mcp_config.parent / "both_styles.json"
+        with open(config_file, "w") as f:
+            json.dump(config_data, f)
+
+        config = parser.parse_file(config_file)
+        variables = parser.extract_variables(config)
+
+        assert variables == {"VAR1", "VAR2", "VAR3", "PROJECT_PATH"}
+
+    def test_variable_precedence_local_over_env(
+        self, parser, valid_mcp_config, monkeypatch
+    ):
+        """Test that provided variables take precedence over environment variables."""
+        monkeypatch.setenv("API_KEY", "env-value")
+
+        config_data = {
+            "schema_version": "1.0.0",
+            "metadata": {"title": "Test", "description": "Test"},
+            "mcpServers": {
+                "server": {
+                    "command": "npx",
+                    "env": {"API_KEY": "${API_KEY}"},
+                }
+            },
+        }
+
+        config_file = valid_mcp_config.parent / "precedence.json"
+        with open(config_file, "w") as f:
+            json.dump(config_data, f)
+
+        config = parser.parse_file(config_file)
+        variables = {"API_KEY": "local-value"}
+
+        result = parser.substitute_variables(config, variables, use_env=True)
+
+        # Local variable should take precedence over env
+        assert result.mcpServers["server"].env["API_KEY"] == "local-value"

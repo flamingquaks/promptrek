@@ -6,7 +6,7 @@ Handles generation of editor-specific MCP configuration files.
 
 import json
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 import click
 import yaml
@@ -111,9 +111,9 @@ class MCPGenerator:
         servers = self._filter_servers(config.mcpServers, selected_servers)
 
         # Convert to Continue format (list of server configs)
-        continue_servers = []
+        continue_servers: List[Dict[str, Any]] = []
         for name, server in servers.items():
-            server_config = {
+            server_config: Dict[str, Any] = {
                 "name": name,
                 "command": server.command,
             }
@@ -199,7 +199,7 @@ class MCPGenerator:
 
     def _merge_servers(
         self,
-        existing: Dict[str, dict],
+        existing: Dict[str, Any],
         new_servers: Dict[str, MCPServerConfig],
         verbose: bool,
     ) -> Dict[str, MCPServerConfig]:
@@ -245,7 +245,7 @@ class MCPGenerator:
 
         return merged
 
-    def _servers_to_dict(self, servers: Dict[str, MCPServerConfig]) -> Dict[str, dict]:
+    def _servers_to_dict(self, servers: Dict[str, MCPServerConfig]) -> Dict[str, Any]:
         """
         Convert MCPServerConfig dict to plain dict for JSON serialization.
 
@@ -255,9 +255,9 @@ class MCPGenerator:
         Returns:
             Plain dict
         """
-        result = {}
+        result: Dict[str, Any] = {}
         for name, config in servers.items():
-            server_dict = {"command": config.command}
+            server_dict: Dict[str, Any] = {"command": config.command}
             if config.args:
                 server_dict["args"] = config.args
             if config.env:

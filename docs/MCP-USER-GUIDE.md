@@ -83,10 +83,63 @@ Controls server selection behavior:
 Each server in `mcpServers` supports:
 
 - **`command`** (required): Executable to run the server (e.g., `npx`, `node`, `python`)
-- **`args`** (optional): Command-line arguments as an array
-- **`env`** (optional): Environment variables (supports `${VAR}` substitution)
+- **`args`** (optional): Command-line arguments as an array (supports variable substitution)
+- **`env`** (optional): Environment variables (supports variable substitution)
 - **`description`** (optional): Human-readable description
 - **`required`** (optional): Whether this server is required for the project
+
+### Variable Substitution
+
+MCP configurations support two variable syntax styles:
+
+1. **MCP Standard**: `${VAR_NAME}` - Standard MCP syntax
+2. **PrompTrek Style**: `{{{ VAR_NAME }}}` - PrompTrek's template syntax
+
+Both syntaxes work in `env` and `args` fields. Variables are resolved in this order:
+
+1. **CLI variables** (highest priority): `--var KEY=VALUE`
+2. **Local variables file**: `variables.promptrek.yaml`
+3. **Environment variables** (lowest priority): Shell environment
+
+Example with both syntaxes:
+
+```json
+{
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+      }
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "{{{ PROJECT_PATH }}}"],
+      "description": "Filesystem access"
+    }
+  }
+}
+```
+
+### Local Variables File
+
+Store sensitive values like API keys in `variables.promptrek.yaml` (git-ignored):
+
+```yaml
+# variables.promptrek.yaml
+GITHUB_TOKEN: ghp_your_token_here
+PROJECT_PATH: /Users/username/projects/myproject
+DATABASE_URL: postgresql://localhost/mydb
+BRAVE_API_KEY: your_brave_api_key
+```
+
+PrompTrek automatically loads this file and substitutes variables in your MCP configuration. This allows you to:
+
+- ✅ Commit `mcp.promptrek.json` to version control
+- ✅ Keep secrets out of the repository
+- ✅ Share server configurations with your team
+- ✅ Override variables per developer with `--var`
 
 ## CLI Usage
 
