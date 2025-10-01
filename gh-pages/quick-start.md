@@ -271,7 +271,7 @@ pre-commit install            # Activate manually
 1. **Validate PrompTrek files** - Automatically validates `.promptrek.yaml` files before commit
 2. **Prevent generated files** - Blocks accidental commits of AI editor config files (`.cursor/`, `.claude/`, etc.)
 
-See the [Pre-commit User Guide](https://github.com/flamingquaks/promptrek/blob/main/docs/PRE_COMMIT_USER_GUIDE.md) for detailed documentation.
+See the [Pre-commit Integration Guide](user-guide/pre-commit.html) for detailed documentation.
 
 ## Common Commands Reference
 
