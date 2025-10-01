@@ -13,7 +13,9 @@ import yaml
 from ...core.exceptions import CLIError
 
 
-def init_command(ctx: click.Context, template: Optional[str], output: str) -> None:
+def init_command(
+    ctx: click.Context, template: Optional[str], output: str, setup_hooks: bool
+) -> None:
     """
     Initialize a new universal prompt file.
 
@@ -21,6 +23,7 @@ def init_command(ctx: click.Context, template: Optional[str], output: str) -> No
         ctx: Click context
         template: Optional template name to use
         output: Output file path
+        setup_hooks: Whether to set up pre-commit hooks after initialization
     """
     output_path = Path(output)
 
@@ -58,6 +61,19 @@ def init_command(ctx: click.Context, template: Optional[str], output: str) -> No
     click.echo(f"✅ Initialized universal prompt file: {output_path}")
     click.echo("📝 Edit the file to customize your prompt configuration")
     click.echo(f"🔍 Run 'promptrek validate {output_path}' to check your configuration")
+
+    # Optionally set up pre-commit hooks
+    if setup_hooks:
+        click.echo("\n🔧 Setting up pre-commit hooks...")
+        try:
+            from .hooks import install_hooks_command
+
+            install_hooks_command(ctx, config_file=None, force=False, activate=True)
+        except Exception as e:
+            click.echo(f"\n⚠️  Failed to set up hooks: {e}", err=True)
+            click.echo(
+                "You can set them up manually with: promptrek install-hooks --activate"
+            )
 
 
 def _get_basic_template() -> dict:

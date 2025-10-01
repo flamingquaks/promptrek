@@ -33,13 +33,18 @@ promptrek --version
 Create a new universal prompt file using one of our templates:
 
 ```bash
-# Basic initialization
-promptrek init --output my-project.promptrek.yaml
+# Basic initialization with pre-commit hooks (recommended)
+promptrek init --setup-hooks --output my-project.promptrek.yaml
 
-# Use a specific template
-promptrek init --template react --output my-react-app.promptrek.yaml
-promptrek init --template api --output my-api.promptrek.yaml
+# Use a specific template with hooks
+promptrek init --template react --setup-hooks --output my-react-app.promptrek.yaml
+promptrek init --template api --setup-hooks --output my-api.promptrek.yaml
+
+# Without hooks setup (manual)
+promptrek init --output my-project.promptrek.yaml
 ```
+
+**💡 Tip:** The `--setup-hooks` flag automatically configures pre-commit hooks to validate your `.promptrek.yaml` files and prevent accidental commits of generated files. This ensures your team maintains clean version control!
 
 **Available templates:**
 - `basic` - General project template
@@ -222,12 +227,53 @@ promptrek generate --editor continue --input react-app.promptrek.yaml
 - **Cursor**: Use the generated rules files for enhanced AI assistance
 - **Continue**: Load the generated configuration in your Continue settings
 
+## Pre-commit Integration (Recommended)
+
+PrompTrek includes pre-commit hooks to ensure code quality and prevent accidental commits of generated files.
+
+### Setup Options
+
+**Option 1: During Initialization (Easiest)**
+```bash
+promptrek init --setup-hooks --output project.promptrek.yaml
+# ✅ Creates .promptrek.yaml
+# ✅ Configures .pre-commit-config.yaml
+# ✅ Activates git hooks automatically
+```
+
+**Option 2: For Existing Projects**
+```bash
+pip install pre-commit
+promptrek install-hooks --activate
+```
+
+**Option 3: Manual Setup**
+```bash
+promptrek install-hooks        # Configure only
+pre-commit install            # Activate manually
+```
+
+### What the Hooks Do
+
+1. **Validate PrompTrek files** - Automatically validates `.promptrek.yaml` files before commit
+2. **Prevent generated files** - Blocks accidental commits of AI editor config files (`.cursor/`, `.claude/`, etc.)
+
+See the [Pre-commit User Guide](https://github.com/flamingquaks/promptrek/blob/main/docs/PRE_COMMIT_USER_GUIDE.md) for detailed documentation.
+
 ## Common Commands Reference
 
 ### Initialization
 ```bash
-promptrek init --output <filename>                    # Basic init
-promptrek init --template <template> --output <file>  # From template
+promptrek init --output <filename>                          # Basic init
+promptrek init --template <template> --output <file>        # From template
+promptrek init --setup-hooks --output <file>                # With pre-commit hooks
+```
+
+### Pre-commit Hooks
+```bash
+promptrek install-hooks                    # Configure hooks
+promptrek install-hooks --activate         # Configure and activate
+promptrek check-generated <files>          # Check if files are generated
 ```
 
 ### Validation

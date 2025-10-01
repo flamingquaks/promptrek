@@ -42,33 +42,29 @@ repos:
         pass_filenames: true
 
       # Basic code formatting and linting (local versions)
-      - id: black-check
-        name: Check code formatting with black
-        entry: black --check --diff
+      - id: black
+        name: black pyton linting
+        entry: uv run black
         language: system
-        files: ^(src/|tests/).*\.py$
+        types: [python]
+        args: ["--check", "--diff"]
+        pass_filenames: true
 
       - id: isort-check
         name: Check import sorting with isort
-        entry: isort --check-only --diff
+        entry: uv run isort
+        args: ["--check", "--diff"]
         language: system
-        files: ^(src/|tests/).*\.py$
+        types: [python]
+        pass_filenames: true
 
       - id: flake8-check
         name: Check code style with flake8
-        entry: flake8
+        entry: uv run flake8
+        args: ["--check", "--diff"]
         language: system
-        files: ^(src/|tests/).*\.py$
-
-      # Basic file checks
-      - id: trailing-whitespace
-        name: Trim trailing whitespace
-        entry: >
-          bash -c 'if command -v sed >/dev/null 2>&1; then
-          sed -i "s/[[:space:]]*$//" "$@"; else
-          echo "Warning: sed not available, skipping whitespace trim"; fi' --
-        language: system
-        types: [text]
+        types: [python]
+        pass_filenames: true
 
       - id: end-of-file-fixer
         name: Fix end of files
@@ -84,7 +80,7 @@ repos:
         entry: python -c "import yaml, sys; [yaml.safe_load(open(f)) for f in sys.argv[1:]]"
         language: system
         files: \.ya?ml$
-        exclude: \.promptrek\.ya?ml$  # Our files have custom format
+        exclude: \.promptrek\.ya?ml$ 
 
       - id: check-merge-conflict
         name: Check for merge conflicts
