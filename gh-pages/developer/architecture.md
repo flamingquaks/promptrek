@@ -1,3 +1,8 @@
+---
+layout: default
+title: Architecture
+---
+
 # System Architecture
 
 ## High-Level Architecture
@@ -170,6 +175,7 @@ templates/
 ```
 
 **Template Example** (`copilot/instructions.md.j2`):
+{% raw %}
 ```markdown
 # {{ metadata.title }}
 
@@ -204,6 +210,7 @@ templates/
 {% endfor %}
 {% endif %}
 ```
+{% endraw %}
 
 ### 4. Editor Adapters
 

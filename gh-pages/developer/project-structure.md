@@ -1,3 +1,8 @@
+---
+layout: default
+title: Project Structure
+---
+
 # Project Structure and Conventions
 
 ## Repository Structure

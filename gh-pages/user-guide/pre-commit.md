@@ -1,3 +1,8 @@
+---
+layout: guide
+title: Pre-commit Integration
+---
+
 # Pre-commit Integration for Users
 
 This guide explains how to integrate PrompTrek's pre-commit hooks into your project to ensure `.promptrek.yaml` files are validated and generated files are not accidentally committed.

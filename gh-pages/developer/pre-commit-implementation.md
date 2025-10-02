@@ -1,3 +1,8 @@
+---
+layout: default
+title: Pre-commit Implementation
+---
+
 # Pre-commit Integration
 
 PrompTrek includes comprehensive pre-commit hooks to ensure code quality and prevent accidental commits of generated files.

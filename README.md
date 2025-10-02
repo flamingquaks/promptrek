@@ -50,22 +50,26 @@ promptrek generate --all
 
 ## 📖 Documentation
 
-Comprehensive documentation is available in the [`docs/`](https://github.com/flamingquaks/promptrek/tree/main/docs) directory:
+**📚 Complete documentation is available on our [GitHub Pages site](https://flamingquaks.github.io/promptrek):**
 
-### Getting Started
-- [Getting Started Guide](./GETTING_STARTED.md) - Complete setup and usage guide
-- [Universal Prompt Format](./docs/UPF_SPECIFICATION.md) - UPF specification and examples
+- **[Quick Start Guide](https://flamingquaks.github.io/promptrek/quick-start.html)** - Get up and running in minutes
+- **[User Guide](https://flamingquaks.github.io/promptrek/user-guide.html)** - Comprehensive documentation covering:
+  - UPF Specification - Universal Prompt Format details
+  - Advanced Features - Variables, conditionals, and imports
+  - Editor Adapters - All supported AI editors
+  - Adapter Capabilities - Feature comparison matrix
+  - Sync Feature - Bidirectional synchronization
+  - Pre-commit Integration - Automated workflows
+- **[Contributing Guide](https://flamingquaks.github.io/promptrek/contributing.html)** - How to contribute to the project
 
-### Features & Usage
-- [Advanced Features](https://github.com/flamingquaks/promptrek/tree/main/docs/ADVANCED_FEATURES.md) - Variables, conditionals, and imports
-- [Editor Adapters](https://github.com/flamingquaks/promptrek/tree/main/docs/ADAPTERS.md) - Detailed guide to all supported editors
-- [Adapter Capabilities](https://github.com/flamingquaks/promptrek/tree/main/docs/ADAPTER_CAPABILITIES.md) - Feature comparison matrix
-- [Sync Feature](https://github.com/flamingquaks/promptrek/tree/main/docs/SYNC_FEATURE.md) - Bidirectional synchronization guide
-
-### Architecture & Planning
-- [System Architecture](https://github.com/flamingquaks/promptrek/tree/main/docs/ARCHITECTURE.md) - Technical design and structure
-- [Implementation Roadmap](https://github.com/flamingquaks/promptrek/tree/main/docs/IMPLEMENTATION_ROADMAP.md) - Development status and future plans
-- [Project Structure](https://github.com/flamingquaks/promptrek/tree/main/docs/PROJECT_STRUCTURE.md) - Repository organization
+### Developer Resources
+For technical architecture and development planning, see the developer documentation on our website:
+- [System Architecture](https://flamingquaks.github.io/promptrek/developer/architecture.html) - Technical design and structure
+- [Implementation Roadmap](https://flamingquaks.github.io/promptrek/developer/roadmap.html) - Development status and future plans
+- [Project Structure](https://flamingquaks.github.io/promptrek/developer/project-structure.html) - Repository organization
+- [Changelog Process](https://flamingquaks.github.io/promptrek/developer/changelog-process.html) - Contribution guidelines
+- [Pre-commit Implementation](https://flamingquaks.github.io/promptrek/developer/pre-commit-implementation.html) - Technical implementation details
+- [UV Workflows](https://flamingquaks.github.io/promptrek/developer/uv-workflows.html) - Developer workflows
 
 ## 🎨 Supported Editors
 
@@ -218,9 +222,9 @@ fix(parser): handle edge case in YAML parsing
 docs(readme): update installation instructions
 ```
 
-All commit messages are validated in CI. See [CHANGELOG_PROCESS.md](./docs/CHANGELOG_PROCESS.md) for detailed guidelines.
+All commit messages are validated in CI. See [Changelog Process](https://flamingquaks.github.io/promptrek/developer/changelog-process.html) for detailed guidelines.
 
-See the [Implementation Roadmap](./docs/IMPLEMENTATION_ROADMAP.md) for planned features and current progress.
+See the [Implementation Roadmap](https://flamingquaks.github.io/promptrek/developer/roadmap.html) for planned features and current progress.
 
 ## 🧪 Testing and Quality Assurance
 
@@ -285,7 +289,7 @@ flake8 src/ tests/        # Lint code
 mypy src/                # Type checking
 ```
 
-For detailed uv workflows, see [UV Workflows Guide](./docs/UV_WORKFLOWS.md).
+For detailed uv workflows, see [UV Workflows Guide](https://flamingquaks.github.io/promptrek/developer/uv-workflows.html).
 
 For contribution guidelines, see [CONTRIBUTING.md](./.github/CONTRIBUTING.md).
 
@@ -293,9 +297,9 @@ For contribution guidelines, see [CONTRIBUTING.md](./.github/CONTRIBUTING.md).
 
 ### Core Documentation
 - **[Getting Started Guide](./GETTING_STARTED.md)** - Comprehensive setup and usage guide
-- **[Advanced Template Features](./docs/ADVANCED_FEATURES.md)** - Variables, conditionals, and imports
-- **[Editor Adapters](./docs/ADAPTERS.md)** - Detailed guide to all supported AI editors
-- **[Implementation Roadmap](./docs/IMPLEMENTATION_ROADMAP.md)** - Development progress and plans
+- **[Advanced Template Features](https://flamingquaks.github.io/promptrek/user-guide/advanced-features.html)** - Variables, conditionals, and imports
+- **[Editor Adapters](https://flamingquaks.github.io/promptrek/user-guide/adapters.html)** - Detailed guide to all supported AI editors
+- **[Implementation Roadmap](https://flamingquaks.github.io/promptrek/developer/roadmap.html)** - Development progress and plans
 
 ### Key Features
 

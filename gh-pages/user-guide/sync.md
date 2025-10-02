@@ -1,3 +1,8 @@
+---
+layout: guide
+title: Sync Feature
+---
+
 # PrompTrek Sync Feature
 
 The sync feature allows you to read AI editor-specific configuration files and create or update PrompTrek configuration from them. This enables bidirectional synchronization between PrompTrek and AI editors.

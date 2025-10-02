@@ -1,3 +1,8 @@
+---
+layout: guide
+title: Advanced Features
+---
+
 # Advanced Template Features
 
 PrompTrek supports powerful advanced template features that allow you to create flexible, maintainable prompt configurations.
@@ -10,6 +15,7 @@ Variables allow you to create reusable templates that can be customized for diff
 
 Use triple braces to define variable placeholders in your UPF files:
 
+{% raw %}
 ```yaml
 metadata:
   title: "{{{ PROJECT_NAME }}} Assistant"
@@ -24,6 +30,7 @@ variables:
   PROJECT_NAME: "MyProject" 
   AUTHOR_EMAIL: "team@example.com"
 ```
+{% endraw %}
 
 ### Environment Variables
 
@@ -72,6 +79,7 @@ ENVIRONMENT: "development"
 
 **Example usage:**
 
+{% raw %}
 ```yaml
 # project.promptrek.yaml (committed to git)
 metadata:
@@ -82,6 +90,7 @@ variables:
   PROJECT_NAME: "MyProject"
   AUTHOR_NAME: "Team"  # Default fallback
 ```
+{% endraw %}
 
 ```yaml
 # variables.promptrek.yaml (local, in .gitignore)
@@ -266,6 +275,7 @@ imports:
 
 All advanced features work together seamlessly:
 
+{% raw %}
 ```yaml
 # base.promptrek.yaml
 instructions:
@@ -299,6 +309,7 @@ variables:
   PROJECT_NAME: "AdvancedProject"
   MAIN_APPROACH: "comprehensive"
 ```
+{% endraw %}
 
 Generate with overrides:
 

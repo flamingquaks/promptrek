@@ -1,3 +1,8 @@
+---
+layout: default
+title: UV Workflows
+---
+
 # UV/UVX Workflow Guide
 
 This document explains how to use PrompTrek with `uv` and `uvx` for streamlined development workflows.

@@ -47,8 +47,12 @@ context:
 
 instructions:
   general:
-    - "When updating documentation, make sure to update the documents in the docs/ directory. Also review the gh-pages/ directory for updating the GitHub Pages site."
     - When running python or python libraries, use `uv run <command>` to ensure the correct Python version and environment.
+    - The full documentation is based in the gh-pages directory.
+    - The website is built using jekyll and hosted on GitHub Pages.
+    - To preview changes locally, install jekyll and run `bundle exec jekyll serve` from the gh-pages directory.
+
+  
   
   code_style:
     - "Format code with Black (line length 88)"

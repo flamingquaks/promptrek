@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="{{ page.lang | default: site.lang | default: "en" }}">
+
+  {%- include head.html -%}
+
+  <body class="guide-page content-page">
+
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    {%- include header.html -%}
+
+    <div class="guide-layout">
+      <aside class="guide-sidebar" role="navigation" aria-label="User Guide Navigation">
+        <nav class="guide-nav" aria-labelledby="guide-nav-heading">
+          <h2 class="guide-nav-title" id="guide-nav-heading">User Guide</h2>
+          <ul class="guide-nav-list" role="list">
+            <li><a href="{{ '/user-guide.html' | relative_url }}" class="guide-nav-link {% if page.url == '/user-guide.html' %}active{% endif %}" {% if page.url == '/user-guide.html' %}aria-current="page"{% endif %}>Overview</a></li>
+            <li><a href="{{ '/user-guide/upf-specification.html' | relative_url }}" class="guide-nav-link {% if page.url contains 'upf-specification' %}active{% endif %}" {% if page.url contains 'upf-specification' %}aria-current="page"{% endif %}>UPF Specification</a></li>
+            <li><a href="{{ '/user-guide/advanced-features.html' | relative_url }}" class="guide-nav-link {% if page.url contains 'advanced-features' %}active{% endif %}" {% if page.url contains 'advanced-features' %}aria-current="page"{% endif %}>Advanced Features</a></li>
+            <li><a href="{{ '/user-guide/adapters.html' | relative_url }}" class="guide-nav-link {% if page.url contains 'adapters' %}active{% endif %}" {% if page.url contains 'adapters' %}aria-current="page"{% endif %}>Editor Adapters</a></li>
+            <li><a href="{{ '/user-guide/adapter-capabilities.html' | relative_url }}" class="guide-nav-link {% if page.url contains 'adapter-capabilities' %}active{% endif %}" {% if page.url contains 'adapter-capabilities' %}aria-current="page"{% endif %}>Adapter Capabilities</a></li>
+            <li><a href="{{ '/user-guide/sync.html' | relative_url }}" class="guide-nav-link {% if page.url contains 'sync' %}active{% endif %}" {% if page.url contains 'sync' %}aria-current="page"{% endif %}>Sync Feature</a></li>
+            <li><a href="{{ '/user-guide/pre-commit.html' | relative_url }}" class="guide-nav-link {% if page.url contains 'pre-commit' %}active{% endif %}" {% if page.url contains 'pre-commit' %}aria-current="page"{% endif %}>Pre-commit Integration</a></li>
+          </ul>
+        </nav>
+      </aside>
+
+      <main class="guide-content" role="main" aria-labelledby="page-title" id="main-content">
+        <article class="guide-article">
+          {{ content }}
+        </article>
+      </main>
+    </div>
+
+    {%- include footer.html -%}
+
+    <a href="#main-content" class="back-to-top" aria-label="Back to top">↑</a>
+
+    <script>
+      // Back to top button functionality
+      (function() {
+        var backToTop = document.querySelector('.back-to-top');
+        var showThreshold = 300;
+
+        function toggleBackToTop() {
+          if (window.pageYOffset > showThreshold) {
+            backToTop.classList.add('show');
+          } else {
+            backToTop.classList.remove('show');
+          }
+        }
+
+        window.addEventListener('scroll', toggleBackToTop);
+        toggleBackToTop();
+
+        backToTop.addEventListener('click', function(e) {
+          e.preventDefault();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+      })();
+    </script>
+
+  </body>
+
+</html>
