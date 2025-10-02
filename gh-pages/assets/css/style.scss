@@ -7,7 +7,7 @@
 html, body {
   margin: 0 !important;
   padding: 0 !important;
-  overflow-x: hidden !important;
+  overflow-x: clip !important;
   max-width: 100vw !important;
   box-sizing: border-box !important;
 }
@@ -21,7 +21,7 @@ html, body {
 .content-page {
   margin: 0 !important;
   padding: 0 !important;
-  overflow-x: hidden !important;
+  overflow-x: clip !important;
   max-width: 100vw !important;
 }
 
@@ -49,8 +49,99 @@ html, body {
   :root {
     --primary: #0066cc;
     --text-primary: #000000;
+    --text-secondary: #1a1a1a;
     --bg-primary: #ffffff;
+    --bg-secondary: #ffffff;
     --border-light: #666666;
+    --border-medium: #333333;
+  }
+
+  .guide-nav-link {
+    border: 2px solid var(--border-medium);
+  }
+
+  .guide-nav-link:hover,
+  .guide-nav-link:focus-visible {
+    border: 2px solid var(--primary);
+    background: #e6f0ff;
+  }
+
+  .guide-nav-link.active {
+    background: #0066cc;
+    color: #ffffff;
+    border: 2px solid #0066cc;
+  }
+
+  .guide-nav-title {
+    color: #000000;
+    background: none;
+    -webkit-text-fill-color: unset;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --primary: #818cf8;
+    --primary-light: #a78bfa;
+    --primary-dark: #6366f1;
+    --text-primary: #f1f5f9;
+    --text-secondary: #cbd5e1;
+    --text-muted: #94a3b8;
+    --bg-primary: #0f172a;
+    --bg-secondary: #1e293b;
+    --bg-tertiary: #334155;
+    --border-light: #334155;
+    --border-medium: #475569;
+    --surface: #1e293b;
+    --surface-raised: #334155;
+  }
+
+  .guide-sidebar {
+    background: linear-gradient(to bottom, #1e293b 0%, #0f172a 100%);
+    border-right-color: var(--border-light);
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.3);
+  }
+
+  .guide-sidebar::-webkit-scrollbar-thumb {
+    background: var(--border-medium);
+  }
+
+  .guide-sidebar::-webkit-scrollbar-thumb:hover {
+    background: var(--primary);
+  }
+
+  .guide-nav-title {
+    color: var(--text-primary);
+  }
+
+  .guide-nav-link {
+    color: var(--text-secondary);
+  }
+
+  .guide-nav-link:hover {
+    background: rgba(129, 140, 248, 0.15);
+    color: var(--primary-light);
+  }
+
+  .guide-nav-link:focus-visible {
+    background: rgba(129, 140, 248, 0.2);
+    color: var(--primary-light);
+  }
+
+  .guide-nav-link.active {
+    background: linear-gradient(90deg, rgba(129, 140, 248, 0.25) 0%, rgba(129, 140, 248, 0.1) 100%);
+    color: var(--primary-light);
+    border-left-color: var(--primary-light);
+  }
+
+  .back-to-top {
+    background: var(--primary);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  }
+
+  .back-to-top:hover {
+    background: var(--primary-light);
   }
 }
 
@@ -2849,28 +2940,46 @@ a.btn.btn-secondary:hover {
 
 /* User Guide Layout with Sidebar */
 .guide-page {
-  padding-top: 80px; /* Compensate for fixed header */
+  padding-top: 0; /* Remove padding as layout handles spacing */
 }
 
 .guide-layout {
   display: flex;
   max-width: 1400px;
   margin: 0 auto;
-  min-height: calc(100vh - 80px);
-  gap: 2rem;
+  gap: 0;
+  padding-top: 80px; /* Add padding to entire layout */
 }
 
 .guide-sidebar {
-  width: 280px;
+  width: 300px;
   flex-shrink: 0;
-  background: var(--surface);
+  background: linear-gradient(to bottom, #f8fafc 0%, #ffffff 100%);
   border-right: 1px solid var(--border-light);
-  padding: 2rem 0;
+  padding: 2.5rem 0;
   position: sticky;
   top: 80px;
-  height: fit-content;
+  align-self: flex-start;
   max-height: calc(100vh - 100px);
   overflow-y: auto;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.03);
+}
+
+.guide-sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.guide-sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.guide-sidebar::-webkit-scrollbar-thumb {
+  background: var(--border-medium);
+  border-radius: 3px;
+}
+
+.guide-sidebar::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
 }
 
 .guide-nav {
@@ -2878,48 +2987,97 @@ a.btn.btn-secondary:hover {
 }
 
 .guide-nav-title {
-  font-size: 1.25rem;
+  font-size: 1.125rem;
   font-weight: 700;
   color: var(--text-primary);
-  margin-bottom: 1.5rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 2px solid var(--border-light);
+  margin: 0 0 1.25rem 0;
+  padding-bottom: 0.875rem;
+  border-bottom: 3px solid var(--primary);
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  line-height: 1.3;
+}
+
+@supports not (background-clip: text) {
+  .guide-nav-title {
+    color: var(--primary);
+    background: none;
+  }
 }
 
 .guide-nav-list {
   list-style: none;
   padding: 0;
   margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
 }
 
 .guide-nav-list li {
-  margin-bottom: 0.5rem;
+  margin-bottom: 0;
 }
 
 .guide-nav-link {
-  display: block;
-  padding: 0.75rem 1rem;
-  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  padding: 0.875rem 1.125rem;
+  color: var(--text-secondary);
   text-decoration: none;
   border-radius: var(--radius-md);
-  transition: all 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   font-weight: 500;
-  font-size: 0.95rem;
-  border: 2px solid transparent;
+  font-size: 0.9375rem;
+  border-left: 3px solid transparent;
+  position: relative;
+  background: transparent;
+  line-height: 1.4;
+}
+
+.guide-nav-link::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 3px;
+  background: var(--primary);
+  transform: scaleY(0);
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 0 2px 2px 0;
 }
 
 .guide-nav-link:hover {
-  background: var(--bg-secondary);
+  background: rgba(99, 102, 241, 0.06);
   color: var(--primary);
   transform: translateX(4px);
-  border-color: var(--border-medium);
+  padding-left: 1.25rem;
+}
+
+.guide-nav-link:hover::before {
+  transform: scaleY(1);
+}
+
+.guide-nav-link:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  background: rgba(99, 102, 241, 0.08);
+  color: var(--primary);
 }
 
 .guide-nav-link.active {
-  background: var(--primary);
-  color: white;
+  background: linear-gradient(90deg, rgba(99, 102, 241, 0.12) 0%, rgba(99, 102, 241, 0.04) 100%);
+  color: var(--primary);
   font-weight: 600;
-  border-color: var(--primary-dark);
+  border-left-color: var(--primary);
+  padding-left: 1.25rem;
+}
+
+.guide-nav-link.active::before {
+  transform: scaleY(1);
 }
 
 .guide-content {
@@ -3042,32 +3200,42 @@ a.btn.btn-secondary:hover {
 
 /* Back to top button */
 .back-to-top {
-  position: fixed;
-  bottom: 2rem;
-  right: 2rem;
-  width: 50px;
-  height: 50px;
+  position: fixed !important;
+  bottom: 2rem !important;
+  right: 2rem !important;
+  width: 56px;
+  height: 56px;
+  min-width: 44px;
+  min-height: 44px;
   background: var(--primary);
-  color: white;
+  color: white !important;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 1.5rem;
+  line-height: 1;
   cursor: pointer;
   opacity: 0;
   visibility: hidden;
   transition: all 0.3s ease;
-  z-index: 999;
+  z-index: 9999 !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  border: none;
-  font-size: 1.5rem;
+  border: 2px solid transparent;
   text-decoration: none;
+  -webkit-text-fill-color: white;
 }
 
 .back-to-top:hover {
   background: var(--primary-dark);
   transform: translateY(-3px);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.back-to-top:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 3px;
+  border: 2px solid white;
 }
 
 .back-to-top.show {
@@ -3079,8 +3247,8 @@ a.btn.btn-secondary:hover {
   .back-to-top {
     bottom: 1rem;
     right: 1rem;
-    width: 45px;
-    height: 45px;
+    width: 52px;
+    height: 52px;
   }
 }
 
@@ -3088,25 +3256,35 @@ a.btn.btn-secondary:hover {
 @media (max-width: 1024px) {
   .guide-layout {
     flex-direction: column;
+    gap: 0;
   }
 
   .guide-sidebar {
     width: 100%;
-    position: static;
-    max-height: none;
+    position: static !important;
+    max-height: none !important;
     border-right: none;
-    border-bottom: 1px solid var(--border-light);
+    border-bottom: 2px solid var(--border-light);
     padding: 1.5rem 0;
+    background: var(--bg-secondary);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    overflow-y: visible !important;
   }
 
   .guide-nav {
-    padding: 0 1rem;
+    padding: 0 1.25rem;
+  }
+
+  .guide-nav-title {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
   }
 
   .guide-nav-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 0.625rem;
   }
 
   .guide-nav-list li {
@@ -3114,15 +3292,88 @@ a.btn.btn-secondary:hover {
   }
 
   .guide-nav-link {
-    padding: 0.5rem 1rem;
-    font-size: 0.9rem;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    text-align: center;
+    justify-content: center;
+    border-left: none;
+    border-bottom: 3px solid transparent;
+    min-height: 44px;
+  }
+
+  .guide-nav-link::before {
+    display: none;
+  }
+
+  .guide-nav-link:hover {
+    transform: translateY(-2px);
+    padding-left: 1rem;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .guide-nav-link.active {
+    border-left: none;
+    border-bottom-color: var(--primary);
+    padding-left: 1rem;
+    box-shadow: var(--shadow-md);
+  }
+
+  .guide-content {
+    padding: 1.5rem 1.25rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .guide-sidebar {
+    padding: 1.25rem 0;
+  }
+
+  .guide-nav {
+    padding: 0 1rem;
+  }
+
+  .guide-nav-title {
+    font-size: 0.9375rem;
+    margin-bottom: 0.875rem;
+    padding-bottom: 0.625rem;
+  }
+
+  .guide-nav-list {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .guide-nav-link {
+    padding: 0.875rem 1rem;
+    font-size: 0.875rem;
+    text-align: left;
+    justify-content: flex-start;
+    border-radius: var(--radius-sm);
   }
 
   .guide-nav-link:hover {
     transform: none;
   }
 
+  .guide-nav-link.active {
+    border-left: 3px solid var(--primary);
+    border-bottom: none;
+    padding-left: 1.125rem;
+  }
+
   .guide-content {
-    padding: 1rem;
+    padding: 1.25rem 1rem;
+  }
+
+  .guide-article h1 {
+    font-size: 1.875rem;
+  }
+
+  .guide-article h2 {
+    font-size: 1.5rem;
+  }
+
+  .guide-article h3 {
+    font-size: 1.25rem;
   }
 }
