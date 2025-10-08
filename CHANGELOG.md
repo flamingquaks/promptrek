@@ -1,3 +1,18 @@
+# [](https://github.com/flamingquaks/promptrek/compare/v0.0.6...v) (2025-10-08)
+
+
+### Bug Fixes
+
+* sync support across editos ([#61](https://github.com/flamingquaks/promptrek/issues/61)) ([46a202e](https://github.com/flamingquaks/promptrek/commit/46a202e1ad47d2a7853751a1b35674cda4f6b0e2))
+* update file name from .cline_rules.md to .clinerules/context.md ([f93004d](https://github.com/flamingquaks/promptrek/commit/f93004d8340c80618175ec4f920cbb8524c55e82))
+
+
+### Features
+
+* add support for local variables file and prevent accidental commits ([#59](https://github.com/flamingquaks/promptrek/issues/59)) ([32d4001](https://github.com/flamingquaks/promptrek/commit/32d400195d96f6526bebe13e006bd4ad557edea3))
+
+
+
 # [](https://github.com/flamingquaks/promptrek/compare/v0.0.5...v) (2025-10-01)
 
 
