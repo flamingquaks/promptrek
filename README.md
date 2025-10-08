@@ -74,16 +74,16 @@ For technical architecture and development planning, see the developer documenta
 ## 🎨 Supported Editors
 
 ### ✅ All Implemented
-- **GitHub Copilot** - `.github/copilot-instructions.md`, `.github/instructions/*.instructions.md`, `.github/prompts/*.prompt.md` - Repository-wide and path-specific instructions
-- **Cursor** - `.cursor/rules/index.mdc`, `.cursor/rules/*.mdc`, `AGENTS.md` - Modern 2025 rules system with Always/Auto Attached rule types and project overview
-- **Continue** - `config.yaml`, `.continue/rules/*.md` - Modern YAML configuration with advanced rules directory
-- **Kiro** - `.kiro/steering/*.md`, `.kiro/specs/*.md` - Comprehensive steering and specs system with YAML frontmatter
-- **Cline** - `.clinerules` - Simple rules-based configuration
-- **Claude Code** - `.claude/context.md` - Context-based prompts with detailed project information
-- **Codeium** - `.codeium/context.json`, `.codeiumrc` - Context-based prompts with team patterns
-- **Tabnine** - `.tabnine/config.json`, `.tabnine/team.yaml` - Team-specific configurations
-- **Amazon Q** - `.amazonq/context.md`, `.amazonq/comments.template` - Comment-based prompts
-- **JetBrains AI** - `.idea/ai-assistant.xml`, `.jetbrains/config.json` - IDE-integrated prompts
+- **GitHub Copilot** - `.github/copilot-instructions.md`, `.github/instructions/*.instructions.md`, `.github/prompts/*.prompt.md` - Repository-wide and path-specific instructions with bidirectional sync
+- **Cursor** - `.cursor/rules/index.mdc`, `.cursor/rules/*.mdc`, `AGENTS.md`, `.cursorignore`, `.cursorindexingignore` - Modern 2025 rules system with Always/Auto Attached rule types and project overview
+- **Continue** - `.continue/rules/*.md` - Organized markdown rules directory with bidirectional sync support
+- **Kiro** - `.kiro/steering/*.md` - Comprehensive steering system with YAML frontmatter
+- **Cline** - `.clinerules/*.md` - Markdown-based rules configuration
+- **Claude Code** - `.claude/context.md` - Rich context format with detailed project information
+- **Windsurf** - `.windsurf/rules/*.md` - Organized markdown rule files for AI-powered coding assistance
+- **Tabnine** - `.tabnine_commands` - Basic context guidance (limited support - full config via IDE)
+- **Amazon Q** - `.amazonq/rules/*.md`, `.amazonq/cli-agents/*.json` - Rules directory and CLI agents with sync support
+- **JetBrains AI** - `.assistant/rules/*.md` - Markdown rules for IDE-integrated AI assistance
 
 ## 🗂️ Example Configurations
 
@@ -113,21 +113,22 @@ See the [`examples/`](https://github.com/flamingquaks/promptrek/tree/main/exampl
 # Install uv if you haven't already
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Install from source with uv
+# Clone and install from source
 git clone https://github.com/flamingquaks/promptrek.git
 cd promptrek
-uv sync --group dev
+uv sync
 ```
 
 #### Option 2: Traditional pip
 
 ```bash
-# Install from source (recommended for now)
+# Clone and install from source
 git clone https://github.com/flamingquaks/promptrek.git
 cd promptrek
-uv sync
-# or with pip: pip install -e .
+pip install -e .
 ```
+
+**Note:** PrompTrek is not yet available on PyPI. Install from source using the methods above.
 
 ### Quick Start
 
@@ -191,11 +192,16 @@ The pre-commit hooks will:
 
 PrompTrek generates editor-specific files that should **not** be committed to version control:
 
-- `.github/copilot-instructions.md` - GitHub Copilot prompts
-- `.cursor/` - Cursor editor configuration (modern .mdc rules)
-- `config.yaml`, `.continue/` - Continue editor configuration
-- `.claude/` - Claude/Anthropic configuration
-- And more...
+- `.github/copilot-instructions.md`, `.github/instructions/`, `.github/prompts/` - GitHub Copilot
+- `.cursor/`, `AGENTS.md`, `.cursorignore`, `.cursorindexingignore` - Cursor
+- `.continue/` - Continue
+- `.claude/` - Claude Code
+- `.windsurf/` - Windsurf
+- `.clinerules/` - Cline
+- `.kiro/` - Kiro
+- `.amazonq/` - Amazon Q
+- `.assistant/` - JetBrains AI
+- `.tabnine_commands` - Tabnine
 
 These files are automatically ignored via `.gitignore` and the pre-commit hooks will prevent accidental commits.
 
@@ -231,7 +237,7 @@ See the [Implementation Roadmap](https://flamingquaks.github.io/promptrek/develo
 PrompTrek maintains high quality standards with comprehensive testing:
 
 ### Automated Testing
-- **Continuous Integration**: Tests run on every push and PR across multiple Python versions (3.8-3.12)
+- **Continuous Integration**: Tests run on every push and PR across multiple Python versions (3.9-3.12)
 - **Cross-Platform Testing**: Validates functionality on Linux, macOS, and Windows
 - **Security Scanning**: Automated security vulnerability detection
 - **Code Quality**: Enforced formatting (black), import sorting (isort), and linting (flake8)
@@ -356,13 +362,16 @@ imports:
 #### 🎨 Multiple Editor Support
 Generate optimized configurations for all major AI coding assistants:
 
-- **GitHub Copilot** → `.github/copilot-instructions.md` + path-specific instructions
-- **Cursor** → `.cursor/rules/index.mdc` + `.cursor/rules/*.mdc` + `AGENTS.md` with modern rule types and project overview
-- **Continue** → `config.yaml` + `.continue/rules/*.md` with advanced rule system
-- **Kiro** → `.kiro/steering/*.md` + `.kiro/specs/*.md` with comprehensive guidance
-- **Cline** → `.clinerules` with project-specific rules
-- **Claude Code** → `.claude/context.md`
-- **Codeium** → `.codeium/context.json` + `.codeiumrc`
+- **GitHub Copilot** → `.github/copilot-instructions.md` + path-specific instructions + bidirectional sync
+- **Cursor** → `.cursor/rules/index.mdc` + `.cursor/rules/*.mdc` + `AGENTS.md` with modern rule types
+- **Continue** → `.continue/rules/*.md` with organized rules + bidirectional sync
+- **Kiro** → `.kiro/steering/*.md` with YAML frontmatter
+- **Cline** → `.clinerules/*.md` with project-specific rules
+- **Claude Code** → `.claude/context.md` with rich context
+- **Windsurf** → `.windsurf/rules/*.md` with organized guidelines
+- **Amazon Q** → `.amazonq/rules/*.md` + CLI agents + sync support
+- **JetBrains AI** → `.assistant/rules/*.md` for IDE integration
+- **Tabnine** → `.tabnine_commands` (limited support)
 
 ## 📄 License
 

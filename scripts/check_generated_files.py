@@ -11,7 +11,6 @@ import os
 from pathlib import Path
 from typing import List, Set
 
-
 # Patterns for generated files that should not be committed
 GENERATED_FILE_PATTERNS = {
     # GitHub Copilot files
@@ -32,12 +31,19 @@ GENERATED_FILE_PATTERNS = {
     ".claude/*.md",
     "CLAUDE.md",
     # Cline files
-    ".cline-rules/*.md",
-    # Codeium files
-    ".codeium/*.json",
-    ".codeiumrc",
-    # General AI prompts directory
-    ".ai-prompts/",
+    ".clinerules/*.md",
+    # Windsurf files
+    ".windsurf/rules/*.md",
+    # Kiro files
+    ".kiro/steering/*.md",
+    ".kiro/specs/*.md",
+    # Tabnine files
+    ".tabnine_commands",
+    # Amazon Q files
+    ".amazonq/rules/*.md",
+    ".amazonq/cli-agents/*.json",
+    # JetBrains AI files
+    ".assistant/rules/*.md",
 }
 
 

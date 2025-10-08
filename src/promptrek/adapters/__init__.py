@@ -102,7 +102,7 @@ registry.register_class(
     "tabnine", TabnineAdapter, [AdapterCapability.GLOBAL_CONFIG_ONLY]
 )
 
-# Windsurf (replaces Codeium) - generates project-level rules files
+# Windsurf - generates project-level rules files
 registry.register_class(
     "windsurf",
     WindsurfAdapter,

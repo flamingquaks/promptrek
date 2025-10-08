@@ -109,7 +109,7 @@ A modern web application built with React and TypeScript.
 **Generated Files**: `.windsurf/rules/*.md`
 **Features**: ✅ Project Files, ✅ Variables, ✅ Conditionals
 
-Windsurf adapter (formerly Codeium) generates organized markdown rule files for AI-powered coding assistance.
+Windsurf adapter generates organized markdown rule files for AI-powered coding assistance.
 
 **Rule Files (.windsurf/rules/)**:
 - `general.md` - General coding guidelines

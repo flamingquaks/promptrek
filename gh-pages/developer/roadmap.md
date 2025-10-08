@@ -23,14 +23,14 @@ title: Implementation Roadmap
 **Editor Adapters** (All Implemented):
 - GitHub Copilot (path-specific instructions, agent files, YAML frontmatter)
 - Cursor (modern `.cursor/rules/*.mdc` system with Always/Auto Attached rule types)
-- Continue (modern `config.yaml` + `.continue/rules/` directory)
-- Kiro (comprehensive steering and specs system)
-- Cline (`.clinerules` configuration)
-- Claude Code (`.claude/context.md`)
-- Codeium (`.codeium/context.json` + `.codeiumrc`)
-- Tabnine (`.tabnine/config.json` + `.tabnine/team.yaml`)
-- Amazon Q (`.amazonq/context.md` + `.amazonq/comments.template`)
-- JetBrains AI (`.idea/ai-assistant.xml` + `.jetbrains/config.json`)
+- Continue (`.continue/rules/*.md` directory with bidirectional sync)
+- Kiro (comprehensive steering system with YAML frontmatter)
+- Cline (`.clinerules/*.md` configuration)
+- Claude Code (`.claude/context.md` rich context format)
+- Windsurf (`.windsurf/rules/*.md` organized markdown rules)
+- Tabnine (`.tabnine_commands` basic context - limited support)
+- Amazon Q (`.amazonq/rules/*.md` + `.amazonq/cli-agents/*.json` with sync support)
+- JetBrains AI (`.assistant/rules/*.md` for IDE integration)
 
 ---
 
@@ -149,11 +149,11 @@ title: Implementation Roadmap
 
 #### 5.1 Additional Editor Support - ✅ COMPLETED
 - [x] Add Claude Code support
-- [x] Add Kiro support (comprehensive steering + specs system)
-- [x] Add Cline support (modern .clinerules)
-- [x] Add Codeium support
-- [x] Add Tabnine support
-- [x] Add Amazon Q support
+- [x] Add Kiro support (comprehensive steering system)
+- [x] Add Cline support (markdown-based rules)
+- [x] Add Windsurf support (organized markdown rules)
+- [x] Add Tabnine support (limited - basic context)
+- [x] Add Amazon Q support (rules + CLI agents with sync)
 - [x] Add JetBrains AI Assistant support
 
 #### 5.2 User Experience Enhancements - ⏳ PARTIAL

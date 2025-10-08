@@ -35,8 +35,6 @@
       ^(\.claude/.*|CLAUDE\.md)$|
       # Cline files
       ^\.cline-rules/.*$|
-      # Codeium files
-      ^(\.codeium/.*|\.codeiumrc)$|
       # Kiro files
       ^\.kiro/.*$|
       # Tabnine files

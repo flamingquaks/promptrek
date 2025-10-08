@@ -223,7 +223,7 @@ metadata:
 targets:
   - claude
   - continue
-  - codeium
+  - windsurf
   - copilot
 
 instructions:
@@ -247,7 +247,7 @@ conditions:
           - "Continue-specific: Generate comprehensive completions"
           - "Continue-specific: Suggest appropriate types"
 
-  - if: 'EDITOR in ["codeium", "copilot"]'
+  - if: 'EDITOR in ["windsurf", "copilot"]'
     then:
       instructions:
         general:
