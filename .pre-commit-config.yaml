@@ -32,8 +32,6 @@ repos:
             ^(\.claude/.*\.md|CLAUDE\.md)$|
             # Cline files
             ^\.cline-rules/.*\.md$|
-            # Codeium files
-            ^(\.codeium/.*\.json|\.codeiumrc)$|
             # Other AI editor files
             ^\.ai-prompts/
           )

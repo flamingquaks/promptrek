@@ -110,9 +110,16 @@ src/promptrek/
 │   ├── registry.py              # Adapter registration system
 │   ├── copilot.py               # GitHub Copilot adapter
 │   ├── cursor.py                # Cursor editor adapter
-│   ├── continue.py              # Continue extension adapter
-│   ├── codeium.py               # Codeium adapter
-│   └── utils.py                 # Adapter utilities
+│   ├── continue_adapter.py      # Continue extension adapter
+│   ├── windsurf.py              # Windsurf adapter
+│   ├── claude.py                # Claude Code adapter
+│   ├── cline.py                 # Cline adapter
+│   ├── kiro.py                  # Kiro adapter
+│   ├── amazon_q.py              # Amazon Q adapter
+│   ├── jetbrains.py             # JetBrains AI adapter
+│   ├── tabnine.py               # Tabnine adapter
+│   ├── sync_mixin.py            # Sync functionality
+│   └── base.py                  # Base adapter class
 ├── templates/                   # Built-in templates
 │   ├── __init__.py
 │   ├── copilot/                 # Copilot templates

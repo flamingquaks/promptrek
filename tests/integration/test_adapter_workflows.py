@@ -539,7 +539,7 @@ class TestAdapterWorkflows:
                     "Test error conditions",
                 ],
             },
-            "variables": {"SERVICE_NAME": "codeium-api", "API_VERSION": "v1"},
+            "variables": {"SERVICE_NAME": "windsurf-api", "API_VERSION": "v1"},
         }
         upf_file = temp_dir / "windsurf_test.promptrek.yaml"
         with open(upf_file, "w") as f:

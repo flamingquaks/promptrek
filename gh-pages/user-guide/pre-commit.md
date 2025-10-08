@@ -77,13 +77,12 @@ repos:
             ^(\.cursorrules|\.cursor/.*|\.cursorignore|\.cursorindexingignore|AGENTS\.md)$|
             ^(config\.yaml|\.continue/.*)$|
             ^(\.claude/.*|CLAUDE\.md)$|
-            ^\.cline-rules/.*$|
-            ^(\.codeium/.*|\.codeiumrc)$|
+            ^\.clinerules/.*$|
+            ^\.windsurf/.*$|
             ^\.kiro/.*$|
-            ^\.tabnine/.*$|
+            ^\.tabnine_commands$|
             ^\.amazonq/.*$|
-            ^(\.idea/ai-assistant\.xml|\.jetbrains/.*)$|
-            ^\.ai-prompts/.*
+            ^\.assistant/.*
           )
         stages: [commit]
         always_run: false
@@ -128,17 +127,16 @@ Validate PrompTrek files.....................................Failed
 **When it runs**: On every commit, checks if any staged files match generated file patterns.
 
 **Protected files**:
-- `.github/copilot-instructions.md` - GitHub Copilot
-- `.cursor/` - Cursor editor
-- `.continue/` - Continue editor
-- `.claude/`, `CLAUDE.md` - Claude Code
-- `.cline-rules/` - Cline
-- `.codeium/` - Codeium
+- `.github/copilot-instructions.md`, `.github/instructions/`, `.github/prompts/` - GitHub Copilot
+- `.cursor/`, `AGENTS.md`, `.cursorignore`, `.cursorindexingignore` - Cursor
+- `.continue/` - Continue
+- `.claude/` - Claude Code
+- `.clinerules/` - Cline
+- `.windsurf/` - Windsurf
 - `.kiro/` - Kiro
-- `.tabnine/` - Tabnine
+- `.tabnine_commands` - Tabnine
 - `.amazonq/` - Amazon Q
-- `.idea/ai-assistant.xml` - JetBrains AI
-- `AGENTS.md` - Agent instructions
+- `.assistant/` - JetBrains AI
 
 **Example failure**:
 ```bash
@@ -263,33 +261,31 @@ Add generated files to your `.gitignore`:
 config.yaml
 .continue/
 
-# Claude
+# Claude Code
 .claude/
-CLAUDE.md
 
 # Cline
-.cline-rules/
+.clinerules/
 
-# Codeium
-.codeium/
-.codeiumrc
+# Windsurf
+.windsurf/
 
 # Kiro
 .kiro/
 
 # Tabnine
-.tabnine/
+.tabnine_commands
 
 # Amazon Q
 .amazonq/
 
 # JetBrains AI
-.idea/ai-assistant.xml
-.jetbrains/
+.assistant/
 
-# Other AI files
-.ai-prompts/
+# Cursor (additional files)
 AGENTS.md
+.cursorignore
+.cursorindexingignore
 ```
 
 ## Advanced Usage

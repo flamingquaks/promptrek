@@ -42,13 +42,15 @@ Validate PrompTrek files.................................................Passed
 
 Protected file patterns:
 - `.github/copilot-instructions.md` - GitHub Copilot prompts
-- `.cursor/` - Cursor editor configuration (modern .mdc rules)
-- `config.yaml`, `.continue/` - Continue editor configuration
-- `.claude/`, `CLAUDE.md` - Claude/Anthropic configuration
-- `.cline-rules/` - Cline configuration
-- `.codeium/`, `.codeiumrc` - Codeium configuration
-- `.ai-prompts/` - General AI prompts directory
-- `AGENTS.md` - Agent configuration
+- `.cursor/`, `AGENTS.md`, `.cursorignore`, `.cursorindexingignore` - Cursor editor
+- `.continue/` - Continue editor configuration
+- `.claude/` - Claude Code configuration
+- `.clinerules/` - Cline configuration
+- `.windsurf/` - Windsurf configuration
+- `.kiro/` - Kiro configuration
+- `.tabnine_commands` - Tabnine configuration
+- `.amazonq/` - Amazon Q configuration
+- `.assistant/` - JetBrains AI configuration
 
 Example failure:
 ```
@@ -105,20 +107,31 @@ PrompTrek automatically ignores generated files via `.gitignore`:
 config.yaml
 .continue/
 
-# Claude generated files
+# Claude Code generated files
 .claude/
-CLAUDE.md
 
 # Cline generated files
-.cline-rules/
+.clinerules/
 
-# Codeium generated files
-.codeium/
-.codeiumrc
+# Windsurf generated files
+.windsurf/
 
-# Other AI editor files
-.ai-prompts/
+# Kiro generated files
+.kiro/
+
+# Tabnine generated files
+.tabnine_commands
+
+# Amazon Q generated files
+.amazonq/
+
+# JetBrains AI generated files
+.assistant/
+
+# Cursor additional files
 AGENTS.md
+.cursorignore
+.cursorindexingignore
 ```
 
 ## Workflow

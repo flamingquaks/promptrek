@@ -70,25 +70,19 @@ def check_generated_command(ctx: click.Context, files: List[str]) -> None:
         ".claude/*.md",
         "CLAUDE.md",
         # Cline files
-        ".cline-rules/*.md",
-        # Codeium files
-        ".codeium/*.json",
-        ".codeiumrc",
+        ".clinerules/*.md",
+        # Windsurf files
+        ".windsurf/rules/*.md",
         # Kiro files
-        ".kiro/*.md",
         ".kiro/steering/*.md",
         ".kiro/specs/*.md",
         # Tabnine files
-        ".tabnine/config.json",
-        ".tabnine/team.yaml",
+        ".tabnine_commands",
         # Amazon Q files
-        ".amazonq/context.md",
-        ".amazonq/comments.template",
-        # JetBrains files
-        ".idea/ai-assistant.xml",
-        ".jetbrains/config.json",
-        # General AI prompts directory
-        ".ai-prompts/",
+        ".amazonq/rules/*.md",
+        ".amazonq/cli-agents/*.json",
+        # JetBrains AI files
+        ".assistant/rules/*.md",
     }
 
     def matches_pattern(file_path: str, pattern: str) -> bool:
@@ -252,13 +246,12 @@ def install_hooks_command(
                 r"^(\.cursorrules|\.cursor/.*|\.cursorignore|\.cursorindexingignore|AGENTS\.md)$|"
                 r"^(config\.yaml|\.continue/.*)$|"
                 r"^(\.claude/.*|CLAUDE\.md)$|"
-                r"^\.cline-rules/.*$|"
-                r"^(\.codeium/.*|\.codeiumrc)$|"
+                r"^\.clinerules/.*$|"
+                r"^\.windsurf/.*$|"
                 r"^\.kiro/.*$|"
-                r"^\.tabnine/.*$|"
+                r"^\.tabnine_commands$|"
                 r"^\.amazonq/.*$|"
-                r"^(\.idea/ai-assistant\.xml|\.jetbrains/.*)$|"
-                r"^\.ai-prompts/.*"
+                r"^\.assistant/.*"
                 r")",
                 "stages": ["commit"],
                 "always_run": False,

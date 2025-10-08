@@ -10,16 +10,7 @@ metadata:
   created: "2024-01-01"
   updated: "2024-01-15"
   tags: ["react", "typescript", "frontend", "web"]
-
-targets:
-  - copilot
-  - cursor
-  - continue
-  - claude
-  - cline
-  - codeium
-  - cline
-  - codeium
+  
 
 context:
   project_type: "web_application"

@@ -194,20 +194,19 @@ PrompTrek generates sophisticated configuration files for each editor:
 ### Claude Code
 - `.claude/context.md` - Rich context format with project information
 
-### Codeium
-- `.codeium/context.json` - JSON context with team patterns
-- `.codeiumrc` - Configuration file
+### Windsurf
+- `.windsurf/rules/*.md` - Organized markdown rule files by category and technology
 
 ### Tabnine
-- Global configuration only (configured through admin panel)
+- `.tabnine_commands` - Basic context guidance (limited support - prompts/MCP configured via IDE)
 
 ### Amazon Q
-- `.amazonq/context.md` - Context information
-- `.amazonq/comments.template` - Comment-based templates
+- `.amazonq/rules/*.md` - Rules directory for coding guidelines
+- `.amazonq/cli-agents/*.json` - CLI agents for code review, security, and testing
+- **Bidirectional sync support**: Import existing Amazon Q configurations
 
 ### JetBrains AI
-- `.idea/ai-assistant.xml` - IDE-integrated configuration
-- `.jetbrains/config.json` - JSON configuration
+- `.assistant/rules/*.md` - Markdown rules for IDE assistance (prompts/MCP configured via IDE UI)
 
 ## Example Workflow
 
