@@ -70,7 +70,7 @@ def check_generated_command(ctx: click.Context, files: List[str]) -> None:
         ".claude/*.md",
         "CLAUDE.md",
         # Cline files
-        ".clinerules/*.md",
+        ".cline-rules/*.md",
         # Windsurf files
         ".windsurf/rules/*.md",
         # Kiro files
