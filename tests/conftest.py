@@ -1,5 +1,9 @@
 """Test configuration for pytest."""
 
+import shutil
+from pathlib import Path
+from typing import Generator
+
 import pytest
 
 from promptrek.core.models import (
@@ -10,8 +14,70 @@ from promptrek.core.models import (
 )
 
 
+@pytest.fixture(scope="session", autouse=True)
+def setup_test_project_dir() -> Generator[Path, None, None]:
+    """
+    Create and clean up test-project/ directory for all tests.
+
+    This ensures tests never pollute the project root with generated files.
+    All file generation happens in test-project/ which is gitignored.
+    """
+    test_project_dir = Path(__file__).parent.parent / "test-project"
+
+    # Clean up any existing test-project directory
+    if test_project_dir.exists():
+        shutil.rmtree(test_project_dir)
+
+    # Create fresh test-project directory
+    test_project_dir.mkdir(exist_ok=True)
+
+    yield test_project_dir
+
+    # Cleanup after all tests (optional - could keep for debugging)
+    # if test_project_dir.exists():
+    #     shutil.rmtree(test_project_dir)
+
+
+@pytest.fixture(autouse=True)
+def use_test_project_dir(
+    setup_test_project_dir: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    request: pytest.FixtureRequest,
+) -> None:
+    """
+    Automatically change to test-project/ directory for ALL tests.
+
+    This is autouse=True so every test runs in test-project/ by default,
+    preventing any test from polluting the project root.
+
+    Tests can still use tmp_path, but the working directory will be test-project/.
+    """
+    # Skip this for tests that explicitly don't want it
+    if "no_test_project" in request.keywords:
+        return
+
+    # Change working directory to test-project for this test
+    monkeypatch.chdir(setup_test_project_dir)
+
+
 @pytest.fixture
-def sample_upf_data():
+def test_project_root(setup_test_project_dir: Path, tmp_path: Path) -> Path:
+    """
+    Provide an isolated subdirectory within test-project/ for each test.
+
+    This gives each test its own clean workspace while keeping everything
+    organized under test-project/.
+
+    Use this when you need a unique directory per test but still within test-project/.
+    """
+    # Create a unique subdirectory for this test
+    test_dir = setup_test_project_dir / tmp_path.name
+    test_dir.mkdir(parents=True, exist_ok=True)
+    return test_dir
+
+
+@pytest.fixture
+def sample_upf_data() -> dict:
     """Sample UPF data for testing."""
     return {
         "schema_version": "1.0.0",
