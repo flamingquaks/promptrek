@@ -16,7 +16,7 @@
   language: python
   files: \.promptrek\.ya?ml$
   pass_filenames: true
-  stages: [commit]
+  stages: [pre-commit]
 
 - id: promptrek-prevent-generated
   name: Prevent committing generated files
@@ -46,7 +46,7 @@
       # Other AI editor files
       ^\.ai-prompts/.*
     )
-  stages: [commit]
+  stages: [pre-commit]
   always_run: false
   pass_filenames: true
 
@@ -56,6 +56,6 @@
   entry: promptrek check-generated
   language: python
   files: variables\.promptrek\.ya?ml$
-  stages: [commit]
+  stages: [pre-commit]
   always_run: false
   pass_filenames: true
