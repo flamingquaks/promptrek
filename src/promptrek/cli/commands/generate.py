@@ -6,7 +6,7 @@ Handles generation of editor-specific prompts from universal prompt files.
 
 import inspect
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union
 
 import click
 
@@ -19,7 +19,7 @@ from ...core.validator import UPFValidator
 from ...utils.variables import VariableSubstitution
 
 
-def _adapter_supports_headless(adapter, method_name: str) -> bool:
+def _adapter_supports_headless(adapter: object, method_name: str) -> bool:
     """
     Check if an adapter method supports the 'headless' parameter.
 
@@ -86,10 +86,10 @@ def generate_command(
         click.echo(f"📋 Loaded {len(local_vars)} variable(s) from local variables file")
 
     # Collect all files to process
-    files_to_process = []
+    files_to_process: list[Path] = []
 
     # Add explicitly specified files
-    files_to_process.extend(files)
+    files_to_process.extend(list(files))
 
     # Add files from directory if specified
     if directory:
@@ -137,7 +137,9 @@ def generate_command(
         click.echo("🔍 Dry run mode - showing what would be generated:")
 
     # Process each file and collect prompts by editor
-    prompts_by_editor = {}  # editor -> list of (prompt, source_file) tuples
+    prompts_by_editor: dict[
+        str, list[tuple[Union[UniversalPrompt, UniversalPromptV2], Path]]
+    ] = {}  # editor -> list of (prompt, source_file) tuples
     processing_errors = []
 
     for file_path in unique_files:
@@ -236,7 +238,9 @@ def generate_command(
         )
 
 
-def _parse_and_validate_file(ctx: click.Context, file_path: Path):
+def _parse_and_validate_file(
+    ctx: click.Context, file_path: Path
+) -> Union[UniversalPrompt, UniversalPromptV2]:
     """Parse and validate a single UPF file.
 
     Returns:
@@ -263,7 +267,7 @@ def _parse_and_validate_file(ctx: click.Context, file_path: Path):
 
 
 def _generate_for_editor_multiple(
-    prompt_files: list[tuple[UniversalPrompt, Path]],
+    prompt_files: list[tuple[Union[UniversalPrompt, UniversalPromptV2], Path]],
     editor: str,
     output_dir: Path,
     dry_run: bool,
@@ -489,7 +493,7 @@ def _process_single_file(
 
 
 def _generate_for_editor(
-    prompt,
+    prompt: Union[UniversalPrompt, UniversalPromptV2],
     editor: str,
     output_dir: Path,
     dry_run: bool,

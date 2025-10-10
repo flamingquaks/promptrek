@@ -235,7 +235,7 @@ class WindsurfAdapter(MarkdownSyncMixin, EditorAdapter):
 
     def _generate_rules_system(
         self,
-        prompt: UniversalPrompt,
+        prompt: Union[UniversalPrompt, UniversalPromptV2],
         conditional_content: Optional[Dict[str, Any]],
         output_dir: Path,
         dry_run: bool,
@@ -246,8 +246,12 @@ class WindsurfAdapter(MarkdownSyncMixin, EditorAdapter):
         created_files = []
 
         # Generate general coding rules
-        all_instructions = []
-        if prompt.instructions and prompt.instructions.general:
+        all_instructions: list[str] = []
+        if (
+            isinstance(prompt, UniversalPrompt)
+            and prompt.instructions
+            and prompt.instructions.general
+        ):
             all_instructions.extend(prompt.instructions.general)
         if (
             conditional_content
@@ -280,7 +284,11 @@ class WindsurfAdapter(MarkdownSyncMixin, EditorAdapter):
                 created_files.append(general_file)
 
         # Generate code style rules
-        if prompt.instructions and prompt.instructions.code_style:
+        if (
+            isinstance(prompt, UniversalPrompt)
+            and prompt.instructions
+            and prompt.instructions.code_style
+        ):
             style_file = rules_dir / "code-style.md"
             style_content = self._build_rules_content(
                 "Code Style Rules", prompt.instructions.code_style
@@ -304,7 +312,11 @@ class WindsurfAdapter(MarkdownSyncMixin, EditorAdapter):
                 created_files.append(style_file)
 
         # Generate testing rules
-        if prompt.instructions and prompt.instructions.testing:
+        if (
+            isinstance(prompt, UniversalPrompt)
+            and prompt.instructions
+            and prompt.instructions.testing
+        ):
             testing_file = rules_dir / "testing.md"
             testing_content = self._build_rules_content(
                 "Testing Rules", prompt.instructions.testing
@@ -328,7 +340,11 @@ class WindsurfAdapter(MarkdownSyncMixin, EditorAdapter):
                 created_files.append(testing_file)
 
         # Generate technology-specific rules
-        if prompt.context and prompt.context.technologies:
+        if (
+            isinstance(prompt, UniversalPrompt)
+            and prompt.context
+            and prompt.context.technologies
+        ):
             for tech in prompt.context.technologies[:2]:  # Limit to 2 main technologies
                 tech_file = rules_dir / f"{tech.lower()}-rules.md"
                 tech_content = self._build_tech_rules_content(tech, prompt)
@@ -370,15 +386,21 @@ class WindsurfAdapter(MarkdownSyncMixin, EditorAdapter):
 
         return "\n".join(lines)
 
-    def _build_tech_rules_content(self, tech: str, prompt: UniversalPrompt) -> str:
+    def _build_tech_rules_content(
+        self, tech: str, prompt: Union[UniversalPrompt, UniversalPromptV2]
+    ) -> str:
         """Build technology-specific rules content."""
         lines = []
 
         lines.append(f"# {tech.title()} Rules")
         lines.append("")
 
-        # Add general instructions that apply to this tech
-        if prompt.instructions and prompt.instructions.general:
+        # Add general instructions that apply to this tech (V1 only)
+        if (
+            isinstance(prompt, UniversalPrompt)
+            and prompt.instructions
+            and prompt.instructions.general
+        ):
             lines.append("## General Guidelines")
             for instruction in prompt.instructions.general:
                 lines.append(f"- {instruction}")

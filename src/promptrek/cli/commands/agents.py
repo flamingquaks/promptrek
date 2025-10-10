@@ -7,12 +7,12 @@ to use PrompTrek and follow the generated instructions.
 
 import os
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union
 
 import click
 
 from ...core.exceptions import CLIError, UPFParsingError
-from ...core.models import UniversalPrompt
+from ...core.models import UniversalPrompt, UniversalPromptV2
 from ...core.parser import UPFParser
 
 
@@ -99,7 +99,7 @@ def agents_command(
 
 
 def _generate_agent_files(
-    prompt: UniversalPrompt,
+    prompt: Union[UniversalPrompt, UniversalPromptV2],
     output_dir: Path,
     dry_run: bool,
     verbose: bool,
@@ -192,7 +192,7 @@ def _should_create_file(file_path: Path, force: bool, dry_run: bool) -> bool:
     return False
 
 
-def _build_agents_content(prompt: UniversalPrompt) -> str:
+def _build_agents_content(prompt: Union[UniversalPrompt, UniversalPromptV2]) -> str:
     """Build content for the general AGENTS.md file."""
     lines = []
 
@@ -226,8 +226,8 @@ def _build_agents_content(prompt: UniversalPrompt) -> str:
     lines.append("   ```")
     lines.append("")
 
-    # Project Context
-    if prompt.context:
+    # Project Context (V1 only)
+    if isinstance(prompt, UniversalPrompt) and prompt.context:
         lines.append("## Project Context")
         if prompt.context.project_type:
             lines.append(f"**Project Type:** {prompt.context.project_type}")
@@ -239,8 +239,8 @@ def _build_agents_content(prompt: UniversalPrompt) -> str:
             lines.append(prompt.context.description)
         lines.append("")
 
-    # High-level instructions
-    if prompt.instructions:
+    # High-level instructions (V1 only)
+    if isinstance(prompt, UniversalPrompt) and prompt.instructions:
         lines.append("## High-Level Guidelines")
         lines.append("*(For detailed instructions, use PrompTrek as described above)*")
         lines.append("")
@@ -263,7 +263,9 @@ def _build_agents_content(prompt: UniversalPrompt) -> str:
     return "\n".join(lines)
 
 
-def _build_copilot_agent_content(prompt: UniversalPrompt) -> str:
+def _build_copilot_agent_content(
+    prompt: Union[UniversalPrompt, UniversalPromptV2],
+) -> str:
     """Build content for GitHub Copilot Agent (.github/copilot-instructions.md)."""
     lines = []
 
@@ -285,8 +287,8 @@ def _build_copilot_agent_content(prompt: UniversalPrompt) -> str:
     lines.append("```")
     lines.append("")
 
-    # Project Information
-    if prompt.context:
+    # Project Information (V1 only)
+    if isinstance(prompt, UniversalPrompt) and prompt.context:
         lines.append("## Project Information")
         if prompt.context.project_type:
             lines.append(f"- Type: {prompt.context.project_type}")
@@ -296,8 +298,8 @@ def _build_copilot_agent_content(prompt: UniversalPrompt) -> str:
             lines.append(f"- Description: {prompt.context.description}")
         lines.append("")
 
-    # Instructions
-    if prompt.instructions:
+    # Instructions (V1 only)
+    if isinstance(prompt, UniversalPrompt) and prompt.instructions:
         if prompt.instructions.general:
             lines.append("## General Instructions")
             for instruction in prompt.instructions.general:
@@ -316,7 +318,9 @@ def _build_copilot_agent_content(prompt: UniversalPrompt) -> str:
     return "\n".join(lines)
 
 
-def _build_claude_agent_content(prompt: UniversalPrompt) -> str:
+def _build_claude_agent_content(
+    prompt: Union[UniversalPrompt, UniversalPromptV2],
+) -> str:
     """Build content for Claude agents (.claude/CLAUDE.md)."""
     lines = []
 
@@ -339,8 +343,8 @@ def _build_claude_agent_content(prompt: UniversalPrompt) -> str:
     )
     lines.append("")
 
-    # Project Context
-    if prompt.context:
+    # Project Context (V1 only)
+    if isinstance(prompt, UniversalPrompt) and prompt.context:
         lines.append("## Project Overview")
         if prompt.context.project_type:
             lines.append(f"**Type:** {prompt.context.project_type}")
@@ -352,8 +356,12 @@ def _build_claude_agent_content(prompt: UniversalPrompt) -> str:
             lines.append(prompt.context.description)
         lines.append("")
 
-    # Key Instructions
-    if prompt.instructions and prompt.instructions.general:
+    # Key Instructions (V1 only)
+    if (
+        isinstance(prompt, UniversalPrompt)
+        and prompt.instructions
+        and prompt.instructions.general
+    ):
         lines.append("## Key Guidelines")
         for instruction in prompt.instructions.general[:3]:  # Top 3 most important
             lines.append(f"- {instruction}")

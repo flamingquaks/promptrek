@@ -180,38 +180,42 @@ class TestContinueAdapter(TestAdapterBase):
 """
         )
 
-        # Test parsing
+        # Test parsing (now returns V2 schema)
         parsed = adapter.parse_files(tmp_path)
 
+        # Verify it's V2 schema
+        from promptrek.core.models import UniversalPromptV2
+
+        assert isinstance(parsed, UniversalPromptV2)
+        assert parsed.schema_version == "2.0.0"
+
         # Verify metadata
-        assert parsed.metadata.title == "Full Test Assistant"
-        assert parsed.metadata.description == "A comprehensive test configuration"
+        assert parsed.metadata.title == "Continue AI Assistant"  # V2 uses default title
         assert parsed.metadata.version == "1.0.0"  # Default version for parsed
 
-        # Verify targets
-        assert "continue" in parsed.targets
+        # V2 uses documents instead of instructions
+        assert parsed.documents is not None
+        assert len(parsed.documents) > 0
 
-        # Verify technologies detected
-        assert parsed.context is not None
-        assert "python" in parsed.context.technologies
+        # Verify all the markdown files were parsed as documents
+        doc_names = [doc.name for doc in parsed.documents]
+        assert "architecture" in doc_names
+        assert "code-style" in doc_names
+        assert "custom" in doc_names
+        assert "general" in doc_names
+        assert "performance" in doc_names
+        assert "python-rules" in doc_names
+        assert "security" in doc_names
+        assert "testing" in doc_names
 
-        # Verify all instruction categories
-        assert parsed.instructions.general is not None
-        assert parsed.instructions.code_style is not None
-        assert parsed.instructions.testing is not None
-        assert parsed.instructions.security is not None
-        assert parsed.instructions.performance is not None
-        assert parsed.instructions.architecture is not None
+        # Verify content from specific documents
+        general_doc = next((d for d in parsed.documents if d.name == "general"), None)
+        assert general_doc is not None
+        assert "Use meaningful variable names" in general_doc.content
 
-        # Verify specific instructions
-        assert "Write comprehensive tests" in parsed.instructions.general
-        assert "Use meaningful variable names" in parsed.instructions.general
-
-        assert "Consistent indentation" in parsed.instructions.code_style
-        assert "Write unit tests for all functions" in parsed.instructions.testing
-        assert "Validate all inputs" in parsed.instructions.security
-        assert "Optimize database queries" in parsed.instructions.performance
-        assert "Follow SOLID principles" in parsed.instructions.architecture
+        testing_doc = next((d for d in parsed.documents if d.name == "testing"), None)
+        assert testing_doc is not None
+        assert "Write unit tests for all functions" in testing_doc.content
 
     def test_parse_files_invalid_yaml(self, adapter, tmp_path):
         """Test parsing with invalid YAML config."""
@@ -236,9 +240,20 @@ class TestContinueAdapter(TestAdapterBase):
         weird_md = rules_dir / "weird.md"
         weird_md.write_text("No bullet points here\njust random text")
 
-        # Should parse successfully, ignoring malformed content
+        # Should parse successfully into V2 schema with documents
         parsed = adapter.parse_files(tmp_path)
-        assert "Valid rule" in parsed.instructions.general
+        from promptrek.core.models import UniversalPromptV2
+
+        assert isinstance(parsed, UniversalPromptV2)
+
+        # Check that both documents were parsed
+        doc_names = [doc.name for doc in parsed.documents]
+        assert "general" in doc_names
+        assert "weird" in doc_names
+
+        # Verify the general document has the expected content
+        general_doc = next((d for d in parsed.documents if d.name == "general"), None)
+        assert "Valid rule" in general_doc.content
 
     def test_build_rules_content(self, adapter):
         """Test building markdown rules content."""

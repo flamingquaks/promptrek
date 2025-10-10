@@ -336,11 +336,11 @@ variables:
         assert result.exit_code == 0
         assert init_file.exists()
 
-        # Verify the created file has basic structure
+        # Verify the created file has basic structure (V2 schema)
         content = init_file.read_text()
         assert "schema_version" in content
         assert "metadata" in content
-        assert "targets" in content
+        assert "content" in content  # V2 uses content instead of targets
 
     def test_init_command_with_template(self, runner, temp_dir):
         """Test init command with template."""
@@ -352,10 +352,10 @@ variables:
         assert result.exit_code == 0
         assert init_file.exists()
 
-        # Verify the created file has template content
+        # Verify the created file has template content (V2 schema)
         content = init_file.read_text()
         assert "schema_version" in content
-        assert "targets" in content
+        assert "content" in content  # V2 uses content instead of targets
 
     def test_validate_command_with_errors(self, runner, temp_dir):
         """Test validate command with a file containing errors."""

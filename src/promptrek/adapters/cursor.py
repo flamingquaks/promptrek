@@ -141,12 +141,16 @@ class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
 
     def _generate_rules_system(
         self,
-        prompt: UniversalPrompt,
+        prompt: Union[UniversalPrompt, UniversalPromptV2],
         output_dir: Path,
         dry_run: bool,
         verbose: bool,
     ) -> List[Path]:
         """Generate modern .cursor/rules/ system with .mdc files."""
+        # V2 doesn't generate rules system
+        if isinstance(prompt, UniversalPromptV2):
+            return []
+
         rules_dir = output_dir / ".cursor" / "rules"
         created_files = []
 
@@ -231,12 +235,16 @@ class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
 
     def _generate_index_file(
         self,
-        prompt: UniversalPrompt,
+        prompt: Union[UniversalPrompt, UniversalPromptV2],
         output_dir: Path,
         dry_run: bool,
         verbose: bool,
     ) -> List[Path]:
         """Generate main index.mdc file for project overview."""
+        # V2 uses simpler structure
+        if isinstance(prompt, UniversalPromptV2):
+            return []
+
         rules_dir = output_dir / ".cursor" / "rules"
         index_file = rules_dir / "index.mdc"
 
@@ -262,12 +270,15 @@ class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
 
     def _generate_agents_file(
         self,
-        prompt: UniversalPrompt,
+        prompt: Union[UniversalPrompt, UniversalPromptV2],
         output_dir: Path,
         dry_run: bool,
         verbose: bool,
     ) -> List[Path]:
         """Generate AGENTS.md file for simple agent instructions."""
+        # V2 doesn't generate agents file
+        if isinstance(prompt, UniversalPromptV2):
+            return []
         agents_file = output_dir / "AGENTS.md"
         content = self._build_agents_content(prompt)
 
@@ -314,7 +325,7 @@ class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
 
     def generate_merged(
         self,
-        prompt_files: List[tuple[UniversalPrompt, Path]],
+        prompt_files: List[tuple[Union[UniversalPrompt, UniversalPromptV2], Path]],
         output_dir: Path,
         dry_run: bool = False,
         verbose: bool = False,
@@ -550,12 +561,15 @@ class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
 
     def _generate_ignore_files(
         self,
-        prompt: UniversalPrompt,
+        prompt: Union[UniversalPrompt, UniversalPromptV2],
         output_dir: Path,
         dry_run: bool,
         verbose: bool,
     ) -> List[Path]:
         """Generate Cursor ignore files for better indexing control."""
+        # V2 doesn't generate ignore files
+        if isinstance(prompt, UniversalPromptV2):
+            return []
         created_files = []
 
         # Generate .cursorignore for files to ignore completely
@@ -743,7 +757,7 @@ class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
 
     def _build_merged_content(
         self,
-        prompt_files: List[tuple[UniversalPrompt, Path]],
+        prompt_files: List[tuple[Union[UniversalPrompt, UniversalPromptV2], Path]],
         variables: Optional[Dict[str, Any]] = None,
         headless: bool = False,
     ) -> str:
@@ -778,8 +792,11 @@ class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
             lines.append(processed_prompt.metadata.description)
             lines.append("")
 
-            # Instructions
-            if processed_prompt.instructions:
+            # Instructions (V1 only)
+            if (
+                isinstance(processed_prompt, UniversalPrompt)
+                and processed_prompt.instructions
+            ):
                 lines.append("### Instructions")
 
                 # Handle all instruction categories dynamically
@@ -801,7 +818,7 @@ class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
 
     def _build_merged_index_content(
         self,
-        prompt_files: List[tuple[UniversalPrompt, Path]],
+        prompt_files: List[tuple[Union[UniversalPrompt, UniversalPromptV2], Path]],
         variables: Optional[Dict[str, Any]] = None,
         headless: bool = False,
     ) -> str:
@@ -836,8 +853,8 @@ class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
                 lines.append(f"{i}. **{prompt.metadata.title}** (`{source_file.name}`)")
             lines.append("")
 
-        # Project context
-        if processed_prompt.context:
+        # Project context (V1 only)
+        if isinstance(processed_prompt, UniversalPrompt) and processed_prompt.context:
             lines.append("## Project Context")
             if processed_prompt.context.project_type:
                 lines.append(f"**Type:** {processed_prompt.context.project_type}")
@@ -851,12 +868,16 @@ class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
                 lines.append(processed_prompt.context.description)
             lines.append("")
 
-        # Core instructions from all sources
+        # Core instructions from all sources (V1 only)
         lines.append("## Core Guidelines")
-        all_general_instructions = []
+        all_general_instructions: List[str] = []
         for prompt, _ in prompt_files:
             processed = self.substitute_variables(prompt, variables)
-            if processed.instructions and processed.instructions.general:
+            if (
+                isinstance(processed, UniversalPrompt)
+                and processed.instructions
+                and processed.instructions.general
+            ):
                 all_general_instructions.extend(processed.instructions.general)
 
         # Remove duplicates while preserving order
@@ -922,13 +943,16 @@ class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
 
     def _generate_source_specific_rules(
         self,
-        prompt: UniversalPrompt,
+        prompt: Union[UniversalPrompt, UniversalPromptV2],
         source_file: Path,
         rules_dir: Path,
         dry_run: bool,
         verbose: bool,
     ) -> List[Path]:
         """Generate source-specific MDC rules for a prompt file."""
+        # V2 doesn't generate source-specific rules
+        if isinstance(prompt, UniversalPromptV2):
+            return []
         created_files = []
 
         # Create a sanitized filename from the source file

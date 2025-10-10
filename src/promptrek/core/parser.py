@@ -5,7 +5,7 @@ Handles loading and parsing .promptrek.yaml files into UniversalPrompt objects.
 """
 
 from pathlib import Path
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Sequence, Union
 
 import yaml
 from pydantic import ValidationError
@@ -191,8 +191,8 @@ class UPFParser:
         return f"Validation errors in {source}:\n" + "\n".join(messages)
 
     def parse_multiple_files(
-        self, file_paths: List[Union[str, Path]]
-    ) -> UniversalPrompt:
+        self, file_paths: Sequence[Union[str, Path]]
+    ) -> Union[UniversalPrompt, UniversalPromptV2]:
         """
         Parse multiple UPF files and merge them into a single UniversalPrompt.
 
@@ -220,7 +220,7 @@ class UPFParser:
 
     def parse_directory(
         self, directory: Union[str, Path], recursive: bool = True
-    ) -> UniversalPrompt:
+    ) -> Union[UniversalPrompt, UniversalPromptV2]:
         """
         Find and parse all UPF files in a directory, merging them into one.
 
@@ -245,8 +245,10 @@ class UPFParser:
         return self.parse_multiple_files(upf_files)
 
     def _merge_prompts(
-        self, base: UniversalPrompt, additional: UniversalPrompt
-    ) -> UniversalPrompt:
+        self,
+        base: Union[UniversalPrompt, UniversalPromptV2],
+        additional: Union[UniversalPrompt, UniversalPromptV2],
+    ) -> Union[UniversalPrompt, UniversalPromptV2]:
         """
         Merge two UniversalPrompt objects, with additional taking precedence.
 
@@ -257,7 +259,15 @@ class UPFParser:
         Returns:
             Merged UniversalPrompt object
         """
-        # Convert to dicts for easier merging
+        # V2 merging: simple content concatenation
+        if isinstance(base, UniversalPromptV2) or isinstance(
+            additional, UniversalPromptV2
+        ):
+            # For v2, we can't meaningfully merge - just return the additional
+            # This is a limitation of the simplified v2 format
+            return additional
+
+        # Convert to dicts for easier merging (v1 only)
         base_dict = base.model_dump()
         additional_dict = additional.model_dump()
 

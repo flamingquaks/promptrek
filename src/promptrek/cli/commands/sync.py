@@ -221,14 +221,13 @@ def _merge_prompts(
     editor: str,
 ) -> Union[UniversalPrompt, UniversalPromptV2]:
     """
-    Intelligently merge parsed prompt data with existing PrompTrek configuration.
+    Merge parsed prompt data with existing PrompTrek configuration.
 
-    Merge Strategy:
-    1. Preserve user-defined metadata (title, description) unless empty
-    2. Merge instructions additively, avoiding duplicates (v1 only)
-    3. Update context info with parsed data (v1 only)
-    4. For v2: Update content and metadata only
-    5. Mark sync timestamp and editor
+    V1 and V2 are separate schemas - no cross-schema merging.
+    - V2 + V2 = V2 (update content and documents)
+    - V1 + V1 = V1 (merge instructions and context)
+    - V2 + V1 = Replace with V2 (warn user)
+    - V1 + V2 = Replace with V1 (warn user)
 
     Args:
         existing: Existing PrompTrek configuration
@@ -238,23 +237,20 @@ def _merge_prompts(
     Returns:
         Merged UniversalPrompt or UniversalPromptV2
     """
-    # Handle v2 parsed schema
+    # V2 schema handling
     if isinstance(parsed, UniversalPromptV2):
-        # If existing is also v2, merge v2 to v2
         if isinstance(existing, UniversalPromptV2):
+            # V2 + V2: Merge within V2 schema
             merged_data = existing.model_dump(exclude_none=True)
-
-            # Update content from parsed
             merged_data["content"] = parsed.content
 
-            # Update metadata fields
-            if parsed.metadata:
-                metadata = merged_data.get("metadata", {})
-                if parsed.metadata.updated:
-                    metadata["updated"] = parsed.metadata.updated
-                else:
-                    metadata["updated"] = datetime.now().isoformat()[:10]
-                merged_data["metadata"] = metadata
+            # Update metadata timestamp
+            metadata = merged_data.get("metadata", {})
+            if parsed.metadata.updated:
+                metadata["updated"] = parsed.metadata.updated
+            else:
+                metadata["updated"] = datetime.now().isoformat()[:10]
+            merged_data["metadata"] = metadata
 
             # Update documents if present
             if parsed.documents:
@@ -264,46 +260,51 @@ def _merge_prompts(
 
             return UniversalPromptV2.model_validate(merged_data)
         else:
-            # Existing is v1, parsed is v2 - upgrade to v2
+            # V1 exists, V2 parsed: Replace with V2 (no cross-schema merge)
             click.echo(
-                "ℹ️  Upgrading existing v1 configuration to v2 schema (synced from editor)"
+                "⚠️  Existing file is V1 schema, parsed files are V2. Replacing with V2 schema."
             )
-            merged_data = {
-                "schema_version": "2.0.0",
-                "metadata": existing.metadata.model_dump(exclude_none=True),
-                "content": parsed.content,
-            }
+            # Preserve metadata title/description from V1 if V2 has defaults
+            if (
+                parsed.metadata.title == "Continue AI Assistant"
+                and existing.metadata.title
+            ):
+                parsed.metadata.title = existing.metadata.title
+            if existing.metadata.description and not parsed.metadata.description:
+                parsed.metadata.description = existing.metadata.description
+            return parsed
 
-            # Add documents if present
-            if parsed.documents:
-                merged_data["documents"] = [
-                    doc.model_dump(exclude_none=True) for doc in parsed.documents
-                ]
+    # V1 schema handling
+    if isinstance(parsed, UniversalPrompt):
+        if isinstance(existing, UniversalPrompt):
+            # V1 + V1: Merge within V1 schema
+            merged_data = existing.model_dump(exclude_none=True)
 
-            # Preserve variables if they exist
-            if hasattr(existing, "variables") and existing.variables:
-                merged_data["variables"] = existing.variables
+            # Use helper functions to merge each section
+            merged_data = _merge_metadata(merged_data, parsed)
+            merged_data = _merge_instructions(merged_data, parsed)
+            merged_data = _merge_context(merged_data, parsed)
 
-            return UniversalPromptV2.model_validate(merged_data)
+            # Ensure the target editor is included in targets
+            targets = merged_data.get("targets", [])
+            if not targets:
+                targets = [editor]
+            elif editor not in targets:
+                targets.append(editor)
+            merged_data["targets"] = targets
 
-    # Handle v1 schema - complex merge with instructions and context
-    # Start with existing configuration
-    merged_data = existing.model_dump(exclude_none=True)
+            return UniversalPrompt.model_validate(merged_data)
+        else:
+            # V2 exists, V1 parsed: Replace with V1 (no cross-schema merge)
+            click.echo(
+                "⚠️  Existing file is V2 schema, parsed files are V1. Replacing with V1 schema."
+            )
+            return parsed
 
-    # Use helper functions to merge each section
-    merged_data = _merge_metadata(merged_data, parsed)
-    merged_data = _merge_instructions(merged_data, parsed)
-    merged_data = _merge_context(merged_data, parsed)
-
-    # Ensure the target editor is included in targets
-    targets = merged_data.get("targets", [])
-    if not targets:
-        targets = [editor]
-    elif editor not in targets:
-        targets.append(editor)
-    merged_data["targets"] = targets
-
-    return UniversalPrompt.model_validate(merged_data)
+    # All cases handled above - this line should never be reached
+    raise PrompTrekError(
+        f"Unexpected schema combination in merge: {type(existing)} + {type(parsed)}"
+    )
 
 
 def _preview_prompt(prompt: Union[UniversalPrompt, UniversalPromptV2]) -> None:

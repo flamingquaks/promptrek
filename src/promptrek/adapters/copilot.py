@@ -5,7 +5,7 @@ GitHub Copilot adapter implementation.
 import re
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 
 import click
 
@@ -144,7 +144,7 @@ class CopilotAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
 
     def _generate_copilot_instructions(
         self,
-        prompt: UniversalPrompt,
+        prompt: Union[UniversalPrompt, UniversalPromptV2],
         conditional_content: Optional[Dict[str, Any]],
         output_dir: Path,
         dry_run: bool,
@@ -155,7 +155,10 @@ class CopilotAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
         github_dir = output_dir / ".github"
         output_file = github_dir / "copilot-instructions.md"
 
-        if headless:
+        # For V2, use content directly
+        if isinstance(prompt, UniversalPromptV2):
+            content = prompt.content
+        elif headless:
             content = self._build_headless_content(prompt, conditional_content)
         else:
             content = self._build_repository_content(prompt, conditional_content)
@@ -177,16 +180,20 @@ class CopilotAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
 
     def _generate_path_specific_instructions(
         self,
-        prompt: UniversalPrompt,
+        prompt: Union[UniversalPrompt, UniversalPromptV2],
         output_dir: Path,
         dry_run: bool,
         verbose: bool,
     ) -> List[Path]:
         """Generate path-specific .github/instructions/*.instructions.md files."""
+        # V2 doesn't generate path-specific files
+        if isinstance(prompt, UniversalPromptV2):
+            return []
+
         instructions_dir = output_dir / ".github" / "instructions"
         created_files = []
 
-        # Generate code style instructions for source files
+        # Generate code style instructions for source files (V1 only)
         if prompt.instructions and prompt.instructions.code_style:
             code_file = instructions_dir / "code-style.instructions.md"
             code_content = self._build_path_specific_content(
@@ -262,16 +269,20 @@ class CopilotAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
 
     def _generate_prompt_files(
         self,
-        prompt: UniversalPrompt,
+        prompt: Union[UniversalPrompt, UniversalPromptV2],
         output_dir: Path,
         dry_run: bool,
         verbose: bool,
     ) -> List[Path]:
         """Generate experimental .github/prompts/*.prompt.md files."""
+        # V2 doesn't generate experimental prompt files
+        if isinstance(prompt, UniversalPromptV2):
+            return []
+
         prompts_dir = output_dir / ".github" / "prompts"
         created_files = []
 
-        # Generate general coding prompt
+        # Generate general coding prompt (V1 only)
         coding_prompt_file = prompts_dir / "coding.prompt.md"
         coding_prompt_content = self._build_coding_prompt_content(prompt)
 
@@ -397,7 +408,7 @@ class CopilotAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
 
     def _build_merged_content(
         self,
-        prompt_files: List[Tuple[UniversalPrompt, Path]],
+        prompt_files: Sequence[Tuple[Union[UniversalPrompt, UniversalPromptV2], Path]],
         variables: Optional[Dict[str, Any]] = None,
     ) -> str:
         """Build merged GitHub Copilot instructions from multiple prompt files."""
@@ -431,7 +442,13 @@ class CopilotAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
             lines.append(processed_prompt.metadata.description)
             lines.append("")
 
-            # Instructions
+            # For V2, use content directly
+            if isinstance(processed_prompt, UniversalPromptV2):
+                lines.append(processed_prompt.content)
+                lines.append("")
+                continue
+
+            # Instructions (V1 only)
             if processed_prompt.instructions:
                 lines.append("### Instructions")
                 # Handle all instruction categories dynamically
@@ -453,7 +470,7 @@ class CopilotAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
 
     def _build_merged_headless_content(
         self,
-        prompt_files: List[Tuple[UniversalPrompt, Path]],
+        prompt_files: Sequence[Tuple[Union[UniversalPrompt, UniversalPromptV2], Path]],
         variables: Optional[Dict[str, Any]] = None,
     ) -> str:
         """Build merged headless content with embedded generation instructions."""
@@ -554,9 +571,9 @@ class CopilotAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
             )
 
         # Parse instructions by section
-        instructions_dict = {}
+        instructions_dict: Dict[str, List[str]] = {}
         current_section = None
-        current_items = []
+        current_items: List[str] = []
 
         for line in lines:
             line = line.strip()
@@ -609,7 +626,7 @@ class CopilotAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
 
     def _parse_instructions_directory(self, instructions_dir: Path) -> Instructions:
         """Parse .github/instructions/*.instructions.md files."""
-        instructions_dict = {}
+        instructions_dict: Dict[str, List[str]] = {}
 
         for file_path in instructions_dir.glob("*.instructions.md"):
             category = self._filename_to_category(file_path.stem)
@@ -621,7 +638,7 @@ class CopilotAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
 
     def _parse_prompts_directory(self, prompts_dir: Path) -> Instructions:
         """Parse .github/prompts/*.prompt.md files."""
-        instructions_dict = {}
+        instructions_dict: Dict[str, List[str]] = {}
 
         for file_path in prompts_dir.glob("*.prompt.md"):
             # Prompts usually contain general guidelines
@@ -745,7 +762,7 @@ class CopilotAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
 
     def _extract_project_context(self, content: str) -> Optional[ProjectContext]:
         """Extract project context information from content."""
-        context_data = {}
+        context_data: Dict[str, Any] = {}
 
         # Look for technology mentions
         tech_patterns = [

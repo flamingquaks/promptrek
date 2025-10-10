@@ -332,11 +332,17 @@ class ClineAdapter(MarkdownSyncMixin, EditorAdapter):
 
         return "\n".join(lines) if lines else ""
 
-    def _should_use_directory_format(self, prompt: UniversalPrompt) -> bool:
+    def _should_use_directory_format(
+        self, prompt: Union[UniversalPrompt, UniversalPromptV2]
+    ) -> bool:
         """Determine if directory format should be used based on complexity."""
+        # V2 uses single file format
+        if isinstance(prompt, UniversalPromptV2):
+            return False
+
         complexity_score = 0
 
-        # Count different types of content
+        # Count different types of content (V1 only)
         if prompt.instructions and prompt.instructions.general:
             complexity_score += len(prompt.instructions.general)
         if prompt.instructions and prompt.instructions.code_style:
@@ -371,17 +377,23 @@ class ClineAdapter(MarkdownSyncMixin, EditorAdapter):
 
     def _generate_directory_format(
         self,
-        prompt: UniversalPrompt,
+        prompt: Union[UniversalPrompt, UniversalPromptV2],
         conditional_content: Optional[Dict[str, Any]],
         output_dir: Path,
         dry_run: bool,
         verbose: bool,
     ) -> List[Path]:
         """Generate multiple files in .clinerules/ directory."""
+        # V2 shouldn't reach here (uses single file), but handle it anyway
+        if isinstance(prompt, UniversalPromptV2):
+            return self._generate_single_file_format(
+                prompt, conditional_content, output_dir, dry_run, verbose
+            )
+
         clinerules_dir = output_dir / ".clinerules"
         created_files = []
 
-        # Generate multiple rule files based on content
+        # Generate multiple rule files based on content (V1 only)
         rule_files = self._generate_rule_files(prompt, conditional_content)
 
         if dry_run:
@@ -410,7 +422,7 @@ class ClineAdapter(MarkdownSyncMixin, EditorAdapter):
 
     def _generate_single_file_format(
         self,
-        prompt: UniversalPrompt,
+        prompt: Union[UniversalPrompt, UniversalPromptV2],
         conditional_content: Optional[Dict[str, Any]],
         output_dir: Path,
         dry_run: bool,
@@ -419,8 +431,12 @@ class ClineAdapter(MarkdownSyncMixin, EditorAdapter):
         """Generate single .clinerules file."""
         output_file = output_dir / ".clinerules"
 
-        # Create unified content for single file
-        content = self._build_unified_content(prompt, conditional_content)
+        # For V2, use content directly
+        if isinstance(prompt, UniversalPromptV2):
+            content = prompt.content
+        else:
+            # Create unified content for single file (V1)
+            content = self._build_unified_content(prompt, conditional_content)
 
         if dry_run:
             click.echo(f"  📄 Would create: {output_file}")

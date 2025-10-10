@@ -11,6 +11,7 @@ import click
 
 from ...adapters import registry
 from ...core.exceptions import AdapterNotFoundError, CLIError
+from ...core.models import UniversalPrompt
 from ...core.parser import UPFParser
 from ...core.validator import UPFValidator
 
@@ -46,8 +47,12 @@ def preview_command(
     if result.errors:
         raise CLIError(f"Validation failed: {'; '.join(result.errors)}")
 
-    # Check if editor is in targets
-    if prompt.targets and editor not in prompt.targets:
+    # Check if editor is in targets (V1 only)
+    if (
+        isinstance(prompt, UniversalPrompt)
+        and prompt.targets
+        and editor not in prompt.targets
+    ):
         click.echo(
             f"⚠️  Warning: '{editor}' not in targets for this file: {', '.join(prompt.targets)}"
         )

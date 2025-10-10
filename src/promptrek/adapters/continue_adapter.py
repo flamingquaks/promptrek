@@ -51,6 +51,9 @@ class ContinueAdapter(EditorAdapter):
 
         # V1: Apply variable substitution if supported
         processed_prompt = self.substitute_variables(prompt, variables)
+        assert isinstance(
+            processed_prompt, UniversalPrompt
+        ), "V1 path should have UniversalPrompt"
 
         # Process conditionals if supported
         conditional_content = self.process_conditionals(processed_prompt, variables)

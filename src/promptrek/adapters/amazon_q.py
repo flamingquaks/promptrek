@@ -137,7 +137,7 @@ class AmazonQAdapter(MarkdownSyncMixin, EditorAdapter):
 
     def _generate_rules_system(
         self,
-        prompt: UniversalPrompt,
+        prompt: Union[UniversalPrompt, UniversalPromptV2],
         conditional_content: Optional[Dict[str, Any]],
         output_dir: Path,
         dry_run: bool,
@@ -148,8 +148,12 @@ class AmazonQAdapter(MarkdownSyncMixin, EditorAdapter):
         created_files = []
 
         # Generate general coding rules
-        all_instructions = []
-        if prompt.instructions and prompt.instructions.general:
+        all_instructions: list[str] = []
+        if (
+            isinstance(prompt, UniversalPrompt)
+            and prompt.instructions
+            and prompt.instructions.general
+        ):
             all_instructions.extend(prompt.instructions.general)
         if (
             conditional_content
@@ -182,7 +186,11 @@ class AmazonQAdapter(MarkdownSyncMixin, EditorAdapter):
                 created_files.append(general_file)
 
         # Generate code style rules
-        if prompt.instructions and prompt.instructions.code_style:
+        if (
+            isinstance(prompt, UniversalPrompt)
+            and prompt.instructions
+            and prompt.instructions.code_style
+        ):
             style_file = rules_dir / "code-style.md"
             style_content = self._build_rules_content(
                 "Code Style Rules", prompt.instructions.code_style
@@ -206,7 +214,11 @@ class AmazonQAdapter(MarkdownSyncMixin, EditorAdapter):
                 created_files.append(style_file)
 
         # Generate testing rules
-        if prompt.instructions and prompt.instructions.testing:
+        if (
+            isinstance(prompt, UniversalPrompt)
+            and prompt.instructions
+            and prompt.instructions.testing
+        ):
             testing_file = rules_dir / "testing.md"
             testing_content = self._build_rules_content(
                 "Testing Rules", prompt.instructions.testing
@@ -230,7 +242,11 @@ class AmazonQAdapter(MarkdownSyncMixin, EditorAdapter):
                 created_files.append(testing_file)
 
         # Generate security rules if defined
-        if prompt.instructions and prompt.instructions.security:
+        if (
+            isinstance(prompt, UniversalPrompt)
+            and prompt.instructions
+            and prompt.instructions.security
+        ):
             security_file = rules_dir / "security.md"
             security_content = self._build_rules_content(
                 "Security Rules", prompt.instructions.security
@@ -254,7 +270,11 @@ class AmazonQAdapter(MarkdownSyncMixin, EditorAdapter):
                 created_files.append(security_file)
 
         # Generate technology-specific rules
-        if prompt.context and prompt.context.technologies:
+        if (
+            isinstance(prompt, UniversalPrompt)
+            and prompt.context
+            and prompt.context.technologies
+        ):
             for tech in prompt.context.technologies[:2]:  # Limit to 2 main technologies
                 tech_file = rules_dir / f"{tech.lower()}-rules.md"
                 tech_content = self._build_tech_rules_content(tech, prompt)
@@ -280,7 +300,7 @@ class AmazonQAdapter(MarkdownSyncMixin, EditorAdapter):
 
     def _generate_cli_agents(
         self,
-        prompt: UniversalPrompt,
+        prompt: Union[UniversalPrompt, UniversalPromptV2],
         output_dir: Path,
         dry_run: bool,
         verbose: bool,
@@ -289,11 +309,15 @@ class AmazonQAdapter(MarkdownSyncMixin, EditorAdapter):
         agents_dir = output_dir / ".amazonq" / "cli-agents"
         created_files = []
 
-        # Generate default agents based on instructions
+        # Generate default agents based on instructions (V1 only)
         agents = []
 
         # Code review agent
-        if prompt.instructions and prompt.instructions.code_style:
+        if (
+            isinstance(prompt, UniversalPrompt)
+            and prompt.instructions
+            and prompt.instructions.code_style
+        ):
             agents.append(
                 {
                     "name": "code-review-agent",
@@ -304,7 +328,11 @@ class AmazonQAdapter(MarkdownSyncMixin, EditorAdapter):
             )
 
         # Security review agent
-        if prompt.instructions and prompt.instructions.security:
+        if (
+            isinstance(prompt, UniversalPrompt)
+            and prompt.instructions
+            and prompt.instructions.security
+        ):
             agents.append(
                 {
                     "name": "security-review-agent",
@@ -315,7 +343,11 @@ class AmazonQAdapter(MarkdownSyncMixin, EditorAdapter):
             )
 
         # Testing agent
-        if prompt.instructions and prompt.instructions.testing:
+        if (
+            isinstance(prompt, UniversalPrompt)
+            and prompt.instructions
+            and prompt.instructions.testing
+        ):
             agents.append(
                 {
                     "name": "test-generation-agent",
@@ -362,15 +394,21 @@ class AmazonQAdapter(MarkdownSyncMixin, EditorAdapter):
 
         return "\n".join(lines)
 
-    def _build_tech_rules_content(self, tech: str, prompt: UniversalPrompt) -> str:
+    def _build_tech_rules_content(
+        self, tech: str, prompt: Union[UniversalPrompt, UniversalPromptV2]
+    ) -> str:
         """Build technology-specific rules content."""
         lines = []
 
         lines.append(f"# {tech.title()} Rules")
         lines.append("")
 
-        # Add general instructions that apply to this tech
-        if prompt.instructions and prompt.instructions.general:
+        # Add general instructions that apply to this tech (V1 only)
+        if (
+            isinstance(prompt, UniversalPrompt)
+            and prompt.instructions
+            and prompt.instructions.general
+        ):
             lines.append("## General Guidelines")
             for instruction in prompt.instructions.general:
                 lines.append(f"- {instruction}")

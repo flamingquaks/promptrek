@@ -196,16 +196,19 @@ def _build_markdown_from_v1(prompt: UniversalPrompt) -> str:
         for i, condition in enumerate(prompt.conditions, 1):
             lines.append(f"**Condition {i}:** If `{condition.if_condition}`")
             lines.append("")
-            if condition.then_instructions:
-                lines.append("Then apply these instructions:")
-                for inst in condition.then_instructions:
-                    lines.append(f"- {inst}")
-            if condition.then_examples:
-                lines.append("")
-                lines.append("Examples:")
-                for name, example in condition.then_examples.items():
-                    lines.append(f"**{name}:**")
-                    lines.append(example)
+            if condition.then:
+                # Handle then instructions
+                if "instructions" in condition.then:
+                    lines.append("Then apply these instructions:")
+                    for inst in condition.then["instructions"]:
+                        lines.append(f"- {inst}")
+                # Handle then examples
+                if "examples" in condition.then:
+                    lines.append("")
+                    lines.append("Examples:")
+                    for name, example in condition.then["examples"].items():
+                        lines.append(f"**{name}:**")
+                        lines.append(example)
             lines.append("")
 
     # AI Assistant instructions (generic footer)

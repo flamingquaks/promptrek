@@ -158,7 +158,9 @@ class UPFValidator:
             result.add_warning("Duplicate target editors found")
 
     def _validate_metadata(
-        self, prompt: UniversalPrompt, result: ValidationResult
+        self,
+        prompt: Union[UniversalPrompt, UniversalPromptV2],
+        result: ValidationResult,
     ) -> None:
         """Validate metadata section."""
         metadata = prompt.metadata
@@ -198,9 +200,7 @@ class UPFValidator:
 
         # Check technologies list
         if context.technologies:
-            if not isinstance(context.technologies, list):
-                result.add_error("Context technologies must be a list")
-            elif len(context.technologies) == 0:
+            if len(context.technologies) == 0:
                 result.add_warning("Context technologies list is empty")
 
     def _validate_instructions(
@@ -256,7 +256,9 @@ class UPFValidator:
             result.add_warning(f"Empty examples found: {', '.join(empty_examples)}")
 
     def _validate_variables(
-        self, prompt: UniversalPrompt, result: ValidationResult
+        self,
+        prompt: Union[UniversalPrompt, UniversalPromptV2],
+        result: ValidationResult,
     ) -> None:
         """Validate variables section."""
         if not prompt.variables:
@@ -288,7 +290,7 @@ class UPFValidator:
         editor_configs = prompt.editor_specific
 
         # Check if editor-specific configs match target editors
-        target_set = set(prompt.targets)
+        target_set = set(prompt.targets) if prompt.targets else set()
         config_set = set(editor_configs.keys())
 
         unknown_configs = config_set - target_set

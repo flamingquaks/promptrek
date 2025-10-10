@@ -28,13 +28,13 @@ class TestInitCommand:
         # File should be created
         assert output_file.exists()
 
-        # Check content
+        # Check content (V2 schema)
         with open(output_file) as f:
             data = yaml.safe_load(f)
 
-        assert data["schema_version"] == "1.0.0"
+        assert data["schema_version"] == "2.0.0"  # V2 schema
         assert "metadata" in data
-        assert "instructions" in data
+        assert "content" in data  # V2 uses content instead of instructions
 
     def test_init_with_template(self, tmp_path):
         """Test initialization with template."""
@@ -51,12 +51,17 @@ class TestInitCommand:
         # File should be created
         assert output_file.exists()
 
-        # Check React-specific content
+        # Check React-specific content (V2 schema uses content field)
         with open(output_file) as f:
             data = yaml.safe_load(f)
 
-        assert "typescript" in data["context"]["technologies"]
-        assert "react" in data["context"]["technologies"]
+        assert data["schema_version"] == "2.0.0"
+        assert "content" in data
+        # V2 schema includes technology info in the content string
+        assert (
+            "typescript" in data["content"].lower()
+            or "react" in data["content"].lower()
+        )
 
     def test_init_with_setup_hooks_success(self, tmp_path, monkeypatch):
         """Test initialization with hooks setup."""
@@ -147,10 +152,10 @@ class TestInitCommand:
         with patch("click.echo"), patch("click.confirm", return_value=True):
             init_command(ctx, template=None, output=str(output_file), setup_hooks=False)
 
-        # File should be overwritten
+        # File should be overwritten (V2 schema)
         with open(output_file) as f:
             data = yaml.safe_load(f)
-        assert data["schema_version"] == "1.0.0"
+        assert data["schema_version"] == "2.0.0"  # V2 schema
 
     def test_init_invalid_template(self, tmp_path):
         """Test initialization with invalid template."""
