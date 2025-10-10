@@ -1,17 +1,12 @@
 schema_version: 2.0.0
 metadata:
-  title: Claude Code Configuration
-  description: Configuration parsed from Claude Code file
+  title: PrompTrek Project Documentation
+  description: Comprehensive documentation for the PrompTrek project, including architecture, development commands, testing, and guidelines for adding new editor adapters.
   version: 1.0.0
   author: PrompTrek Sync
-  created: '2025-10-09T22:03:21.270924'
-  updated: '2025-10-09T22:11:25.464589'
-  tags:
-  - claude-code
-  - synced
+  created: '2025-10-09T22:03:21'
+  updated: '2025-10-10T22:10:53'
 content: |-
-  # CLAUDE.md
-
   This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
   ## Project Overview
