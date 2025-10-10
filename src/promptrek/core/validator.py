@@ -5,9 +5,9 @@ Provides comprehensive validation for Universal Prompt Format files
 beyond basic schema validation.
 """
 
-from typing import List
+from typing import List, Union
 
-from .models import UniversalPrompt
+from .models import UniversalPrompt, UniversalPromptV2
 
 
 class ValidationResult:
@@ -70,18 +70,43 @@ class UPFValidator:
         """Initialize the UPF validator."""
         pass
 
-    def validate(self, prompt: UniversalPrompt) -> ValidationResult:
+    def validate(
+        self, prompt: Union[UniversalPrompt, UniversalPromptV2]
+    ) -> ValidationResult:
         """
         Perform comprehensive validation of a UPF object.
 
         Args:
-            prompt: The UniversalPrompt to validate
+            prompt: The UniversalPrompt (v1) or UniversalPromptV2 to validate
 
         Returns:
             ValidationResult with errors and warnings
         """
         result = ValidationResult()
 
+        # V2 has simpler validation
+        if isinstance(prompt, UniversalPromptV2):
+            self._validate_metadata(prompt, result)
+
+            # V2 specific: check content exists
+            if not prompt.content or not prompt.content.strip():
+                result.add_error("Content cannot be empty")
+
+            # Validate variables if present
+            if prompt.variables:
+                self._validate_variables(prompt, result)
+
+            # Validate documents if present
+            if prompt.documents:
+                for i, doc in enumerate(prompt.documents):
+                    if not doc.name.strip():
+                        result.add_error(f"Document {i+1} has empty name")
+                    if not doc.content.strip():
+                        result.add_error(f"Document {i+1} has empty content")
+
+            return result
+
+        # V1 full validation
         self._validate_schema_version(prompt, result)
         self._validate_targets(prompt, result)
         self._validate_metadata(prompt, result)

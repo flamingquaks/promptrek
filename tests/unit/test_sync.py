@@ -23,6 +23,7 @@ from promptrek.core.models import (
     ProjectContext,
     PromptMetadata,
     UniversalPrompt,
+    UniversalPromptV2,
 )
 
 
@@ -410,3 +411,52 @@ Some other text that should be ignored.
         # Should include tech-specific rules in general instructions
         assert "Use type hints" in parsed_prompt.instructions.general
         assert "Use const/let" in parsed_prompt.instructions.general
+
+    def test_write_v2_prompt_with_literal_block_scalar(self, tmp_path):
+        """Test that v2 prompts with multi-line content use literal block scalar formatting."""
+        content = """# Test Project
+
+## Overview
+This is a test project with multiple lines.
+
+## Guidelines
+- Follow best practices
+- Write tests
+- Document code
+"""
+
+        prompt = UniversalPromptV2(
+            schema_version="2.0.0",
+            metadata=PromptMetadata(
+                title="Test Prompt",
+                description="Test description",
+                version="1.0.0",
+                author="Test Author",
+                created="2024-01-01",
+                updated="2024-01-01",
+            ),
+            content=content,
+        )
+
+        output_file = tmp_path / "test.yaml"
+        _write_prompt_file(prompt, output_file)
+
+        assert output_file.exists()
+
+        # Read the raw YAML file
+        yaml_content = output_file.read_text()
+
+        # Should use literal block scalar (|- or |)
+        assert "content: |" in yaml_content or "content: |-" in yaml_content
+
+        # Should NOT have escaped newlines
+        assert "\\n" not in yaml_content
+
+        # Should have actual readable content
+        assert "# Test Project" in yaml_content
+        assert "## Overview" in yaml_content
+        assert "- Follow best practices" in yaml_content
+
+        # Also verify it can be parsed back correctly
+        parsed_data = yaml.safe_load(yaml_content)
+        assert parsed_data["content"] == content

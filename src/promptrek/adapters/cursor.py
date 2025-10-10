@@ -3,12 +3,12 @@ Cursor editor adapter implementation.
 """
 
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 import click
 
 from ..core.exceptions import ValidationError
-from ..core.models import UniversalPrompt
+from ..core.models import UniversalPrompt, UniversalPromptV2
 from .base import EditorAdapter
 from .sync_mixin import MarkdownSyncMixin
 
@@ -28,7 +28,7 @@ class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
 
     def generate(
         self,
-        prompt: UniversalPrompt,
+        prompt: Union[UniversalPrompt, UniversalPromptV2],
         output_dir: Path,
         dry_run: bool = False,
         verbose: bool = False,
@@ -37,7 +37,11 @@ class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
     ) -> List[Path]:
         """Generate Cursor configuration files."""
 
-        # Apply variable substitution if supported
+        # V2: Use documents field for multi-file rules or main content for single file
+        if isinstance(prompt, UniversalPromptV2):
+            return self._generate_v2(prompt, output_dir, dry_run, verbose, variables)
+
+        # V1: Apply variable substitution if supported
         processed_prompt = self.substitute_variables(prompt, variables)
 
         created_files = []
@@ -65,6 +69,73 @@ class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
             processed_prompt, output_dir, dry_run, verbose
         )
         created_files.extend(ignore_files)
+
+        return created_files
+
+    def _generate_v2(
+        self,
+        prompt: UniversalPromptV2,
+        output_dir: Path,
+        dry_run: bool,
+        verbose: bool,
+        variables: Optional[Dict[str, Any]] = None,
+    ) -> List[Path]:
+        """Generate Cursor files from v2 schema (using documents for rules or content for single file)."""
+        rules_dir = output_dir / ".cursor" / "rules"
+        created_files = []
+
+        # If documents field is present, generate separate rule files
+        if prompt.documents:
+            for doc in prompt.documents:
+                # Apply variable substitution
+                content = doc.content
+                if variables:
+                    for var_name, var_value in variables.items():
+                        placeholder = "{{{ " + var_name + " }}}"
+                        content = content.replace(placeholder, var_value)
+
+                # Generate filename from document name
+                filename = (
+                    f"{doc.name}.mdc" if not doc.name.endswith(".mdc") else doc.name
+                )
+                output_file = rules_dir / filename
+
+                if dry_run:
+                    click.echo(f"  📁 Would create: {output_file}")
+                    if verbose:
+                        preview = (
+                            content[:200] + "..." if len(content) > 200 else content
+                        )
+                        click.echo(f"    {preview}")
+                    created_files.append(output_file)
+                else:
+                    rules_dir.mkdir(parents=True, exist_ok=True)
+                    with open(output_file, "w", encoding="utf-8") as f:
+                        f.write(content)
+                    click.echo(f"✅ Generated: {output_file}")
+                    created_files.append(output_file)
+        else:
+            # No documents, use main content as index.mdc
+            content = prompt.content
+            if variables:
+                for var_name, var_value in variables.items():
+                    placeholder = "{{{ " + var_name + " }}}"
+                    content = content.replace(placeholder, var_value)
+
+            output_file = rules_dir / "index.mdc"
+
+            if dry_run:
+                click.echo(f"  📁 Would create: {output_file}")
+                if verbose:
+                    preview = content[:200] + "..." if len(content) > 200 else content
+                    click.echo(f"    {preview}")
+                created_files.append(output_file)
+            else:
+                rules_dir.mkdir(parents=True, exist_ok=True)
+                with open(output_file, "w", encoding="utf-8") as f:
+                    f.write(content)
+                click.echo(f"✅ Generated: {output_file}")
+                created_files.append(output_file)
 
         return created_files
 
@@ -288,11 +359,25 @@ class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
 
         return created_files
 
-    def validate(self, prompt: UniversalPrompt) -> List[ValidationError]:
+    def validate(
+        self, prompt: Union[UniversalPrompt, UniversalPromptV2]
+    ) -> List[ValidationError]:
         """Validate prompt for Cursor."""
         errors = []
 
-        # Cursor works well with structured instructions
+        # V2 validation: check content exists
+        if isinstance(prompt, UniversalPromptV2):
+            if not prompt.content or not prompt.content.strip():
+                errors.append(
+                    ValidationError(
+                        field="content",
+                        message="Cursor requires content",
+                        severity="error",
+                    )
+                )
+            return errors
+
+        # V1 validation: Cursor works well with structured instructions
         if not prompt.instructions:
             errors.append(
                 ValidationError(
@@ -975,15 +1060,17 @@ class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
 
         return config
 
-    def parse_files(self, source_dir: Path) -> UniversalPrompt:
+    def parse_files(
+        self, source_dir: Path
+    ) -> Union[UniversalPrompt, UniversalPromptV2]:
         """
-        Parse Cursor files back into a UniversalPrompt.
+        Parse Cursor files back into a UniversalPrompt or UniversalPromptV2.
 
         Args:
             source_dir: Directory containing Cursor configuration files
 
         Returns:
-            UniversalPrompt object parsed from Cursor files
+            UniversalPrompt or UniversalPromptV2 object parsed from Cursor files
         """
         return self.parse_markdown_rules_files(
             source_dir=source_dir,

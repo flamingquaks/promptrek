@@ -3,12 +3,12 @@ Cline (terminal-based AI assistant) adapter implementation.
 """
 
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 import click
 
 from ..core.exceptions import ValidationError
-from ..core.models import UniversalPrompt
+from ..core.models import UniversalPrompt, UniversalPromptV2
 from .base import EditorAdapter
 from .sync_mixin import MarkdownSyncMixin
 
@@ -28,7 +28,7 @@ class ClineAdapter(MarkdownSyncMixin, EditorAdapter):
 
     def generate(
         self,
-        prompt: UniversalPrompt,
+        prompt: Union[UniversalPrompt, UniversalPromptV2],
         output_dir: Path,
         dry_run: bool = False,
         verbose: bool = False,
@@ -37,7 +37,11 @@ class ClineAdapter(MarkdownSyncMixin, EditorAdapter):
     ) -> List[Path]:
         """Generate Cline rules files - supports both single file and directory formats."""
 
-        # Apply variable substitution if supported
+        # V2: Use documents field for multi-file rules or main content for single file
+        if isinstance(prompt, UniversalPromptV2):
+            return self._generate_v2(prompt, output_dir, dry_run, verbose, variables)
+
+        # V1: Apply variable substitution if supported
         processed_prompt = self.substitute_variables(prompt, variables)
 
         # Process conditionals if supported
@@ -61,11 +65,91 @@ class ClineAdapter(MarkdownSyncMixin, EditorAdapter):
 
         return created_files
 
-    def validate(self, prompt: UniversalPrompt) -> List[ValidationError]:
+    def _generate_v2(
+        self,
+        prompt: UniversalPromptV2,
+        output_dir: Path,
+        dry_run: bool,
+        verbose: bool,
+        variables: Optional[Dict[str, Any]] = None,
+    ) -> List[Path]:
+        """Generate Cline files from v2 schema (using documents for multi-file or content for single file)."""
+        created_files = []
+
+        # If documents field is present, generate directory format with separate files
+        if prompt.documents:
+            clinerules_dir = output_dir / ".clinerules"
+            for doc in prompt.documents:
+                # Apply variable substitution
+                content = doc.content
+                if variables:
+                    for var_name, var_value in variables.items():
+                        placeholder = "{{{ " + var_name + " }}}"
+                        content = content.replace(placeholder, var_value)
+
+                # Generate filename from document name
+                filename = (
+                    f"{doc.name}.md" if not doc.name.endswith(".md") else doc.name
+                )
+                output_file = clinerules_dir / filename
+
+                if dry_run:
+                    click.echo(f"  📁 Would create: {output_file}")
+                    if verbose:
+                        preview = (
+                            content[:200] + "..." if len(content) > 200 else content
+                        )
+                        click.echo(f"    {preview}")
+                    created_files.append(output_file)
+                else:
+                    clinerules_dir.mkdir(parents=True, exist_ok=True)
+                    with open(output_file, "w", encoding="utf-8") as f:
+                        f.write(content)
+                    click.echo(f"✅ Generated: {output_file}")
+                    created_files.append(output_file)
+        else:
+            # No documents, use main content as single .clinerules file
+            content = prompt.content
+            if variables:
+                for var_name, var_value in variables.items():
+                    placeholder = "{{{ " + var_name + " }}}"
+                    content = content.replace(placeholder, var_value)
+
+            output_file = output_dir / ".clinerules"
+
+            if dry_run:
+                click.echo(f"  📁 Would create: {output_file}")
+                if verbose:
+                    preview = content[:200] + "..." if len(content) > 200 else content
+                    click.echo(f"    {preview}")
+                created_files.append(output_file)
+            else:
+                with open(output_file, "w", encoding="utf-8") as f:
+                    f.write(content)
+                click.echo(f"✅ Generated: {output_file}")
+                created_files.append(output_file)
+
+        return created_files
+
+    def validate(
+        self, prompt: Union[UniversalPrompt, UniversalPromptV2]
+    ) -> List[ValidationError]:
         """Validate prompt for Cline."""
         errors = []
 
-        # Cline works well with clear instructions and context
+        # V2 validation: check content exists
+        if isinstance(prompt, UniversalPromptV2):
+            if not prompt.content or not prompt.content.strip():
+                errors.append(
+                    ValidationError(
+                        field="content",
+                        message="Cline requires content",
+                        severity="error",
+                    )
+                )
+            return errors
+
+        # V1 validation: Cline works well with clear instructions and context
         if not prompt.instructions or not prompt.instructions.general:
             errors.append(
                 ValidationError(
@@ -93,8 +177,10 @@ class ClineAdapter(MarkdownSyncMixin, EditorAdapter):
         """Cline supports conditional configuration."""
         return True
 
-    def parse_files(self, source_dir: Path) -> UniversalPrompt:
-        """Parse Cline files back into a UniversalPrompt."""
+    def parse_files(
+        self, source_dir: Path
+    ) -> Union[UniversalPrompt, UniversalPromptV2]:
+        """Parse Cline files back into a UniversalPrompt or UniversalPromptV2."""
         return self.parse_markdown_rules_files(
             source_dir=source_dir,
             rules_subdir=".clinerules",

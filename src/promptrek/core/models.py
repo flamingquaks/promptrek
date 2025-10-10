@@ -125,8 +125,59 @@ class ImportConfig(BaseModel):
     prefix: Optional[str] = Field(default=None, description="Optional namespace prefix")
 
 
+# V2 Models - Simplified schema for v2.0.0+
+
+
+class DocumentConfig(BaseModel):
+    """A single document for multi-file editors (v2 schema)."""
+
+    name: str = Field(..., description="Document name (used for filename)")
+    frontmatter: Optional[Dict[str, Any]] = Field(
+        default=None, description="Optional YAML frontmatter for the document"
+    )
+    content: str = Field(..., description="Raw markdown content")
+
+
+class UniversalPromptV2(BaseModel):
+    """Simplified UPF v2 schema - markdown-first approach."""
+
+    schema_version: str = Field(..., description="UPF schema version (2.x.x)")
+    metadata: PromptMetadata = Field(..., description="Prompt metadata")
+    content: str = Field(..., description="Main markdown content")
+    documents: Optional[List[DocumentConfig]] = Field(
+        default=None, description="Additional documents for multi-file editors"
+    )
+    variables: Optional[Dict[str, str]] = Field(
+        default=None, description="Template variables"
+    )
+
+    @field_validator("schema_version")
+    @classmethod
+    def validate_schema_version(cls, v: str) -> str:
+        """Validate schema version format and ensure it's 2.x.x."""
+        if not v.count(".") == 2:
+            raise ValueError("Schema version must be in format 'x.y.z'")
+        major = v.split(".")[0]
+        if major != "2":
+            raise ValueError("UniversalPromptV2 requires schema version 2.x.x")
+        return v
+
+    @field_validator("content")
+    @classmethod
+    def validate_content(cls, v: str) -> str:
+        """Ensure content is not empty."""
+        if not v or not v.strip():
+            raise ValueError("Content cannot be empty")
+        return v
+
+    model_config = ConfigDict(validate_assignment=True, extra="forbid")
+
+
+# V1 Models - Legacy schema for v1.x.x (backwards compatibility)
+
+
 class UniversalPrompt(BaseModel):
-    """Main UPF model representing a complete prompt configuration."""
+    """Main UPF model representing a complete prompt configuration (v1 schema)."""
 
     schema_version: str = Field(..., description="UPF schema version")
     metadata: PromptMetadata = Field(..., description="Prompt metadata")

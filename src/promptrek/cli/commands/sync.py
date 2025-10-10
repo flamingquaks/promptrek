@@ -7,15 +7,21 @@ PrompTrek configuration from them.
 
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 
 import click
-import yaml
 
 from ...adapters import registry
 from ...core.exceptions import PrompTrekError, UPFParsingError
-from ...core.models import Instructions, ProjectContext, PromptMetadata, UniversalPrompt
+from ...core.models import (
+    Instructions,
+    ProjectContext,
+    PromptMetadata,
+    UniversalPrompt,
+    UniversalPromptV2,
+)
 from ...core.parser import UPFParser
+from ..yaml_writer import write_promptrek_yaml
 
 
 def sync_command(
@@ -210,16 +216,19 @@ def _merge_context(existing_data: dict, parsed: UniversalPrompt) -> dict:
 
 
 def _merge_prompts(
-    existing: UniversalPrompt, parsed: UniversalPrompt, editor: str
-) -> UniversalPrompt:
+    existing: Union[UniversalPrompt, UniversalPromptV2],
+    parsed: Union[UniversalPrompt, UniversalPromptV2],
+    editor: str,
+) -> Union[UniversalPrompt, UniversalPromptV2]:
     """
     Intelligently merge parsed prompt data with existing PrompTrek configuration.
 
     Merge Strategy:
     1. Preserve user-defined metadata (title, description) unless empty
-    2. Merge instructions additively, avoiding duplicates
-    3. Update context info with parsed data
-    4. Mark sync timestamp and editor
+    2. Merge instructions additively, avoiding duplicates (v1 only)
+    3. Update context info with parsed data (v1 only)
+    4. For v2: Update content and metadata only
+    5. Mark sync timestamp and editor
 
     Args:
         existing: Existing PrompTrek configuration
@@ -227,8 +236,57 @@ def _merge_prompts(
         editor: Editor name being synced
 
     Returns:
-        Merged UniversalPrompt
+        Merged UniversalPrompt or UniversalPromptV2
     """
+    # Handle v2 parsed schema
+    if isinstance(parsed, UniversalPromptV2):
+        # If existing is also v2, merge v2 to v2
+        if isinstance(existing, UniversalPromptV2):
+            merged_data = existing.model_dump(exclude_none=True)
+
+            # Update content from parsed
+            merged_data["content"] = parsed.content
+
+            # Update metadata fields
+            if parsed.metadata:
+                metadata = merged_data.get("metadata", {})
+                if parsed.metadata.updated:
+                    metadata["updated"] = parsed.metadata.updated
+                else:
+                    metadata["updated"] = datetime.now().isoformat()[:10]
+                merged_data["metadata"] = metadata
+
+            # Update documents if present
+            if parsed.documents:
+                merged_data["documents"] = [
+                    doc.model_dump(exclude_none=True) for doc in parsed.documents
+                ]
+
+            return UniversalPromptV2.model_validate(merged_data)
+        else:
+            # Existing is v1, parsed is v2 - upgrade to v2
+            click.echo(
+                "ℹ️  Upgrading existing v1 configuration to v2 schema (synced from editor)"
+            )
+            merged_data = {
+                "schema_version": "2.0.0",
+                "metadata": existing.metadata.model_dump(exclude_none=True),
+                "content": parsed.content,
+            }
+
+            # Add documents if present
+            if parsed.documents:
+                merged_data["documents"] = [
+                    doc.model_dump(exclude_none=True) for doc in parsed.documents
+                ]
+
+            # Preserve variables if they exist
+            if hasattr(existing, "variables") and existing.variables:
+                merged_data["variables"] = existing.variables
+
+            return UniversalPromptV2.model_validate(merged_data)
+
+    # Handle v1 schema - complex merge with instructions and context
     # Start with existing configuration
     merged_data = existing.model_dump(exclude_none=True)
 
@@ -248,22 +306,28 @@ def _merge_prompts(
     return UniversalPrompt.model_validate(merged_data)
 
 
-def _preview_prompt(prompt: UniversalPrompt) -> None:
+def _preview_prompt(prompt: Union[UniversalPrompt, UniversalPromptV2]) -> None:
     """Preview the prompt that would be written."""
     click.echo("📄 Preview of configuration that would be written:")
     click.echo(f"  Title: {prompt.metadata.title}")
     click.echo(f"  Description: {prompt.metadata.description}")
 
-    if prompt.instructions:
+    # V2 schema - show content length
+    if isinstance(prompt, UniversalPromptV2):
+        click.echo(f"  Content length: {len(prompt.content)} characters")
+        if prompt.documents:
+            click.echo(f"  Documents: {len(prompt.documents)} files")
+    # V1 schema - show instructions
+    elif prompt.instructions:
         instructions_data = prompt.instructions.model_dump(exclude_none=True)
         for category, instructions in instructions_data.items():
             if instructions:
                 click.echo(f"  {category.title()}: {len(instructions)} instructions")
 
 
-def _write_prompt_file(prompt: UniversalPrompt, output_file: Path) -> None:
-    """Write prompt to YAML file."""
+def _write_prompt_file(
+    prompt: Union[UniversalPrompt, UniversalPromptV2], output_file: Path
+) -> None:
+    """Write prompt to YAML file with proper multi-line formatting."""
     prompt_data = prompt.model_dump(exclude_none=True, by_alias=True)
-
-    with open(output_file, "w", encoding="utf-8") as f:
-        yaml.dump(prompt_data, f, default_flow_style=False, sort_keys=False)
+    write_promptrek_yaml(prompt_data, output_file)

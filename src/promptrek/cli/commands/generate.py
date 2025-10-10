@@ -13,7 +13,7 @@ import click
 from ...adapters import registry
 from ...adapters.registry import AdapterCapability
 from ...core.exceptions import AdapterNotFoundError, CLIError, UPFParsingError
-from ...core.models import UniversalPrompt
+from ...core.models import UniversalPrompt, UniversalPromptV2
 from ...core.parser import UPFParser
 from ...core.validator import UPFValidator
 from ...utils.variables import VariableSubstitution
@@ -145,30 +145,41 @@ def generate_command(
             file_prompts = _parse_and_validate_file(ctx, file_path)
 
             # Determine target editors for this file
-            file_targets = file_prompts.targets or []
-            if all_editors:
-                target_editors = file_targets
-            elif editor:
-                # If targets is None (not specified), allow any editor
-                if (
-                    file_prompts.targets is not None
-                    and editor not in file_prompts.targets
-                ):
-                    # For single file scenario, this should be an error for backward compatibility
-                    if len(unique_files) == 1:
-                        raise CLIError(
-                            f"Editor '{editor}' not in targets for {file_path}: {', '.join(file_targets)}"
-                        )
-                    # For multiple files, just skip with a warning
-                    if verbose:
-                        click.echo(
-                            f"⚠️ Editor '{editor}' not in targets for {file_path}, skipping"
-                        )
-                    continue
-                target_editors = [editor]
+            # V2 doesn't have targets field - works with any editor
+            if isinstance(file_prompts, UniversalPromptV2):
+                # V2: No targets, works with any editor
+                if all_editors:
+                    target_editors = registry.get_project_file_adapters()
+                elif editor:
+                    target_editors = [editor]
+                else:
+                    raise CLIError("Must specify either --editor or --all")
             else:
-                # This is a critical error that should stop processing
-                raise CLIError("Must specify either --editor or --all")
+                # V1: Has targets field
+                file_targets = file_prompts.targets or []
+                if all_editors:
+                    target_editors = file_targets
+                elif editor:
+                    # If targets is None (not specified), allow any editor
+                    if (
+                        file_prompts.targets is not None
+                        and editor not in file_prompts.targets
+                    ):
+                        # For single file scenario, this should be an error for backward compatibility
+                        if len(unique_files) == 1:
+                            raise CLIError(
+                                f"Editor '{editor}' not in targets for {file_path}: {', '.join(file_targets)}"
+                            )
+                        # For multiple files, just skip with a warning
+                        if verbose:
+                            click.echo(
+                                f"⚠️ Editor '{editor}' not in targets for {file_path}, skipping"
+                            )
+                        continue
+                    target_editors = [editor]
+                else:
+                    # This is a critical error that should stop processing
+                    raise CLIError("Must specify either --editor or --all")
 
             # Add to prompts by editor
             for target_editor in target_editors:
@@ -225,8 +236,12 @@ def generate_command(
         )
 
 
-def _parse_and_validate_file(ctx: click.Context, file_path: Path) -> UniversalPrompt:
-    """Parse and validate a single UPF file."""
+def _parse_and_validate_file(ctx: click.Context, file_path: Path):
+    """Parse and validate a single UPF file.
+
+    Returns:
+        Union[UniversalPrompt, UniversalPromptV2]: Parsed prompt (v1 or v2)
+    """
     verbose = ctx.obj.get("verbose", False)
 
     # Parse the file

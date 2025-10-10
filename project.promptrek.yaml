@@ -1,0 +1,441 @@
+schema_version: 2.0.0
+metadata:
+  title: Claude Code Configuration
+  description: Configuration parsed from Claude Code file
+  version: 1.0.0
+  author: PrompTrek Sync
+  created: '2025-10-09T22:03:21.270924'
+  updated: '2025-10-09T22:11:25.464589'
+  tags:
+  - claude-code
+  - synced
+content: |-
+  # CLAUDE.md
+
+  This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+  ## Project Overview
+
+  PrompTrek is a universal AI editor prompt management tool that converts `.promptrek.yaml` files into editor-specific configuration files for various AI coding assistants (GitHub Copilot, Cursor, Continue, Claude Code, Windsurf, Cline, Kiro, Amazon Q, JetBrains AI, Tabnine).
+
+  **Key Features**:
+  - **Schema v2.0.0**: Markdown-first approach for simpler, more maintainable configurations
+  - **Lossless Bidirectional Sync**: Parse editor files back to `.promptrek.yaml` without data loss
+  - **Multi-Format Support**: Works with all major AI editors automatically (no `targets` field needed in v2)
+  - **Variable Substitution**: Use `{{{ VARIABLE_NAME }}}` for dynamic content
+
+  **Technology Stack**: Python 3.9+ with Click (CLI), Jinja2 (templating), PyYAML (parsing), Pydantic (validation)
+
+  ## Development Commands
+
+  ### Testing
+  ```bash
+  # Run all tests with coverage
+  make test
+
+  # Fast tests without coverage
+  make test-fast
+
+  # Unit tests only
+  make test-unit
+  # or: uv run python -m pytest tests/unit/
+
+  # Integration tests only
+  make test-integration
+  # or: uv run python -m pytest tests/integration/
+
+  # Run specific test file
+  uv run python -m pytest tests/unit/test_parser.py
+  ```
+
+  ### Code Quality
+  ```bash
+  # Format code (black + isort)
+  make format
+
+  # Lint code
+  make lint
+
+  # Type checking
+  make typecheck
+  # or: uv run mypy src/
+  ```
+
+  ### Pre-commit Hooks
+  ```bash
+  # Install hooks
+  uv run pre-commit install
+
+  # Run hooks manually
+  uv run pre-commit run --all-files
+  ```
+
+  ### Running PrompTrek
+  ```bash
+  # Run CLI directly
+  uv run promptrek <command>
+
+  # Initialize new project (creates v2 format by default)
+  uv run promptrek init
+  uv run promptrek init --v1  # Create legacy v1 format
+  uv run promptrek init --template react  # Use React template (v2)
+
+  # Migrate v1 to v2
+  uv run promptrek migrate project.promptrek.yaml -o project.v2.promptrek.yaml
+
+  # Validate configuration
+  uv run promptrek validate .promptrek.yaml
+
+  # Generate editor files
+  uv run promptrek generate .promptrek.yaml --all
+  uv run promptrek generate .promptrek.yaml --editor claude
+
+  # Sync from editor files to .promptrek.yaml
+  uv run promptrek sync --editor claude --source-dir . --output synced.promptrek.yaml
+  ```
+
+  ## Architecture
+
+  ### Core Components
+
+  **1. CLI Layer** (`src/promptrek/cli/`)
+  - Entry point: `main.py` with Click command group
+  - Commands in `commands/`: `init.py`, `generate.py`, `validate.py`, `sync.py`, `migrate.py`, `preview.py`, `agents.py`, `hooks.py`
+  - **New**: `migrate.py` - Convert v1 schemas to v2
+
+  **2. Core Functionality** (`src/promptrek/core/`)
+  - `models.py`: Pydantic models for both v1 (`UniversalPrompt`) and v2 (`UniversalPromptV2`) schemas
+    - v2 uses `DocumentConfig` for multi-file editors
+    - v2 stores raw markdown in `content` field (lossless!)
+    - v2 has no `targets` field (works with all editors)
+  - `parser.py`: Version-aware YAML parsing (auto-detects v1 vs v2 from `schema_version`)
+  - `validator.py`: Schema validation for both v1 and v2 (simpler validation for v2)
+  - `exceptions.py`: Custom exception hierarchy
+
+  **3. Adapter System** (`src/promptrek/adapters/`)
+  - `base.py`: Abstract `EditorAdapter` class with common interface
+  - `registry.py`: Adapter registration and capability management
+  - Individual adapters: `copilot.py`, `cursor.py`, `continue_adapter.py`, `claude.py`, `windsurf.py`, `cline.py`, `kiro.py`, `amazon_q.py`, `jetbrains.py`, `tabnine.py`
+  - `sync_mixin.py`: Bidirectional sync support with v2 lossless methods
+    - `SingleFileMarkdownSyncMixin`: For editors with single markdown files (Claude, Copilot)
+    - `MarkdownSyncMixin`: For editors with multiple markdown files (Continue, Windsurf, Kiro)
+    - **V2 Sync**: `parse_single_markdown_file_v2()` for lossless roundtrip
+
+  **Adapters with Full V2 Support** (All 10 Adapters ✅):
+  - ✅ Claude (`claude.py`) - Lossless sync verified, single markdown file
+  - ✅ Copilot (`copilot.py`) - Lossless sync with headless mode, single markdown file
+  - ✅ Continue (`continue_adapter.py`) - Multi-file support with `documents` field
+  - ✅ Windsurf (`windsurf.py`) - Multi-file support with `documents` field
+  - ✅ Kiro (`kiro.py`) - Multi-file steering docs support
+  - ✅ Cursor (`cursor.py`) - Multi-file `.mdc` rules with `documents` field
+  - ✅ Cline (`cline.py`) - Single file or multi-file directory format
+  - ✅ Tabnine (`tabnine.py`) - Markdown to comment-based conversion
+  - ✅ JetBrains (`jetbrains.py`) - Multi-file rules with `documents` field
+  - ✅ Amazon Q (`amazon_q.py`) - Multi-file rules with `documents` field
+
+  **4. Utilities** (`src/promptrek/utils/`)
+  - `variables.py`: Variable substitution with `{{{ VAR }}}` syntax
+  - `conditionals.py`: Conditional instruction processing
+  - `imports.py`: Import system for sharing configurations
+
+  ### Key Patterns
+
+  **Adapter Interface**: All adapters inherit from `EditorAdapter` and must implement:
+  - `generate(prompt: Union[UniversalPrompt, UniversalPromptV2], ...)`: Create editor-specific files from v1 or v2 schema
+    - V2 adapters check `isinstance(prompt, UniversalPromptV2)` and handle accordingly
+    - V2 uses direct markdown output from `prompt.content` (lossless!)
+  - `validate(prompt: Union[UniversalPrompt, UniversalPromptV2])`: Editor-specific validation
+    - V2 validation is simpler (just checks content exists)
+  - Optional: `parse_files()` for bidirectional sync (returns `Union[UniversalPrompt, UniversalPromptV2]`)
+    - V2-enabled adapters use `parse_single_markdown_file_v2()` for lossless roundtrip
+
+  **Capability System**: Adapters declare capabilities via `AdapterCapability` enum:
+  - `PROJECT_FILE_SUPPORT`: Can generate project-level config files
+  - `GLOBAL_CONFIG_ONLY`: Only global/user settings (no file generation)
+  - `IDE_PLUGIN_ONLY`: Configured through IDE interface
+  - `BIDIRECTIONAL_SYNC`: Supports parsing editor files back to UPF
+
+  **Variable Substitution**: Uses `{{{ VARIABLE_NAME }}}` syntax (triple braces to distinguish from Jinja2)
+  - Processed by `VariableSubstitution` class in `utils/variables.py`
+  - Supports environment variables and CLI overrides with `-V KEY=value`
+
+  **Conditional Instructions**: Uses `conditions` field in `.promptrek.yaml`
+  - Evaluated by `ConditionalProcessor` in `utils/conditionals.py`
+  - Can reference `EDITOR` variable to provide editor-specific instructions
+
+  ## Testing
+
+  **Test Structure**:
+  - `tests/unit/`: Unit tests for individual modules
+    - `tests/unit/test_models.py`: Model tests including `TestDocumentConfig` and `TestUniversalPromptV2` (10+ v2 tests)
+    - `tests/unit/test_parser.py`: Parser tests including `TestUPFParserV2` (9+ v2 tests)
+    - `tests/unit/adapters/test_adapters_v2.py`: Comprehensive v2 adapter tests for all 10 adapters
+    - `tests/unit/adapters/test_*.py`: Individual adapter tests
+  - `tests/integration/`: End-to-end workflow tests
+  - `tests/conftest.py`: Shared pytest fixtures
+
+  **V2 Test Coverage**:
+  - ✅ **Model Tests**: `DocumentConfig` validation, `UniversalPromptV2` creation, schema version validation
+  - ✅ **Parser Tests**: V2 file parsing, v1/v2 auto-detection, documents field handling
+  - ✅ **Adapter Tests**: V2 generation for all 10 adapters, variable substitution, multi-file support
+  - ✅ **All Tests Passing**: Complete v2 implementation verified
+
+  **Coverage Requirements**: Minimum 60% (enforced in pytest config), targeting >80%
+
+  **Running Specific Tests**:
+  ```bash
+  # Run all v2 model tests
+  uv run python -m pytest tests/unit/test_models.py::TestUniversalPromptV2 -v
+  uv run python -m pytest tests/unit/test_models.py::TestDocumentConfig -v
+
+  # Run all v2 parser tests
+  uv run python -m pytest tests/unit/test_parser.py::TestUPFParserV2 -v
+
+  # Run v2 adapter tests
+  uv run python -m pytest tests/unit/adapters/test_adapters_v2.py -v
+
+  # Run specific adapter v2 test
+  uv run python -m pytest tests/unit/adapters/test_adapters_v2.py::TestClaudeAdapterV2 -v
+
+  # Single test file
+  uv run python -m pytest tests/unit/adapters/test_copilot.py
+
+  # Single test function
+  uv run python -m pytest tests/unit/test_parser.py::test_parse_valid_yaml -v
+
+  # Tests matching pattern
+  uv run python -m pytest -k "test_adapter" -v
+  uv run python -m pytest -k "v2" -v  # Run all v2-related tests
+  ```
+
+  ## Pre-commit Hooks
+
+  PrompTrek uses pre-commit hooks for validation and preventing accidental commits of generated files:
+
+  **Hook Types** (defined in `.pre-commit-hooks.yaml`):
+  1. `promptrek-validate`: Validates `.promptrek.yaml` files
+  2. `promptrek-prevent-generated`: Blocks commits of generated editor files
+  3. `promptrek-check-local-vars`: Prevents committing user-specific `variables.promptrek.yaml`
+
+  **Implementation**: Hooks are implemented via CLI commands in `src/promptrek/cli/commands/hooks.py`
+
+  ## Code Conventions
+
+  **Python Style**:
+  - Follow PEP 8 (enforced by black and flake8)
+  - Type hints required for all function signatures (enforced by mypy)
+  - Docstrings for all public classes and functions
+  - Use f-strings for formatting
+  - Line length: 88 characters (black default)
+
+  **Imports**:
+  - Sorted with isort (black profile)
+  - Order: stdlib, third-party, local imports
+
+  **Naming**:
+  - Classes: PascalCase
+  - Functions/methods: snake_case
+  - Constants: UPPER_SNAKE_CASE
+  - Private members: _leading_underscore
+
+  **Error Handling**:
+  - Use custom exceptions from `core/exceptions.py`
+  - Hierarchy: `PrompTrekError` (base) → `ValidationError`, `ParserError`, `AdapterError`, etc.
+
+  ## Adding New Editor Adapters
+
+  1. Create adapter class in `src/promptrek/adapters/your_editor.py`:
+     ```python
+     from typing import Union
+     from .base import EditorAdapter
+     from ..core.models import UniversalPrompt, UniversalPromptV2
+
+     class YourEditorAdapter(EditorAdapter):
+         def __init__(self):
+             super().__init__(
+                 name="youreditor",
+                 description="Description",
+                 file_patterns=[".youreditor/config.md"]
+             )
+
+         def generate(self, prompt: Union[UniversalPrompt, UniversalPromptV2], output_dir, ...):
+             # V2: Direct markdown output (lossless!)
+             if isinstance(prompt, UniversalPromptV2):
+                 content = prompt.content
+                 # Apply variable substitution if needed
+                 if variables:
+                     for var_name, var_value in variables.items():
+                         placeholder = "{{{ " + var_name + " }}}"
+                         content = content.replace(placeholder, var_value)
+                 # Write directly to file
+                 output_file.write_text(content)
+                 return [output_file]
+
+             # V1: Build from structured fields
+             processed_prompt = self.substitute_variables(prompt, variables)
+             content = self._build_content(processed_prompt)
+             # ...
+
+         def validate(self, prompt: Union[UniversalPrompt, UniversalPromptV2]):
+             # V2: Simple validation
+             if isinstance(prompt, UniversalPromptV2):
+                 return [] if prompt.content else [ValidationError(...)]
+             # V1: Full validation
+             # ...
+     ```
+
+  2. Register in `src/promptrek/adapters/registry.py`:
+     ```python
+     from .your_editor import YourEditorAdapter
+     registry.register(YourEditorAdapter(), capabilities=[...])
+     ```
+
+  3. Add bidirectional sync (optional):
+     ```python
+     from .sync_mixin import SingleFileMarkdownSyncMixin
+
+     class YourEditorAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
+         def parse_files(self, source_dir: Path):
+             # Use v2 sync for lossless roundtrip
+             return self.parse_single_markdown_file_v2(
+                 source_dir=source_dir,
+                 file_path=".youreditor/config.md",
+                 editor_name="Your Editor",
+             )
+     ```
+
+  4. Add tests in `tests/unit/adapters/test_youreditor.py`
+
+  ## Universal Prompt Format (.promptrek.yaml)
+
+  PrompTrek supports two schema versions:
+
+  ### Schema v2.0.0 (Recommended - Default)
+
+  **Markdown-First Approach**: Simpler, more maintainable, aligned with how editors actually work.
+
+  **Key Fields**:
+  - `schema_version`: "2.0.0"
+  - `metadata`: Project info (title, description, author, version, tags, created, updated)
+  - `content`: **Main markdown content** (raw markdown, lossless!)
+  - `documents` (optional): Array of `DocumentConfig` for multi-file editors (Continue, Windsurf, Kiro)
+    - Each document has `name` and `content`
+    - Used for separate steering docs or rules files
+  - `variables` (optional): Variable definitions for `{{{ VAR }}}` substitution
+
+  **Benefits of v2**:
+  - ✅ **No `targets` field**: Works with ALL editors automatically
+  - ✅ **Lossless sync**: Parse editor files back without data loss
+  - ✅ **Simpler**: Just markdown content, no complex nested structures
+  - ✅ **Editor-friendly**: Matches how Claude Code, Copilot, and others actually use markdown
+
+  **Example v2 file**:
+  ```yaml
+  schema_version: 2.0.0
+  metadata:
+    title: My Project Assistant
+    description: AI assistant for my project
+    version: 1.0.0
+    author: Your Name
+    tags: [ai-assistant, project]
+  content: |
+    # My Project Assistant
+
+    ## Project Details
+    **Technologies:** Python, React, TypeScript
+
+    ## Development Guidelines
+
+    ### General Principles
+    - Write clean, maintainable code
+    - Follow existing patterns
+    - Add tests for new features
+
+    ## Code Examples
+
+    ### Function Example
+    ```python
+    def example():
+        """Example function."""
+        pass
+    ```
+  variables:
+    PROJECT_NAME: "My Project"
+  ```
+
+  ### Schema v1.0.0 (Legacy)
+
+  **Structured Approach**: Complex nested fields, requires `targets` specification.
+
+  **Key Fields**:
+  - `schema_version`: "1.0.0"
+  - `metadata`: Project info
+  - `targets`: **Required** - List of editor names to generate for
+  - `context`: Project type, technologies, description
+  - `instructions`: Categorized (general, code_style, architecture, testing, security, performance)
+  - `examples`: Code examples with keys
+  - `variables`: Variable definitions
+  - `conditions`: Conditional instructions based on EDITOR variable
+  - `imports`: Import other `.promptrek.yaml` files
+
+  **Migration**: Use `promptrek migrate` to convert v1 → v2:
+  ```bash
+  promptrek migrate old.promptrek.yaml -o new.promptrek.yaml
+  ```
+
+  ## CI/CD
+
+  **GitHub Actions Workflows**:
+  - `ci.yml`: Runs tests, linting, type checking across Python 3.9-3.12
+  - `pr.yml`: PR validation (commit message format, changelog check)
+
+  **Commit Format**: Conventional Commits (enforced in CI)
+  - Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`, `ci`, `build`, `perf`
+  - Scopes: `cli`, `core`, `adapters`, `templates`, `docs`, `parser`, `validator`, `utils`, `tests`, `deps`, `changelog`
+  - Example: `feat(adapters): add support for new editor`
+
+  ## Build and Release
+
+  ```bash
+  # Build package
+  uv build
+  # or: make build
+
+  # Clean build artifacts
+  make clean
+  ```
+
+  **Version**: Defined in `pyproject.toml` under `[project]` section (currently 0.0.7)
+
+  ## Important Notes
+
+  - **V2 Schema is Production Ready**: All 10 adapters support v2.0.0 schema with comprehensive test coverage
+  - **V2 is the Default**: `promptrek init` now creates v2 format by default (use `--v1` for legacy)
+  - **Migration Available**: Use `promptrek migrate` to convert v1 files to v2 format
+  - **Generated files should NOT be committed**: The pre-commit hooks prevent this, but be aware that files in `.github/copilot-instructions.md`, `.cursor/`, `.continue/`, etc. are auto-generated
+  - **Use uv for all operations**: The project uses uv for dependency management and running commands
+  - **Test coverage is enforced**: Minimum 60% coverage required for CI to pass
+  - **Type hints are required**: mypy is configured with strict settings
+  - **Adapter capabilities matter**: When adding features, check if they apply to all adapters or only those with specific capabilities
+
+  ## V2 Schema Quick Reference
+
+  **When to use v2 (Recommended for all new projects)**:
+  - ✅ You want a simpler, markdown-first format
+  - ✅ You need lossless bidirectional sync
+  - ✅ You want to support all editors without specifying `targets`
+  - ✅ You prefer writing markdown over structured YAML
+
+  **When to use v1 (Legacy)**:
+  - ⚠️ You have existing v1 files (consider migrating to v2)
+  - ⚠️ You need highly structured instruction categories
+  - ⚠️ You rely on complex conditional logic
+
+  **V2 Implementation Checklist** (for new adapters):
+  1. ✅ Update `generate()` method signature to `Union[UniversalPrompt, UniversalPromptV2]`
+  2. ✅ Add `_generate_v2()` method for direct markdown output
+  3. ✅ Handle `documents` field for multi-file generation
+  4. ✅ Implement variable substitution with `{{{ VAR }}}` syntax
+  5. ✅ Update `validate()` method for v2 (simple content check)
+  6. ✅ Update `parse_files()` return type to `Union[UniversalPrompt, UniversalPromptV2]`
+  7. ✅ Add comprehensive tests in `tests/unit/adapters/test_adapters_v2.py`

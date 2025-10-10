@@ -11,7 +11,7 @@ import yaml
 from pydantic import ValidationError
 
 from .exceptions import UPFFileNotFoundError, UPFParsingError
-from .models import UniversalPrompt
+from .models import UniversalPrompt, UniversalPromptV2
 
 
 class UPFParser:
@@ -21,7 +21,9 @@ class UPFParser:
         """Initialize the UPF parser."""
         pass
 
-    def parse_file(self, file_path: Union[str, Path]) -> UniversalPrompt:
+    def parse_file(
+        self, file_path: Union[str, Path]
+    ) -> Union[UniversalPrompt, UniversalPromptV2]:
         """
         Parse a UPF file from disk.
 
@@ -29,7 +31,7 @@ class UPFParser:
             file_path: Path to the .promptrek.yaml file
 
         Returns:
-            Parsed UniversalPrompt object
+            Parsed UniversalPrompt (v1) or UniversalPromptV2 (v2) object
 
         Raises:
             UPFFileNotFoundError: If the file doesn't exist
@@ -55,8 +57,8 @@ class UPFParser:
 
         prompt = self.parse_dict(data, str(file_path))
 
-        # Process imports if present
-        if prompt.imports:
+        # Process imports if present (v1 only)
+        if isinstance(prompt, UniversalPrompt) and prompt.imports:
             from ..utils import ImportProcessor
 
             import_processor = ImportProcessor()
@@ -66,16 +68,18 @@ class UPFParser:
 
     def parse_dict(
         self, data: Dict[str, Any], source: str = "<dict>"
-    ) -> UniversalPrompt:
+    ) -> Union[UniversalPrompt, UniversalPromptV2]:
         """
         Parse a UPF dictionary into a UniversalPrompt object.
+
+        Automatically detects schema version and uses appropriate model.
 
         Args:
             data: Dictionary containing UPF data
             source: Source identifier for error messages
 
         Returns:
-            Parsed UniversalPrompt object
+            Parsed UniversalPrompt (v1) or UniversalPromptV2 (v2) object
 
         Raises:
             UPFParsingError: If parsing or validation fails
@@ -85,17 +89,33 @@ class UPFParser:
                 f"UPF data must be a dictionary, got {type(data)} in {source}"
             )
 
+        # Detect version from schema_version field
+        schema_version = data.get("schema_version", "1.0.0")
+        major_version = self._get_major_version(schema_version)
+
         try:
-            return UniversalPrompt(**data)
+            if major_version == "2":
+                # Use v2 model
+                return UniversalPromptV2(**data)
+            else:
+                # Use v1 model (default for backwards compatibility)
+                return UniversalPrompt(**data)
         except ValidationError as e:
             error_msg = self._format_validation_error(e, source)
             raise UPFParsingError(error_msg)
         except Exception as e:
             raise UPFParsingError(f"Unexpected error parsing {source}: {e}")
 
+    def _get_major_version(self, version_str: str) -> str:
+        """Extract major version from version string."""
+        try:
+            return version_str.split(".")[0]
+        except (AttributeError, IndexError):
+            return "1"  # Default to v1 if invalid format
+
     def parse_string(
         self, yaml_content: str, source: str = "<string>"
-    ) -> UniversalPrompt:
+    ) -> Union[UniversalPrompt, UniversalPromptV2]:
         """
         Parse a UPF YAML string into a UniversalPrompt object.
 
@@ -104,7 +124,7 @@ class UPFParser:
             source: Source identifier for error messages
 
         Returns:
-            Parsed UniversalPrompt object
+            Parsed UniversalPrompt (v1) or UniversalPromptV2 (v2) object
 
         Raises:
             UPFParsingError: If parsing fails
