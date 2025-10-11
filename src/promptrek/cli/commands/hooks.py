@@ -224,22 +224,26 @@ def install_hooks_command(
                 break
 
     # PrompTrek hook configuration
+    # Note: For PrompTrek development, use "uv run promptrek" to use local version
+    # For users installing PrompTrek, "promptrek" is sufficient
+    entry_prefix = "uv run " if Path("pyproject.toml").exists() else ""
+
     promptrek_hooks = {
         "repo": "local",
         "hooks": [
             {
                 "id": "promptrek-validate",
                 "name": "Validate PrompTrek files",
-                "entry": "promptrek validate",
+                "entry": f"{entry_prefix}promptrek validate",
                 "language": "system",
                 "files": r"\.promptrek\.ya?ml$",
                 "pass_filenames": True,
-                "stages": ["commit"],
+                "stages": ["pre-commit"],
             },
             {
                 "id": "promptrek-prevent-generated",
                 "name": "Prevent committing generated files",
-                "entry": "promptrek check-generated",
+                "entry": f"{entry_prefix}promptrek check-generated",
                 "language": "system",
                 "files": r"(?x)("
                 r"^\.github/(copilot-instructions\.md|instructions/.*\.instructions\.md|prompts/.*\.prompt\.md)$|"
@@ -253,17 +257,17 @@ def install_hooks_command(
                 r"^\.amazonq/.*$|"
                 r"^\.assistant/.*"
                 r")",
-                "stages": ["commit"],
+                "stages": ["pre-commit"],
                 "always_run": False,
                 "pass_filenames": True,
             },
             {
                 "id": "promptrek-check-local-vars",
                 "name": "Prevent committing local variables",
-                "entry": "promptrek check-generated",
+                "entry": f"{entry_prefix}promptrek check-generated",
                 "language": "system",
                 "files": r"variables\.promptrek\.ya?ml$",
-                "stages": ["commit"],
+                "stages": ["pre-commit"],
                 "always_run": False,
                 "pass_filenames": True,
             },

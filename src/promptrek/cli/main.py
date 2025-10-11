@@ -80,20 +80,25 @@ def init(
 
 
 @cli.command()
-@click.argument("file", type=click.Path(exists=True, path_type=Path))
+@click.argument("files", nargs=-1, type=click.Path(exists=True, path_type=Path), required=True)
 @click.option("--strict", is_flag=True, help="Treat warnings as errors")
 @click.pass_context
-def validate(ctx: click.Context, file: Path, strict: bool) -> None:
-    """Validate a universal prompt file."""
-    try:
-        validate_command(ctx, file, strict)
-    except PrompTrekError as e:
-        click.echo(f"Error: {e}", err=True)
-        ctx.exit(1)
-    except Exception as e:
-        if ctx.obj.get("verbose"):
-            raise
-        click.echo(f"Unexpected error: {e}", err=True)
+def validate(ctx: click.Context, files: tuple[Path, ...], strict: bool) -> None:
+    """Validate one or more universal prompt files."""
+    has_error = False
+    for file in files:
+        try:
+            validate_command(ctx, file, strict)
+        except PrompTrekError as e:
+            click.echo(f"Error: {e}", err=True)
+            has_error = True
+        except Exception as e:
+            if ctx.obj.get("verbose"):
+                raise
+            click.echo(f"Unexpected error: {e}", err=True)
+            has_error = True
+
+    if has_error:
         ctx.exit(1)
 
 
