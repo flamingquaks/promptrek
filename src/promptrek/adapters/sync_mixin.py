@@ -10,8 +10,16 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 import click
+import yaml
 
-from ..core.models import Instructions, ProjectContext, PromptMetadata, UniversalPrompt
+from ..core.models import (
+    DocumentConfig,
+    Instructions,
+    ProjectContext,
+    PromptMetadata,
+    UniversalPrompt,
+    UniversalPromptV2,
+)
 
 
 class MarkdownSyncMixin:
@@ -214,7 +222,7 @@ class SingleFileMarkdownSyncMixin:
         editor_name: str = "AI Assistant",
     ) -> UniversalPrompt:
         """
-        Parse a single markdown file back into a UniversalPrompt.
+        Parse a single markdown file back into a UniversalPrompt (v1 - legacy).
 
         Args:
             source_dir: Root directory containing editor configuration
@@ -268,6 +276,91 @@ class SingleFileMarkdownSyncMixin:
             context=context,
             instructions=instructions,
         )
+
+    def parse_single_markdown_file_v2(
+        self,
+        source_dir: Path,
+        file_path: str,
+        editor_name: str = "AI Assistant",
+    ) -> UniversalPromptV2:
+        """
+        Parse a single markdown file into UniversalPromptV2 (lossless).
+
+        This method preserves the markdown content exactly as-is, extracting
+        only minimal metadata. Perfect for lossless bidirectional sync.
+
+        Args:
+            source_dir: Root directory containing editor configuration
+            file_path: Path to the file relative to source_dir
+            editor_name: Name of the editor for metadata
+
+        Returns:
+            UniversalPromptV2 object with lossless markdown content
+        """
+        md_file = source_dir / file_path
+
+        if not md_file.exists():
+            raise FileNotFoundError(f"File not found: {md_file}")
+
+        # Read the file
+        with open(md_file, "r", encoding="utf-8") as f:
+            full_content = f.read()
+
+        # Extract frontmatter if present
+        frontmatter_data, content = self._extract_frontmatter(full_content)
+
+        # Extract title from first H1 or use default
+        title = (
+            self._extract_title_from_markdown(content) or f"{editor_name} Configuration"
+        )
+
+        # Create metadata
+        metadata = PromptMetadata(
+            title=title,
+            description=f"Synced from {file_path}",
+            version="1.0.0",
+            author="PrompTrek Sync",
+            created=datetime.now().isoformat(),
+            updated=datetime.now().isoformat(),
+            tags=[editor_name.lower().replace(" ", "-"), "synced"],
+        )
+
+        # Build v2 prompt with raw markdown content
+        return UniversalPromptV2(
+            schema_version="2.0.0",
+            metadata=metadata,
+            content=content.strip(),  # Raw markdown content, lossless!
+            variables={},
+        )
+
+    def _extract_frontmatter(self, content: str) -> tuple[Optional[Dict], str]:
+        """
+        Extract YAML frontmatter from markdown if present.
+
+        Returns:
+            Tuple of (frontmatter_dict, remaining_content)
+        """
+        if not content.startswith("---"):
+            return None, content
+
+        parts = content.split("---", 2)
+        if len(parts) < 3:
+            return None, content
+
+        try:
+            frontmatter = yaml.safe_load(parts[1])
+            remaining = parts[2].strip()
+            return frontmatter, remaining
+        except yaml.YAMLError:
+            return None, content
+
+    def _extract_title_from_markdown(self, content: str) -> Optional[str]:
+        """Extract title from first H1 heading in markdown."""
+        for line in content.split("\n"):
+            line = line.strip()
+            if line.startswith("# "):
+                return line[2:].strip()
+        return None
 
     def _parse_markdown_sections(self, content: str) -> Dict[str, List[str]]:
         """

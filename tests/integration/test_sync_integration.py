@@ -75,21 +75,36 @@ class TestSyncIntegration:
             # Check output file was created
             assert output_file.exists()
 
-            # Validate content
+            # Validate content (V2 schema)
             with open(output_file, "r") as f:
                 content = yaml.safe_load(f)
 
-            assert content["metadata"]["title"] == "Integration Test Assistant"
-            assert content["metadata"]["description"] == "Testing the full workflow"
-            assert "continue" in content["targets"]
-
-            # Check instructions were parsed
-            assert "Integration test rule" in content["instructions"]["general"]
-            assert "Use integration tests" in content["instructions"]["general"]
+            assert content["schema_version"] == "2.0.0"
             assert (
-                "Write comprehensive integration tests"
-                in content["instructions"]["testing"]
+                content["metadata"]["title"] == "Continue AI Assistant"
+            )  # V2 uses default title
+
+            # V2 uses documents instead of targets/instructions
+            assert "documents" in content
+            assert len(content["documents"]) >= 2  # general.md and testing.md
+
+            # Check documents were parsed
+            doc_names = [doc["name"] for doc in content["documents"]]
+            assert "general" in doc_names
+            assert "testing" in doc_names
+
+            # Check content in documents
+            general_doc = next(
+                (d for d in content["documents"] if d["name"] == "general"), None
             )
+            assert general_doc is not None
+            assert "Use integration tests" in general_doc["content"]
+
+            testing_doc = next(
+                (d for d in content["documents"] if d["name"] == "testing"), None
+            )
+            assert testing_doc is not None
+            assert "Write comprehensive integration tests" in testing_doc["content"]
 
     def test_sync_dry_run_cli(self):
         """Test sync dry run through CLI."""

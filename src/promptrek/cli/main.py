@@ -15,6 +15,7 @@ from .commands.agents import agents_command
 from .commands.generate import generate_command
 from .commands.hooks import check_generated_command, install_hooks_command
 from .commands.init import init_command
+from .commands.migrate import migrate_command
 from .commands.preview import preview_command
 from .commands.sync import sync_command
 from .commands.validate import validate_command
@@ -49,15 +50,25 @@ def cli(ctx: click.Context, verbose: bool) -> None:
     is_flag=True,
     help="Automatically set up and activate pre-commit hooks",
 )
+@click.option(
+    "--v1",
+    is_flag=True,
+    help="Use v1 schema format (default is v2)",
+)
 @click.pass_context
-def init(ctx: click.Context, template: str, output: str, setup_hooks: bool) -> None:
+def init(
+    ctx: click.Context, template: str, output: str, setup_hooks: bool, v1: bool
+) -> None:
     """Initialize a new universal prompt file.
+
+    Creates a v2 format file by default (markdown-first approach).
+    Use --v1 for legacy v1 format with structured fields.
 
     Use --setup-hooks to automatically configure pre-commit hooks after
     creating the file, making your project ready for development.
     """
     try:
-        init_command(ctx, template, output, setup_hooks)
+        init_command(ctx, template, output, setup_hooks, use_v2=not v1)
     except PrompTrekError as e:
         click.echo(f"Error: {e}", err=True)
         ctx.exit(1)
@@ -69,13 +80,60 @@ def init(ctx: click.Context, template: str, output: str, setup_hooks: bool) -> N
 
 
 @cli.command()
-@click.argument("file", type=click.Path(exists=True, path_type=Path))
+@click.argument(
+    "files", nargs=-1, type=click.Path(exists=True, path_type=Path), required=True
+)
 @click.option("--strict", is_flag=True, help="Treat warnings as errors")
 @click.pass_context
-def validate(ctx: click.Context, file: Path, strict: bool) -> None:
-    """Validate a universal prompt file."""
+def validate(ctx: click.Context, files: tuple[Path, ...], strict: bool) -> None:
+    """Validate one or more universal prompt files."""
+    has_error = False
+    for file in files:
+        try:
+            validate_command(ctx, file, strict)
+        except PrompTrekError as e:
+            click.echo(f"Error: {e}", err=True)
+            has_error = True
+        except Exception as e:
+            if ctx.obj.get("verbose"):
+                raise
+            click.echo(f"Unexpected error: {e}", err=True)
+            has_error = True
+
+    if has_error:
+        ctx.exit(1)
+
+
+@cli.command()
+@click.argument("input-file", type=click.Path(exists=True, path_type=Path))
+@click.option(
+    "--output",
+    "-o",
+    type=click.Path(path_type=Path),
+    help="Output file path (default: <input>.v2.promptrek.yaml)",
+)
+@click.option(
+    "--force",
+    "-f",
+    is_flag=True,
+    help="Overwrite output file if it exists",
+)
+@click.pass_context
+def migrate(
+    ctx: click.Context,
+    input_file: Path,
+    output: Optional[Path],
+    force: bool,
+) -> None:
+    """Migrate a v1 .promptrek.yaml file to v2 format.
+
+    The v2 format uses pure markdown content instead of structured fields,
+    making it simpler and aligned with how AI editors actually work.
+
+    By default, creates a new file with .v2.promptrek.yaml suffix.
+    """
     try:
-        validate_command(ctx, file, strict)
+        migrate_command(ctx, input_file, output, force)
     except PrompTrekError as e:
         click.echo(f"Error: {e}", err=True)
         ctx.exit(1)

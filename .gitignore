@@ -53,6 +53,7 @@ Thumbs.db
 htmlcov/
 .tox/
 .nox/
+test-project/  # All test file generation happens here, not in project root
 
 # GitHub Actions artifacts
 coverage.xml
@@ -122,3 +123,4 @@ vendor/
 
 # PrompTrek local variables (user-specific, not committed)
 variables.promptrek.yaml
+test-project/

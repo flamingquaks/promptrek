@@ -33,15 +33,18 @@ promptrek --version
 Create a new universal prompt file using one of our templates:
 
 ```bash
-# Basic initialization with pre-commit hooks (recommended)
+# Basic initialization with pre-commit hooks (creates v2 format by default)
 promptrek init --setup-hooks --output my-project.promptrek.yaml
 
-# Use a specific template with hooks
+# Use a specific template with hooks (v2 format)
 promptrek init --template react --setup-hooks --output my-react-app.promptrek.yaml
 promptrek init --template api --setup-hooks --output my-api.promptrek.yaml
 
-# Without hooks setup (manual)
-promptrek init --output my-project.promptrek.yaml
+# Create v1 format (legacy)
+promptrek init --v1 --output legacy.promptrek.yaml
+
+# Migrate existing v1 file to v2
+promptrek migrate old.promptrek.yaml -o new.promptrek.yaml
 ```
 
 **💡 Tip:** The `--setup-hooks` flag automatically configures pre-commit hooks to validate your `.promptrek.yaml` files and prevent accidental commits of generated files. This ensures your team maintains clean version control!
@@ -65,7 +68,61 @@ See [examples on GitHub](https://github.com/flamingquaks/promptrek/tree/main/exa
 
 ### 2. Customize Your Prompt
 
-Edit the generated `.promptrek.yaml` file to match your project needs:
+Edit the generated `.promptrek.yaml` file to match your project needs.
+
+**Using v2 Format (Recommended - Default)**:
+
+```yaml
+schema_version: "2.0.0"
+
+metadata:
+  title: "My Project Assistant"
+  description: "AI assistant for my project"
+  version: "1.0.0"
+  author: "Your Name <your.email@example.com>"
+  tags: [web, python, react]
+
+content: |
+  # My Project Assistant
+
+  ## Project Details
+  **Project Type:** web_application
+  **Technologies:** Python, JavaScript, React
+
+  ## Development Guidelines
+
+  ### General Principles
+  - Write clean, readable code
+  - Follow existing patterns
+  - Add comprehensive documentation
+
+  ### Code Style
+  - Use meaningful variable names
+  - Add appropriate comments for complex logic
+  - Follow language-specific best practices
+
+  ## Code Examples
+
+  ### Function Example
+  ```python
+  def hello_world():
+      """Example function with docstring."""
+      return "Hello, World!"
+  ```
+
+variables:
+  PROJECT_NAME: "my-project"
+  AUTHOR_EMAIL: "your.email@example.com"
+```
+
+**Benefits of v2**:
+- ✅ **No `targets` field** - Works with ALL editors automatically
+- ✅ **Simpler format** - Just markdown content
+- ✅ **Lossless sync** - Parse editor files back without data loss
+- ✅ **Editor-friendly** - Matches how AI editors use markdown
+
+<details>
+<summary>📚 Click to see v1 format (legacy)</summary>
 
 ```yaml
 schema_version: "1.0.0"
@@ -73,11 +130,7 @@ schema_version: "1.0.0"
 metadata:
   title: "My Project Assistant"
   description: "AI assistant for my project"
-  # Optional fields:
-  # version: "1.0.0"
-  # author: "Your Name <your.email@example.com>"
 
-# Optional - defaults to all supported editors if not specified
 targets: ["copilot", "cursor", "continue"]
 
 context:
@@ -99,6 +152,10 @@ examples:
         return "Hello, World!"
     ```
 ```
+
+To create v1 files, use: `promptrek init --v1`
+
+</details>
 
 ### 3. Validate Your Configuration
 

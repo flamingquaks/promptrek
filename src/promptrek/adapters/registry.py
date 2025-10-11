@@ -4,7 +4,7 @@ Adapter registry for managing and discovering editor adapters.
 
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Set, Type
+from typing import Any, Dict, List, Optional, Set, Type
 
 from ..core.exceptions import AdapterNotFoundError
 from .base import EditorAdapter
@@ -30,7 +30,9 @@ class AdapterRegistry:
         self._capabilities: Dict[str, Set[AdapterCapability]] = {}
 
     def register(
-        self, adapter: EditorAdapter, capabilities: List[AdapterCapability] = None
+        self,
+        adapter: EditorAdapter,
+        capabilities: Optional[List[AdapterCapability]] = None,
     ) -> None:
         """Register an adapter instance with its capabilities."""
         self._adapters[adapter.name] = adapter
@@ -41,7 +43,7 @@ class AdapterRegistry:
         self,
         name: str,
         adapter_class: Type[EditorAdapter],
-        capabilities: List[AdapterCapability] = None,
+        capabilities: Optional[List[AdapterCapability]] = None,
     ) -> None:
         """Register an adapter class that will be instantiated on demand."""
         self._adapter_classes[name] = adapter_class
@@ -56,7 +58,7 @@ class AdapterRegistry:
         if name in self._adapter_classes:
             # Instantiate the adapter class
             adapter_class = self._adapter_classes[name]
-            adapter = adapter_class()
+            adapter = adapter_class()  # type: ignore[call-arg]
             self._adapters[name] = adapter
             return adapter
 
@@ -66,7 +68,7 @@ class AdapterRegistry:
         """Get list of all registered adapter names."""
         return list(set(self._adapters.keys()) | set(self._adapter_classes.keys()))
 
-    def get_adapter_info(self, name: str) -> Dict[str, str]:
+    def get_adapter_info(self, name: str) -> Dict[str, Any]:
         """Get information about an adapter without instantiating it."""
         if name in self._adapters:
             adapter = self._adapters[name]

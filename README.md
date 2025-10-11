@@ -13,14 +13,45 @@ A universal AI Editor prompt storage solution that dynamically maps prompt data 
 
 AI coding assistants like GitHub Copilot, Cursor, Continue, and others all use different prompt formats and configuration methods. When working across teams or switching between editors, you have to maintain separate prompt configurations for each tool. PrompTrek solves this by:
 
-- **Universal Format**: Create prompts once in a standardized format
-- **Multi-Editor Support**: Generate prompts for any supported AI editor
+- **Universal Format**: Create prompts once in a standardized format (now with **v2.0.0 schema** - simpler and more aligned with how editors work!)
+- **Multi-Editor Support**: Generate prompts for any supported AI editor automatically (no `targets` field needed in v2!)
+- **Bidirectional Sync**: Parse editor files back to `.promptrek.yaml` without data loss (v2 lossless sync)
 - **Team Consistency**: Share prompt configurations across team members regardless of their editor choice
 - **Easy Migration**: Switch between AI editors without losing your prompt configurations
 
 ## 🚀 Quick Example
 
-1. Create a universal prompt file (`.promptrek.yaml`):
+1. Create a universal prompt file (`.promptrek.yaml`) using the **new v2 format** (recommended):
+```yaml
+schema_version: "2.0.0"
+metadata:
+  title: "My Project Assistant"
+  description: "AI assistant for React TypeScript project"
+  tags: [react, typescript, web]
+content: |
+  # My Project Assistant
+
+  ## Project Details
+  **Technologies:** React, TypeScript, Node.js
+
+  ## Development Guidelines
+
+  ### General Principles
+  - Use TypeScript for all new files
+  - Follow React functional component patterns
+  - Write comprehensive tests
+
+  ### Code Style
+  - Use functional components with hooks
+  - Prefer const over let
+  - Use meaningful variable names
+variables:
+  PROJECT_NAME: "my-react-app"
+```
+
+<details>
+<summary>📚 Click to see v1 format (legacy)</summary>
+
 ```yaml
 schema_version: "1.0.0"
 metadata:
@@ -33,6 +64,8 @@ instructions:
     - "Follow React functional component patterns"
     - "Write comprehensive tests"
 ```
+
+</details>
 
 2. Generate editor-specific prompts:
 ```bash
@@ -133,7 +166,7 @@ pip install -e .
 ### Quick Start
 
 ```bash
-# 1. Initialize a new project with pre-commit hooks (recommended)
+# 1. Initialize a new project with pre-commit hooks (v2 format by default)
 uv run promptrek init --template react --output my-project.promptrek.yaml --setup-hooks
 # or with traditional pip: promptrek init --template react --output my-project.promptrek.yaml --setup-hooks
 
@@ -145,11 +178,63 @@ uv run promptrek generate my-project.promptrek.yaml --all
 
 # 4. Your AI editor prompts are ready!
 ls .github/copilot-instructions.md
-ls .cursorrules
-ls .continue/config.json
+ls .cursor/rules/index.mdc
+ls .continue/rules/
 ```
 
 **Note:** The `--setup-hooks` flag automatically configures pre-commit hooks to validate your `.promptrek.yaml` files and prevent accidental commits of generated files.
+
+### 🆕 Schema v2.0.0 (Recommended)
+
+PrompTrek now supports **v2.0.0 schema** which is simpler and more aligned with how AI editors actually work:
+
+**Key Benefits:**
+- ✅ **No `targets` field** - Works with ALL editors automatically
+- ✅ **Lossless bidirectional sync** - Parse editor files back without data loss
+- ✅ **Simpler format** - Just markdown content, no complex nested structures
+- ✅ **Editor-friendly** - Matches how Claude Code, Copilot, and others use markdown
+- ✅ **Multi-file support** - Use `documents` field for multi-file editors (Continue, Windsurf, Kiro)
+
+**Quick Migration:**
+```bash
+# Migrate existing v1 file to v2
+uv run promptrek migrate old.promptrek.yaml -o new.promptrek.yaml
+
+# Or create a new v2 file from scratch
+uv run promptrek init  # v2 is now the default!
+
+# Create a v1 file (legacy)
+uv run promptrek init --v1
+```
+
+**V2 Format Example:**
+```yaml
+schema_version: "2.0.0"
+metadata:
+  title: "My Project"
+  description: "AI assistant"
+  version: "1.0.0"
+  author: "Your Name"
+  tags: [ai, project]
+
+content: |
+  # My Project
+
+  ## Guidelines
+  - Write clean code
+  - Follow best practices
+
+variables:
+  PROJECT_NAME: "my-project"
+
+# Optional: For multi-file editors
+documents:
+  - name: "general-rules"
+    content: |
+      # General Rules
+      - Rule 1
+      - Rule 2
+```
 
 ### Available Commands
 

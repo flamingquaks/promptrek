@@ -170,6 +170,85 @@ metadata:
         assert result.exit_code == 1
         assert "❌ Parsing failed" in result.output
 
+    def test_validate_command_multiple_files(self, tmp_path):
+        """Test validate command with multiple files."""
+        # Create multiple valid files
+        file1 = tmp_path / "file1.promptrek.yaml"
+        file1.write_text(
+            """
+schema_version: "2.0.0"
+metadata:
+  title: "Test 1"
+  description: "First test file"
+  version: "1.0.0"
+content: |
+  # Test 1
+  This is a test file.
+"""
+        )
+
+        file2 = tmp_path / "file2.promptrek.yaml"
+        file2.write_text(
+            """
+schema_version: "2.0.0"
+metadata:
+  title: "Test 2"
+  description: "Second test file"
+  version: "1.0.0"
+content: |
+  # Test 2
+  This is another test file.
+"""
+        )
+
+        runner = CliRunner()
+        result = runner.invoke(cli, ["validate", str(file1), str(file2)])
+
+        assert result.exit_code == 0
+        assert "file1.promptrek.yaml" in result.output
+        assert "file2.promptrek.yaml" in result.output
+        assert result.output.count("✅ Validation passed") == 2
+
+    def test_validate_command_multiple_files_with_error(self, tmp_path):
+        """Test validate command with multiple files where one fails."""
+        # Create one valid and one invalid file
+        valid_file = tmp_path / "valid.promptrek.yaml"
+        valid_file.write_text(
+            """
+schema_version: "2.0.0"
+metadata:
+  title: "Valid File"
+  description: "This is valid"
+  version: "1.0.0"
+content: |
+  # Valid
+  This is valid.
+"""
+        )
+
+        invalid_file = tmp_path / "invalid.promptrek.yaml"
+        invalid_file.write_text(
+            """
+schema_version: "2.0.0"
+metadata:
+  title: ""
+  description: "Invalid - empty title"
+  version: "1.0.0"
+content: |
+  # Invalid
+  This has an empty title.
+"""
+        )
+
+        runner = CliRunner()
+        result = runner.invoke(cli, ["validate", str(valid_file), str(invalid_file)])
+
+        assert result.exit_code == 1
+        assert "valid.promptrek.yaml" in result.output
+        assert "invalid.promptrek.yaml" in result.output
+        assert "✅ Validation passed" in result.output
+        assert "failed" in result.output.lower()
+
     def test_generate_command_auto_discovery_with_verbose(self, tmp_path):
         """Test generate command with automatic file discovery and verbose output."""
         runner = CliRunner()

@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 
 from ..core.exceptions import UPFParsingError
-from ..core.models import ImportConfig, UniversalPrompt
+from ..core.models import ImportConfig, UniversalPrompt, UniversalPromptV2
 from ..core.parser import UPFParser
 
 
@@ -18,7 +18,7 @@ class ImportProcessor:
     def __init__(self) -> None:
         """Initialize import processor."""
         self.parser = UPFParser()
-        self._processed_files = set()  # Prevent circular imports
+        self._processed_files: set[Path] = set()  # Prevent circular imports
 
     def process_imports(
         self, prompt: UniversalPrompt, base_path: Path
@@ -75,6 +75,10 @@ class ImportProcessor:
 
         try:
             imported_prompt = self.parser.parse_file(import_path)
+
+            # V2 prompts don't support imports
+            if isinstance(imported_prompt, UniversalPromptV2):
+                raise UPFParsingError(f"Cannot import v2 format file: {import_path}")
 
             # Recursively process imports in the imported file
             if imported_prompt.imports:

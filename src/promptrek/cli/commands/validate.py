@@ -5,10 +5,12 @@ Handles validation of universal prompt files.
 """
 
 from pathlib import Path
+from typing import Union
 
 import click
 
 from ...core.exceptions import UPFParsingError
+from ...core.models import UniversalPrompt, UniversalPromptV2
 from ...core.parser import UPFParser
 from ...core.validator import UPFValidator
 
@@ -68,18 +70,19 @@ def validate_command(ctx: click.Context, file: Path, strict: bool) -> None:
         _show_summary(prompt)
 
 
-def _show_summary(prompt) -> None:
+def _show_summary(prompt: Union[UniversalPrompt, UniversalPromptV2]) -> None:
     """Show a summary of the prompt configuration."""
     click.echo("\n📋 Summary:")
     click.echo(f"  Title: {prompt.metadata.title}")
     click.echo(f"  Version: {prompt.metadata.version}")
-    click.echo(f"  Targets: {', '.join(prompt.targets)}")
-
-    if prompt.context and prompt.context.technologies:
-        click.echo(f"  Technologies: {', '.join(prompt.context.technologies)}")
+    if isinstance(prompt, UniversalPrompt):
+        if prompt.targets:
+            click.echo(f"  Targets: {', '.join(prompt.targets)}")
+        if prompt.context and prompt.context.technologies:
+            click.echo(f"  Technologies: {', '.join(prompt.context.technologies)}")
 
     instruction_count = 0
-    if prompt.instructions:
+    if isinstance(prompt, UniversalPrompt) and prompt.instructions:
         for field in [
             "general",
             "code_style",
@@ -94,7 +97,7 @@ def _show_summary(prompt) -> None:
 
     click.echo(f"  Instructions: {instruction_count} total")
 
-    if prompt.examples:
+    if isinstance(prompt, UniversalPrompt) and prompt.examples:
         click.echo(f"  Examples: {len(prompt.examples)}")
 
     if prompt.variables:

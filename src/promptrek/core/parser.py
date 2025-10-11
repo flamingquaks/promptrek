@@ -5,13 +5,13 @@ Handles loading and parsing .promptrek.yaml files into UniversalPrompt objects.
 """
 
 from pathlib import Path
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Sequence, Union
 
 import yaml
 from pydantic import ValidationError
 
 from .exceptions import UPFFileNotFoundError, UPFParsingError
-from .models import UniversalPrompt
+from .models import UniversalPrompt, UniversalPromptV2
 
 
 class UPFParser:
@@ -21,7 +21,9 @@ class UPFParser:
         """Initialize the UPF parser."""
         pass
 
-    def parse_file(self, file_path: Union[str, Path]) -> UniversalPrompt:
+    def parse_file(
+        self, file_path: Union[str, Path]
+    ) -> Union[UniversalPrompt, UniversalPromptV2]:
         """
         Parse a UPF file from disk.
 
@@ -29,7 +31,7 @@ class UPFParser:
             file_path: Path to the .promptrek.yaml file
 
         Returns:
-            Parsed UniversalPrompt object
+            Parsed UniversalPrompt (v1) or UniversalPromptV2 (v2) object
 
         Raises:
             UPFFileNotFoundError: If the file doesn't exist
@@ -55,8 +57,8 @@ class UPFParser:
 
         prompt = self.parse_dict(data, str(file_path))
 
-        # Process imports if present
-        if prompt.imports:
+        # Process imports if present (v1 only)
+        if isinstance(prompt, UniversalPrompt) and prompt.imports:
             from ..utils import ImportProcessor
 
             import_processor = ImportProcessor()
@@ -66,16 +68,18 @@ class UPFParser:
 
     def parse_dict(
         self, data: Dict[str, Any], source: str = "<dict>"
-    ) -> UniversalPrompt:
+    ) -> Union[UniversalPrompt, UniversalPromptV2]:
         """
         Parse a UPF dictionary into a UniversalPrompt object.
+
+        Automatically detects schema version and uses appropriate model.
 
         Args:
             data: Dictionary containing UPF data
             source: Source identifier for error messages
 
         Returns:
-            Parsed UniversalPrompt object
+            Parsed UniversalPrompt (v1) or UniversalPromptV2 (v2) object
 
         Raises:
             UPFParsingError: If parsing or validation fails
@@ -85,17 +89,33 @@ class UPFParser:
                 f"UPF data must be a dictionary, got {type(data)} in {source}"
             )
 
+        # Detect version from schema_version field
+        schema_version = data.get("schema_version", "1.0.0")
+        major_version = self._get_major_version(schema_version)
+
         try:
-            return UniversalPrompt(**data)
+            if major_version == "2":
+                # Use v2 model
+                return UniversalPromptV2(**data)
+            else:
+                # Use v1 model (default for backwards compatibility)
+                return UniversalPrompt(**data)
         except ValidationError as e:
             error_msg = self._format_validation_error(e, source)
             raise UPFParsingError(error_msg)
         except Exception as e:
             raise UPFParsingError(f"Unexpected error parsing {source}: {e}")
 
+    def _get_major_version(self, version_str: str) -> str:
+        """Extract major version from version string."""
+        try:
+            return version_str.split(".")[0]
+        except (AttributeError, IndexError):
+            return "1"  # Default to v1 if invalid format
+
     def parse_string(
         self, yaml_content: str, source: str = "<string>"
-    ) -> UniversalPrompt:
+    ) -> Union[UniversalPrompt, UniversalPromptV2]:
         """
         Parse a UPF YAML string into a UniversalPrompt object.
 
@@ -104,7 +124,7 @@ class UPFParser:
             source: Source identifier for error messages
 
         Returns:
-            Parsed UniversalPrompt object
+            Parsed UniversalPrompt (v1) or UniversalPromptV2 (v2) object
 
         Raises:
             UPFParsingError: If parsing fails
@@ -171,8 +191,8 @@ class UPFParser:
         return f"Validation errors in {source}:\n" + "\n".join(messages)
 
     def parse_multiple_files(
-        self, file_paths: List[Union[str, Path]]
-    ) -> UniversalPrompt:
+        self, file_paths: Sequence[Union[str, Path]]
+    ) -> Union[UniversalPrompt, UniversalPromptV2]:
         """
         Parse multiple UPF files and merge them into a single UniversalPrompt.
 
@@ -200,7 +220,7 @@ class UPFParser:
 
     def parse_directory(
         self, directory: Union[str, Path], recursive: bool = True
-    ) -> UniversalPrompt:
+    ) -> Union[UniversalPrompt, UniversalPromptV2]:
         """
         Find and parse all UPF files in a directory, merging them into one.
 
@@ -225,8 +245,10 @@ class UPFParser:
         return self.parse_multiple_files(upf_files)
 
     def _merge_prompts(
-        self, base: UniversalPrompt, additional: UniversalPrompt
-    ) -> UniversalPrompt:
+        self,
+        base: Union[UniversalPrompt, UniversalPromptV2],
+        additional: Union[UniversalPrompt, UniversalPromptV2],
+    ) -> Union[UniversalPrompt, UniversalPromptV2]:
         """
         Merge two UniversalPrompt objects, with additional taking precedence.
 
@@ -237,7 +259,15 @@ class UPFParser:
         Returns:
             Merged UniversalPrompt object
         """
-        # Convert to dicts for easier merging
+        # V2 merging: simple content concatenation
+        if isinstance(base, UniversalPromptV2) or isinstance(
+            additional, UniversalPromptV2
+        ):
+            # For v2, we can't meaningfully merge - just return the additional
+            # This is a limitation of the simplified v2 format
+            return additional
+
+        # Convert to dicts for easier merging (v1 only)
         base_dict = base.model_dump()
         additional_dict = additional.model_dump()
 
