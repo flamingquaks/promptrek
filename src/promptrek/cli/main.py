@@ -80,7 +80,9 @@ def init(
 
 
 @cli.command()
-@click.argument("files", nargs=-1, type=click.Path(exists=True, path_type=Path), required=True)
+@click.argument(
+    "files", nargs=-1, type=click.Path(exists=True, path_type=Path), required=True
+)
 @click.option("--strict", is_flag=True, help="Treat warnings as errors")
 @click.pass_context
 def validate(ctx: click.Context, files: tuple[Path, ...], strict: bool) -> None:
