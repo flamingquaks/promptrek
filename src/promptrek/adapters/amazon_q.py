@@ -4,12 +4,12 @@ Amazon Q adapter implementation.
 
 import json
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 import click
 
 from ..core.exceptions import ValidationError
-from ..core.models import UniversalPrompt
+from ..core.models import UniversalPrompt, UniversalPromptV2
 from .base import EditorAdapter
 from .sync_mixin import MarkdownSyncMixin
 
@@ -32,7 +32,7 @@ class AmazonQAdapter(MarkdownSyncMixin, EditorAdapter):
 
     def generate(
         self,
-        prompt: UniversalPrompt,
+        prompt: Union[UniversalPrompt, UniversalPromptV2],
         output_dir: Path,
         dry_run: bool = False,
         verbose: bool = False,
@@ -41,7 +41,11 @@ class AmazonQAdapter(MarkdownSyncMixin, EditorAdapter):
     ) -> List[Path]:
         """Generate Amazon Q configuration files."""
 
-        # Apply variable substitution if supported
+        # V2: Use documents field for multi-file rules or main content for single file
+        if isinstance(prompt, UniversalPromptV2):
+            return self._generate_v2(prompt, output_dir, dry_run, verbose, variables)
+
+        # V1: Apply variable substitution if supported
         processed_prompt = self.substitute_variables(prompt, variables)
 
         # Process conditionals if supported
@@ -64,9 +68,76 @@ class AmazonQAdapter(MarkdownSyncMixin, EditorAdapter):
 
         return created_files
 
+    def _generate_v2(
+        self,
+        prompt: UniversalPromptV2,
+        output_dir: Path,
+        dry_run: bool,
+        verbose: bool,
+        variables: Optional[Dict[str, Any]] = None,
+    ) -> List[Path]:
+        """Generate Amazon Q files from v2 schema (using documents for rules or content for single file)."""
+        rules_dir = output_dir / ".amazonq" / "rules"
+        created_files = []
+
+        # If documents field is present, generate separate rule files
+        if prompt.documents:
+            for doc in prompt.documents:
+                # Apply variable substitution
+                content = doc.content
+                if variables:
+                    for var_name, var_value in variables.items():
+                        placeholder = "{{{ " + var_name + " }}}"
+                        content = content.replace(placeholder, var_value)
+
+                # Generate filename from document name
+                filename = (
+                    f"{doc.name}.md" if not doc.name.endswith(".md") else doc.name
+                )
+                output_file = rules_dir / filename
+
+                if dry_run:
+                    click.echo(f"  📁 Would create: {output_file}")
+                    if verbose:
+                        preview = (
+                            content[:200] + "..." if len(content) > 200 else content
+                        )
+                        click.echo(f"    {preview}")
+                    created_files.append(output_file)
+                else:
+                    rules_dir.mkdir(parents=True, exist_ok=True)
+                    with open(output_file, "w", encoding="utf-8") as f:
+                        f.write(content)
+                    click.echo(f"✅ Generated: {output_file}")
+                    created_files.append(output_file)
+        else:
+            # No documents, use main content as general.md
+            content = prompt.content
+            if variables:
+                for var_name, var_value in variables.items():
+                    placeholder = "{{{ " + var_name + " }}}"
+                    content = content.replace(placeholder, var_value)
+
+            output_file = rules_dir / "general.md"
+
+            if dry_run:
+                click.echo(f"  📁 Would create: {output_file}")
+                if verbose:
+                    preview = content[:200] + "..." if len(content) > 200 else content
+                    click.echo(f"    {preview}")
+                created_files.append(output_file)
+            else:
+                rules_dir.mkdir(parents=True, exist_ok=True)
+                with open(output_file, "w", encoding="utf-8") as f:
+                    f.write(content)
+                click.echo(f"✅ Generated: {output_file}")
+                created_files.append(output_file)
+
+        return created_files
+
     def _generate_rules_system(
         self,
-        prompt: UniversalPrompt,
+        prompt: Union[UniversalPrompt, UniversalPromptV2],
         conditional_content: Optional[Dict[str, Any]],
         output_dir: Path,
         dry_run: bool,
@@ -77,8 +148,12 @@ class AmazonQAdapter(MarkdownSyncMixin, EditorAdapter):
         created_files = []
 
         # Generate general coding rules
-        all_instructions = []
-        if prompt.instructions and prompt.instructions.general:
+        all_instructions: list[str] = []
+        if (
+            isinstance(prompt, UniversalPrompt)
+            and prompt.instructions
+            and prompt.instructions.general
+        ):
             all_instructions.extend(prompt.instructions.general)
         if (
             conditional_content
@@ -111,7 +186,11 @@ class AmazonQAdapter(MarkdownSyncMixin, EditorAdapter):
                 created_files.append(general_file)
 
         # Generate code style rules
-        if prompt.instructions and prompt.instructions.code_style:
+        if (
+            isinstance(prompt, UniversalPrompt)
+            and prompt.instructions
+            and prompt.instructions.code_style
+        ):
             style_file = rules_dir / "code-style.md"
             style_content = self._build_rules_content(
                 "Code Style Rules", prompt.instructions.code_style
@@ -135,7 +214,11 @@ class AmazonQAdapter(MarkdownSyncMixin, EditorAdapter):
                 created_files.append(style_file)
 
         # Generate testing rules
-        if prompt.instructions and prompt.instructions.testing:
+        if (
+            isinstance(prompt, UniversalPrompt)
+            and prompt.instructions
+            and prompt.instructions.testing
+        ):
             testing_file = rules_dir / "testing.md"
             testing_content = self._build_rules_content(
                 "Testing Rules", prompt.instructions.testing
@@ -159,7 +242,11 @@ class AmazonQAdapter(MarkdownSyncMixin, EditorAdapter):
                 created_files.append(testing_file)
 
         # Generate security rules if defined
-        if prompt.instructions and prompt.instructions.security:
+        if (
+            isinstance(prompt, UniversalPrompt)
+            and prompt.instructions
+            and prompt.instructions.security
+        ):
             security_file = rules_dir / "security.md"
             security_content = self._build_rules_content(
                 "Security Rules", prompt.instructions.security
@@ -183,7 +270,11 @@ class AmazonQAdapter(MarkdownSyncMixin, EditorAdapter):
                 created_files.append(security_file)
 
         # Generate technology-specific rules
-        if prompt.context and prompt.context.technologies:
+        if (
+            isinstance(prompt, UniversalPrompt)
+            and prompt.context
+            and prompt.context.technologies
+        ):
             for tech in prompt.context.technologies[:2]:  # Limit to 2 main technologies
                 tech_file = rules_dir / f"{tech.lower()}-rules.md"
                 tech_content = self._build_tech_rules_content(tech, prompt)
@@ -209,7 +300,7 @@ class AmazonQAdapter(MarkdownSyncMixin, EditorAdapter):
 
     def _generate_cli_agents(
         self,
-        prompt: UniversalPrompt,
+        prompt: Union[UniversalPrompt, UniversalPromptV2],
         output_dir: Path,
         dry_run: bool,
         verbose: bool,
@@ -218,11 +309,15 @@ class AmazonQAdapter(MarkdownSyncMixin, EditorAdapter):
         agents_dir = output_dir / ".amazonq" / "cli-agents"
         created_files = []
 
-        # Generate default agents based on instructions
+        # Generate default agents based on instructions (V1 only)
         agents = []
 
         # Code review agent
-        if prompt.instructions and prompt.instructions.code_style:
+        if (
+            isinstance(prompt, UniversalPrompt)
+            and prompt.instructions
+            and prompt.instructions.code_style
+        ):
             agents.append(
                 {
                     "name": "code-review-agent",
@@ -233,7 +328,11 @@ class AmazonQAdapter(MarkdownSyncMixin, EditorAdapter):
             )
 
         # Security review agent
-        if prompt.instructions and prompt.instructions.security:
+        if (
+            isinstance(prompt, UniversalPrompt)
+            and prompt.instructions
+            and prompt.instructions.security
+        ):
             agents.append(
                 {
                     "name": "security-review-agent",
@@ -244,7 +343,11 @@ class AmazonQAdapter(MarkdownSyncMixin, EditorAdapter):
             )
 
         # Testing agent
-        if prompt.instructions and prompt.instructions.testing:
+        if (
+            isinstance(prompt, UniversalPrompt)
+            and prompt.instructions
+            and prompt.instructions.testing
+        ):
             agents.append(
                 {
                     "name": "test-generation-agent",
@@ -291,15 +394,21 @@ class AmazonQAdapter(MarkdownSyncMixin, EditorAdapter):
 
         return "\n".join(lines)
 
-    def _build_tech_rules_content(self, tech: str, prompt: UniversalPrompt) -> str:
+    def _build_tech_rules_content(
+        self, tech: str, prompt: Union[UniversalPrompt, UniversalPromptV2]
+    ) -> str:
         """Build technology-specific rules content."""
         lines = []
 
         lines.append(f"# {tech.title()} Rules")
         lines.append("")
 
-        # Add general instructions that apply to this tech
-        if prompt.instructions and prompt.instructions.general:
+        # Add general instructions that apply to this tech (V1 only)
+        if (
+            isinstance(prompt, UniversalPrompt)
+            and prompt.instructions
+            and prompt.instructions.general
+        ):
             lines.append("## General Guidelines")
             for instruction in prompt.instructions.general:
                 lines.append(f"- {instruction}")
@@ -344,11 +453,25 @@ class AmazonQAdapter(MarkdownSyncMixin, EditorAdapter):
 
         return "\n".join(lines)
 
-    def validate(self, prompt: UniversalPrompt) -> List[ValidationError]:
+    def validate(
+        self, prompt: Union[UniversalPrompt, UniversalPromptV2]
+    ) -> List[ValidationError]:
         """Validate prompt for Amazon Q."""
         errors = []
 
-        # Amazon Q works well with structured instructions
+        # V2 validation: check content exists
+        if isinstance(prompt, UniversalPromptV2):
+            if not prompt.content or not prompt.content.strip():
+                errors.append(
+                    ValidationError(
+                        field="content",
+                        message="Amazon Q requires content",
+                        severity="error",
+                    )
+                )
+            return errors
+
+        # V1 validation: Amazon Q works well with structured instructions
         if not prompt.instructions:
             errors.append(
                 ValidationError(
@@ -368,8 +491,10 @@ class AmazonQAdapter(MarkdownSyncMixin, EditorAdapter):
         """Amazon Q supports conditional configuration."""
         return True
 
-    def parse_files(self, source_dir: Path) -> UniversalPrompt:
-        """Parse Amazon Q files back into a UniversalPrompt."""
+    def parse_files(
+        self, source_dir: Path
+    ) -> Union[UniversalPrompt, UniversalPromptV2]:
+        """Parse Amazon Q files back into a UniversalPrompt or UniversalPromptV2."""
         return self.parse_markdown_rules_files(
             source_dir=source_dir,
             rules_subdir=".amazonq/rules",

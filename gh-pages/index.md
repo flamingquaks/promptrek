@@ -8,6 +8,10 @@ title: Home
     <div class="intro-content">
       <h2 class="section-title">One Prompt Configuration.<br>Every AI Editor.</h2>
       <p class="intro-description">Stop recreating prompts for different AI coding assistants. PrompTrek lets you write comprehensive coding guidelines once and automatically generates the perfect configuration for GitHub Copilot, Cursor, Continue, and more.</p>
+      <div class="v2-badge">
+        <span class="badge-new">NEW</span>
+        <span class="badge-text">Schema v2.0.0: Simpler markdown-first format with lossless bidirectional sync!</span>
+      </div>
     </div>
   </div>
 </section>
@@ -239,36 +243,40 @@ title: Home
     <div class="example-grid">
 
       <div class="example-input">
-        <h3>Universal Configuration</h3>
+        <h3>Universal Configuration (v2.0.0)</h3>
         <p>Write your prompt once in PrompTrek format:</p>
         <div class="code-example">
-<pre><code>schema_version: "1.0.0"
+<pre><code>schema_version: "2.0.0"
 metadata:
   title: "Full-Stack Development Assistant"
   description: "Production-ready coding standards"
+  tags: [fullstack, typescript, react]
 
-# Optional - generates for all supported editors if not specified
-targets: [copilot, cursor, continue, cline]
+content: |
+  # Full-Stack Development Assistant
 
-instructions:
-  general:
-    - "Write clean, maintainable code with proper error handling"
-    - "Use TypeScript with strict mode for all new code"
-    - "Follow SOLID principles and design patterns"
-    - "Include comprehensive JSDoc comments"
+  ## General Guidelines
+  - Write clean, maintainable code with proper error handling
+  - Use TypeScript with strict mode for all new code
+  - Follow SOLID principles and design patterns
+  - Include comprehensive JSDoc comments
 
-  frontend:
-    - "Use React functional components with hooks"
-    - "Implement proper loading states and error boundaries"
-    - "Follow accessibility best practices (WCAG 2.1)"
-    - "Write unit tests with Jest and React Testing Library"
+  ## Frontend Development
+  - Use React functional components with hooks
+  - Implement proper loading states and error boundaries
+  - Follow accessibility best practices (WCAG 2.1)
+  - Write unit tests with Jest and React Testing Library
 
-  backend:
-    - "Use RESTful API design with proper HTTP status codes"
-    - "Implement input validation and sanitization"
-    - "Add proper logging and monitoring"
-    - "Write integration tests for all endpoints"</code></pre>
+  ## Backend Development
+  - Use RESTful API design with proper HTTP status codes
+  - Implement input validation and sanitization
+  - Add proper logging and monitoring
+  - Write integration tests for all endpoints
+
+variables:
+  TEAM_NAME: "Engineering Team"</code></pre>
         </div>
+        <p class="schema-note">✨ <strong>v2.0.0 Schema</strong>: Simpler, markdown-first format. No <code>targets</code> field needed - works with ALL editors!</p>
       </div>
 
       <div class="example-output">

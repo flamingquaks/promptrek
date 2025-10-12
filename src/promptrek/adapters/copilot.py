@@ -5,21 +5,24 @@ GitHub Copilot adapter implementation.
 import re
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 
 import click
 
 from ..core.exceptions import ValidationError
 from ..core.models import (
+    DocumentConfig,
     Instructions,
     ProjectContext,
     PromptMetadata,
     UniversalPrompt,
+    UniversalPromptV2,
 )
 from .base import EditorAdapter
+from .sync_mixin import SingleFileMarkdownSyncMixin
 
 
-class CopilotAdapter(EditorAdapter):
+class CopilotAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
     """Adapter for GitHub Copilot."""
 
     _description = (
@@ -41,7 +44,7 @@ class CopilotAdapter(EditorAdapter):
 
     def generate(
         self,
-        prompt: UniversalPrompt,
+        prompt: Union[UniversalPrompt, UniversalPromptV2],
         output_dir: Path,
         dry_run: bool = False,
         verbose: bool = False,
@@ -50,7 +53,13 @@ class CopilotAdapter(EditorAdapter):
     ) -> List[Path]:
         """Generate GitHub Copilot configuration files."""
 
-        # Apply variable substitution if supported
+        # V2: Direct markdown output
+        if isinstance(prompt, UniversalPromptV2):
+            return self._generate_v2(
+                prompt, output_dir, dry_run, verbose, variables, headless
+            )
+
+        # V1: Apply variable substitution if supported
         processed_prompt = self.substitute_variables(prompt, variables)
 
         # Process conditionals if supported
@@ -83,9 +92,59 @@ class CopilotAdapter(EditorAdapter):
 
         return created_files
 
+    def _generate_v2(
+        self,
+        prompt: UniversalPromptV2,
+        output_dir: Path,
+        dry_run: bool,
+        verbose: bool,
+        variables: Optional[Dict[str, Any]] = None,
+        headless: bool = False,
+    ) -> List[Path]:
+        """Generate Copilot files from v2 schema."""
+        github_dir = output_dir / ".github"
+        output_file = github_dir / "copilot-instructions.md"
+
+        # Apply variable substitution
+        content = prompt.content
+        if variables:
+            for var_name, var_value in variables.items():
+                placeholder = "{{{ " + var_name + " }}}"
+                content = content.replace(placeholder, var_value)
+
+        # Add headless instructions if requested
+        if headless:
+            lines = [
+                "<!-- HEADLESS INSTRUCTIONS START -->",
+                "<!-- ",
+                "COPILOT HEADLESS AGENT INSTRUCTIONS:",
+                "Before starting any coding tasks, run the following command to generate full instructions:",
+                "`promptrek generate --editor copilot`",
+                "",
+                "This will regenerate the complete GitHub Copilot instructions from the source .promptrek.yaml files.",
+                "-->",
+                "<!-- HEADLESS INSTRUCTIONS END -->",
+                "",
+                content,
+            ]
+            content = "\n".join(lines)
+
+        if dry_run:
+            click.echo(f"  📁 Would create: {output_file}")
+            if verbose:
+                preview = content[:200] + "..." if len(content) > 200 else content
+                click.echo(f"    {preview}")
+        else:
+            github_dir.mkdir(exist_ok=True)
+            with open(output_file, "w", encoding="utf-8") as f:
+                f.write(content)
+            click.echo(f"✅ Generated: {output_file}")
+
+        return [output_file]
+
     def _generate_copilot_instructions(
         self,
-        prompt: UniversalPrompt,
+        prompt: Union[UniversalPrompt, UniversalPromptV2],
         conditional_content: Optional[Dict[str, Any]],
         output_dir: Path,
         dry_run: bool,
@@ -96,7 +155,10 @@ class CopilotAdapter(EditorAdapter):
         github_dir = output_dir / ".github"
         output_file = github_dir / "copilot-instructions.md"
 
-        if headless:
+        # For V2, use content directly
+        if isinstance(prompt, UniversalPromptV2):
+            content = prompt.content
+        elif headless:
             content = self._build_headless_content(prompt, conditional_content)
         else:
             content = self._build_repository_content(prompt, conditional_content)
@@ -118,16 +180,20 @@ class CopilotAdapter(EditorAdapter):
 
     def _generate_path_specific_instructions(
         self,
-        prompt: UniversalPrompt,
+        prompt: Union[UniversalPrompt, UniversalPromptV2],
         output_dir: Path,
         dry_run: bool,
         verbose: bool,
     ) -> List[Path]:
         """Generate path-specific .github/instructions/*.instructions.md files."""
+        # V2 doesn't generate path-specific files
+        if isinstance(prompt, UniversalPromptV2):
+            return []
+
         instructions_dir = output_dir / ".github" / "instructions"
         created_files = []
 
-        # Generate code style instructions for source files
+        # Generate code style instructions for source files (V1 only)
         if prompt.instructions and prompt.instructions.code_style:
             code_file = instructions_dir / "code-style.instructions.md"
             code_content = self._build_path_specific_content(
@@ -203,16 +269,20 @@ class CopilotAdapter(EditorAdapter):
 
     def _generate_prompt_files(
         self,
-        prompt: UniversalPrompt,
+        prompt: Union[UniversalPrompt, UniversalPromptV2],
         output_dir: Path,
         dry_run: bool,
         verbose: bool,
     ) -> List[Path]:
         """Generate experimental .github/prompts/*.prompt.md files."""
+        # V2 doesn't generate experimental prompt files
+        if isinstance(prompt, UniversalPromptV2):
+            return []
+
         prompts_dir = output_dir / ".github" / "prompts"
         created_files = []
 
-        # Generate general coding prompt
+        # Generate general coding prompt (V1 only)
         coding_prompt_file = prompts_dir / "coding.prompt.md"
         coding_prompt_content = self._build_coding_prompt_content(prompt)
 
@@ -236,7 +306,7 @@ class CopilotAdapter(EditorAdapter):
 
     def generate_merged(
         self,
-        prompt_files: List[Tuple[UniversalPrompt, Path]],
+        prompt_files: List[Tuple[Union[UniversalPrompt, UniversalPromptV2], Path]],
         output_dir: Path,
         dry_run: bool = False,
         verbose: bool = False,
@@ -245,11 +315,17 @@ class CopilotAdapter(EditorAdapter):
     ) -> List[Path]:
         """Generate merged GitHub Copilot instructions from multiple prompt files."""
 
-        # Build merged content
-        if headless:
-            content = self._build_merged_headless_content(prompt_files, variables)
+        # Check if any v2 files (use simple concatenation for v2)
+        has_v2 = any(isinstance(p, UniversalPromptV2) for p, _ in prompt_files)
+
+        if has_v2:
+            content = self._build_merged_content_v2(prompt_files, variables, headless)
         else:
-            content = self._build_merged_content(prompt_files, variables)
+            # Build merged content for v1
+            if headless:
+                content = self._build_merged_headless_content(prompt_files, variables)
+            else:
+                content = self._build_merged_content(prompt_files, variables)
 
         # Determine output path
         github_dir = output_dir / ".github"
@@ -273,9 +349,66 @@ class CopilotAdapter(EditorAdapter):
 
         return [output_file]
 
+    def _build_merged_content_v2(
+        self,
+        prompt_files: List[Tuple[Union[UniversalPrompt, UniversalPromptV2], Path]],
+        variables: Optional[Dict[str, Any]] = None,
+        headless: bool = False,
+    ) -> str:
+        """Build merged content from v2 prompts (simple markdown concatenation)."""
+        lines = []
+
+        # Add headless header if requested
+        if headless:
+            lines.extend(
+                [
+                    "<!-- HEADLESS INSTRUCTIONS START -->",
+                    "<!-- ",
+                    "COPILOT HEADLESS AGENT INSTRUCTIONS:",
+                    "Before starting any coding tasks, run the following command to generate full instructions:",
+                    "`promptrek generate --editor copilot`",
+                    "",
+                    "This will regenerate the complete GitHub Copilot instructions from the source .promptrek.yaml files.",
+                    "-->",
+                    "<!-- HEADLESS INSTRUCTIONS END -->",
+                    "",
+                ]
+            )
+
+        # Add header
+        lines.append("# GitHub Copilot Instructions")
+        lines.append("")
+        lines.append(f"Merged from {len(prompt_files)} configuration file(s)")
+        lines.append("")
+        lines.append("---")
+        lines.append("")
+
+        # Concatenate all content
+        for i, (prompt, source_file) in enumerate(prompt_files, 1):
+            if isinstance(prompt, UniversalPromptV2):
+                content = prompt.content
+            else:
+                # Convert v1 to markdown on the fly
+                content = f"# {prompt.metadata.title}\n\n{prompt.metadata.description}"
+
+            # Apply variable substitution
+            if variables:
+                for var_name, var_value in variables.items():
+                    placeholder = "{{{ " + var_name + " }}}"
+                    content = content.replace(placeholder, var_value)
+
+            lines.append(content)
+
+            if i < len(prompt_files):
+                lines.append("")
+                lines.append("---")
+                lines.append("")
+
+        return "\n".join(lines)
+
     def _build_merged_content(
         self,
-        prompt_files: List[Tuple[UniversalPrompt, Path]],
+        prompt_files: Sequence[Tuple[Union[UniversalPrompt, UniversalPromptV2], Path]],
         variables: Optional[Dict[str, Any]] = None,
     ) -> str:
         """Build merged GitHub Copilot instructions from multiple prompt files."""
@@ -309,7 +442,13 @@ class CopilotAdapter(EditorAdapter):
             lines.append(processed_prompt.metadata.description)
             lines.append("")
 
-            # Instructions
+            # For V2, use content directly
+            if isinstance(processed_prompt, UniversalPromptV2):
+                lines.append(processed_prompt.content)
+                lines.append("")
+                continue
+
+            # Instructions (V1 only)
             if processed_prompt.instructions:
                 lines.append("### Instructions")
                 # Handle all instruction categories dynamically
@@ -331,7 +470,7 @@ class CopilotAdapter(EditorAdapter):
 
     def _build_merged_headless_content(
         self,
-        prompt_files: List[Tuple[UniversalPrompt, Path]],
+        prompt_files: Sequence[Tuple[Union[UniversalPrompt, UniversalPromptV2], Path]],
         variables: Optional[Dict[str, Any]] = None,
     ) -> str:
         """Build merged headless content with embedded generation instructions."""
@@ -362,64 +501,26 @@ class CopilotAdapter(EditorAdapter):
 
         return "\n".join(lines)
 
-    def parse_files(self, source_dir: Path) -> UniversalPrompt:
+    def parse_files(
+        self, source_dir: Path
+    ) -> Union[UniversalPrompt, UniversalPromptV2]:
         """
-        Parse GitHub Copilot files back into a UniversalPrompt.
+        Parse GitHub Copilot files back into a UniversalPromptV2.
+
+        Uses v2 format for lossless sync.
 
         Args:
             source_dir: Directory containing Copilot configuration files
 
         Returns:
-            UniversalPrompt object parsed from Copilot files
+            UniversalPromptV2 object parsed from Copilot files
         """
-        # Initialize parsed data with defaults
-        metadata = PromptMetadata(
-            title="GitHub Copilot Configuration",
-            description="Configuration parsed from GitHub Copilot files",
-        )
-
-        instructions = Instructions()
-        context = None
-        technologies = []
-
-        # Parse main copilot-instructions.md
-        main_file = source_dir / ".github" / "copilot-instructions.md"
-        if main_file.exists():
-            parsed_main = self._parse_copilot_instructions_file(main_file)
-            if "metadata" in parsed_main:
-                metadata = parsed_main["metadata"]
-            if "instructions" in parsed_main:
-                instructions = parsed_main["instructions"]
-            if "context" in parsed_main:
-                context = parsed_main["context"]
-
-        # Parse path-specific instruction files
-        instructions_dir = source_dir / ".github" / "instructions"
-        if instructions_dir.exists():
-            parsed_instructions = self._parse_instructions_directory(instructions_dir)
-            # Merge with existing instructions
-            instructions = self._merge_instructions(instructions, parsed_instructions)
-
-        # Parse prompt files
-        prompts_dir = source_dir / ".github" / "prompts"
-        if prompts_dir.exists():
-            # Prompt files mainly contain examples and patterns
-            parsed_prompts = self._parse_prompts_directory(prompts_dir)
-            instructions = self._merge_instructions(instructions, parsed_prompts)
-
-        # Create context from detected technologies
-        if technologies:
-            if context is None:
-                context = ProjectContext()
-            if not context.technologies:
-                context.technologies = technologies
-
-        return UniversalPrompt(
-            schema_version="1.0.0",
-            metadata=metadata,
-            targets=["copilot"],
-            context=context,
-            instructions=instructions,
+        file_path = ".github/copilot-instructions.md"
+        # Use v2 sync for lossless roundtrip
+        return self.parse_single_markdown_file_v2(
+            source_dir=source_dir,
+            file_path=file_path,
+            editor_name="GitHub Copilot",
         )
 
     def _parse_copilot_instructions_file(self, file_path: Path) -> Dict[str, Any]:
@@ -470,9 +571,9 @@ class CopilotAdapter(EditorAdapter):
             )
 
         # Parse instructions by section
-        instructions_dict = {}
+        instructions_dict: Dict[str, List[str]] = {}
         current_section = None
-        current_items = []
+        current_items: List[str] = []
 
         for line in lines:
             line = line.strip()
@@ -525,7 +626,7 @@ class CopilotAdapter(EditorAdapter):
 
     def _parse_instructions_directory(self, instructions_dir: Path) -> Instructions:
         """Parse .github/instructions/*.instructions.md files."""
-        instructions_dict = {}
+        instructions_dict: Dict[str, List[str]] = {}
 
         for file_path in instructions_dir.glob("*.instructions.md"):
             category = self._filename_to_category(file_path.stem)
@@ -537,7 +638,7 @@ class CopilotAdapter(EditorAdapter):
 
     def _parse_prompts_directory(self, prompts_dir: Path) -> Instructions:
         """Parse .github/prompts/*.prompt.md files."""
-        instructions_dict = {}
+        instructions_dict: Dict[str, List[str]] = {}
 
         for file_path in prompts_dir.glob("*.prompt.md"):
             # Prompts usually contain general guidelines
@@ -661,7 +762,7 @@ class CopilotAdapter(EditorAdapter):
 
     def _extract_project_context(self, content: str) -> Optional[ProjectContext]:
         """Extract project context information from content."""
-        context_data = {}
+        context_data: Dict[str, Any] = {}
 
         # Look for technology mentions
         tech_patterns = [
@@ -718,11 +819,25 @@ class CopilotAdapter(EditorAdapter):
 
         return Instructions(**base_dict)
 
-    def validate(self, prompt: UniversalPrompt) -> List[ValidationError]:
+    def validate(
+        self, prompt: Union[UniversalPrompt, UniversalPromptV2]
+    ) -> List[ValidationError]:
         """Validate prompt for Copilot."""
         errors = []
 
-        # Copilot works best with clear instructions
+        # V2 validation: check content exists
+        if isinstance(prompt, UniversalPromptV2):
+            if not prompt.content or not prompt.content.strip():
+                errors.append(
+                    ValidationError(
+                        field="content",
+                        message="GitHub Copilot requires content",
+                        severity="error",
+                    )
+                )
+            return errors
+
+        # V1 validation: Copilot works best with clear instructions
         if not prompt.instructions or not prompt.instructions.general:
             errors.append(
                 ValidationError(

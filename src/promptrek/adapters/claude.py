@@ -3,12 +3,12 @@ Claude Code adapter implementation.
 """
 
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import click
 
 from ..core.exceptions import ValidationError
-from ..core.models import UniversalPrompt
+from ..core.models import UniversalPrompt, UniversalPromptV2
 from .base import EditorAdapter
 from .sync_mixin import SingleFileMarkdownSyncMixin
 
@@ -28,7 +28,7 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
 
     def generate(
         self,
-        prompt: UniversalPrompt,
+        prompt: Union[UniversalPrompt, UniversalPromptV2],
         output_dir: Path,
         dry_run: bool = False,
         verbose: bool = False,
@@ -37,19 +37,29 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
     ) -> List[Path]:
         """Generate Claude Code context files."""
 
-        # Apply variable substitution if supported
-        processed_prompt = self.substitute_variables(prompt, variables)
-
-        # Process conditionals if supported
-        conditional_content = self.process_conditionals(processed_prompt, variables)
-
-        # Create content
-        content = self._build_content(processed_prompt, conditional_content)
-
-        # Determine output path - Claude Code expects CLAUDE.md
-        # in .claude directory
+        # Determine output path
         claude_dir = output_dir / ".claude"
         output_file = claude_dir / "CLAUDE.md"
+
+        # Check if this is v2 (simplified) or v1 (complex)
+        if isinstance(prompt, UniversalPromptV2):
+            # V2: Direct markdown output (lossless!)
+            content = prompt.content
+
+            # Apply variable substitution if variables provided
+            if variables:
+                for var_name, var_value in variables.items():
+                    # Replace {{{ VAR_NAME }}} with value
+                    placeholder = "{{{ " + var_name + " }}}"
+                    content = content.replace(placeholder, var_value)
+        else:
+            # V1: Build content from structured fields
+            processed_prompt = self.substitute_variables(prompt, variables)
+            assert isinstance(
+                processed_prompt, UniversalPrompt
+            ), "V1 path should have UniversalPrompt"
+            conditional_content = self.process_conditionals(processed_prompt, variables)
+            content = self._build_content(processed_prompt, conditional_content)
 
         if dry_run:
             click.echo(f"  📁 Would create: {output_file}")
@@ -68,7 +78,7 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
 
     def generate_multiple(
         self,
-        prompt_files: List[Tuple[UniversalPrompt, Path]],
+        prompt_files: List[Tuple[Union[UniversalPrompt, UniversalPromptV2], Path]],
         output_dir: Path,
         dry_run: bool = False,
         verbose: bool = False,
@@ -81,8 +91,19 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
         generated_files = []
 
         for prompt, source_file in prompt_files:
+            # Only support v1 prompts in generate_multiple (for now)
+            # V2 prompts should use the main generate() method
+            if isinstance(prompt, UniversalPromptV2):
+                click.echo(
+                    f"⚠️  Skipping v2 prompt from {source_file} (use generate() instead)"
+                )
+                continue
+
             # Apply variable substitution if supported
             processed_prompt = self.substitute_variables(prompt, variables)
+            assert isinstance(
+                processed_prompt, UniversalPrompt
+            ), "V1 path should have UniversalPrompt"
 
             # Process conditionals if supported
             conditional_content = self.process_conditionals(processed_prompt, variables)
@@ -116,11 +137,25 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
 
         return generated_files
 
-    def validate(self, prompt: UniversalPrompt) -> List[ValidationError]:
+    def validate(
+        self, prompt: Union[UniversalPrompt, UniversalPromptV2]
+    ) -> List[ValidationError]:
         """Validate prompt for Claude."""
         errors = []
 
-        # Claude works well with detailed context and examples
+        # V2 validation: just check content exists
+        if isinstance(prompt, UniversalPromptV2):
+            if not prompt.content or not prompt.content.strip():
+                errors.append(
+                    ValidationError(
+                        field="content",
+                        message="Content cannot be empty",
+                        severity="error",
+                    )
+                )
+            return errors
+
+        # V1 validation: check context and examples
         if not prompt.context:
             errors.append(
                 ValidationError(
@@ -153,10 +188,17 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
         """Claude supports conditional instructions."""
         return True
 
-    def parse_files(self, source_dir: Path) -> UniversalPrompt:
-        """Parse Claude Code files back into a UniversalPrompt."""
+    def parse_files(
+        self, source_dir: Path
+    ) -> Union[UniversalPrompt, UniversalPromptV2]:
+        """
+        Parse Claude Code files back into a UniversalPrompt.
+
+        Uses v2 format by default for lossless sync.
+        """
         file_path = ".claude/CLAUDE.md"
-        return self.parse_single_markdown_file(
+        # Use v2 sync for lossless roundtrip
+        return self.parse_single_markdown_file_v2(
             source_dir=source_dir,
             file_path=file_path,
             editor_name="Claude Code",

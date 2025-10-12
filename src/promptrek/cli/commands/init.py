@@ -8,13 +8,17 @@ from pathlib import Path
 from typing import Optional
 
 import click
-import yaml
 
 from ...core.exceptions import CLIError
+from ..yaml_writer import write_promptrek_yaml
 
 
 def init_command(
-    ctx: click.Context, template: Optional[str], output: str, setup_hooks: bool
+    ctx: click.Context,
+    template: Optional[str],
+    output: str,
+    setup_hooks: bool,
+    use_v2: bool = True,
 ) -> None:
     """
     Initialize a new universal prompt file.
@@ -24,6 +28,7 @@ def init_command(
         template: Optional template name to use
         output: Output file path
         setup_hooks: Whether to set up pre-commit hooks after initialization
+        use_v2: Use v2 schema (default True)
     """
     output_path = Path(output)
 
@@ -38,23 +43,19 @@ def init_command(
 
     # Create basic template
     if template:
-        upf_data = _get_template(template)
+        upf_data = _get_template(template, use_v2)
     else:
-        upf_data = _get_basic_template()
+        if use_v2:
+            upf_data = _get_basic_template_v2()
+        else:
+            upf_data = _get_basic_template()
 
     # Create output directory if needed
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     # Write the file
     try:
-        with open(output_path, "w", encoding="utf-8") as f:
-            yaml.dump(
-                upf_data,
-                f,
-                default_flow_style=False,
-                allow_unicode=True,
-                sort_keys=False,
-            )
+        write_promptrek_yaml(upf_data, output_path)
     except Exception as e:
         raise CLIError(f"Failed to write file {output_path}: {e}")
 
@@ -80,8 +81,82 @@ def init_command(
             )
 
 
+def _get_basic_template_v2() -> dict:
+    """Get the basic v2 template structure (markdown-first)."""
+    content = """# My Project Assistant
+
+AI assistant configuration for my project
+
+## Project Details
+**Project Type:** web_application
+**Technologies:** python, javascript, react
+
+**Description:**
+A sample project using modern web technologies
+
+## Development Guidelines
+
+### General Principles
+- Write clean, readable, and maintainable code
+- Follow existing code patterns and conventions
+- Add appropriate comments for complex logic
+
+### Code Style Requirements
+- Use meaningful and descriptive variable names
+- Follow the existing linting and formatting rules
+- Prefer explicit over implicit code
+
+### Testing Standards
+- Write unit tests for new functions
+- Ensure tests are clear and well-documented
+- Aim for good test coverage
+
+## Code Examples
+
+### Function
+```python
+def calculate_total(items: list[float]) -> float:
+    \"\"\"Calculate the total sum of items.
+
+    Args:
+        items: List of numeric values to sum
+
+    Returns:
+        Total sum of all items
+    \"\"\"
+    return sum(items)
+```
+
+## AI Assistant Instructions
+
+When working on this project:
+- Follow the established patterns and conventions shown above
+- Maintain consistency with the existing codebase
+- Consider the project context and requirements in all suggestions
+- Prioritize code quality, maintainability, and best practices
+"""
+
+    return {
+        "schema_version": "2.0.0",
+        "metadata": {
+            "title": "My Project Assistant",
+            "description": "AI assistant configuration for my project",
+            "version": "1.0.0",
+            "author": "Your Name <your.email@example.com>",
+            "created": "2024-01-01",
+            "updated": "2024-01-01",
+            "tags": ["project", "ai-assistant"],
+        },
+        "content": content,
+        "variables": {
+            "PROJECT_NAME": "My Project",
+            "AUTHOR_EMAIL": "your.email@example.com",
+        },
+    }
+
+
 def _get_basic_template() -> dict:
-    """Get the basic template structure."""
+    """Get the basic v1 template structure (legacy)."""
     return {
         "schema_version": "1.0.0",
         "metadata": {
@@ -137,12 +212,13 @@ def calculate_total(items: list[float]) -> float:
     }
 
 
-def _get_template(template_name: str) -> dict:
+def _get_template(template_name: str, use_v2: bool = True) -> dict:
     """
     Get a specific template by name.
 
     Args:
         template_name: Name of the template to use
+        use_v2: Use v2 schema format (default True)
 
     Returns:
         Template data dictionary
@@ -150,11 +226,18 @@ def _get_template(template_name: str) -> dict:
     Raises:
         CLIError: If template is not found
     """
-    templates = {
-        "basic": _get_basic_template(),
-        "react": _get_react_template(),
-        "api": _get_api_template(),
-    }
+    if use_v2:
+        templates = {
+            "basic": _get_basic_template_v2(),
+            "react": _get_react_template_v2(),
+            "api": _get_api_template_v2(),
+        }
+    else:
+        templates = {
+            "basic": _get_basic_template(),
+            "react": _get_react_template(),
+            "api": _get_api_template(),
+        }
 
     if template_name not in templates:
         available = ", ".join(templates.keys())
@@ -163,6 +246,177 @@ def _get_template(template_name: str) -> dict:
         )
 
     return templates[template_name]
+
+
+def _get_react_template_v2() -> dict:
+    """Get React/TypeScript project template (v2)."""
+    content = """# React TypeScript Project Assistant
+
+AI assistant for React TypeScript development
+
+## Project Details
+**Project Type:** web_application
+**Technologies:** typescript, react, vite, tailwindcss
+
+**Description:**
+Modern React application using TypeScript and Vite
+
+## Development Guidelines
+
+### General Principles
+- Write clean, readable, and maintainable code
+- Follow existing code patterns and conventions
+- Add appropriate comments for complex logic
+- Use TypeScript for all new files
+- Follow React functional component patterns
+- Implement proper error boundaries
+
+### Code Style Requirements
+- Use meaningful and descriptive variable names
+- Follow the existing linting and formatting rules
+- Prefer explicit over implicit code
+- Use functional components with hooks
+- Prefer arrow functions for components
+- Use TypeScript interfaces for props
+
+### Testing Standards
+- Write unit tests for new functions
+- Ensure tests are clear and well-documented
+- Aim for good test coverage
+
+## Code Examples
+
+### Component
+```typescript
+interface ButtonProps {
+  title: string;
+  onClick: () => void;
+  variant?: 'primary' | 'secondary';
+}
+
+export const Button: React.FC<ButtonProps> = ({
+  title,
+  onClick,
+  variant = 'primary'
+}) => {
+  return (
+    <button
+      className={`btn btn-${variant}`}
+      onClick={onClick}
+    >
+      {title}
+    </button>
+  );
+};
+```
+
+## AI Assistant Instructions
+
+When working on this project:
+- Follow the established patterns and conventions shown above
+- Maintain consistency with the existing codebase
+- Consider the project context and requirements in all suggestions
+- Prioritize code quality, maintainability, and best practices
+- Leverage typescript, react, vite, tailwindcss best practices and idioms
+"""
+
+    return {
+        "schema_version": "2.0.0",
+        "metadata": {
+            "title": "React TypeScript Project Assistant",
+            "description": "AI assistant for React TypeScript development",
+            "version": "1.0.0",
+            "author": "Your Name <your.email@example.com>",
+            "created": "2024-01-01",
+            "updated": "2024-01-01",
+            "tags": ["react", "typescript", "ai-assistant"],
+        },
+        "content": content,
+    }
+
+
+def _get_api_template_v2() -> dict:
+    """Get API project template (v2)."""
+    content = """# API Service Assistant
+
+AI assistant for API development
+
+## Project Details
+**Project Type:** api_service
+**Technologies:** python, fastapi, postgresql, sqlalchemy
+
+**Description:**
+RESTful API service using FastAPI and PostgreSQL
+
+## Development Guidelines
+
+### General Principles
+- Write clean, readable, and maintainable code
+- Follow existing code patterns and conventions
+- Add appropriate comments for complex logic
+- Follow RESTful API design principles
+- Implement proper error handling
+- Use async/await for database operations
+
+### Code Style Requirements
+- Use meaningful and descriptive variable names
+- Follow the existing linting and formatting rules
+- Prefer explicit over implicit code
+
+### Testing Standards
+- Write unit tests for new functions
+- Ensure tests are clear and well-documented
+- Aim for good test coverage
+
+### Security Requirements
+- Validate all user inputs
+- Use parameterized queries
+- Implement proper authentication
+- Never log sensitive information
+
+## Code Examples
+
+### Endpoint
+```python
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
+
+class UserCreate(BaseModel):
+    name: str
+    email: str
+
+@router.post("/users")
+async def create_user(user: UserCreate):
+    try:
+        # Create user logic here
+        return {"id": 1, "name": user.name, "email": user.email}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+```
+
+## AI Assistant Instructions
+
+When working on this project:
+- Follow the established patterns and conventions shown above
+- Maintain consistency with the existing codebase
+- Consider the project context and requirements in all suggestions
+- Prioritize code quality, maintainability, and best practices
+- Leverage python, fastapi, postgresql, sqlalchemy best practices and idioms
+"""
+
+    return {
+        "schema_version": "2.0.0",
+        "metadata": {
+            "title": "API Service Assistant",
+            "description": "AI assistant for API development",
+            "version": "1.0.0",
+            "author": "Your Name <your.email@example.com>",
+            "created": "2024-01-01",
+            "updated": "2024-01-01",
+            "tags": ["api", "fastapi", "ai-assistant"],
+        },
+        "content": content,
+    }
 
 
 def _get_react_template() -> dict:

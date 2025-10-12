@@ -4,12 +4,18 @@ Tabnine adapter implementation.
 
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 import click
 
 from ..core.exceptions import ValidationError
-from ..core.models import Instructions, ProjectContext, PromptMetadata, UniversalPrompt
+from ..core.models import (
+    Instructions,
+    ProjectContext,
+    PromptMetadata,
+    UniversalPrompt,
+    UniversalPromptV2,
+)
 from .base import EditorAdapter
 
 
@@ -28,7 +34,7 @@ class TabnineAdapter(EditorAdapter):
 
     def generate(
         self,
-        prompt: UniversalPrompt,
+        prompt: Union[UniversalPrompt, UniversalPromptV2],
         output_dir: Path,
         dry_run: bool = False,
         verbose: bool = False,
@@ -37,8 +43,15 @@ class TabnineAdapter(EditorAdapter):
     ) -> List[Path]:
         """Generate Tabnine configuration files."""
 
-        # Apply variable substitution if supported
+        # V2: Convert markdown content to comment-based format
+        if isinstance(prompt, UniversalPromptV2):
+            return self._generate_v2(prompt, output_dir, dry_run, verbose, variables)
+
+        # V1: Apply variable substitution if supported
         processed_prompt = self.substitute_variables(prompt, variables)
+        assert isinstance(
+            processed_prompt, UniversalPrompt
+        ), "V1 path should have UniversalPrompt"
 
         # Process conditionals if supported
         conditional_content = self.process_conditionals(processed_prompt, variables)
@@ -68,11 +81,69 @@ class TabnineAdapter(EditorAdapter):
             click.echo(f"✅ Generated: {commands_file}")
             return [commands_file]
 
-    def validate(self, prompt: UniversalPrompt) -> List[ValidationError]:
+    def _generate_v2(
+        self,
+        prompt: UniversalPromptV2,
+        output_dir: Path,
+        dry_run: bool,
+        verbose: bool,
+        variables: Optional[Dict[str, Any]] = None,
+    ) -> List[Path]:
+        """Generate Tabnine file from v2 schema (convert markdown to comment format)."""
+        # Apply variable substitution
+        content = prompt.content
+        if variables:
+            for var_name, var_value in variables.items():
+                placeholder = "{{{ " + var_name + " }}}"
+                content = content.replace(placeholder, var_value)
+
+        # Convert markdown content to comment-based format
+        # Simple conversion: prefix each line with # if not already
+        lines = []
+        for line in content.split("\n"):
+            if line.strip() and not line.startswith("#"):
+                lines.append(f"# {line}")
+            else:
+                lines.append(line)
+
+        commands_content = "\n".join(lines)
+        commands_file = output_dir / ".tabnine_commands"
+
+        if dry_run:
+            click.echo(f"  📁 Would create: {commands_file}")
+            if verbose:
+                preview = (
+                    commands_content[:200] + "..."
+                    if len(commands_content) > 200
+                    else commands_content
+                )
+                click.echo(f"    {preview}")
+            return [commands_file]
+        else:
+            with open(commands_file, "w", encoding="utf-8") as f:
+                f.write(commands_content)
+            click.echo(f"✅ Generated: {commands_file}")
+            return [commands_file]
+
+    def validate(
+        self, prompt: Union[UniversalPrompt, UniversalPromptV2]
+    ) -> List[ValidationError]:
         """Validate prompt for Tabnine."""
         errors = []
 
-        # Tabnine works well with clear instructions
+        # V2 validation: check content exists
+        if isinstance(prompt, UniversalPromptV2):
+            if not prompt.content or not prompt.content.strip():
+                errors.append(
+                    ValidationError(
+                        field="content",
+                        message="Tabnine requires content",
+                        severity="error",
+                    )
+                )
+            return errors
+
+        # V1 validation: Tabnine works well with clear instructions
         if not prompt.instructions:
             errors.append(
                 ValidationError(
@@ -92,7 +163,9 @@ class TabnineAdapter(EditorAdapter):
         """Tabnine supports conditional configuration."""
         return True
 
-    def parse_files(self, source_dir: Path) -> UniversalPrompt:
+    def parse_files(
+        self, source_dir: Path
+    ) -> Union[UniversalPrompt, UniversalPromptV2]:
         """Parse Tabnine files back into a UniversalPrompt."""
         commands_file = source_dir / ".tabnine_commands"
 

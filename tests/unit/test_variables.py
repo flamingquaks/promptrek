@@ -158,3 +158,42 @@ class TestVariableSubstitution:
         assert result["boolean"] is True
         assert result["none_value"] is None
         assert result["string"] == "Value test"
+
+    def test_extract_variables_complex(self):
+        """Test extracting variables from complex content."""
+        vs = VariableSubstitution()
+        text = """
+        Use {{{ PROJECT_NAME }}} with {{{ LANGUAGE }}}.
+        Version: {{{ VERSION }}}
+        Repeat {{{ PROJECT_NAME }}} again.
+        """
+
+        variables = vs.extract_variables(text)
+
+        assert "PROJECT_NAME" in variables
+        assert "LANGUAGE" in variables
+        assert "VERSION" in variables
+        # Should not have duplicates
+        assert variables.count("PROJECT_NAME") == 1
+
+    def test_substitute_nested_dicts(self):
+        """Test substituting variables in nested dictionaries."""
+        vs = VariableSubstitution()
+
+        data = {"outer": {"inner": {"value": "Project {{{ NAME }}}"}}}
+
+        variables = {"NAME": "PromptTrek"}
+        result = vs._substitute_dict_recursive(data, variables, False, False)
+
+        assert result["outer"]["inner"]["value"] == "Project PromptTrek"
+
+    def test_get_undefined_variables_nested(self):
+        """Test getting undefined variables from nested content."""
+        vs = VariableSubstitution()
+
+        text = "{{{ VAR1 }}} {{{ VAR2 }}} {{{ VAR3 }}}"
+        undefined = vs.get_undefined_variables(text, {"VAR1": "val1"})
+
+        assert "VAR2" in undefined
+        assert "VAR3" in undefined
+        assert "VAR1" not in undefined

@@ -4,13 +4,20 @@ Continue editor adapter implementation.
 
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 import click
 import yaml
 
 from ..core.exceptions import ValidationError
-from ..core.models import Instructions, ProjectContext, PromptMetadata, UniversalPrompt
+from ..core.models import (
+    DocumentConfig,
+    Instructions,
+    ProjectContext,
+    PromptMetadata,
+    UniversalPrompt,
+    UniversalPromptV2,
+)
 from .base import EditorAdapter
 
 
@@ -29,7 +36,7 @@ class ContinueAdapter(EditorAdapter):
 
     def generate(
         self,
-        prompt: UniversalPrompt,
+        prompt: Union[UniversalPrompt, UniversalPromptV2],
         output_dir: Path,
         dry_run: bool = False,
         verbose: bool = False,
@@ -38,8 +45,15 @@ class ContinueAdapter(EditorAdapter):
     ) -> List[Path]:
         """Generate Continue configuration files."""
 
-        # Apply variable substitution if supported
+        # V2: Use documents field for multi-file generation
+        if isinstance(prompt, UniversalPromptV2):
+            return self._generate_v2(prompt, output_dir, dry_run, verbose, variables)
+
+        # V1: Apply variable substitution if supported
         processed_prompt = self.substitute_variables(prompt, variables)
+        assert isinstance(
+            processed_prompt, UniversalPrompt
+        ), "V1 path should have UniversalPrompt"
 
         # Process conditionals if supported
         conditional_content = self.process_conditionals(processed_prompt, variables)
@@ -50,6 +64,73 @@ class ContinueAdapter(EditorAdapter):
         )
 
         return rules_files
+
+    def _generate_v2(
+        self,
+        prompt: UniversalPromptV2,
+        output_dir: Path,
+        dry_run: bool,
+        verbose: bool,
+        variables: Optional[Dict[str, Any]] = None,
+    ) -> List[Path]:
+        """Generate Continue files from v2 schema."""
+        rules_dir = output_dir / ".continue" / "rules"
+        created_files = []
+
+        # If documents field is present, generate separate files
+        if prompt.documents:
+            for doc in prompt.documents:
+                # Apply variable substitution
+                content = doc.content
+                if variables:
+                    for var_name, var_value in variables.items():
+                        placeholder = "{{{ " + var_name + " }}}"
+                        content = content.replace(placeholder, var_value)
+
+                # Generate filename from document name
+                filename = (
+                    f"{doc.name}.md" if not doc.name.endswith(".md") else doc.name
+                )
+                output_file = rules_dir / filename
+
+                if dry_run:
+                    click.echo(f"  📁 Would create: {output_file}")
+                    if verbose:
+                        preview = (
+                            content[:200] + "..." if len(content) > 200 else content
+                        )
+                        click.echo(f"    {preview}")
+                    created_files.append(output_file)
+                else:
+                    rules_dir.mkdir(parents=True, exist_ok=True)
+                    with open(output_file, "w", encoding="utf-8") as f:
+                        f.write(content)
+                    click.echo(f"✅ Generated: {output_file}")
+                    created_files.append(output_file)
+        else:
+            # No documents, use main content as general rules
+            content = prompt.content
+            if variables:
+                for var_name, var_value in variables.items():
+                    placeholder = "{{{ " + var_name + " }}}"
+                    content = content.replace(placeholder, var_value)
+
+            output_file = rules_dir / "general.md"
+
+            if dry_run:
+                click.echo(f"  📁 Would create: {output_file}")
+                if verbose:
+                    preview = content[:200] + "..." if len(content) > 200 else content
+                    click.echo(f"    {preview}")
+                created_files.append(output_file)
+            else:
+                rules_dir.mkdir(parents=True, exist_ok=True)
+                with open(output_file, "w", encoding="utf-8") as f:
+                    f.write(content)
+                click.echo(f"✅ Generated: {output_file}")
+                created_files.append(output_file)
+
+        return created_files
 
     def _generate_rules_system(
         self,
@@ -196,11 +277,25 @@ class ContinueAdapter(EditorAdapter):
 
         return []
 
-    def validate(self, prompt: UniversalPrompt) -> List[ValidationError]:
+    def validate(
+        self, prompt: Union[UniversalPrompt, UniversalPromptV2]
+    ) -> List[ValidationError]:
         """Validate prompt for Continue."""
         errors = []
 
-        # Continue requires a system message
+        # V2 validation: check content exists
+        if isinstance(prompt, UniversalPromptV2):
+            if not prompt.content or not prompt.content.strip():
+                errors.append(
+                    ValidationError(
+                        field="content",
+                        message="Continue requires content",
+                        severity="error",
+                    )
+                )
+            return errors
+
+        # V1 validation: Continue requires a system message
         if not prompt.metadata.description:
             errors.append(
                 ValidationError(
@@ -358,9 +453,82 @@ class ContinueAdapter(EditorAdapter):
 
         return "\n".join(lines)
 
-    def parse_files(self, source_dir: Path) -> UniversalPrompt:
+    def parse_files(
+        self, source_dir: Path
+    ) -> Union[UniversalPrompt, UniversalPromptV2]:
         """
-        Parse Continue files back into a UniversalPrompt.
+        Parse Continue files back into a UniversalPromptV2.
+
+        Uses v2 format with documents field for lossless multi-file sync.
+
+        Args:
+            source_dir: Directory containing Continue configuration files
+
+        Returns:
+            UniversalPromptV2 object parsed from Continue files
+        """
+        # Parse markdown files from .continue/rules/
+        rules_dir = source_dir / ".continue" / "rules"
+
+        if not rules_dir.exists():
+            # Fallback to v1 parsing if no rules directory
+            return self._parse_files_v1(source_dir)
+
+        # V2: Parse each markdown file as a document
+        documents = []
+        main_content_parts = []
+
+        for md_file in sorted(rules_dir.glob("*.md")):
+            try:
+                with open(md_file, "r", encoding="utf-8") as f:
+                    content = f.read()
+
+                # Create document for this file
+                doc_name = md_file.stem  # Remove .md extension
+                documents.append(
+                    DocumentConfig(
+                        name=doc_name,
+                        content=content.strip(),
+                    )
+                )
+
+                # Also add to main content for backwards compatibility
+                main_content_parts.append(
+                    f"## {doc_name.replace('-', ' ').title()}\n\n{content}"
+                )
+
+            except Exception as e:
+                click.echo(f"Warning: Could not parse {md_file}: {e}")
+
+        # Create metadata
+        metadata = PromptMetadata(
+            title="Continue AI Assistant",
+            description="Configuration synced from Continue rules",
+            version="1.0.0",
+            author="PrompTrek Sync",
+            created=datetime.now().isoformat(),
+            updated=datetime.now().isoformat(),
+            tags=["continue", "synced"],
+        )
+
+        # Build main content from all documents
+        main_content = (
+            "\n\n".join(main_content_parts)
+            if main_content_parts
+            else "# Continue AI Assistant\n\nNo rules found."
+        )
+
+        return UniversalPromptV2(
+            schema_version="2.0.0",
+            metadata=metadata,
+            content=main_content,
+            documents=documents if documents else None,
+            variables={},
+        )
+
+    def _parse_files_v1(self, source_dir: Path) -> UniversalPrompt:
+        """
+        Parse Continue files back into v1 UniversalPrompt (legacy).
 
         Args:
             source_dir: Directory containing Continue configuration files

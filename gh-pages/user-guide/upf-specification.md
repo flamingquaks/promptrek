@@ -9,13 +9,264 @@ title: UPF Specification
 
 The Universal Prompt Format (UPF) is a standardized YAML-based format for defining AI assistant prompts that can be converted to various editor-specific formats.
 
+PrompTrek supports **two schema versions**:
+- **v2.0.0** (Recommended): Markdown-first, simpler format with lossless bidirectional sync
+- **v1.0.0** (Legacy): Structured format with complex nested fields
+
 ## File Extension
 
 `.promptrek.yaml`
 
-## Schema Version
+## Schema Versions
 
-Current version: `1.0.0`
+- **Current (Recommended)**: `2.0.0` - [Jump to v2 Specification](#schema-v20-recommended)
+- **Legacy**: `1.0.0` - [Jump to v1 Specification](#schema-v10-legacy)
+
+---
+
+## Schema v2.0 (Recommended)
+
+**New in v2.0.0**: Simpler markdown-first approach that aligns with how AI editors actually work.
+
+### Key Benefits
+
+- ✅ **No `targets` field** - Works with ALL editors automatically
+- ✅ **Lossless bidirectional sync** - Parse editor files back without data loss
+- ✅ **Simpler format** - Just markdown content, no complex nested structures
+- ✅ **Editor-friendly** - Matches how Claude Code, Copilot, and others use markdown
+- ✅ **Multi-file support** - Use `documents` field for multi-file editors
+
+### Complete v2 Schema
+
+```yaml
+# Schema version (required)
+schema_version: "2.0.0"
+
+# Metadata about the prompt file (required)
+metadata:
+  title: string                    # Human-readable title (required)
+  description: string              # Brief description of purpose (required)
+  version: string                  # Semantic version of this prompt (optional)
+  author: string                   # Author name or email (optional)
+  created: string                  # ISO 8601 date (YYYY-MM-DD) (optional)
+  updated: string                  # ISO 8601 date (YYYY-MM-DD) (optional)
+  tags: [string]                   # Tags for categorization (optional)
+
+# Main markdown content (required)
+content: string                    # Raw markdown content
+
+# Optional: Multi-file support for editors like Continue, Windsurf, Kiro
+documents:
+  - name: string                   # Document name (becomes filename)
+    content: string                # Raw markdown content for this document
+
+# Template variables (optional)
+variables:
+  variable_name: string            # Variable value
+```
+
+### v2 Field Descriptions
+
+#### metadata (required)
+
+Same as v1 - contains information about the prompt file.
+
+**Example**:
+```yaml
+metadata:
+  title: "My Project Assistant"
+  description: "AI assistant for my project"
+  version: "1.0.0"
+  author: "Your Name <your.email@example.com>"
+  created: "2024-01-01"
+  updated: "2024-01-15"
+  tags: ["project", "ai-assistant"]
+```
+
+#### content (required)
+
+The main markdown content that will be used by AI editors. This is where you write your comprehensive guidelines, examples, and instructions in natural markdown format.
+
+**Example**:
+```yaml
+content: |
+  # My Project Assistant
+
+  ## Project Details
+  **Technologies:** Python, React, TypeScript
+
+  ## Development Guidelines
+
+  ### General Principles
+  - Write clean, maintainable code
+  - Follow existing patterns
+  - Add tests for new features
+
+  ### Code Style
+  - Use functional components with hooks
+  - Prefer const over let
+  - Use meaningful variable names
+
+  ## Code Examples
+
+  ### Function Example
+  ```python
+  def calculate_total(items: list[float]) -> float:
+      """Calculate the total sum of items."""
+      return sum(items)
+  ```
+```
+
+#### documents (optional)
+
+For multi-file editors like Continue, Windsurf, and Kiro, you can split content into separate documents.
+
+**Example**:
+```yaml
+documents:
+  - name: "general-rules"
+    content: |
+      # General Coding Rules
+      - Write clean code
+      - Follow best practices
+
+  - name: "code-style"
+    content: |
+      # Code Style Guidelines
+      - Use meaningful variable names
+      - Follow PEP 8 for Python
+
+  - name: "testing"
+    content: |
+      # Testing Standards
+      - Write unit tests for all functions
+      - Aim for 80% coverage
+```
+
+#### variables (optional)
+
+Template variables using `{{{ VARIABLE_NAME }}}` syntax (triple braces to distinguish from Jinja2).
+
+**Example**:
+```yaml
+content: |
+  # {{{ PROJECT_NAME }}}
+
+  Project for {{{ COMPANY }}}.
+
+  Technologies: {{{ TECH_STACK }}}
+
+variables:
+  PROJECT_NAME: "My App"
+  COMPANY: "Acme Corp"
+  TECH_STACK: "Python, React"
+```
+
+### Complete v2 Example
+
+```yaml
+schema_version: "2.0.0"
+
+metadata:
+  title: "React TypeScript Project"
+  description: "AI assistant for React TypeScript development"
+  version: "1.0.0"
+  author: "dev-team@company.com"
+  tags: ["react", "typescript", "frontend"]
+
+content: |
+  # React TypeScript Project
+
+  ## Project Overview
+  Modern React application with TypeScript, focusing on clean architecture and best practices.
+
+  **Tech Stack:**
+  - React 18
+  - TypeScript
+  - Vite
+  - React Router
+  - TanStack Query
+
+  ## Development Guidelines
+
+  ### General Principles
+  - Write type-safe code with strict TypeScript settings
+  - Use functional components with hooks
+  - Follow React best practices and patterns
+  - Add comprehensive JSDoc comments
+
+  ### Code Style
+  - Use named exports for components
+  - Prefer arrow functions for components
+  - Use destructuring for props
+  - Follow existing ESLint and Prettier configurations
+
+  ### Testing
+  - Write tests using Vitest and React Testing Library
+  - Test user interactions, not implementation details
+  - Aim for 80%+ test coverage
+  - Mock external dependencies
+
+  ## Code Examples
+
+  ### Component Example
+  ```typescript
+  interface ButtonProps {
+    label: string;
+    onClick: () => void;
+    variant?: 'primary' | 'secondary';
+  }
+
+  export const Button: React.FC<ButtonProps> = ({
+    label,
+    onClick,
+    variant = 'primary'
+  }) => {
+    return (
+      <button
+        className={`btn btn--${variant}`}
+        onClick={onClick}
+      >
+        {label}
+      </button>
+    );
+  };
+  ```
+
+  ### Hook Example
+  ```typescript
+  export const useUser = (userId: string) => {
+    return useQuery({
+      queryKey: ['user', userId],
+      queryFn: () => fetchUser(userId),
+      staleTime: 5 * 60 * 1000,
+    });
+  };
+  ```
+
+variables:
+  PROJECT_NAME: "react-app"
+  TEAM_EMAIL: "dev-team@company.com"
+```
+
+### Migration from v1 to v2
+
+Use the `promptrek migrate` command to convert v1 files to v2:
+
+```bash
+promptrek migrate old.promptrek.yaml -o new.promptrek.yaml
+```
+
+The migration tool:
+- ✅ Converts structured `instructions` to markdown `content`
+- ✅ Converts `examples` to markdown code blocks
+- ✅ Preserves `metadata` and `variables`
+- ✅ Removes `targets` field (no longer needed in v2)
+- ✅ Optionally splits into `documents` for multi-file editors
+
+---
+
+## Schema v1.0 (Legacy)
 
 ## Complete Schema
 

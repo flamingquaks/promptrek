@@ -23,6 +23,7 @@ from promptrek.core.models import (
     ProjectContext,
     PromptMetadata,
     UniversalPrompt,
+    UniversalPromptV2,
 )
 
 
@@ -76,26 +77,37 @@ class TestSyncCommand:
 """
         )
 
-        # Test parsing
+        # Test parsing (now returns V2 schema)
         adapter = ContinueAdapter()
         parsed_prompt = adapter.parse_files(tmp_path)
 
-        assert isinstance(parsed_prompt, UniversalPrompt)
-        assert parsed_prompt.metadata.title == "Test Assistant"
-        assert parsed_prompt.metadata.description == "A test configuration"
-        assert "continue" in parsed_prompt.targets
-
-        # Check instructions were parsed
-        assert parsed_prompt.instructions is not None
-        assert parsed_prompt.instructions.general is not None
+        assert isinstance(parsed_prompt, UniversalPromptV2)
+        assert parsed_prompt.schema_version == "2.0.0"
         assert (
-            len(parsed_prompt.instructions.general) >= 5
-        )  # 3 from config + 3 from markdown (minus generic ones)
-        assert "Write clean code" in parsed_prompt.instructions.general
-        assert "Use descriptive variable names" in parsed_prompt.instructions.general
+            parsed_prompt.metadata.title == "Continue AI Assistant"
+        )  # V2 uses default title
 
-        assert parsed_prompt.instructions.code_style is not None
-        assert "Use consistent indentation" in parsed_prompt.instructions.code_style
+        # V2 schema uses documents instead of instructions
+        assert parsed_prompt.documents is not None
+        assert len(parsed_prompt.documents) >= 2  # general.md and code-style.md
+
+        # Check documents were parsed
+        doc_names = [doc.name for doc in parsed_prompt.documents]
+        assert "general" in doc_names
+        assert "code-style" in doc_names
+
+        # Check content is in documents
+        general_doc = next(
+            (d for d in parsed_prompt.documents if d.name == "general"), None
+        )
+        assert general_doc is not None
+        assert "Use descriptive variable names" in general_doc.content
+
+        code_style_doc = next(
+            (d for d in parsed_prompt.documents if d.name == "code-style"), None
+        )
+        assert code_style_doc is not None
+        assert "Use consistent indentation" in code_style_doc.content
 
     def test_continue_adapter_parse_files_no_config(self, tmp_path):
         """Test parsing when only markdown files exist."""
@@ -113,8 +125,11 @@ class TestSyncCommand:
         adapter = ContinueAdapter()
         parsed_prompt = adapter.parse_files(tmp_path)
 
+        # V2 schema
+        assert isinstance(parsed_prompt, UniversalPromptV2)
         assert parsed_prompt.metadata.title == "Continue AI Assistant"
-        assert len(parsed_prompt.instructions.general) == 2
+        assert len(parsed_prompt.documents) == 1
+        assert parsed_prompt.documents[0].name == "general"
 
     def test_continue_adapter_parse_files_empty_directory(self, tmp_path):
         """Test parsing from empty directory."""
@@ -382,10 +397,14 @@ Some other text that should be ignored.
         # Should overwrite without asking
         sync_command(ctx, tmp_path, "continue", output_file, False, True)
 
-        # File should have new content
+        # File should have new content (V2 schema)
         content = yaml.safe_load(output_file.read_text())
+        assert content["schema_version"] == "2.0.0"
         assert content["metadata"]["title"] == "Continue AI Assistant"
-        assert "New test rule" in content["instructions"]["general"]
+        # V2 uses documents, not instructions
+        assert "documents" in content
+        assert len(content["documents"]) == 1
+        assert content["documents"][0]["name"] == "general"
 
     def test_continue_adapter_technology_detection(self, tmp_path):
         """Test technology detection from technology-specific rule files."""
@@ -402,11 +421,73 @@ Some other text that should be ignored.
         adapter = ContinueAdapter()
         parsed_prompt = adapter.parse_files(tmp_path)
 
-        # Should detect technologies
-        assert parsed_prompt.context is not None
-        assert "python" in parsed_prompt.context.technologies
-        assert "javascript" in parsed_prompt.context.technologies
+        # V2 schema: tech-specific files become documents
+        assert isinstance(parsed_prompt, UniversalPromptV2)
+        assert parsed_prompt.documents is not None
 
-        # Should include tech-specific rules in general instructions
-        assert "Use type hints" in parsed_prompt.instructions.general
-        assert "Use const/let" in parsed_prompt.instructions.general
+        # Check documents were created for each technology
+        doc_names = [doc.name for doc in parsed_prompt.documents]
+        assert "python-rules" in doc_names
+        assert "javascript-rules" in doc_names
+
+        # Check content in documents
+        python_doc = next(
+            (d for d in parsed_prompt.documents if d.name == "python-rules"), None
+        )
+        assert python_doc is not None
+        assert "Use type hints" in python_doc.content
+
+        js_doc = next(
+            (d for d in parsed_prompt.documents if d.name == "javascript-rules"), None
+        )
+        assert js_doc is not None
+        assert "Use const/let" in js_doc.content
+
+    def test_write_v2_prompt_with_literal_block_scalar(self, tmp_path):
+        """Test that v2 prompts with multi-line content use literal block scalar formatting."""
+        content = """# Test Project
+
+## Overview
+This is a test project with multiple lines.
+
+## Guidelines
+- Follow best practices
+- Write tests
+- Document code
+"""
+
+        prompt = UniversalPromptV2(
+            schema_version="2.0.0",
+            metadata=PromptMetadata(
+                title="Test Prompt",
+                description="Test description",
+                version="1.0.0",
+                author="Test Author",
+                created="2024-01-01",
+                updated="2024-01-01",
+            ),
+            content=content,
+        )
+
+        output_file = tmp_path / "test.yaml"
+        _write_prompt_file(prompt, output_file)
+
+        assert output_file.exists()
+
+        # Read the raw YAML file
+        yaml_content = output_file.read_text()
+
+        # Should use literal block scalar (|- or |)
+        assert "content: |" in yaml_content or "content: |-" in yaml_content
+
+        # Should NOT have escaped newlines
+        assert "\\n" not in yaml_content
+
+        # Should have actual readable content
+        assert "# Test Project" in yaml_content
+        assert "## Overview" in yaml_content
+        assert "- Follow best practices" in yaml_content
+
+        # Also verify it can be parsed back correctly
+        parsed_data = yaml.safe_load(yaml_content)
+        assert parsed_data["content"] == content

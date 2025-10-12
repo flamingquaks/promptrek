@@ -3,12 +3,12 @@ JetBrains AI adapter implementation.
 """
 
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 import click
 
 from ..core.exceptions import ValidationError
-from ..core.models import UniversalPrompt
+from ..core.models import UniversalPrompt, UniversalPromptV2
 from .base import EditorAdapter
 from .sync_mixin import MarkdownSyncMixin
 
@@ -28,7 +28,7 @@ class JetBrainsAdapter(MarkdownSyncMixin, EditorAdapter):
 
     def generate(
         self,
-        prompt: UniversalPrompt,
+        prompt: Union[UniversalPrompt, UniversalPromptV2],
         output_dir: Path,
         dry_run: bool = False,
         verbose: bool = False,
@@ -37,8 +37,15 @@ class JetBrainsAdapter(MarkdownSyncMixin, EditorAdapter):
     ) -> List[Path]:
         """Generate JetBrains AI configuration files."""
 
-        # Apply variable substitution if supported
+        # V2: Use documents field for multi-file rules or main content for single file
+        if isinstance(prompt, UniversalPromptV2):
+            return self._generate_v2(prompt, output_dir, dry_run, verbose, variables)
+
+        # V1: Apply variable substitution if supported
         processed_prompt = self.substitute_variables(prompt, variables)
+        assert isinstance(
+            processed_prompt, UniversalPrompt
+        ), "V1 path should have UniversalPrompt"
 
         # Process conditionals if supported
         conditional_content = self.process_conditionals(processed_prompt, variables)
@@ -50,11 +57,92 @@ class JetBrainsAdapter(MarkdownSyncMixin, EditorAdapter):
 
         return rules_files
 
-    def validate(self, prompt: UniversalPrompt) -> List[ValidationError]:
+    def _generate_v2(
+        self,
+        prompt: UniversalPromptV2,
+        output_dir: Path,
+        dry_run: bool,
+        verbose: bool,
+        variables: Optional[Dict[str, Any]] = None,
+    ) -> List[Path]:
+        """Generate JetBrains files from v2 schema (using documents for rules or content for single file)."""
+        rules_dir = output_dir / ".assistant" / "rules"
+        created_files = []
+
+        # If documents field is present, generate separate rule files
+        if prompt.documents:
+            for doc in prompt.documents:
+                # Apply variable substitution
+                content = doc.content
+                if variables:
+                    for var_name, var_value in variables.items():
+                        placeholder = "{{{ " + var_name + " }}}"
+                        content = content.replace(placeholder, var_value)
+
+                # Generate filename from document name
+                filename = (
+                    f"{doc.name}.md" if not doc.name.endswith(".md") else doc.name
+                )
+                output_file = rules_dir / filename
+
+                if dry_run:
+                    click.echo(f"  📁 Would create: {output_file}")
+                    if verbose:
+                        preview = (
+                            content[:200] + "..." if len(content) > 200 else content
+                        )
+                        click.echo(f"    {preview}")
+                    created_files.append(output_file)
+                else:
+                    rules_dir.mkdir(parents=True, exist_ok=True)
+                    with open(output_file, "w", encoding="utf-8") as f:
+                        f.write(content)
+                    click.echo(f"✅ Generated: {output_file}")
+                    created_files.append(output_file)
+        else:
+            # No documents, use main content as general.md
+            content = prompt.content
+            if variables:
+                for var_name, var_value in variables.items():
+                    placeholder = "{{{ " + var_name + " }}}"
+                    content = content.replace(placeholder, var_value)
+
+            output_file = rules_dir / "general.md"
+
+            if dry_run:
+                click.echo(f"  📁 Would create: {output_file}")
+                if verbose:
+                    preview = content[:200] + "..." if len(content) > 200 else content
+                    click.echo(f"    {preview}")
+                created_files.append(output_file)
+            else:
+                rules_dir.mkdir(parents=True, exist_ok=True)
+                with open(output_file, "w", encoding="utf-8") as f:
+                    f.write(content)
+                click.echo(f"✅ Generated: {output_file}")
+                created_files.append(output_file)
+
+        return created_files
+
+    def validate(
+        self, prompt: Union[UniversalPrompt, UniversalPromptV2]
+    ) -> List[ValidationError]:
         """Validate prompt for JetBrains AI."""
         errors = []
 
-        # JetBrains works well with structured development guidelines
+        # V2 validation: check content exists
+        if isinstance(prompt, UniversalPromptV2):
+            if not prompt.content or not prompt.content.strip():
+                errors.append(
+                    ValidationError(
+                        field="content",
+                        message="JetBrains AI requires content",
+                        severity="error",
+                    )
+                )
+            return errors
+
+        # V1 validation: JetBrains works well with structured development guidelines
         if not prompt.instructions:
             errors.append(
                 ValidationError(
@@ -74,8 +162,10 @@ class JetBrainsAdapter(MarkdownSyncMixin, EditorAdapter):
         """JetBrains supports conditional configuration."""
         return True
 
-    def parse_files(self, source_dir: Path) -> UniversalPrompt:
-        """Parse JetBrains files back into a UniversalPrompt."""
+    def parse_files(
+        self, source_dir: Path
+    ) -> Union[UniversalPrompt, UniversalPromptV2]:
+        """Parse JetBrains files back into a UniversalPrompt or UniversalPromptV2."""
         return self.parse_markdown_rules_files(
             source_dir=source_dir,
             rules_subdir=".assistant/rules",

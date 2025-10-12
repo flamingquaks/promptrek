@@ -344,12 +344,12 @@ class TestCLIComprehensiveFixed:
         assert result.exit_code == 0
         assert output_file.exists()
 
-        # Validate the created file
+        # Validate the created file (V2 schema)
         with open(output_file) as f:
             content = yaml.safe_load(f)
-            assert content["schema_version"] == "1.0.0"
+            assert content["schema_version"] == "2.0.0"  # V2 schema
             assert "metadata" in content
-            assert "targets" in content
+            assert "content" in content  # V2 uses content instead of targets
 
     def test_validate_command_comprehensive(self, runner, comprehensive_upf_file):
         """Test validate command with comprehensive file."""

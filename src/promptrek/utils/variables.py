@@ -7,7 +7,7 @@ Handles variable replacement in templates and UPF content.
 import os
 import re
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Match, Optional
 
 import yaml
 
@@ -143,7 +143,7 @@ class VariableSubstitution:
     ) -> str:
         """Substitute template variables in content."""
 
-        def replace_var(match) -> str:
+        def replace_var(match: Match[str]) -> str:
             var_name = match.group(1)
             if var_name in variables:
                 return str(variables[var_name])
@@ -157,7 +157,7 @@ class VariableSubstitution:
     def _substitute_env_variables(self, content: str, strict: bool) -> str:
         """Substitute environment variables in content."""
 
-        def replace_env(match) -> str:
+        def replace_env(match: Match[str]) -> str:
             var_name = match.group(1)
             value = os.getenv(var_name)
             if value is not None:

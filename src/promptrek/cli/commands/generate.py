@@ -6,20 +6,20 @@ Handles generation of editor-specific prompts from universal prompt files.
 
 import inspect
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union
 
 import click
 
 from ...adapters import registry
 from ...adapters.registry import AdapterCapability
 from ...core.exceptions import AdapterNotFoundError, CLIError, UPFParsingError
-from ...core.models import UniversalPrompt
+from ...core.models import UniversalPrompt, UniversalPromptV2
 from ...core.parser import UPFParser
 from ...core.validator import UPFValidator
 from ...utils.variables import VariableSubstitution
 
 
-def _adapter_supports_headless(adapter, method_name: str) -> bool:
+def _adapter_supports_headless(adapter: object, method_name: str) -> bool:
     """
     Check if an adapter method supports the 'headless' parameter.
 
@@ -86,10 +86,10 @@ def generate_command(
         click.echo(f"📋 Loaded {len(local_vars)} variable(s) from local variables file")
 
     # Collect all files to process
-    files_to_process = []
+    files_to_process: list[Path] = []
 
     # Add explicitly specified files
-    files_to_process.extend(files)
+    files_to_process.extend(list(files))
 
     # Add files from directory if specified
     if directory:
@@ -137,7 +137,9 @@ def generate_command(
         click.echo("🔍 Dry run mode - showing what would be generated:")
 
     # Process each file and collect prompts by editor
-    prompts_by_editor = {}  # editor -> list of (prompt, source_file) tuples
+    prompts_by_editor: dict[
+        str, list[tuple[Union[UniversalPrompt, UniversalPromptV2], Path]]
+    ] = {}  # editor -> list of (prompt, source_file) tuples
     processing_errors = []
 
     for file_path in unique_files:
@@ -145,30 +147,41 @@ def generate_command(
             file_prompts = _parse_and_validate_file(ctx, file_path)
 
             # Determine target editors for this file
-            file_targets = file_prompts.targets or []
-            if all_editors:
-                target_editors = file_targets
-            elif editor:
-                # If targets is None (not specified), allow any editor
-                if (
-                    file_prompts.targets is not None
-                    and editor not in file_prompts.targets
-                ):
-                    # For single file scenario, this should be an error for backward compatibility
-                    if len(unique_files) == 1:
-                        raise CLIError(
-                            f"Editor '{editor}' not in targets for {file_path}: {', '.join(file_targets)}"
-                        )
-                    # For multiple files, just skip with a warning
-                    if verbose:
-                        click.echo(
-                            f"⚠️ Editor '{editor}' not in targets for {file_path}, skipping"
-                        )
-                    continue
-                target_editors = [editor]
+            # V2 doesn't have targets field - works with any editor
+            if isinstance(file_prompts, UniversalPromptV2):
+                # V2: No targets, works with any editor
+                if all_editors:
+                    target_editors = registry.get_project_file_adapters()
+                elif editor:
+                    target_editors = [editor]
+                else:
+                    raise CLIError("Must specify either --editor or --all")
             else:
-                # This is a critical error that should stop processing
-                raise CLIError("Must specify either --editor or --all")
+                # V1: Has targets field
+                file_targets = file_prompts.targets or []
+                if all_editors:
+                    target_editors = file_targets
+                elif editor:
+                    # If targets is None (not specified), allow any editor
+                    if (
+                        file_prompts.targets is not None
+                        and editor not in file_prompts.targets
+                    ):
+                        # For single file scenario, this should be an error for backward compatibility
+                        if len(unique_files) == 1:
+                            raise CLIError(
+                                f"Editor '{editor}' not in targets for {file_path}: {', '.join(file_targets)}"
+                            )
+                        # For multiple files, just skip with a warning
+                        if verbose:
+                            click.echo(
+                                f"⚠️ Editor '{editor}' not in targets for {file_path}, skipping"
+                            )
+                        continue
+                    target_editors = [editor]
+                else:
+                    # This is a critical error that should stop processing
+                    raise CLIError("Must specify either --editor or --all")
 
             # Add to prompts by editor
             for target_editor in target_editors:
@@ -225,8 +238,14 @@ def generate_command(
         )
 
 
-def _parse_and_validate_file(ctx: click.Context, file_path: Path) -> UniversalPrompt:
-    """Parse and validate a single UPF file."""
+def _parse_and_validate_file(
+    ctx: click.Context, file_path: Path
+) -> Union[UniversalPrompt, UniversalPromptV2]:
+    """Parse and validate a single UPF file.
+
+    Returns:
+        Union[UniversalPrompt, UniversalPromptV2]: Parsed prompt (v1 or v2)
+    """
     verbose = ctx.obj.get("verbose", False)
 
     # Parse the file
@@ -248,7 +267,7 @@ def _parse_and_validate_file(ctx: click.Context, file_path: Path) -> UniversalPr
 
 
 def _generate_for_editor_multiple(
-    prompt_files: list[tuple[UniversalPrompt, Path]],
+    prompt_files: list[tuple[Union[UniversalPrompt, UniversalPromptV2], Path]],
     editor: str,
     output_dir: Path,
     dry_run: bool,
@@ -474,7 +493,7 @@ def _process_single_file(
 
 
 def _generate_for_editor(
-    prompt,
+    prompt: Union[UniversalPrompt, UniversalPromptV2],
     editor: str,
     output_dir: Path,
     dry_run: bool,

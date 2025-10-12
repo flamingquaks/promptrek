@@ -4,7 +4,7 @@ import pytest
 import yaml
 
 from promptrek.core.exceptions import UPFFileNotFoundError, UPFParsingError
-from promptrek.core.models import UniversalPrompt
+from promptrek.core.models import UniversalPrompt, UniversalPromptV2
 from promptrek.core.parser import UPFParser
 
 
@@ -280,3 +280,391 @@ class TestUPFParser:
         assert len(merged.targets) == 2
         assert "editor1" in merged.targets
         assert "editor2" in merged.targets
+
+
+class TestUPFParserV2:
+    """Test UPFParser functionality for v2 schema."""
+
+    def test_parse_v2_file(self, tmp_path):
+        """Test parsing a v2 format file."""
+        v2_data = {
+            "schema_version": "2.0.0",
+            "metadata": {
+                "title": "V2 Test Project",
+                "description": "Test v2 schema",
+                "version": "1.0.0",
+                "author": "Test Author",
+                "tags": ["v2", "test"],
+            },
+            "content": "# V2 Test Project\n\n## Guidelines\n- Write clean code\n- Follow best practices",
+            "variables": {"PROJECT_NAME": "v2-test"},
+        }
+        file_path = tmp_path / "v2.promptrek.yaml"
+        file_path.write_text(yaml.dump(v2_data))
+
+        parser = UPFParser()
+        prompt = parser.parse_file(file_path)
+
+        assert isinstance(prompt, UniversalPromptV2)
+        assert prompt.schema_version == "2.0.0"
+        assert prompt.metadata.title == "V2 Test Project"
+        assert "Write clean code" in prompt.content
+        assert prompt.variables["PROJECT_NAME"] == "v2-test"
+
+    def test_parse_v2_with_documents(self, tmp_path):
+        """Test parsing v2 file with documents field."""
+        v2_data = {
+            "schema_version": "2.0.0",
+            "metadata": {
+                "title": "Multi-Doc Project",
+                "description": "Test with documents",
+                "version": "1.0.0",
+                "author": "Test",
+            },
+            "content": "# Main Content",
+            "documents": [
+                {
+                    "name": "general",
+                    "content": "# General Rules\n- Rule 1",
+                },
+                {
+                    "name": "code-style",
+                    "content": "# Code Style\n- Style 1",
+                },
+            ],
+        }
+        file_path = tmp_path / "multi-doc.promptrek.yaml"
+        file_path.write_text(yaml.dump(v2_data))
+
+        parser = UPFParser()
+        prompt = parser.parse_file(file_path)
+
+        assert isinstance(prompt, UniversalPromptV2)
+        assert len(prompt.documents) == 2
+        assert prompt.documents[0].name == "general"
+        assert "Rule 1" in prompt.documents[0].content
+
+    def test_parse_v2_minimal(self, tmp_path):
+        """Test parsing minimal v2 file."""
+        v2_data = {
+            "schema_version": "2.0.0",
+            "metadata": {
+                "title": "Minimal V2",
+                "description": "Minimal test",
+                "version": "1.0.0",
+                "author": "Test",
+            },
+            "content": "# Minimal content",
+        }
+        file_path = tmp_path / "minimal.promptrek.yaml"
+        file_path.write_text(yaml.dump(v2_data))
+
+        parser = UPFParser()
+        prompt = parser.parse_file(file_path)
+
+        assert isinstance(prompt, UniversalPromptV2)
+        assert prompt.schema_version == "2.0.0"
+        assert prompt.documents is None
+        assert prompt.variables is None
+
+    def test_parse_v2_vs_v1_detection(self, tmp_path):
+        """Test parser correctly detects v1 vs v2 schema."""
+        # Create v1 file
+        v1_data = {
+            "schema_version": "1.0.0",
+            "metadata": {
+                "title": "V1 Project",
+                "description": "V1 test",
+                "version": "1.0.0",
+                "author": "Test",
+            },
+            "targets": ["claude"],
+            "instructions": {"general": ["Rule 1"]},
+        }
+        v1_file = tmp_path / "v1.promptrek.yaml"
+        v1_file.write_text(yaml.dump(v1_data))
+
+        # Create v2 file
+        v2_data = {
+            "schema_version": "2.0.0",
+            "metadata": {
+                "title": "V2 Project",
+                "description": "V2 test",
+                "version": "1.0.0",
+                "author": "Test",
+            },
+            "content": "# V2 content",
+        }
+        v2_file = tmp_path / "v2.promptrek.yaml"
+        v2_file.write_text(yaml.dump(v2_data))
+
+        parser = UPFParser()
+
+        # Parse v1 file
+        v1_prompt = parser.parse_file(v1_file)
+        assert isinstance(v1_prompt, UniversalPrompt)
+        assert v1_prompt.schema_version == "1.0.0"
+        assert hasattr(v1_prompt, "targets")
+
+        # Parse v2 file
+        v2_prompt = parser.parse_file(v2_file)
+        assert isinstance(v2_prompt, UniversalPromptV2)
+        assert v2_prompt.schema_version == "2.0.0"
+        assert not hasattr(v2_prompt, "targets")
+
+    def test_parse_v2_string(self):
+        """Test parsing v2 from YAML string."""
+        v2_yaml = """schema_version: 2.0.0
+metadata:
+  title: String Test
+  description: Test from string
+  version: 1.0.0
+  author: Test
+content: |
+  # String Test
+
+  ## Guidelines
+  - Rule 1
+  - Rule 2
+variables:
+  VAR1: value1
+"""
+        parser = UPFParser()
+        prompt = parser.parse_string(v2_yaml)
+
+        assert isinstance(prompt, UniversalPromptV2)
+        assert prompt.metadata.title == "String Test"
+        assert "Rule 1" in prompt.content
+        assert prompt.variables["VAR1"] == "value1"
+
+    def test_parse_v2_dict(self):
+        """Test parsing v2 from dictionary."""
+        v2_dict = {
+            "schema_version": "2.0.0",
+            "metadata": {
+                "title": "Dict Test",
+                "description": "Test from dict",
+                "version": "1.0.0",
+                "author": "Test",
+            },
+            "content": "# Dict content",
+            "variables": {"KEY": "value"},
+        }
+        parser = UPFParser()
+        prompt = parser.parse_dict(v2_dict)
+
+        assert isinstance(prompt, UniversalPromptV2)
+        assert prompt.metadata.title == "Dict Test"
+        assert prompt.variables["KEY"] == "value"
+
+    def test_parse_v2_invalid_schema_version(self, tmp_path):
+        """Test v2 file with wrong schema version."""
+        invalid_data = {
+            "schema_version": "1.5.0",  # Invalid version
+            "metadata": {
+                "title": "Invalid",
+                "description": "Invalid version",
+                "version": "1.0.0",
+                "author": "Test",
+            },
+            "content": "# Content",
+        }
+        file_path = tmp_path / "invalid.promptrek.yaml"
+        file_path.write_text(yaml.dump(invalid_data))
+
+        parser = UPFParser()
+        with pytest.raises(UPFParsingError):
+            parser.parse_file(file_path)
+
+    def test_parse_v2_missing_content(self, tmp_path):
+        """Test v2 file without content field."""
+        invalid_data = {
+            "schema_version": "2.0.0",
+            "metadata": {
+                "title": "No Content",
+                "description": "Missing content",
+                "version": "1.0.0",
+                "author": "Test",
+            },
+        }
+        file_path = tmp_path / "no-content.promptrek.yaml"
+        file_path.write_text(yaml.dump(invalid_data))
+
+        parser = UPFParser()
+        with pytest.raises(UPFParsingError):
+            parser.parse_file(file_path)
+
+    def test_parse_multiple_files_v2(self, tmp_path):
+        """Test parsing and merging multiple v2 files."""
+        file1 = tmp_path / "file1.promptrek.yaml"
+        file1.write_text(
+            """
+schema_version: "2.0.0"
+metadata:
+  title: "File 1"
+  description: "First file"
+content: |
+  # Content 1
+"""
+        )
+
+        file2 = tmp_path / "file2.promptrek.yaml"
+        file2.write_text(
+            """
+schema_version: "2.0.0"
+metadata:
+  title: "File 2"
+  description: "Second file"
+content: |
+  # Content 2
+"""
+        )
+
+        parser = UPFParser()
+        merged = parser.parse_multiple_files([file1, file2])
+
+        # Should return merged prompt
+        assert isinstance(merged, UniversalPromptV2)
+        assert "Content 1" in merged.content or "Content 2" in merged.content
+
+    def test_parse_directory_v2(self, tmp_path):
+        """Test parsing directory with v2 files."""
+        (tmp_path / "file1.promptrek.yaml").write_text(
+            """
+schema_version: "2.0.0"
+metadata:
+  title: "File 1"
+  description: "First"
+content: "# Content"
+"""
+        )
+
+        (tmp_path / "file2.promptrek.yaml").write_text(
+            """
+schema_version: "2.0.0"
+metadata:
+  title: "File 2"
+  description: "Second"
+content: "# Content"
+"""
+        )
+
+        parser = UPFParser()
+        merged = parser.parse_directory(tmp_path)
+
+        # Should return merged prompt
+        assert isinstance(merged, UniversalPromptV2)
+
+    def test_parse_file_unexpected_error(self, tmp_path):
+        """Test handling of unexpected errors during parsing."""
+        # Create a file that will cause an unexpected error
+        bad_file = tmp_path / "bad.promptrek.yaml"
+        bad_file.write_text(
+            "schema_version: 2.0.0\nmetadata: !invalid_tag\n  title: Test"
+        )
+
+        parser = UPFParser()
+        with pytest.raises(UPFParsingError):
+            parser.parse_file(bad_file)
+
+    def test_parse_string_basic(self):
+        """Test parsing from string."""
+        parser = UPFParser()
+        yaml_content = """
+schema_version: "2.0.0"
+metadata:
+  title: "String Test"
+  description: "Test"
+content: "# Content"
+"""
+        prompt = parser.parse_string(yaml_content)
+
+        assert isinstance(prompt, UniversalPromptV2)
+        assert prompt.metadata.title == "String Test"
+
+    def test_get_major_version_valid(self):
+        """Test _get_major_version with valid input."""
+        parser = UPFParser()
+
+        # Should extract major version
+        assert parser._get_major_version("2.0.0") == "2"
+        assert parser._get_major_version("1.5.3") == "1"
+
+    def test_get_major_version_invalid(self):
+        """Test _get_major_version with invalid input."""
+        parser = UPFParser()
+
+        # None should trigger AttributeError and return "1"
+        assert parser._get_major_version(None) == "1"
+
+    def test_parse_dict_with_conditions(self):
+        """Test parsing dict with conditions field."""
+        parser = UPFParser()
+        data = {
+            "schema_version": "1.0.0",
+            "metadata": {"title": "Test", "description": "Test"},
+            "targets": ["claude"],
+            "instructions": {"general": ["Test"]},
+            "conditions": [
+                {
+                    "if": "EDITOR == 'claude'",
+                    "then": {"instructions": {"general": ["Claude specific"]}},
+                }
+            ],
+        }
+
+        prompt = parser.parse_dict(data)
+
+        assert isinstance(prompt, UniversalPrompt)
+        assert prompt.conditions is not None
+
+    def test_parse_dict_with_examples(self):
+        """Test parsing dict with examples field."""
+        parser = UPFParser()
+        data = {
+            "schema_version": "1.0.0",
+            "metadata": {"title": "Test", "description": "Test"},
+            "targets": ["claude"],
+            "instructions": {"general": ["Test"]},
+            "examples": {"python": "def test(): pass"},
+        }
+
+        prompt = parser.parse_dict(data)
+
+        assert isinstance(prompt, UniversalPrompt)
+        assert prompt.examples is not None
+        assert "python" in prompt.examples
+
+    def test_parse_dict_malformed_data(self):
+        """Test parsing dict with data that causes unexpected errors."""
+        parser = UPFParser()
+
+        # Data that will pass YAML parsing but fail Pydantic validation in unexpected way
+        bad_data = {
+            "schema_version": "2.0.0",
+            "metadata": {"title": 123, "description": 456},  # Wrong types
+            "content": None,  # Wrong type
+        }
+
+        with pytest.raises(UPFParsingError):
+            parser.parse_dict(bad_data)
+
+    def test_format_validation_error(self):
+        """Test validation error formatting."""
+        parser = UPFParser()
+
+        # Create a validation error by trying to parse invalid data
+        bad_data = {
+            "schema_version": "2.0.0",
+            "metadata": {"title": "Test"},  # Missing required description
+            "content": "# Test",
+        }
+
+        with pytest.raises(UPFParsingError) as exc_info:
+            parser.parse_dict(bad_data)
+
+        # Should contain formatted error message
+        assert (
+            "description" in str(exc_info.value).lower()
+            or "missing" in str(exc_info.value).lower()
+        )
