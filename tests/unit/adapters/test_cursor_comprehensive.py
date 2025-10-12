@@ -1,8 +1,15 @@
 """Comprehensive Cursor adapter tests."""
 
 import pytest
+
 from promptrek.adapters.cursor import CursorAdapter
-from promptrek.core.models import UniversalPrompt, UniversalPromptV2, PromptMetadata, Instructions, DocumentConfig
+from promptrek.core.models import (
+    DocumentConfig,
+    Instructions,
+    PromptMetadata,
+    UniversalPrompt,
+    UniversalPromptV2,
+)
 
 
 class TestCursorAdapterComprehensive:
@@ -17,7 +24,7 @@ class TestCursorAdapterComprehensive:
         return UniversalPromptV2(
             schema_version="2.0.0",
             metadata=PromptMetadata(title="Test", description="Test"),
-            content="# Test"
+            content="# Test",
         )
 
     @pytest.fixture
@@ -26,7 +33,7 @@ class TestCursorAdapterComprehensive:
             schema_version="1.0.0",
             metadata=PromptMetadata(title="Test", description="Test"),
             targets=["cursor"],
-            instructions=Instructions(general=["Test"])
+            instructions=Instructions(general=["Test"]),
         )
 
     def test_generate_v2_basic(self, adapter, v2_prompt, tmp_path):
@@ -40,10 +47,10 @@ class TestCursorAdapterComprehensive:
             content="# Main",
             documents=[
                 DocumentConfig(name="rule1", content="# Rule 1"),
-                DocumentConfig(name="rule2", content="# Rule 2")
-            ]
+                DocumentConfig(name="rule2", content="# Rule 2"),
+            ],
         )
-        
+
         files = adapter.generate(prompt, tmp_path)
         assert len(files) > 0
 
@@ -64,9 +71,9 @@ class TestCursorAdapterComprehensive:
             schema_version="2.0.0",
             metadata=PromptMetadata(title="Test", description="Test"),
             content="{{{ PROJECT }}}",
-            variables={"PROJECT": "test"}
+            variables={"PROJECT": "test"},
         )
-        
+
         files = adapter.generate(prompt, tmp_path, variables={"PROJECT": "override"})
         assert len(files) > 0
 
@@ -81,10 +88,10 @@ class TestCursorAdapterComprehensive:
                 architecture=["A"],
                 testing=["T"],
                 security=["S"],
-                performance=["P"]
-            )
+                performance=["P"],
+            ),
         )
-        
+
         files = adapter.generate(prompt, tmp_path)
         assert len(files) > 0
 
@@ -94,9 +101,9 @@ class TestCursorAdapterComprehensive:
             metadata=PromptMetadata(title="Test", description="Test"),
             targets=["cursor"],
             instructions=Instructions(general=["Test"]),
-            examples={"py": "print('test')"}
+            examples={"py": "print('test')"},
         )
-        
+
         files = adapter.generate(prompt, tmp_path)
         assert len(files) > 0
 
@@ -114,7 +121,7 @@ class TestCursorAdapterComprehensive:
             schema_version="1.0.0",
             metadata=PromptMetadata(title="Test", description="Test"),
             targets=["cursor"],
-            instructions=Instructions(general=["Test"])
+            instructions=Instructions(general=["Test"]),
         )
 
         files = adapter.generate(prompt, tmp_path, dry_run=True)
@@ -129,7 +136,7 @@ class TestCursorAdapterComprehensive:
             schema_version="1.0.0",
             metadata=PromptMetadata(title="Test", description="Test"),
             targets=["cursor"],
-            instructions=Instructions(general=["Test"])
+            instructions=Instructions(general=["Test"]),
         )
 
         files = adapter.generate(prompt, tmp_path, verbose=True)
@@ -141,9 +148,9 @@ class TestCursorAdapterComprehensive:
         prompt = UniversalPromptV2(
             schema_version="2.0.0",
             metadata=PromptMetadata(title="Test", description="Test"),
-            content=long_content
+            content=long_content,
         )
-        
+
         files = adapter.generate(prompt, tmp_path)
         assert len(files) > 0
 
@@ -151,7 +158,7 @@ class TestCursorAdapterComprehensive:
         # Create cursor structure
         cursor_file = tmp_path / ".cursorrules"
         cursor_file.write_text("# Rules\nTest rules")
-        
+
         try:
             result = adapter.parse_files(tmp_path)
         except Exception:

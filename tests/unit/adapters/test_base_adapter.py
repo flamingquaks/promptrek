@@ -1,24 +1,31 @@
 """Tests for base adapter functionality."""
 
-import pytest
 from pathlib import Path
+
+import pytest
+
 from promptrek.adapters.base import EditorAdapter
-from promptrek.core.models import UniversalPrompt, UniversalPromptV2, PromptMetadata, Instructions
+from promptrek.core.models import (
+    Instructions,
+    PromptMetadata,
+    UniversalPrompt,
+    UniversalPromptV2,
+)
 
 
 class MockAdapter(EditorAdapter):
     """Mock adapter for testing base functionality."""
-    
+
     def __init__(self):
         super().__init__(
             name="mock",
             description="Mock adapter for testing",
-            file_patterns=["*.mock"]
+            file_patterns=["*.mock"],
         )
-    
+
     def generate(self, prompt, output_dir, **kwargs):
         return []
-    
+
     def validate(self, prompt):
         return []
 
@@ -46,11 +53,11 @@ class TestEditorAdapterBase:
         prompt = UniversalPromptV2(
             schema_version="2.0.0",
             metadata=PromptMetadata(title="Test", description="Test"),
-            content="# Test"
+            content="# Test",
         )
-        
+
         result = adapter.validate(prompt)
-        
+
         assert isinstance(result, list)
 
     def test_generate_returns_list(self, adapter, tmp_path):
@@ -58,16 +65,16 @@ class TestEditorAdapterBase:
         prompt = UniversalPromptV2(
             schema_version="2.0.0",
             metadata=PromptMetadata(title="Test", description="Test"),
-            content="# Test"
+            content="# Test",
         )
-        
+
         result = adapter.generate(prompt, tmp_path)
-        
+
         assert isinstance(result, list)
 
     def test_substitute_variables_exists(self, adapter):
         """Test that substitute_variables method exists."""
-        assert hasattr(adapter, 'substitute_variables')
+        assert hasattr(adapter, "substitute_variables")
         assert callable(adapter.substitute_variables)
 
     def test_adapter_repr(self, adapter):

@@ -1,10 +1,17 @@
 """Tests for import system."""
 
-import pytest
 from pathlib import Path
-from promptrek.utils.imports import ImportProcessor
+
+import pytest
+
+from promptrek.core.models import (
+    ImportConfig,
+    Instructions,
+    PromptMetadata,
+    UniversalPrompt,
+)
 from promptrek.core.parser import UPFParser
-from promptrek.core.models import UniversalPrompt, PromptMetadata, Instructions, ImportConfig
+from promptrek.utils.imports import ImportProcessor
 
 
 class TestImportProcessor:
@@ -20,7 +27,7 @@ class TestImportProcessor:
             schema_version="1.0.0",
             metadata=PromptMetadata(title="Test", description="Test"),
             targets=["claude"],
-            instructions=Instructions(general=["Test"])
+            instructions=Instructions(general=["Test"]),
         )
 
         result = processor.process_imports(prompt, tmp_path)
@@ -31,7 +38,8 @@ class TestImportProcessor:
         """Test processing prompt with imports."""
         # Create an imported file
         imported_file = tmp_path / "imported.promptrek.yaml"
-        imported_file.write_text("""schema_version: 1.0.0
+        imported_file.write_text(
+            """schema_version: 1.0.0
 metadata:
   title: Imported
   description: Imported prompt
@@ -40,7 +48,8 @@ targets:
 instructions:
   general:
     - Imported instruction
-""")
+"""
+        )
 
         # Create main prompt with import
         prompt = UniversalPrompt(
@@ -48,9 +57,7 @@ instructions:
             metadata=PromptMetadata(title="Main", description="Main"),
             targets=["claude"],
             instructions=Instructions(general=["Main instruction"]),
-            imports=[
-                ImportConfig(path="imported.promptrek.yaml")
-            ]
+            imports=[ImportConfig(path="imported.promptrek.yaml")],
         )
 
         result = processor.process_imports(prompt, tmp_path)
@@ -58,12 +65,12 @@ instructions:
         # Result should have merged instructions
         assert len(result.instructions.general) > 1
 
-
     def test_process_imports_with_prefix(self, processor, tmp_path):
         """Test processing imports with prefix."""
         # Create an imported file
         imported_file = tmp_path / "imported.promptrek.yaml"
-        imported_file.write_text("""schema_version: 1.0.0
+        imported_file.write_text(
+            """schema_version: 1.0.0
 metadata:
   title: Imported
   description: Imported prompt
@@ -72,7 +79,8 @@ targets:
 instructions:
   general:
     - Imported instruction
-""")
+"""
+        )
 
         # Create main prompt with import that has prefix
         prompt = UniversalPrompt(
@@ -80,9 +88,7 @@ instructions:
             metadata=PromptMetadata(title="Main", description="Main"),
             targets=["claude"],
             instructions=Instructions(general=["Main instruction"]),
-            imports=[
-                ImportConfig(path="imported.promptrek.yaml", prefix="[IMPORTED]")
-            ]
+            imports=[ImportConfig(path="imported.promptrek.yaml", prefix="[IMPORTED]")],
         )
 
         result = processor.process_imports(prompt, tmp_path)
@@ -97,9 +103,7 @@ instructions:
             metadata=PromptMetadata(title="Main", description="Main"),
             targets=["claude"],
             instructions=Instructions(general=["Main instruction"]),
-            imports=[
-                ImportConfig(path="nonexistent.promptrek.yaml")
-            ]
+            imports=[ImportConfig(path="nonexistent.promptrek.yaml")],
         )
 
         # Should raise an error

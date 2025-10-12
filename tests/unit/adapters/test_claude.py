@@ -72,9 +72,16 @@ class TestClaudeAdapter(TestAdapterBase):
 
         prompt = UniversalPrompt(
             schema_version="1.0.0",
-            metadata=PromptMetadata(title="Test", description="Test", created="2024-01-01", updated="2024-01-01", version="1.0.0", author="test@example.com"),
+            metadata=PromptMetadata(
+                title="Test",
+                description="Test",
+                created="2024-01-01",
+                updated="2024-01-01",
+                version="1.0.0",
+                author="test@example.com",
+            ),
             targets=["claude"],
-            instructions=Instructions(general=["Test instruction"])
+            instructions=Instructions(general=["Test instruction"]),
         )
 
         files = adapter.generate(prompt, tmp_path, dry_run=True, verbose=True)
@@ -85,19 +92,30 @@ class TestClaudeAdapter(TestAdapterBase):
 
     def test_generate_with_conditionals(self, adapter, tmp_path):
         """Test generation with conditional instructions."""
-        from promptrek.core.models import Instructions, Condition
+        from promptrek.core.models import Condition, Instructions
 
         prompt = UniversalPrompt(
             schema_version="1.0.0",
-            metadata=PromptMetadata(title="Test", description="Test", created="2024-01-01", updated="2024-01-01", version="1.0.0", author="test@example.com"),
+            metadata=PromptMetadata(
+                title="Test",
+                description="Test",
+                created="2024-01-01",
+                updated="2024-01-01",
+                version="1.0.0",
+                author="test@example.com",
+            ),
             targets=["claude"],
             instructions=Instructions(general=["Base instruction"]),
             conditions=[
-                Condition.model_validate({
-                    "if": "EDITOR == 'claude'",
-                    "then": {"instructions": {"general": ["Claude-specific instruction"]}}
-                })
-            ]
+                Condition.model_validate(
+                    {
+                        "if": "EDITOR == 'claude'",
+                        "then": {
+                            "instructions": {"general": ["Claude-specific instruction"]}
+                        },
+                    }
+                )
+            ],
         )
 
         files = adapter.generate(prompt, tmp_path)

@@ -1,8 +1,14 @@
 """Comprehensive conditionals tests."""
 
 import pytest
+
+from promptrek.core.models import (
+    Condition,
+    Instructions,
+    PromptMetadata,
+    UniversalPrompt,
+)
 from promptrek.utils.conditionals import ConditionalProcessor
-from promptrek.core.models import UniversalPrompt, PromptMetadata, Instructions, Condition
 
 
 class TestConditionalProcessorComprehensive:
@@ -20,13 +26,15 @@ class TestConditionalProcessorComprehensive:
             targets=["claude"],
             instructions=Instructions(general=["Base instruction"]),
             conditions=[
-                Condition.model_validate({
-                    "if": "EDITOR == 'claude'",
-                    "then": {"instructions": {"general": ["Claude instruction"]}}
-                })
-            ]
+                Condition.model_validate(
+                    {
+                        "if": "EDITOR == 'claude'",
+                        "then": {"instructions": {"general": ["Claude instruction"]}},
+                    }
+                )
+            ],
         )
-        
+
         result = processor.process_conditions(prompt, {"EDITOR": "claude"})
         assert result is not None
 
@@ -38,13 +46,15 @@ class TestConditionalProcessorComprehensive:
             targets=["claude"],
             instructions=Instructions(general=["Base instruction"]),
             conditions=[
-                Condition.model_validate({
-                    "if": "EDITOR == 'cursor'",
-                    "then": {"instructions": {"general": ["Cursor instruction"]}}
-                })
-            ]
+                Condition.model_validate(
+                    {
+                        "if": "EDITOR == 'cursor'",
+                        "then": {"instructions": {"general": ["Cursor instruction"]}},
+                    }
+                )
+            ],
         )
-        
+
         result = processor.process_conditions(prompt, {"EDITOR": "claude"})
         assert result is not None
 
@@ -56,13 +66,15 @@ class TestConditionalProcessorComprehensive:
             targets=["claude"],
             instructions=Instructions(general=["Base"]),
             conditions=[
-                Condition.model_validate({
-                    "if": "EDITOR == 'cursor'",
-                    "then": {"instructions": {"general": ["Cursor"]}},
-                    "else": {"instructions": {"general": ["Other"]}}
-                })
-            ]
+                Condition.model_validate(
+                    {
+                        "if": "EDITOR == 'cursor'",
+                        "then": {"instructions": {"general": ["Cursor"]}},
+                        "else": {"instructions": {"general": ["Other"]}},
+                    }
+                )
+            ],
         )
-        
+
         result = processor.process_conditions(prompt, {"EDITOR": "claude"})
         assert result is not None

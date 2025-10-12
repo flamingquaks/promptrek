@@ -21,7 +21,7 @@ class TestParserErrorCases:
         """Test parsing file with wrong extension."""
         wrong_ext = tmp_path / "test.txt"
         wrong_ext.write_text("content")
-        
+
         parser = UPFParser()
         with pytest.raises(UPFParsingError, match="must have .yaml or .yml extension"):
             parser.parse_file(wrong_ext)
@@ -30,7 +30,7 @@ class TestParserErrorCases:
         """Test parsing file with invalid YAML."""
         invalid_yaml = tmp_path / "invalid.promptrek.yaml"
         invalid_yaml.write_text("invalid: yaml: content:")
-        
+
         parser = UPFParser()
         with pytest.raises(UPFParsingError, match="YAML parsing error"):
             parser.parse_file(invalid_yaml)
@@ -41,7 +41,7 @@ class TestParserErrorCases:
         # Create a directory instead of a file to cause IO error
         dir_path = tmp_path / "test.promptrek.yaml"
         dir_path.mkdir()
-        
+
         with pytest.raises(UPFParsingError, match="Error reading file"):
             parser.parse_file(dir_path)
 
@@ -56,12 +56,9 @@ class TestParserErrorCases:
         parser = UPFParser()
         invalid_data = {
             "schema_version": "1.0.0",
-            "metadata": {
-                "title": "Test",
-                "description": "Test"
-            },
+            "metadata": {"title": "Test", "description": "Test"},
             "targets": ["unknown_editor"],
-            "invalid_field": "this should cause error"
+            "invalid_field": "this should cause error",
         }
         with pytest.raises(UPFParsingError, match="Validation errors"):
             parser.parse_dict(invalid_data)
@@ -92,7 +89,7 @@ class TestParserErrorCases:
         parser = UPFParser()
         file_path = tmp_path / "test.txt"
         file_path.write_text("content")
-        
+
         files = parser.find_upf_files(file_path)
         assert files == []
 
@@ -105,21 +102,21 @@ class TestParserErrorCases:
     def test_find_upf_files_recursive(self, tmp_path):
         """Test finding files recursively."""
         parser = UPFParser()
-        
+
         # Create nested structure
         subdir = tmp_path / "subdir"
         subdir.mkdir()
-        
+
         file1 = tmp_path / "test1.promptrek.yaml"
         file1.write_text("content1")
-        
+
         file2 = subdir / "test2.promptrek.yaml"
         file2.write_text("content2")
-        
+
         # Non-recursive should find only file1
         files = parser.find_upf_files(tmp_path, recursive=False)
         assert len(files) == 1
-        
+
         # Recursive should find both
         files = parser.find_upf_files(tmp_path, recursive=True)
         assert len(files) == 2
@@ -139,10 +136,11 @@ class TestParserErrorCases:
     def test_parse_multiple_files_merging(self, tmp_path):
         """Test parsing and merging multiple files."""
         parser = UPFParser()
-        
+
         # Create first file
         file1 = tmp_path / "file1.promptrek.yaml"
-        file1.write_text("""
+        file1.write_text(
+            """
 schema_version: "1.0.0"
 metadata:
   title: "File 1"
@@ -153,11 +151,13 @@ targets:
 instructions:
   general:
     - "Instruction 1"
-""")
-        
+"""
+        )
+
         # Create second file
         file2 = tmp_path / "file2.promptrek.yaml"
-        file2.write_text("""
+        file2.write_text(
+            """
 schema_version: "1.0.0"
 metadata:
   title: "File 2"
@@ -168,28 +168,30 @@ targets:
 instructions:
   general:
     - "Instruction 2"
-""")
-        
+"""
+        )
+
         result = parser.parse_multiple_files([file1, file2])
-        
+
         # Second file should override metadata
         assert result.metadata.title == "File 2"
         assert result.metadata.version == "2.0.0"
-        
+
         # Targets should be merged
         assert "claude" in result.targets
         assert "cursor" in result.targets
-        
+
         # Instructions should be combined
         assert len(result.instructions.general) == 2
 
     def test_parse_directory_with_files(self, tmp_path):
         """Test parsing directory with UPF files."""
         parser = UPFParser()
-        
+
         # Create files
         file1 = tmp_path / "test1.promptrek.yaml"
-        file1.write_text("""
+        file1.write_text(
+            """
 schema_version: "2.0.0"
 metadata:
   title: "Test"
@@ -197,10 +199,12 @@ metadata:
   version: "1.0.0"
 content: |
   # Test
-""")
-        
+"""
+        )
+
         file2 = tmp_path / "test2.promptrek.yaml"
-        file2.write_text("""
+        file2.write_text(
+            """
 schema_version: "2.0.0"
 metadata:
   title: "Test 2"
@@ -208,8 +212,9 @@ metadata:
   version: "1.0.0"
 content: |
   # Test 2
-""")
-        
+"""
+        )
+
         result = parser.parse_directory(tmp_path)
         # Should return second file's content (files are sorted and merged)
         assert result is not None
@@ -217,9 +222,10 @@ content: |
     def test_merge_v2_prompts(self, tmp_path):
         """Test merging v2 prompts returns second one."""
         parser = UPFParser()
-        
+
         file1 = tmp_path / "file1.promptrek.yaml"
-        file1.write_text("""
+        file1.write_text(
+            """
 schema_version: "2.0.0"
 metadata:
   title: "First"
@@ -227,10 +233,12 @@ metadata:
   version: "1.0.0"
 content: |
   # First
-""")
-        
+"""
+        )
+
         file2 = tmp_path / "file2.promptrek.yaml"
-        file2.write_text("""
+        file2.write_text(
+            """
 schema_version: "2.0.0"
 metadata:
   title: "Second"
@@ -238,8 +246,9 @@ metadata:
   version: "1.0.0"
 content: |
   # Second
-""")
-        
+"""
+        )
+
         result = parser.parse_multiple_files([file1, file2])
         assert result.metadata.title == "Second"
 
@@ -262,10 +271,10 @@ content: |
     def test_format_validation_error(self):
         """Test validation error formatting."""
         from pydantic import BaseModel, Field, ValidationError
-        
+
         class TestModel(BaseModel):
             required_field: str = Field(...)
-        
+
         parser = UPFParser()
         try:
             TestModel(required_field="")  # This should fail

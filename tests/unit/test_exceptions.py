@@ -20,14 +20,14 @@ class TestExceptions:
         """Test PrompTrekError base exception."""
         with pytest.raises(PrompTrekError) as exc_info:
             raise PrompTrekError("Base error")
-        
+
         assert "Base error" in str(exc_info.value)
 
     def test_cli_error(self):
         """Test CLIError exception."""
         with pytest.raises(CLIError) as exc_info:
             raise CLIError("CLI error")
-        
+
         assert "CLI error" in str(exc_info.value)
         assert isinstance(exc_info.value, PrompTrekError)
 
@@ -35,7 +35,7 @@ class TestExceptions:
         """Test UPFError exception."""
         with pytest.raises(UPFError) as exc_info:
             raise UPFError("UPF error")
-        
+
         assert "UPF error" in str(exc_info.value)
         assert isinstance(exc_info.value, PrompTrekError)
 
@@ -43,7 +43,7 @@ class TestExceptions:
         """Test UPFParsingError exception."""
         with pytest.raises(UPFParsingError) as exc_info:
             raise UPFParsingError("UPF parsing failed")
-        
+
         assert "UPF parsing failed" in str(exc_info.value)
         assert isinstance(exc_info.value, UPFError)
 
@@ -51,7 +51,7 @@ class TestExceptions:
         """Test UPFFileNotFoundError exception."""
         with pytest.raises(UPFFileNotFoundError) as exc_info:
             raise UPFFileNotFoundError("File not found")
-        
+
         assert "File not found" in str(exc_info.value)
         assert isinstance(exc_info.value, UPFError)
 
@@ -59,7 +59,7 @@ class TestExceptions:
         """Test AdapterError exception."""
         with pytest.raises(AdapterError) as exc_info:
             raise AdapterError("Adapter error")
-        
+
         assert "Adapter error" in str(exc_info.value)
         assert isinstance(exc_info.value, PrompTrekError)
 
@@ -67,7 +67,7 @@ class TestExceptions:
         """Test AdapterGenerationError exception."""
         with pytest.raises(AdapterGenerationError) as exc_info:
             raise AdapterGenerationError("Generation error")
-        
+
         assert "Generation error" in str(exc_info.value)
         assert isinstance(exc_info.value, AdapterError)
 

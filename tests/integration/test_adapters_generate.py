@@ -1,8 +1,10 @@
 """Test adapter generation for all editors."""
 
-import pytest
 from pathlib import Path
+
+import pytest
 from click.testing import CliRunner
+
 from promptrek.cli.main import cli
 
 
@@ -13,7 +15,8 @@ class TestAllAdaptersGenerate:
     def v2_prompt_file(self, tmp_path):
         """Create a v2 prompt file for testing."""
         upf_file = tmp_path / "test.promptrek.yaml"
-        upf_file.write_text("""
+        upf_file.write_text(
+            """
 schema_version: "2.0.0"
 metadata:
   title: "Test Project"
@@ -36,79 +39,88 @@ content: |
   ```
 variables:
   PROJECT_NAME: "TestProject"
-""")
+"""
+        )
         return upf_file
 
     def test_generate_cline(self, v2_prompt_file, tmp_path):
         """Test Cline adapter generation."""
         runner = CliRunner()
-        result = runner.invoke(cli, [
-            "generate",
-            str(v2_prompt_file),
-            "--editor", "cline",
-            "-o", str(tmp_path)
-        ])
-        
+        result = runner.invoke(
+            cli,
+            ["generate", str(v2_prompt_file), "--editor", "cline", "-o", str(tmp_path)],
+        )
+
         assert result.exit_code == 0
 
     def test_generate_kiro(self, v2_prompt_file, tmp_path):
         """Test Kiro adapter generation."""
         runner = CliRunner()
-        result = runner.invoke(cli, [
-            "generate",
-            str(v2_prompt_file),
-            "--editor", "kiro",
-            "-o", str(tmp_path)
-        ])
-        
+        result = runner.invoke(
+            cli,
+            ["generate", str(v2_prompt_file), "--editor", "kiro", "-o", str(tmp_path)],
+        )
+
         assert result.exit_code == 0
 
     def test_generate_tabnine(self, v2_prompt_file, tmp_path):
         """Test Tabnine adapter generation."""
         runner = CliRunner()
-        result = runner.invoke(cli, [
-            "generate",
-            str(v2_prompt_file),
-            "--editor", "tabnine",
-            "-o", str(tmp_path)
-        ])
-        
+        result = runner.invoke(
+            cli,
+            [
+                "generate",
+                str(v2_prompt_file),
+                "--editor",
+                "tabnine",
+                "-o",
+                str(tmp_path),
+            ],
+        )
+
         assert result.exit_code == 0
 
     def test_generate_jetbrains(self, v2_prompt_file, tmp_path):
         """Test JetBrains adapter generation."""
         runner = CliRunner()
-        result = runner.invoke(cli, [
-            "generate",
-            str(v2_prompt_file),
-            "--editor", "jetbrains",
-            "-o", str(tmp_path)
-        ])
-        
+        result = runner.invoke(
+            cli,
+            [
+                "generate",
+                str(v2_prompt_file),
+                "--editor",
+                "jetbrains",
+                "-o",
+                str(tmp_path),
+            ],
+        )
+
         assert result.exit_code == 0
 
     def test_generate_amazonq(self, v2_prompt_file, tmp_path):
         """Test Amazon Q adapter generation."""
         runner = CliRunner()
-        result = runner.invoke(cli, [
-            "generate",
-            str(v2_prompt_file),
-            "--editor", "amazonq",
-            "-o", str(tmp_path)
-        ])
-        
+        result = runner.invoke(
+            cli,
+            [
+                "generate",
+                str(v2_prompt_file),
+                "--editor",
+                "amazonq",
+                "-o",
+                str(tmp_path),
+            ],
+        )
+
         assert result.exit_code == 0
 
     def test_generate_all_at_once(self, v2_prompt_file, tmp_path):
         """Test generating for all editors at once."""
         runner = CliRunner()
-        result = runner.invoke(cli, [
-            "generate",
-            str(v2_prompt_file),
-            "--all",
-            "-o", str(tmp_path)
-        ])
-        
+        result = runner.invoke(
+            cli, ["generate", str(v2_prompt_file), "--all", "-o", str(tmp_path)]
+        )
+
         assert result.exit_code == 0
         # Should have created files for multiple editors
         assert any(tmp_path.rglob("*"))
@@ -116,7 +128,8 @@ variables:
     def test_generate_with_all_variable_types(self, tmp_path):
         """Test generation with various variable types."""
         upf_file = tmp_path / "test.promptrek.yaml"
-        upf_file.write_text("""
+        upf_file.write_text(
+            """
 schema_version: "2.0.0"
 metadata:
   title: "Variable Test"
@@ -132,23 +145,31 @@ variables:
   VERSION: "1.0.0"
   API_KEY: "test-key"
   DB_URL: "postgresql://localhost"
-""")
-        
+"""
+        )
+
         runner = CliRunner()
-        result = runner.invoke(cli, [
-            "generate",
-            str(upf_file),
-            "--editor", "claude",
-            "-o", str(tmp_path),
-            "-V", "API_KEY=override-key"
-        ])
-        
+        result = runner.invoke(
+            cli,
+            [
+                "generate",
+                str(upf_file),
+                "--editor",
+                "claude",
+                "-o",
+                str(tmp_path),
+                "-V",
+                "API_KEY=override-key",
+            ],
+        )
+
         assert result.exit_code == 0
 
     def test_generate_v1_all_instruction_categories(self, tmp_path):
         """Test v1 generation with all instruction categories."""
         upf_file = tmp_path / "test.promptrek.yaml"
-        upf_file.write_text("""
+        upf_file.write_text(
+            """
 schema_version: "1.0.0"
 metadata:
   title: "Full V1 Test"
@@ -183,14 +204,12 @@ examples:
         return True
 variables:
   ENV: "test"
-""")
-        
+"""
+        )
+
         runner = CliRunner()
-        result = runner.invoke(cli, [
-            "generate",
-            str(upf_file),
-            "--editor", "claude",
-            "-o", str(tmp_path)
-        ])
-        
+        result = runner.invoke(
+            cli, ["generate", str(upf_file), "--editor", "claude", "-o", str(tmp_path)]
+        )
+
         assert result.exit_code == 0

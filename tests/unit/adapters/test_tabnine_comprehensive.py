@@ -1,8 +1,14 @@
 """Comprehensive Tabnine adapter tests."""
 
 import pytest
+
 from promptrek.adapters.tabnine import TabnineAdapter
-from promptrek.core.models import UniversalPrompt, UniversalPromptV2, PromptMetadata, Instructions
+from promptrek.core.models import (
+    Instructions,
+    PromptMetadata,
+    UniversalPrompt,
+    UniversalPromptV2,
+)
 
 
 class TestTabnineAdapterComprehensive:
@@ -17,7 +23,7 @@ class TestTabnineAdapterComprehensive:
         return UniversalPromptV2(
             schema_version="2.0.0",
             metadata=PromptMetadata(title="Test", description="Test"),
-            content="# Test Instructions"
+            content="# Test Instructions",
         )
 
     @pytest.fixture
@@ -26,7 +32,7 @@ class TestTabnineAdapterComprehensive:
             schema_version="1.0.0",
             metadata=PromptMetadata(title="Test", description="Test"),
             targets=["tabnine"],
-            instructions=Instructions(general=["Test"])
+            instructions=Instructions(general=["Test"]),
         )
 
     def test_generate_v2_basic(self, adapter, v2_prompt, tmp_path):
@@ -50,9 +56,9 @@ class TestTabnineAdapterComprehensive:
             schema_version="2.0.0",
             metadata=PromptMetadata(title="Test", description="Test"),
             content="Var: {{{ VAR }}}",
-            variables={"VAR": "value"}
+            variables={"VAR": "value"},
         )
-        
+
         files = adapter.generate(prompt, tmp_path, variables={"VAR": "override"})
         assert len(files) > 0
 
@@ -62,9 +68,9 @@ class TestTabnineAdapterComprehensive:
             metadata=PromptMetadata(title="Test", description="Test"),
             targets=["tabnine"],
             instructions=Instructions(general=["Test"]),
-            examples={"python": "def test(): pass"}
+            examples={"python": "def test(): pass"},
         )
-        
+
         files = adapter.generate(prompt, tmp_path)
         assert len(files) > 0
 
@@ -75,20 +81,22 @@ class TestTabnineAdapterComprehensive:
             targets=["tabnine"],
             instructions=Instructions(
                 general=["Instruction " + str(i) for i in range(20)]
-            )
+            ),
         )
-        
+
         files = adapter.generate(prompt, tmp_path)
         assert len(files) > 0
 
     def test_generate_v2_multiline(self, adapter, tmp_path):
-        long_content = "# Instructions\n\n" + "\n".join([f"Line {i}" for i in range(50)])
+        long_content = "# Instructions\n\n" + "\n".join(
+            [f"Line {i}" for i in range(50)]
+        )
         prompt = UniversalPromptV2(
             schema_version="2.0.0",
             metadata=PromptMetadata(title="Test", description="Test"),
-            content=long_content
+            content=long_content,
         )
-        
+
         files = adapter.generate(prompt, tmp_path)
         assert len(files) > 0
 
@@ -96,9 +104,9 @@ class TestTabnineAdapterComprehensive:
         prompt = UniversalPromptV2(
             schema_version="2.0.0",
             metadata=PromptMetadata(title="Test", description="Test"),
-            content="# Test\n\n`code` **bold** _italic_"
+            content="# Test\n\n`code` **bold** _italic_",
         )
-        
+
         files = adapter.generate(prompt, tmp_path)
         assert len(files) > 0
 
@@ -111,8 +119,8 @@ class TestTabnineAdapterComprehensive:
                 general=["Gen"],
                 code_style=["Style"],
                 testing=["Test"],
-                security=["Sec"]
-            )
+                security=["Sec"],
+            ),
         )
 
         files = adapter.generate(prompt, tmp_path)
@@ -124,7 +132,7 @@ class TestTabnineAdapterComprehensive:
             schema_version="1.0.0",
             metadata=PromptMetadata(title="Test", description="Test"),
             targets=["tabnine"],
-            instructions=Instructions(general=["Test instruction"])
+            instructions=Instructions(general=["Test instruction"]),
         )
 
         files = adapter.generate(prompt, tmp_path, dry_run=True)
@@ -140,7 +148,7 @@ class TestTabnineAdapterComprehensive:
             schema_version="1.0.0",
             metadata=PromptMetadata(title="Test", description="Test"),
             targets=["tabnine"],
-            instructions=Instructions(general=["Test instruction"])
+            instructions=Instructions(general=["Test instruction"]),
         )
 
         files = adapter.generate(prompt, tmp_path, verbose=True)
@@ -155,7 +163,7 @@ class TestTabnineAdapterComprehensive:
             targets=["tabnine"],
             instructions=Instructions(
                 general=["Test instruction " * 100]  # Long to test preview
-            )
+            ),
         )
 
         files = adapter.generate(prompt, tmp_path, dry_run=True, verbose=True)
@@ -189,7 +197,7 @@ class TestTabnineAdapterComprehensive:
             schema_version="1.0.0",
             metadata=PromptMetadata(title="Test", description="Test"),
             targets=["tabnine"],
-            instructions=None
+            instructions=None,
         )
 
         errors = adapter.validate(prompt)
@@ -202,7 +210,8 @@ class TestTabnineAdapterComprehensive:
         prompt = UniversalPromptV2(
             schema_version="2.0.0",
             metadata=PromptMetadata(title="Test", description="Test"),
-            content="# Test Instructions\n\nSome content here that is longer than 200 characters to test the preview truncation feature in verbose mode. " * 5
+            content="# Test Instructions\n\nSome content here that is longer than 200 characters to test the preview truncation feature in verbose mode. "
+            * 5,
         )
 
         files = adapter.generate(prompt, tmp_path, dry_run=True, verbose=True)
@@ -219,7 +228,8 @@ class TestTabnineAdapterComprehensive:
     def test_parse_files_with_sections(self, adapter, tmp_path):
         """Test parsing Tabnine file with various sections."""
         commands_file = tmp_path / ".tabnine_commands"
-        commands_file.write_text("""# Tabnine Commands for My Project
+        commands_file.write_text(
+            """# Tabnine Commands for My Project
 
 # This project uses Python and TypeScript
 # Technologies: Python, TypeScript, React
@@ -244,7 +254,8 @@ class TestTabnineAdapterComprehensive:
 
 # Python: Follow Python best practices and idioms
 # TypeScript: Follow TypeScript best practices and idioms
-""")
+"""
+        )
 
         result = adapter.parse_files(tmp_path)
 
@@ -258,7 +269,7 @@ class TestTabnineAdapterComprehensive:
 
     def test_generate_v1_with_context_and_conditionals(self, adapter, tmp_path):
         """Test v1 generation with context and conditional content."""
-        from promptrek.core.models import ProjectContext, Condition
+        from promptrek.core.models import Condition, ProjectContext
 
         prompt = UniversalPrompt(
             schema_version="1.0.0",
@@ -267,19 +278,23 @@ class TestTabnineAdapterComprehensive:
             context=ProjectContext(
                 project_type="web_app",
                 technologies=["Python", "React"],
-                description="A web application"
+                description="A web application",
             ),
             instructions=Instructions(
                 general=["Test instruction"],
                 code_style=["Style rule"],
-                testing=["Test rule"]
+                testing=["Test rule"],
             ),
             conditions=[
-                Condition.model_validate({
-                    "if": "EDITOR == 'tabnine'",
-                    "then": {"instructions": {"general": ["Conditional instruction"]}}
-                })
-            ]
+                Condition.model_validate(
+                    {
+                        "if": "EDITOR == 'tabnine'",
+                        "then": {
+                            "instructions": {"general": ["Conditional instruction"]}
+                        },
+                    }
+                )
+            ],
         )
 
         files = adapter.generate(prompt, tmp_path)

@@ -1,8 +1,15 @@
 """Comprehensive Continue adapter tests."""
 
 import pytest
+
 from promptrek.adapters.continue_adapter import ContinueAdapter
-from promptrek.core.models import UniversalPrompt, UniversalPromptV2, PromptMetadata, Instructions, DocumentConfig
+from promptrek.core.models import (
+    DocumentConfig,
+    Instructions,
+    PromptMetadata,
+    UniversalPrompt,
+    UniversalPromptV2,
+)
 
 
 class TestContinueAdapterComprehensive:
@@ -17,7 +24,7 @@ class TestContinueAdapterComprehensive:
         return UniversalPromptV2(
             schema_version="2.0.0",
             metadata=PromptMetadata(title="Test", description="Test"),
-            content="# Test Instructions"
+            content="# Test Instructions",
         )
 
     @pytest.fixture
@@ -26,7 +33,7 @@ class TestContinueAdapterComprehensive:
             schema_version="1.0.0",
             metadata=PromptMetadata(title="Test", description="Test"),
             targets=["continue"],
-            instructions=Instructions(general=["Test"])
+            instructions=Instructions(general=["Test"]),
         )
 
     def test_generate_v2_basic(self, adapter, v2_prompt, tmp_path):
@@ -40,10 +47,10 @@ class TestContinueAdapterComprehensive:
             content="# Main",
             documents=[
                 DocumentConfig(name="doc1", content="# Doc 1"),
-                DocumentConfig(name="doc2", content="# Doc 2")
-            ]
+                DocumentConfig(name="doc2", content="# Doc 2"),
+            ],
         )
-        
+
         files = adapter.generate(prompt, tmp_path)
         assert len(files) > 0
 
@@ -64,9 +71,9 @@ class TestContinueAdapterComprehensive:
             schema_version="2.0.0",
             metadata=PromptMetadata(title="Test", description="Test"),
             content="Project: {{{ NAME }}}",
-            variables={"NAME": "Test"}
+            variables={"NAME": "Test"},
         )
-        
+
         files = adapter.generate(prompt, tmp_path, variables={"NAME": "Override"})
         assert len(files) > 0
 
@@ -76,7 +83,7 @@ class TestContinueAdapterComprehensive:
         continue_dir.mkdir()
         config_file = continue_dir / "config.json"
         config_file.write_text('{"rules": []}')
-        
+
         try:
             result = adapter.parse_files(tmp_path)
             # May or may not work depending on implementation
@@ -89,11 +96,10 @@ class TestContinueAdapterComprehensive:
             metadata=PromptMetadata(title="Test", description="Test"),
             content="# Main",
             documents=[
-                DocumentConfig(name=f"doc{i}", content=f"# Doc {i}")
-                for i in range(5)
-            ]
+                DocumentConfig(name=f"doc{i}", content=f"# Doc {i}") for i in range(5)
+            ],
         )
-        
+
         files = adapter.generate(prompt, tmp_path)
         assert len(files) > 0
 
@@ -108,10 +114,10 @@ class TestContinueAdapterComprehensive:
                 architecture=["Arch"],
                 testing=["Test"],
                 security=["Secure"],
-                performance=["Perf"]
-            )
+                performance=["Perf"],
+            ),
         )
-        
+
         files = adapter.generate(prompt, tmp_path)
         assert len(files) > 0
 
@@ -121,7 +127,7 @@ class TestContinueAdapterComprehensive:
             metadata=PromptMetadata(title="Test", description="Test"),
             targets=["continue"],
             instructions=Instructions(general=["Test"]),
-            examples={"ex1": "code here"}
+            examples={"ex1": "code here"},
         )
 
         files = adapter.generate(prompt, tmp_path)
@@ -134,9 +140,8 @@ class TestContinueAdapterComprehensive:
             metadata=PromptMetadata(title="Test", description="Test"),
             targets=["continue"],
             instructions=Instructions(
-                general=["General rule"],
-                code_style=["Follow PEP 8", "Use type hints"]
-            )
+                general=["General rule"], code_style=["Follow PEP 8", "Use type hints"]
+            ),
         )
 
         files = adapter.generate(prompt, tmp_path)
@@ -152,9 +157,8 @@ class TestContinueAdapterComprehensive:
             metadata=PromptMetadata(title="Test", description="Test"),
             targets=["continue"],
             instructions=Instructions(
-                general=["General rule"],
-                testing=["Write unit tests", "Use pytest"]
-            )
+                general=["General rule"], testing=["Write unit tests", "Use pytest"]
+            ),
         )
 
         files = adapter.generate(prompt, tmp_path)
@@ -170,9 +174,8 @@ class TestContinueAdapterComprehensive:
             metadata=PromptMetadata(title="Test", description="Test"),
             targets=["continue"],
             instructions=Instructions(
-                general=["General rule"],
-                code_style=["Style rule"]
-            )
+                general=["General rule"], code_style=["Style rule"]
+            ),
         )
 
         files = adapter.generate(prompt, tmp_path, dry_run=True)
@@ -190,9 +193,8 @@ class TestContinueAdapterComprehensive:
             metadata=PromptMetadata(title="Test", description="Test"),
             targets=["continue"],
             instructions=Instructions(
-                general=["General rule"],
-                code_style=["Style rule"]
-            )
+                general=["General rule"], code_style=["Style rule"]
+            ),
         )
 
         files = adapter.generate(prompt, tmp_path, verbose=True)
@@ -209,11 +211,15 @@ class TestContinueAdapterComprehensive:
             targets=["continue"],
             instructions=Instructions(general=["Base rule"]),
             conditions=[
-                Condition.model_validate({
-                    "if": "EDITOR == 'continue'",
-                    "then": {"instructions": {"general": ["Continue-specific rule"]}}
-                })
-            ]
+                Condition.model_validate(
+                    {
+                        "if": "EDITOR == 'continue'",
+                        "then": {
+                            "instructions": {"general": ["Continue-specific rule"]}
+                        },
+                    }
+                )
+            ],
         )
 
         files = adapter.generate(prompt, tmp_path)
@@ -238,9 +244,9 @@ class TestContinueAdapterComprehensive:
             targets=["continue"],
             context=ProjectContext(
                 project_type="web_application",
-                technologies=["Python", "React", "TypeScript"]
+                technologies=["Python", "React", "TypeScript"],
             ),
-            instructions=Instructions(general=["General rule"])
+            instructions=Instructions(general=["General rule"]),
         )
 
         files = adapter.generate(prompt, tmp_path)
@@ -257,8 +263,8 @@ class TestContinueAdapterComprehensive:
             targets=["continue"],
             instructions=Instructions(
                 general=["General"],
-                architecture=["Follow MVC", "Use dependency injection"]
-            )
+                architecture=["Follow MVC", "Use dependency injection"],
+            ),
         )
 
         files = adapter.generate(prompt, tmp_path)
@@ -272,9 +278,8 @@ class TestContinueAdapterComprehensive:
             metadata=PromptMetadata(title="Test", description="Test"),
             targets=["continue"],
             instructions=Instructions(
-                general=["General"],
-                security=["Sanitize inputs", "Use HTTPS"]
-            )
+                general=["General"], security=["Sanitize inputs", "Use HTTPS"]
+            ),
         )
 
         files = adapter.generate(prompt, tmp_path)
@@ -289,8 +294,8 @@ class TestContinueAdapterComprehensive:
             targets=["continue"],
             instructions=Instructions(
                 general=["General"],
-                performance=["Cache results", "Minimize database queries"]
-            )
+                performance=["Cache results", "Minimize database queries"],
+            ),
         )
 
         files = adapter.generate(prompt, tmp_path)
@@ -303,7 +308,7 @@ class TestContinueAdapterComprehensive:
             schema_version="1.0.0",
             metadata=PromptMetadata(title="Test", description=""),
             targets=["continue"],
-            instructions=Instructions(general=["Test"])
+            instructions=Instructions(general=["Test"]),
         )
 
         errors = adapter.validate(prompt)
@@ -326,9 +331,13 @@ class TestContinueAdapterComprehensive:
             metadata=PromptMetadata(title="Test", description="Test"),
             content="# Main",
             documents=[
-                DocumentConfig(name="doc1", content="# Document 1\n\n" + "Content " * 50),
-                DocumentConfig(name="doc2", content="# Document 2\n\n" + "Content " * 50)
-            ]
+                DocumentConfig(
+                    name="doc1", content="# Document 1\n\n" + "Content " * 50
+                ),
+                DocumentConfig(
+                    name="doc2", content="# Document 2\n\n" + "Content " * 50
+                ),
+            ],
         )
 
         files = adapter.generate(prompt, tmp_path, dry_run=True, verbose=True)
@@ -342,7 +351,7 @@ class TestContinueAdapterComprehensive:
         prompt = UniversalPromptV2(
             schema_version="2.0.0",
             metadata=PromptMetadata(title="Test", description="Test"),
-            content="# Test Instructions\n\n" + "Long content " * 50
+            content="# Test Instructions\n\n" + "Long content " * 50,
         )
 
         files = adapter.generate(prompt, tmp_path, dry_run=True, verbose=True)
@@ -358,9 +367,8 @@ class TestContinueAdapterComprehensive:
             metadata=PromptMetadata(title="Test", description="Test"),
             targets=["continue"],
             instructions=Instructions(
-                general=["General"],
-                code_style=["Style rule 1", "Style rule 2"]
-            )
+                general=["General"], code_style=["Style rule 1", "Style rule 2"]
+            ),
         )
 
         files = adapter.generate(prompt, tmp_path, dry_run=True, verbose=True)
@@ -376,9 +384,8 @@ class TestContinueAdapterComprehensive:
             metadata=PromptMetadata(title="Test", description="Test"),
             targets=["continue"],
             instructions=Instructions(
-                general=["General"],
-                testing=["Test rule 1", "Test rule 2"]
-            )
+                general=["General"], testing=["Test rule 1", "Test rule 2"]
+            ),
         )
 
         files = adapter.generate(prompt, tmp_path, dry_run=True, verbose=True)
@@ -386,7 +393,6 @@ class TestContinueAdapterComprehensive:
         assert len(files) > 0
         for f in files:
             assert not f.exists()
-
 
     def test_parse_files_v2_multiple_files(self, adapter, tmp_path):
         """Test parsing multiple markdown files into v2."""
@@ -424,13 +430,15 @@ class TestContinueAdapterComprehensive:
         # No .continue/rules directory, should fall back to v1
         # Create config.yaml instead
         config_file = tmp_path / "config.yaml"
-        config_file.write_text("""
+        config_file.write_text(
+            """
 name: Test Project
 systemMessage: Test system message
 rules:
   - Rule 1
   - Rule 2
-""")
+"""
+        )
 
         try:
             result = adapter.parse_files(tmp_path)
@@ -446,16 +454,27 @@ rules:
         rules_dir.mkdir(parents=True)
 
         # Create rule files
-        (rules_dir / "general.md").write_text("# General\n\n- Follow patterns\n- Be consistent")
-        (rules_dir / "security.md").write_text("# Security\n\n- Sanitize inputs\n- Use HTTPS")
-        (rules_dir / "performance.md").write_text("# Performance\n\n- Cache results\n- Optimize queries")
-        (rules_dir / "architecture.md").write_text("# Architecture\n\n- Use MVC\n- Follow SOLID")
-        (rules_dir / "python-rules.md").write_text("# Python\n\n- Follow PEP 8\n- Use type hints")
+        (rules_dir / "general.md").write_text(
+            "# General\n\n- Follow patterns\n- Be consistent"
+        )
+        (rules_dir / "security.md").write_text(
+            "# Security\n\n- Sanitize inputs\n- Use HTTPS"
+        )
+        (rules_dir / "performance.md").write_text(
+            "# Performance\n\n- Cache results\n- Optimize queries"
+        )
+        (rules_dir / "architecture.md").write_text(
+            "# Architecture\n\n- Use MVC\n- Follow SOLID"
+        )
+        (rules_dir / "python-rules.md").write_text(
+            "# Python\n\n- Follow PEP 8\n- Use type hints"
+        )
         (rules_dir / "unknown-file.md").write_text("# Unknown\n\n- Some rule")
 
         # Also test config.yaml merging
         config_file = tmp_path / "config.yaml"
-        config_file.write_text("""
+        config_file.write_text(
+            """
 name: Test Project
 systemMessage: |
   Context info
@@ -464,7 +483,8 @@ systemMessage: |
 rules:
   - Config rule 1
   - Config rule 2
-""")
+"""
+        )
 
         result = adapter.parse_files(tmp_path)
 
@@ -485,19 +505,19 @@ rules:
                 version="1.0.0",
                 author="Test",
                 created="2024-01-01",
-                updated="2024-01-01"
+                updated="2024-01-01",
             ),
             targets=["continue"],
             context=ProjectContext(
                 project_type="web_app",
                 technologies=["Python", "React"],
-                description="A web application"
+                description="A web application",
             ),
             instructions=Instructions(
                 general=["General rule"],
                 code_style=["Style rule"],
-                testing=["Test rule"]
-            )
+                testing=["Test rule"],
+            ),
         )
 
         content = adapter._build_legacy_rules_content(prompt)
@@ -518,7 +538,7 @@ rules:
             schema_version="1.0.0",
             metadata=PromptMetadata(title="Test", description="Test", version="1.0.0"),
             targets=["continue"],
-            instructions=Instructions(general=["General rule"])
+            instructions=Instructions(general=["General rule"]),
         )
 
         # Test known technologies
@@ -536,7 +556,8 @@ rules:
     def test_parse_markdown_file(self, adapter, tmp_path):
         """Test parsing markdown file for instructions."""
         md_file = tmp_path / "test.md"
-        md_file.write_text("""# Test Rules
+        md_file.write_text(
+            """# Test Rules
 
 - Instruction 1
 - Instruction 2
@@ -545,7 +566,8 @@ rules:
   - Nested item (should be ignored)
 - Maintain consistency with existing codebase
 - Instruction 4
-""")
+"""
+        )
 
         instructions = adapter._parse_markdown_file(md_file)
 

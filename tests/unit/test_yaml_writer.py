@@ -1,7 +1,9 @@
 """Tests for YAML writer."""
 
-import pytest
 from pathlib import Path
+
+import pytest
+
 from promptrek.cli.yaml_writer import write_promptrek_yaml
 
 
@@ -12,16 +14,13 @@ class TestYAMLWriter:
         """Test writing basic dictionary."""
         data = {
             "schema_version": "2.0.0",
-            "metadata": {
-                "title": "Test",
-                "description": "Test"
-            },
-            "content": "# Test"
+            "metadata": {"title": "Test", "description": "Test"},
+            "content": "# Test",
         }
-        
+
         output_file = tmp_path / "test.yaml"
         write_promptrek_yaml(data, output_file)
-        
+
         assert output_file.exists()
         content = output_file.read_text()
         assert "schema_version" in content
@@ -34,18 +33,15 @@ class TestYAMLWriter:
             "metadata": {
                 "title": "Test",
                 "description": "Test",
-                "tags": ["tag1", "tag2"]
+                "tags": ["tag1", "tag2"],
             },
-            "variables": {
-                "VAR1": "value1",
-                "VAR2": "value2"
-            },
-            "content": "# Test"
+            "variables": {"VAR1": "value1", "VAR2": "value2"},
+            "content": "# Test",
         }
-        
+
         output_file = tmp_path / "test.yaml"
         write_promptrek_yaml(data, output_file)
-        
+
         assert output_file.exists()
         content = output_file.read_text()
         assert "variables" in content
@@ -56,12 +52,12 @@ class TestYAMLWriter:
         data = {
             "schema_version": "2.0.0",
             "metadata": {"title": "Test", "description": "Test"},
-            "content": "# Test\n\nMultiple lines\nOf content\nHere"
+            "content": "# Test\n\nMultiple lines\nOf content\nHere",
         }
-        
+
         output_file = tmp_path / "test.yaml"
         write_promptrek_yaml(data, output_file)
-        
+
         assert output_file.exists()
         content = output_file.read_text()
         assert "Multiple lines" in content
@@ -74,13 +70,13 @@ class TestYAMLWriter:
             "content": "# Test",
             "documents": [
                 {"name": "doc1", "content": "Content 1"},
-                {"name": "doc2", "content": "Content 2"}
-            ]
+                {"name": "doc2", "content": "Content 2"},
+            ],
         }
-        
+
         output_file = tmp_path / "test.yaml"
         write_promptrek_yaml(data, output_file)
-        
+
         assert output_file.exists()
         content = output_file.read_text()
         assert "documents" in content

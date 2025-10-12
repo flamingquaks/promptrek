@@ -191,7 +191,13 @@ class TestInitCommand:
         ctx.obj = {"verbose": False}
 
         with patch("click.echo"):
-            init_command(ctx, template=None, output=str(output_file), setup_hooks=False, use_v2=False)
+            init_command(
+                ctx,
+                template=None,
+                output=str(output_file),
+                setup_hooks=False,
+                use_v2=False,
+            )
 
         # File should be created
         assert output_file.exists()
@@ -212,7 +218,9 @@ class TestInitCommand:
         ctx.obj = {"verbose": False}
 
         with patch("click.echo"):
-            init_command(ctx, template="api", output=str(output_file), setup_hooks=False)
+            init_command(
+                ctx, template="api", output=str(output_file), setup_hooks=False
+            )
 
         assert output_file.exists()
 
@@ -229,7 +237,13 @@ class TestInitCommand:
         ctx.obj = {"verbose": False}
 
         with patch("click.echo"):
-            init_command(ctx, template="react", output=str(output_file), setup_hooks=False, use_v2=False)
+            init_command(
+                ctx,
+                template="react",
+                output=str(output_file),
+                setup_hooks=False,
+                use_v2=False,
+            )
 
         assert output_file.exists()
 
@@ -247,7 +261,13 @@ class TestInitCommand:
         ctx.obj = {"verbose": False}
 
         with patch("click.echo"):
-            init_command(ctx, template="api", output=str(output_file), setup_hooks=False, use_v2=False)
+            init_command(
+                ctx,
+                template="api",
+                output=str(output_file),
+                setup_hooks=False,
+                use_v2=False,
+            )
 
         assert output_file.exists()
 

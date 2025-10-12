@@ -1,8 +1,15 @@
 """Comprehensive Windsurf adapter tests."""
 
 import pytest
+
 from promptrek.adapters.windsurf import WindsurfAdapter
-from promptrek.core.models import UniversalPrompt, UniversalPromptV2, PromptMetadata, Instructions, DocumentConfig
+from promptrek.core.models import (
+    DocumentConfig,
+    Instructions,
+    PromptMetadata,
+    UniversalPrompt,
+    UniversalPromptV2,
+)
 
 
 class TestWindsurfAdapterComprehensive:
@@ -17,7 +24,7 @@ class TestWindsurfAdapterComprehensive:
         return UniversalPromptV2(
             schema_version="2.0.0",
             metadata=PromptMetadata(title="Test", description="Test"),
-            content="# Test"
+            content="# Test",
         )
 
     @pytest.fixture
@@ -26,7 +33,7 @@ class TestWindsurfAdapterComprehensive:
             schema_version="1.0.0",
             metadata=PromptMetadata(title="Test", description="Test"),
             targets=["windsurf"],
-            instructions=Instructions(general=["Test"])
+            instructions=Instructions(general=["Test"]),
         )
 
     def test_generate_v2_basic(self, adapter, v2_prompt, tmp_path):
@@ -38,9 +45,9 @@ class TestWindsurfAdapterComprehensive:
             schema_version="2.0.0",
             metadata=PromptMetadata(title="Test", description="Test"),
             content="# Main",
-            documents=[DocumentConfig(name="extra", content="# Extra")]
+            documents=[DocumentConfig(name="extra", content="# Extra")],
         )
-        
+
         files = adapter.generate(prompt, tmp_path)
         assert len(files) > 0
 
@@ -61,9 +68,9 @@ class TestWindsurfAdapterComprehensive:
             schema_version="2.0.0",
             metadata=PromptMetadata(title="Test", description="Test"),
             content="{{{ VAR }}}",
-            variables={"VAR": "value"}
+            variables={"VAR": "value"},
         )
-        
+
         files = adapter.generate(prompt, tmp_path, variables={"VAR": "test"})
         assert len(files) > 0
 
@@ -78,10 +85,10 @@ class TestWindsurfAdapterComprehensive:
                 architecture=["C"],
                 testing=["D"],
                 security=["E"],
-                performance=["F"]
-            )
+                performance=["F"],
+            ),
         )
-        
+
         files = adapter.generate(prompt, tmp_path)
         assert len(files) > 0
 
@@ -91,9 +98,9 @@ class TestWindsurfAdapterComprehensive:
             metadata=PromptMetadata(title="Test", description="Test"),
             targets=["windsurf"],
             instructions=Instructions(general=["Test"]),
-            examples={"ex": "code"}
+            examples={"ex": "code"},
         )
-        
+
         files = adapter.generate(prompt, tmp_path)
         assert len(files) > 0
 
@@ -116,7 +123,7 @@ class TestWindsurfAdapterComprehensive:
             schema_version="1.0.0",
             metadata=PromptMetadata(title="Test", description="Test"),
             targets=["windsurf"],
-            instructions=Instructions(general=["Test"])
+            instructions=Instructions(general=["Test"]),
         )
 
         files = adapter.generate(prompt, tmp_path, dry_run=True)
@@ -131,7 +138,7 @@ class TestWindsurfAdapterComprehensive:
             schema_version="1.0.0",
             metadata=PromptMetadata(title="Test", description="Test"),
             targets=["windsurf"],
-            instructions=Instructions(general=["Test"])
+            instructions=Instructions(general=["Test"]),
         )
 
         files = adapter.generate(prompt, tmp_path, verbose=True)

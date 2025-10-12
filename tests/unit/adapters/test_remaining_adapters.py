@@ -1,16 +1,17 @@
 """Tests for remaining adapters."""
 
 import pytest
-from promptrek.adapters.kiro import KiroAdapter
+
 from promptrek.adapters.amazon_q import AmazonQAdapter
-from promptrek.adapters.jetbrains import JetBrainsAdapter
 from promptrek.adapters.cline import ClineAdapter
+from promptrek.adapters.jetbrains import JetBrainsAdapter
+from promptrek.adapters.kiro import KiroAdapter
 from promptrek.core.models import (
+    DocumentConfig,
+    Instructions,
+    PromptMetadata,
     UniversalPrompt,
     UniversalPromptV2,
-    PromptMetadata,
-    Instructions,
-    DocumentConfig,
 )
 
 
@@ -78,7 +79,7 @@ class TestKiroAdapter:
             schema_version="1.0.0",
             metadata=PromptMetadata(title="Test", description="Test"),
             targets=["kiro"],
-            instructions=Instructions(general=["Test"])
+            instructions=Instructions(general=["Test"]),
         )
 
         files = adapter.generate(prompt, tmp_path, dry_run=True)
@@ -93,7 +94,7 @@ class TestKiroAdapter:
             schema_version="1.0.0",
             metadata=PromptMetadata(title="Test", description="Test"),
             targets=["kiro"],
-            instructions=Instructions(general=["Test"])
+            instructions=Instructions(general=["Test"]),
         )
 
         files = adapter.generate(prompt, tmp_path, verbose=True)
