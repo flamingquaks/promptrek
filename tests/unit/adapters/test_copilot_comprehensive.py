@@ -51,7 +51,7 @@ class TestCopilotAdapterComprehensive:
         files = adapter.generate(v2_prompt, tmp_path)
 
         assert len(files) > 0
-        assert any(".github/copilot-instructions.md" in str(f) for f in files)
+        assert any(f.name == "copilot-instructions.md" and ".github" in f.parts for f in files)
 
     def test_generate_v2_with_variables(self, adapter, tmp_path):
         """Test v2 generation with variables."""
@@ -85,7 +85,7 @@ class TestCopilotAdapterComprehensive:
 
         assert len(files) > 0
         # In headless mode, should generate project-level file
-        assert any("copilot-instructions.md" in str(f) for f in files)
+        assert any(f.name == "copilot-instructions.md" for f in files)
 
     def test_generate_user_mode(self, adapter, v2_prompt, tmp_path):
         """Test generation in user mode."""
@@ -344,7 +344,7 @@ class TestCopilotAdapterComprehensive:
         files = adapter.generate_merged([(prompt, source)], tmp_path, headless=True)
 
         assert len(files) > 0
-        assert any(".github" in str(f) for f in files)
+        assert any(".github" in f.parts for f in files)
 
     def test_parse_files_v2(self, adapter, tmp_path):
         """Test parsing v2 format from .github directory."""
