@@ -1,3 +1,7 @@
+# [](https://github.com/flamingquaks/promptrek/compare/v0.1.0-rc.1...v) (2025-10-12)
+
+
+
 # [](https://github.com/flamingquaks/promptrek/compare/v0.0.6...v) (2025-10-08)
 
 
