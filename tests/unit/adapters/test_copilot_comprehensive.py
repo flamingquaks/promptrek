@@ -51,7 +51,9 @@ class TestCopilotAdapterComprehensive:
         files = adapter.generate(v2_prompt, tmp_path)
 
         assert len(files) > 0
-        assert any(f.name == "copilot-instructions.md" and ".github" in f.parts for f in files)
+        assert any(
+            f.name == "copilot-instructions.md" and ".github" in f.parts for f in files
+        )
 
     def test_generate_v2_with_variables(self, adapter, tmp_path):
         """Test v2 generation with variables."""
