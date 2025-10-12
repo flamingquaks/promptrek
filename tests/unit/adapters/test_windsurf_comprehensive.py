@@ -144,3 +144,58 @@ class TestWindsurfAdapterComprehensive:
         files = adapter.generate(prompt, tmp_path, verbose=True)
 
         assert len(files) > 0
+
+    def test_generate_v2_documents(self, adapter, tmp_path):
+        """Test v2 generation with documents."""
+        from promptrek.core.models import DocumentConfig
+
+        prompt = UniversalPromptV2(
+            schema_version="2.0.0",
+            metadata=PromptMetadata(title="Test", description="Test"),
+            content="# Main",
+            documents=[
+                DocumentConfig(name="doc1", content="# Document 1"),
+                DocumentConfig(name="doc2", content="# Document 2"),
+            ],
+        )
+
+        files = adapter.generate(prompt, tmp_path)
+
+        assert len(files) == 2
+
+    def test_generate_v1_with_all_categories(self, adapter, tmp_path):
+        """Test v1 generation with all instruction categories."""
+        from promptrek.core.models import ProjectContext
+
+        prompt = UniversalPrompt(
+            schema_version="1.0.0",
+            metadata=PromptMetadata(title="Test", description="Test"),
+            targets=["windsurf"],
+            context=ProjectContext(
+                project_type="web_app", technologies=["Python", "React"]
+            ),
+            instructions=Instructions(
+                general=["General"],
+                code_style=["Style"],
+                architecture=["Arch"],
+                testing=["Test"],
+                security=["Sec"],
+                performance=["Perf"],
+            ),
+        )
+
+        files = adapter.generate(prompt, tmp_path)
+
+        assert len(files) >= 3
+
+    def test_parse_files_v2_multiple(self, adapter, tmp_path):
+        """Test parsing multiple markdown files."""
+        rules_dir = tmp_path / ".windsurf" / "rules"
+        rules_dir.mkdir(parents=True)
+
+        (rules_dir / "general.md").write_text("# General\n\n- Rule 1")
+        (rules_dir / "code-style.md").write_text("# Style\n\n- Style 1")
+
+        result = adapter.parse_files(tmp_path)
+
+        assert result is not None

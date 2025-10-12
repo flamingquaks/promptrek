@@ -493,3 +493,178 @@ variables:
         parser = UPFParser()
         with pytest.raises(UPFParsingError):
             parser.parse_file(file_path)
+
+    def test_parse_multiple_files_v2(self, tmp_path):
+        """Test parsing and merging multiple v2 files."""
+        file1 = tmp_path / "file1.promptrek.yaml"
+        file1.write_text(
+            """
+schema_version: "2.0.0"
+metadata:
+  title: "File 1"
+  description: "First file"
+content: |
+  # Content 1
+"""
+        )
+
+        file2 = tmp_path / "file2.promptrek.yaml"
+        file2.write_text(
+            """
+schema_version: "2.0.0"
+metadata:
+  title: "File 2"
+  description: "Second file"
+content: |
+  # Content 2
+"""
+        )
+
+        parser = UPFParser()
+        merged = parser.parse_multiple_files([file1, file2])
+
+        # Should return merged prompt
+        assert isinstance(merged, UniversalPromptV2)
+        assert "Content 1" in merged.content or "Content 2" in merged.content
+
+    def test_parse_directory_v2(self, tmp_path):
+        """Test parsing directory with v2 files."""
+        (tmp_path / "file1.promptrek.yaml").write_text(
+            """
+schema_version: "2.0.0"
+metadata:
+  title: "File 1"
+  description: "First"
+content: "# Content"
+"""
+        )
+
+        (tmp_path / "file2.promptrek.yaml").write_text(
+            """
+schema_version: "2.0.0"
+metadata:
+  title: "File 2"
+  description: "Second"
+content: "# Content"
+"""
+        )
+
+        parser = UPFParser()
+        merged = parser.parse_directory(tmp_path)
+
+        # Should return merged prompt
+        assert isinstance(merged, UniversalPromptV2)
+
+    def test_parse_file_unexpected_error(self, tmp_path):
+        """Test handling of unexpected errors during parsing."""
+        # Create a file that will cause an unexpected error
+        bad_file = tmp_path / "bad.promptrek.yaml"
+        bad_file.write_text(
+            "schema_version: 2.0.0\nmetadata: !invalid_tag\n  title: Test"
+        )
+
+        parser = UPFParser()
+        with pytest.raises(UPFParsingError):
+            parser.parse_file(bad_file)
+
+    def test_parse_string_basic(self):
+        """Test parsing from string."""
+        parser = UPFParser()
+        yaml_content = """
+schema_version: "2.0.0"
+metadata:
+  title: "String Test"
+  description: "Test"
+content: "# Content"
+"""
+        prompt = parser.parse_string(yaml_content)
+
+        assert isinstance(prompt, UniversalPromptV2)
+        assert prompt.metadata.title == "String Test"
+
+    def test_get_major_version_valid(self):
+        """Test _get_major_version with valid input."""
+        parser = UPFParser()
+
+        # Should extract major version
+        assert parser._get_major_version("2.0.0") == "2"
+        assert parser._get_major_version("1.5.3") == "1"
+
+    def test_get_major_version_invalid(self):
+        """Test _get_major_version with invalid input."""
+        parser = UPFParser()
+
+        # None should trigger AttributeError and return "1"
+        assert parser._get_major_version(None) == "1"
+
+    def test_parse_dict_with_conditions(self):
+        """Test parsing dict with conditions field."""
+        parser = UPFParser()
+        data = {
+            "schema_version": "1.0.0",
+            "metadata": {"title": "Test", "description": "Test"},
+            "targets": ["claude"],
+            "instructions": {"general": ["Test"]},
+            "conditions": [
+                {
+                    "if": "EDITOR == 'claude'",
+                    "then": {"instructions": {"general": ["Claude specific"]}},
+                }
+            ],
+        }
+
+        prompt = parser.parse_dict(data)
+
+        assert isinstance(prompt, UniversalPrompt)
+        assert prompt.conditions is not None
+
+    def test_parse_dict_with_examples(self):
+        """Test parsing dict with examples field."""
+        parser = UPFParser()
+        data = {
+            "schema_version": "1.0.0",
+            "metadata": {"title": "Test", "description": "Test"},
+            "targets": ["claude"],
+            "instructions": {"general": ["Test"]},
+            "examples": {"python": "def test(): pass"},
+        }
+
+        prompt = parser.parse_dict(data)
+
+        assert isinstance(prompt, UniversalPrompt)
+        assert prompt.examples is not None
+        assert "python" in prompt.examples
+
+    def test_parse_dict_malformed_data(self):
+        """Test parsing dict with data that causes unexpected errors."""
+        parser = UPFParser()
+
+        # Data that will pass YAML parsing but fail Pydantic validation in unexpected way
+        bad_data = {
+            "schema_version": "2.0.0",
+            "metadata": {"title": 123, "description": 456},  # Wrong types
+            "content": None,  # Wrong type
+        }
+
+        with pytest.raises(UPFParsingError):
+            parser.parse_dict(bad_data)
+
+    def test_format_validation_error(self):
+        """Test validation error formatting."""
+        parser = UPFParser()
+
+        # Create a validation error by trying to parse invalid data
+        bad_data = {
+            "schema_version": "2.0.0",
+            "metadata": {"title": "Test"},  # Missing required description
+            "content": "# Test",
+        }
+
+        with pytest.raises(UPFParsingError) as exc_info:
+            parser.parse_dict(bad_data)
+
+        # Should contain formatted error message
+        assert (
+            "description" in str(exc_info.value).lower()
+            or "missing" in str(exc_info.value).lower()
+        )

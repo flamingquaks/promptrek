@@ -500,3 +500,60 @@ class TestModelsAdditional:
         assert len(prompt.documents) == 2
         assert len(prompt.variables) == 2
         assert prompt.documents[0].name == "doc1"
+
+
+class TestPromptMetadataEdgeCases:
+    """Additional test cases for PromptMetadata."""
+
+    def test_metadata_with_empty_tags(self):
+        """Test metadata with empty tags list."""
+        metadata = PromptMetadata(title="Test", description="Test", tags=[])
+        assert metadata.tags == []
+
+    def test_metadata_with_none_fields(self):
+        """Test metadata with None optional fields."""
+        metadata = PromptMetadata(
+            title="Test", description="Test", version=None, author=None, tags=None
+        )
+        assert metadata.version is None
+        assert metadata.author is None
+
+
+class TestDocumentConfigEdgeCases:
+    """Additional test cases for DocumentConfig."""
+
+    def test_document_minimal(self):
+        """Test document with minimal fields."""
+        doc = DocumentConfig(name="test", content="# Content")
+        assert doc.name == "test"
+        assert doc.frontmatter is None
+
+    def test_document_with_empty_frontmatter(self):
+        """Test document with empty frontmatter dict."""
+        doc = DocumentConfig(name="test", content="# Content", frontmatter={})
+        assert doc.frontmatter == {}
+
+
+class TestInstructionsEdgeCases:
+    """Additional test cases for Instructions."""
+
+    def test_instructions_all_empty(self):
+        """Test instructions with all fields as empty lists."""
+        inst = Instructions(
+            general=[],
+            code_style=[],
+            architecture=[],
+            testing=[],
+            security=[],
+            performance=[],
+        )
+        assert inst.general == []
+
+    def test_instructions_mixed_empty_none(self):
+        """Test instructions with mix of empty lists and None."""
+        inst = Instructions(
+            general=["Test"], code_style=None, architecture=[], testing=None
+        )
+        assert inst.general == ["Test"]
+        assert inst.code_style is None
+        assert inst.architecture == []
