@@ -183,6 +183,119 @@ class TestInitCommand:
         assert output_file.exists()
         assert output_file.parent.exists()
 
+    def test_init_v1_basic(self, tmp_path):
+        """Test v1 initialization."""
+        output_file = tmp_path / "test.promptrek.yaml"
+
+        ctx = Mock()
+        ctx.obj = {"verbose": False}
+
+        with patch("click.echo"):
+            init_command(ctx, template=None, output=str(output_file), setup_hooks=False, use_v2=False)
+
+        # File should be created
+        assert output_file.exists()
+
+        # Check content (V1 schema)
+        with open(output_file) as f:
+            data = yaml.safe_load(f)
+
+        assert data["schema_version"] == "1.0.0"
+        assert "targets" in data
+        assert "instructions" in data
+
+    def test_init_api_template(self, tmp_path):
+        """Test API template initialization."""
+        output_file = tmp_path / "test.promptrek.yaml"
+
+        ctx = Mock()
+        ctx.obj = {"verbose": False}
+
+        with patch("click.echo"):
+            init_command(ctx, template="api", output=str(output_file), setup_hooks=False)
+
+        assert output_file.exists()
+
+        with open(output_file) as f:
+            data = yaml.safe_load(f)
+
+        assert "fastapi" in data["content"].lower() or "api" in data["content"].lower()
+
+    def test_init_react_template_v1(self, tmp_path):
+        """Test React template v1 initialization."""
+        output_file = tmp_path / "test.promptrek.yaml"
+
+        ctx = Mock()
+        ctx.obj = {"verbose": False}
+
+        with patch("click.echo"):
+            init_command(ctx, template="react", output=str(output_file), setup_hooks=False, use_v2=False)
+
+        assert output_file.exists()
+
+        with open(output_file) as f:
+            data = yaml.safe_load(f)
+
+        assert data["schema_version"] == "1.0.0"
+        assert "typescript" in str(data).lower()
+
+    def test_init_api_template_v1(self, tmp_path):
+        """Test API template v1 initialization."""
+        output_file = tmp_path / "test.promptrek.yaml"
+
+        ctx = Mock()
+        ctx.obj = {"verbose": False}
+
+        with patch("click.echo"):
+            init_command(ctx, template="api", output=str(output_file), setup_hooks=False, use_v2=False)
+
+        assert output_file.exists()
+
+        with open(output_file) as f:
+            data = yaml.safe_load(f)
+
+        assert data["schema_version"] == "1.0.0"
+        assert "fastapi" in str(data).lower()
+
+    def test_init_adds_to_existing_gitignore(self, tmp_path):
+        """Test initialization adds to existing gitignore."""
+        output_file = tmp_path / "test.promptrek.yaml"
+
+        # Create existing gitignore
+        gitignore = tmp_path / ".gitignore"
+        gitignore.write_text("*.pyc\n__pycache__/\n")
+
+        ctx = Mock()
+        ctx.obj = {"verbose": False}
+
+        with patch("click.echo"):
+            init_command(ctx, template=None, output=str(output_file), setup_hooks=False)
+
+        assert output_file.exists()
+        assert gitignore.exists()
+
+        content = gitignore.read_text()
+        assert "variables.promptrek.yaml" in content
+        assert "*.pyc" in content  # Original content preserved
+
+    def test_init_creates_new_gitignore(self, tmp_path):
+        """Test initialization creates new gitignore."""
+        output_file = tmp_path / "test.promptrek.yaml"
+
+        ctx = Mock()
+        ctx.obj = {"verbose": False}
+
+        with patch("click.echo"):
+            init_command(ctx, template=None, output=str(output_file), setup_hooks=False)
+
+        assert output_file.exists()
+
+        gitignore = tmp_path / ".gitignore"
+        assert gitignore.exists()
+
+        content = gitignore.read_text()
+        assert "variables.promptrek.yaml" in content
+
 
 class TestInitIntegration:
     """Integration tests for init command via CLI."""

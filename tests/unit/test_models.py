@@ -323,3 +323,181 @@ This project uses {{{ TECHNOLOGY }}} for {{{ PURPOSE }}}.
         )
         assert "{{{ PROJECT_TITLE }}}" in prompt.content
         assert prompt.variables["TECHNOLOGY"] == "Python"
+
+
+class TestModelsAdditional:
+    """Additional model tests for coverage."""
+
+    def test_prompt_metadata_with_optional_fields(self):
+        """Test PromptMetadata with all optional fields."""
+        from promptrek.core.models import PromptMetadata
+        
+        metadata = PromptMetadata(
+            title="Test",
+            description="Test description",
+            version="1.0.0",
+            author="Test Author",
+            created="2024-01-01",
+            updated="2024-01-02",
+            tags=["tag1", "tag2"]
+        )
+        
+        assert metadata.title == "Test"
+        assert metadata.author == "Test Author"
+        assert len(metadata.tags) == 2
+
+    def test_project_context_full(self):
+        """Test ProjectContext with all fields."""
+        from promptrek.core.models import ProjectContext
+        
+        context = ProjectContext(
+            project_type="web_application",
+            technologies=["Python", "React"],
+            description="A web app",
+            repository_url="https://github.com/test/repo",
+            documentation_url="https://docs.test.com"
+        )
+        
+        assert context.project_type == "web_application"
+        assert len(context.technologies) == 2
+        assert context.repository_url == "https://github.com/test/repo"
+
+    def test_instructions_all_categories(self):
+        """Test Instructions with all categories."""
+        from promptrek.core.models import Instructions
+        
+        instructions = Instructions(
+            general=["General instruction"],
+            code_style=["Code style guide"],
+            architecture=["Architecture pattern"],
+            testing=["Testing guidelines"],
+            security=["Security best practices"],
+            performance=["Performance tips"]
+        )
+        
+        assert len(instructions.general) == 1
+        assert len(instructions.security) == 1
+
+    def test_custom_command_model(self):
+        """Test CustomCommand model."""
+        from promptrek.core.models import CustomCommand
+        
+        command = CustomCommand(
+            name="test-command",
+            prompt="Run tests",
+            description="Test command description"
+        )
+        
+        assert command.name == "test-command"
+        assert command.prompt == "Run tests"
+
+    def test_editor_specific_config(self):
+        """Test EditorSpecificConfig model."""
+        from promptrek.core.models import CustomCommand, EditorSpecificConfig
+        
+        config = EditorSpecificConfig(
+            additional_instructions=["Extra instruction"],
+            custom_commands=[
+                CustomCommand(name="test", prompt="Test", description="Test command")
+            ],
+            templates={"template1": "content"}
+        )
+        
+        assert len(config.additional_instructions) == 1
+        assert len(config.custom_commands) == 1
+        assert "template1" in config.templates
+
+    def test_condition_model(self):
+        """Test Condition model."""
+        from promptrek.core.models import Condition
+
+        # Use model_validate with alias
+        condition = Condition.model_validate({
+            "if": "EDITOR == 'claude'",
+            "then": {"instructions": ["Claude specific"]},
+            "else": {"instructions": ["Other editor"]}
+        })
+        
+        assert condition.if_condition == "EDITOR == 'claude'"
+        assert condition.then is not None
+        assert condition.else_clause is not None
+
+    def test_import_config_model(self):
+        """Test ImportConfig model."""
+        from promptrek.core.models import ImportConfig
+        
+        import_config = ImportConfig(
+            path="../shared.promptrek.yaml",
+            prefix="shared"
+        )
+        
+        assert import_config.path == "../shared.promptrek.yaml"
+        assert import_config.prefix == "shared"
+
+    def test_document_config_with_frontmatter(self):
+        """Test DocumentConfig with frontmatter."""
+        from promptrek.core.models import DocumentConfig
+        
+        doc = DocumentConfig(
+            name="test-doc",
+            content="# Test content",
+            frontmatter={"key": "value", "nested": {"data": "test"}}
+        )
+        
+        assert doc.name == "test-doc"
+        assert doc.frontmatter["key"] == "value"
+        assert doc.frontmatter["nested"]["data"] == "test"
+
+    def test_universal_prompt_full_v1(self):
+        """Test UniversalPrompt v1 with all fields."""
+        from promptrek.core.models import (
+            CustomCommand,
+            EditorSpecificConfig,
+            Instructions,
+            ProjectContext,
+            PromptMetadata,
+            UniversalPrompt,
+        )
+        
+        prompt = UniversalPrompt(
+            schema_version="1.0.0",
+            metadata=PromptMetadata(title="Full Test", description="Complete test"),
+            targets=["claude", "cursor"],
+            context=ProjectContext(project_type="web_application"),
+            instructions=Instructions(general=["Test"]),
+            examples={"example1": "code"},
+            variables={"VAR1": "value1"},
+            editor_specific={
+                "claude": EditorSpecificConfig(
+                    additional_instructions=["Claude specific"]
+                )
+            }
+        )
+        
+        assert prompt.schema_version == "1.0.0"
+        assert len(prompt.targets) == 2
+        assert "example1" in prompt.examples
+        assert "VAR1" in prompt.variables
+
+    def test_universal_prompt_v2_with_documents(self):
+        """Test UniversalPromptV2 with documents."""
+        from promptrek.core.models import (
+            DocumentConfig,
+            PromptMetadata,
+            UniversalPromptV2,
+        )
+        
+        prompt = UniversalPromptV2(
+            schema_version="2.0.0",
+            metadata=PromptMetadata(title="Test", description="Test"),
+            content="# Main content",
+            documents=[
+                DocumentConfig(name="doc1", content="# Doc 1"),
+                DocumentConfig(name="doc2", content="# Doc 2")
+            ],
+            variables={"VAR1": "value1", "VAR2": "value2"}
+        )
+        
+        assert len(prompt.documents) == 2
+        assert len(prompt.variables) == 2
+        assert prompt.documents[0].name == "doc1"

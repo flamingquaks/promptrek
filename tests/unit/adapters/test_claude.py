@@ -65,3 +65,41 @@ class TestClaudeAdapter(TestAdapterBase):
         assert "## Development Guidelines" in content
         assert "## Code Examples" in content
         assert "typescript, react, nodejs" in content
+
+    def test_generate_v1_dry_run_verbose(self, adapter, tmp_path):
+        """Test v1 generation with dry run and verbose."""
+        from promptrek.core.models import Instructions
+
+        prompt = UniversalPrompt(
+            schema_version="1.0.0",
+            metadata=PromptMetadata(title="Test", description="Test", created="2024-01-01", updated="2024-01-01", version="1.0.0", author="test@example.com"),
+            targets=["claude"],
+            instructions=Instructions(general=["Test instruction"])
+        )
+
+        files = adapter.generate(prompt, tmp_path, dry_run=True, verbose=True)
+
+        assert len(files) > 0
+        for f in files:
+            assert not f.exists()
+
+    def test_generate_with_conditionals(self, adapter, tmp_path):
+        """Test generation with conditional instructions."""
+        from promptrek.core.models import Instructions, Condition
+
+        prompt = UniversalPrompt(
+            schema_version="1.0.0",
+            metadata=PromptMetadata(title="Test", description="Test", created="2024-01-01", updated="2024-01-01", version="1.0.0", author="test@example.com"),
+            targets=["claude"],
+            instructions=Instructions(general=["Base instruction"]),
+            conditions=[
+                Condition.model_validate({
+                    "if": "EDITOR == 'claude'",
+                    "then": {"instructions": {"general": ["Claude-specific instruction"]}}
+                })
+            ]
+        )
+
+        files = adapter.generate(prompt, tmp_path)
+
+        assert len(files) > 0
