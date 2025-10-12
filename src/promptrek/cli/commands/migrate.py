@@ -200,8 +200,15 @@ def _build_markdown_from_v1(prompt: UniversalPrompt) -> str:
                 # Handle then instructions
                 if "instructions" in condition.then:
                     lines.append("Then apply these instructions:")
-                    for inst in condition.then["instructions"]:
-                        lines.append(f"- {inst}")
+                    instructions = condition.then["instructions"]
+                    if isinstance(instructions, dict):
+                        for category, inst_list in instructions.items():
+                            lines.append(f"**{category.replace('_', ' ').title()}:**")
+                            for inst in inst_list:
+                                lines.append(f"- {inst}")
+                    else:
+                        for inst in instructions:
+                            lines.append(f"- {inst}")
                 # Handle then examples
                 if "examples" in condition.then:
                     lines.append("")
