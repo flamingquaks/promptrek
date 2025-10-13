@@ -3,6 +3,36 @@
 
 ### Bug Fixes
 
+* Correct changelog sections and reorder entries for clarity ([14436e3](https://github.com/flamingquaks/promptrek/commit/14436e37b0be48bce44dc310c19d73f461d9fabb))
+* update hook stages to pre-commit for validation and prevention checks ([#65](https://github.com/flamingquaks/promptrek/issues/65)) ([f3273b4](https://github.com/flamingquaks/promptrek/commit/f3273b41adbf44b1820e285abe265a1b6ae87678))
+
+
+### Features
+
+* Enhance changelog generation with last stable version detection ([cc0f395](https://github.com/flamingquaks/promptrek/commit/cc0f3953da4fbadadf132addb8be5498f73e55c3))
+
+
+
+## [0.0.7](https://github.com/flamingquaks/promptrek/compare/v0.0.6...v0.0.7) (2025-10-08)
+
+
+### Bug Fixes
+
+* sync support across editos ([#61](https://github.com/flamingquaks/promptrek/issues/61)) ([46a202e](https://github.com/flamingquaks/promptrek/commit/46a202e1ad47d2a7853751a1b35674cda4f6b0e2))
+* update file name from .cline_rules.md to .clinerules/context.md ([f93004d](https://github.com/flamingquaks/promptrek/commit/f93004d8340c80618175ec4f920cbb8524c55e82))
+
+
+### Features
+
+* add support for local variables file and prevent accidental commits ([#59](https://github.com/flamingquaks/promptrek/issues/59)) ([32d4001](https://github.com/flamingquaks/promptrek/commit/32d400195d96f6526bebe13e006bd4ad557edea3))
+
+
+
+# [](https://github.com/flamingquaks/promptrek/compare/v0.0.7...v) (2025-10-13)
+
+
+### Bug Fixes
+
 * update hook stages to pre-commit for validation and prevention checks ([#65](https://github.com/flamingquaks/promptrek/issues/65)) ([f3273b4](https://github.com/flamingquaks/promptrek/commit/f3273b41adbf44b1820e285abe265a1b6ae87678))
 
 
