@@ -92,43 +92,38 @@ print_info "Finding last stable version tag..."
 LAST_STABLE_TAG=$(git tag -l --sort=-version:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1)
 if [ -z "$LAST_STABLE_TAG" ]; then
     print_info "No previous stable version found, generating full changelog"
-    # Generate changelog from beginning
-    if [ -f CHANGELOG.md ]; then
-        conventional-changelog -p angular -i CHANGELOG.md -s
-    else
-        conventional-changelog -p angular -o CHANGELOG.md
-    fi
+    LAST_STABLE_TAG=""
 else
     print_info "Last stable version: $LAST_STABLE_TAG"
+fi
 
-    # Generate changelog for all commits since last stable tag
-    # We'll temporarily hide RC tags so conventional-changelog only sees stable versions
-    RC_TAGS=$(git tag -l | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+-rc\.[0-9]+$')
+# Temporarily hide RC tags so conventional-changelog only sees stable versions
+RC_TAGS=$(git tag -l | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+-rc\.[0-9]+$')
+if [ -n "$RC_TAGS" ]; then
+    print_info "Temporarily hiding RC tags for changelog generation..."
+    while IFS= read -r tag; do
+        git tag "_backup_$tag" "$tag" 2>/dev/null || true
+        git tag -d "$tag" 2>/dev/null || true
+    done <<< "$RC_TAGS"
+fi
 
-    # Backup RC tags
-    if [ -n "$RC_TAGS" ]; then
-        print_info "Temporarily hiding RC tags for changelog generation..."
-        while IFS= read -r tag; do
-            git tag "_backup_$tag" "$tag" 2>/dev/null || true
-            git tag -d "$tag" 2>/dev/null || true
-        done <<< "$RC_TAGS"
-    fi
+# Generate changelog with the new version
+print_info "Generating changelog for version $NEW_VERSION..."
+if [ -f CHANGELOG.md ]; then
+    # Update existing changelog with new version
+    conventional-changelog -p angular -i CHANGELOG.md -s -r 2 --pkg "{\"version\":\"$NEW_VERSION\"}"
+else
+    # Create new changelog
+    conventional-changelog -p angular -o CHANGELOG.md --pkg "{\"version\":\"$NEW_VERSION\"}"
+fi
 
-    # Generate changelog
-    if [ -f CHANGELOG.md ]; then
-        conventional-changelog -p angular -i CHANGELOG.md -s
-    else
-        conventional-changelog -p angular -o CHANGELOG.md
-    fi
-
-    # Restore RC tags
-    if [ -n "$RC_TAGS" ]; then
-        print_info "Restoring RC tags..."
-        while IFS= read -r tag; do
-            git tag "$tag" "_backup_$tag" 2>/dev/null || true
-            git tag -d "_backup_$tag" 2>/dev/null || true
-        done <<< "$RC_TAGS"
-    fi
+# Restore RC tags
+if [ -n "$RC_TAGS" ]; then
+    print_info "Restoring RC tags..."
+    while IFS= read -r tag; do
+        git tag "$tag" "_backup_$tag" 2>/dev/null || true
+        git tag -d "_backup_$tag" 2>/dev/null || true
+    done <<< "$RC_TAGS"
 fi
 print_success "Generated changelog"
 
