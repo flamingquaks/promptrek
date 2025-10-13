@@ -1,18 +1,14 @@
-# [](https://github.com/flamingquaks/promptrek/compare/v0.1.0-rc.1...v) (2025-10-13)
-
-
-### Features
-
-* Enhance changelog generation with last stable version detection ([cc0f395](https://github.com/flamingquaks/promptrek/commit/cc0f3953da4fbadadf132addb8be5498f73e55c3))
-
-
-
-# [0.1.0-rc.1](https://github.com/flamingquaks/promptrek/compare/v0.0.7...v0.1.0-rc.1) (2025-10-12)
+# [](https://github.com/flamingquaks/promptrek/compare/v0.0.7...v) (2025-10-13)
 
 
 ### Bug Fixes
 
 * update hook stages to pre-commit for validation and prevention checks ([#65](https://github.com/flamingquaks/promptrek/issues/65)) ([f3273b4](https://github.com/flamingquaks/promptrek/commit/f3273b41adbf44b1820e285abe265a1b6ae87678))
+
+
+### Features
+
+* Enhance changelog generation with last stable version detection ([cc0f395](https://github.com/flamingquaks/promptrek/commit/cc0f3953da4fbadadf132addb8be5498f73e55c3))
 
 
 
