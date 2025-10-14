@@ -48,16 +48,16 @@ instructions:
 
         assert result.exit_code == 0
         assert "✅ Migrated" in result.output
-        assert "1.0.0 → 2.0.0" in result.output
+        assert "1.0.0 → 2.1.0" in result.output
 
         # Check output file was created
         output_file = tmp_path / "test.promptrek.v2.yaml"
         assert output_file.exists()
 
-        # Verify it's valid v2
+        # Verify it's valid v2.1
         content = output_file.read_text()
         assert (
-            "schema_version: 2.0.0" in content or 'schema_version: "2.0.0"' in content
+            "schema_version: 2.1.0" in content or 'schema_version: "2.1.0"' in content
         )
         assert "content:" in content
 
@@ -86,27 +86,55 @@ instructions:
         assert result.exit_code == 0
         assert output_file.exists()
 
-    def test_migrate_already_v2(self, tmp_path):
-        """Test migrating a file that's already v2."""
-        v2_file = tmp_path / "test.promptrek.yaml"
-        v2_file.write_text(
+    def test_migrate_v20_to_v21(self, tmp_path):
+        """Test migrating v2.0.0 to v2.1.0."""
+        v20_file = tmp_path / "test.promptrek.yaml"
+        v20_file.write_text(
             """
 schema_version: "2.0.0"
 metadata:
   title: "Test"
-  description: "Already v2"
+  description: "V2.0 format"
   version: "1.0.0"
 content: |
   # Test
-  This is v2 format.
+  This is v2.0 format.
 """
         )
 
         runner = CliRunner()
-        result = runner.invoke(cli, ["migrate", str(v2_file)])
+        result = runner.invoke(cli, ["migrate", str(v20_file)])
 
         assert result.exit_code == 0
-        assert "already v2 format" in result.output
+        assert "2.0.0 → 2.1.0" in result.output
+
+        # Check output file
+        output_file = tmp_path / "test.promptrek.v21.yaml"
+        assert output_file.exists()
+        content = output_file.read_text()
+        assert "schema_version: 2.1.0" in content or 'schema_version: "2.1.0"' in content
+
+    def test_migrate_already_v2(self, tmp_path):
+        """Test migrating a file that's already v2.1."""
+        v21_file = tmp_path / "test.promptrek.yaml"
+        v21_file.write_text(
+            """
+schema_version: "2.1.0"
+metadata:
+  title: "Test"
+  description: "Already v2.1"
+  version: "1.0.0"
+content: |
+  # Test
+  This is v2.1 format.
+"""
+        )
+
+        runner = CliRunner()
+        result = runner.invoke(cli, ["migrate", str(v21_file)])
+
+        assert result.exit_code == 0
+        assert "already v2.1 format" in result.output
 
     def test_migrate_output_exists_no_force(self, tmp_path):
         """Test migration fails when output exists without --force."""
@@ -323,8 +351,8 @@ instructions:
         new_content = output_file.read_text()
         assert new_content != "existing content"
         assert (
-            "schema_version: 2.0.0" in new_content
-            or 'schema_version: "2.0.0"' in new_content
+            "schema_version: 2.1.0" in new_content
+            or 'schema_version: "2.1.0"' in new_content
         )
 
     def test_migrate_with_examples(self, tmp_path):

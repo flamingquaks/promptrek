@@ -48,9 +48,16 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
             # V2: Direct markdown output (lossless!)
             content = prompt.content
 
-            # Apply variable substitution if variables provided
+            # Merge variables: prompt variables + CLI/local overrides
+            merged_vars = {}
+            if prompt.variables:
+                merged_vars.update(prompt.variables)
             if variables:
-                for var_name, var_value in variables.items():
+                merged_vars.update(variables)
+
+            # Apply variable substitution if variables provided
+            if merged_vars:
+                for var_name, var_value in merged_vars.items():
                     # Replace {{{ VAR_NAME }}} with value
                     placeholder = "{{{ " + var_name + " }}}"
                     content = content.replace(placeholder, var_value)
@@ -80,8 +87,15 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
 
         # Generate v2.1 plugin files if present
         if isinstance(prompt, UniversalPromptV2) and prompt.plugins:
+            # Merge variables for plugins too
+            merged_vars = {}
+            if prompt.variables:
+                merged_vars.update(prompt.variables)
+            if variables:
+                merged_vars.update(variables)
+
             plugin_files = self._generate_v21_plugins(
-                prompt, output_dir, dry_run, verbose, variables
+                prompt, output_dir, dry_run, verbose, merged_vars if merged_vars else None
             )
             generated_files.extend(plugin_files)
 
@@ -233,16 +247,29 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
         # Generate MCP server configurations
         if prompt.plugins.mcp_servers:
             mcp_file = claude_dir / "mcp.json"
-            mcp_config = {
-                "mcpServers": {
-                    server.name: {
-                        "command": server.command,
-                        **({"args": server.args} if server.args else {}),
-                        **({"env": server.env} if server.env else {}),
-                    }
-                    for server in prompt.plugins.mcp_servers
+            mcp_servers = {}
+            for server in prompt.plugins.mcp_servers:
+                server_config: Dict[str, Any] = {
+                    "command": server.command,
                 }
-            }
+                if server.args:
+                    server_config["args"] = server.args
+                if server.env:
+                    # Apply variable substitution to env vars
+                    env_vars = {}
+                    for key, value in server.env.items():
+                        substituted_value = value
+                        if variables:
+                            for var_name, var_value in variables.items():
+                                placeholder = "{{{ " + var_name + " }}}"
+                                substituted_value = substituted_value.replace(
+                                    placeholder, var_value
+                                )
+                        env_vars[key] = substituted_value
+                    server_config["env"] = env_vars
+                mcp_servers[server.name] = server_config
+
+            mcp_config = {"mcpServers": mcp_servers}
 
             if dry_run:
                 click.echo(f"  📁 Would create: {mcp_file}")

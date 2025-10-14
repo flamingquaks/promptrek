@@ -41,18 +41,31 @@ def migrate_command(
     except UPFParsingError as e:
         raise CLIError(f"Failed to parse {input_file}: {e}")
 
-    # Check if already v2
+    # Check schema version and determine migration path
     if isinstance(prompt, UniversalPromptV2):
-        click.echo(f"ℹ️  {input_file} is already v2 format, no migration needed")
-        return
+        # Check if already v2.1.0
+        if prompt.schema_version.startswith("2.1"):
+            click.echo(f"ℹ️  {input_file} is already v2.1 format, no migration needed")
+            return
 
-    # Convert to v2
-    v2_prompt = _convert_v1_to_v2(prompt, verbose)
+        # Migrate v2.0 → v2.1 (just update schema version, add empty plugins field)
+        click.echo(f"ℹ️  Migrating from v{prompt.schema_version} to v2.1.0...")
+        v2_prompt = _upgrade_v2_to_v21(prompt, verbose)
+        old_version = prompt.schema_version
+        new_version = "2.1.0"
+    else:
+        # Convert v1 → v2.1
+        v2_prompt = _convert_v1_to_v2(prompt, verbose)
+        old_version = "1.0.0"
+        new_version = "2.1.0"
 
     # Determine output path
     if not output_file:
-        # Default: replace .promptrek.yaml with .v2.promptrek.yaml
-        output_file = input_file.parent / f"{input_file.stem}.v2{input_file.suffix}"
+        # Default: replace .promptrek.yaml with .v2.promptrek.yaml or .v21.promptrek.yaml
+        if isinstance(prompt, UniversalPromptV2):
+            output_file = input_file.parent / f"{input_file.stem}.v21{input_file.suffix}"
+        else:
+            output_file = input_file.parent / f"{input_file.stem}.v2{input_file.suffix}"
 
     # Check if output file exists
     if output_file.exists() and not force:
@@ -60,16 +73,18 @@ def migrate_command(
             f"Output file {output_file} already exists. Use --force to overwrite."
         )
 
-    # Write v2 file
+    # Write v2.1 file
     v2_dict = v2_prompt.model_dump(exclude_none=True)
     write_promptrek_yaml(v2_dict, output_file)
 
     click.echo(f"✅ Migrated {input_file} → {output_file}")
-    click.echo("   Schema version: 1.0.0 → 2.0.0")
+    click.echo(f"   Schema version: {old_version} → {new_version}")
     if verbose:
         click.echo(f"   Content length: {len(v2_prompt.content)} characters")
         if v2_prompt.documents:
             click.echo(f"   Documents: {len(v2_prompt.documents)}")
+        if v2_prompt.plugins:
+            click.echo("   Plugins: configured")
 
 
 def _convert_v1_to_v2(
@@ -102,11 +117,38 @@ def _convert_v1_to_v2(
     variables = prompt.variables if prompt.variables else None
 
     return UniversalPromptV2(
-        schema_version="2.0.0",
+        schema_version="2.1.0",
         metadata=metadata,
         content=content,
         documents=None,  # v1 doesn't have multi-document structure
         variables=variables,
+        plugins=None,  # v2.1.0 field (optional)
+    )
+
+
+def _upgrade_v2_to_v21(
+    prompt: UniversalPromptV2, verbose: bool = False
+) -> UniversalPromptV2:
+    """
+    Upgrade a v2.0.0 UniversalPromptV2 to v2.1.0.
+
+    Args:
+        prompt: v2.0.0 UniversalPromptV2 to upgrade
+        verbose: Enable verbose output
+
+    Returns:
+        UniversalPromptV2 with v2.1.0 schema
+    """
+    if verbose:
+        click.echo("   Upgrading to v2.1.0 schema (adds plugin support)...")
+
+    return UniversalPromptV2(
+        schema_version="2.1.0",
+        metadata=prompt.metadata,
+        content=prompt.content,
+        documents=prompt.documents,
+        variables=prompt.variables,
+        plugins=None,  # Empty plugins field for v2.1.0
     )
 
 
