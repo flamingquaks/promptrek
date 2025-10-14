@@ -13,17 +13,18 @@ A universal AI Editor prompt storage solution that dynamically maps prompt data 
 
 AI coding assistants like GitHub Copilot, Cursor, Continue, and others all use different prompt formats and configuration methods. When working across teams or switching between editors, you have to maintain separate prompt configurations for each tool. PrompTrek solves this by:
 
-- **Universal Format**: Create prompts once in a standardized format (now with **v2.0.0 schema** - simpler and more aligned with how editors work!)
+- **Universal Format**: Create prompts once in a standardized format (now with **v2.1.0 schema** - simpler with plugin support!)
 - **Multi-Editor Support**: Generate prompts for any supported AI editor automatically (no `targets` field needed in v2!)
 - **Bidirectional Sync**: Parse editor files back to `.promptrek.yaml` without data loss (v2 lossless sync)
+- **Plugin Ecosystem**: Configure MCP servers, custom commands, autonomous agents, and event hooks (v2.1+)
 - **Team Consistency**: Share prompt configurations across team members regardless of their editor choice
 - **Easy Migration**: Switch between AI editors without losing your prompt configurations
 
 ## 🚀 Quick Example
 
-1. Create a universal prompt file (`.promptrek.yaml`) using the **new v2 format** (recommended):
+1. Create a universal prompt file (`.promptrek.yaml`) using the **v2.1 format** (recommended):
 ```yaml
-schema_version: "2.0.0"
+schema_version: "2.1.0"
 metadata:
   title: "My Project Assistant"
   description: "AI assistant for React TypeScript project"
@@ -184,32 +185,34 @@ ls .continue/rules/
 
 **Note:** The `--setup-hooks` flag automatically configures pre-commit hooks to validate your `.promptrek.yaml` files and prevent accidental commits of generated files.
 
-### 🆕 Schema v2.0.0 (Recommended)
+### 🆕 Schema v2.1.0 (Latest)
 
-PrompTrek now supports **v2.0.0 schema** which is simpler and more aligned with how AI editors actually work:
+PrompTrek now supports **v2.1.0 schema** with plugin support for advanced AI editor features:
 
 **Key Benefits:**
-- ✅ **No `targets` field** - Works with ALL editors automatically
-- ✅ **Lossless bidirectional sync** - Parse editor files back without data loss
-- ✅ **Simpler format** - Just markdown content, no complex nested structures
-- ✅ **Editor-friendly** - Matches how Claude Code, Copilot, and others use markdown
-- ✅ **Multi-file support** - Use `documents` field for multi-file editors (Continue, Windsurf, Kiro)
+- ✅ **All v2.0 benefits** - Markdown-first, lossless sync, works with all editors
+- ✅ **MCP Server Integration** - Configure Model Context Protocol servers for external tools
+- ✅ **Custom Commands** - Define slash commands for AI editors (Claude Code, Cursor)
+- ✅ **Autonomous Agents** - Configure AI agents with specific tools and permissions
+- ✅ **Event Hooks** - Automate workflows with event-driven hooks
+- ✅ **Trust Metadata** - Security controls for plugin execution
+- ✅ **100% Backward Compatible** - v2.0 files work without modification
 
 **Quick Migration:**
 ```bash
-# Migrate existing v1 file to v2
+# Migrate existing v1 file to v2.1
 uv run promptrek migrate old.promptrek.yaml -o new.promptrek.yaml
 
-# Or create a new v2 file from scratch
-uv run promptrek init  # v2 is now the default!
+# Or create a new v2.1 file from scratch
+uv run promptrek init  # v2.1 is now the default!
 
 # Create a v1 file (legacy)
 uv run promptrek init --v1
 ```
 
-**V2 Format Example:**
+**V2.1 Format Example:**
 ```yaml
-schema_version: "2.0.0"
+schema_version: "2.1.0"
 metadata:
   title: "My Project"
   description: "AI assistant"
@@ -226,6 +229,38 @@ content: |
 
 variables:
   PROJECT_NAME: "my-project"
+  GITHUB_TOKEN: "ghp_your_token_here"
+
+# Optional: Plugin configurations (v2.1+)
+plugins:
+  mcp_servers:
+    - name: github
+      command: npx
+      args: ["-y", "@modelcontextprotocol/server-github"]
+      env:
+        GITHUB_TOKEN: "{{{ GITHUB_TOKEN }}}"
+      description: "GitHub API integration"
+      trust_metadata:
+        trusted: true
+        trust_level: full
+
+  commands:
+    - name: review-code
+      description: "Review code for quality"
+      prompt: |
+        Review the selected code for:
+        - Code quality and best practices
+        - Security vulnerabilities
+        - Performance optimizations
+      output_format: markdown
+
+  agents:
+    - name: test-generator
+      description: "Generate unit tests"
+      system_prompt: "Generate comprehensive tests with Jest"
+      tools: [file_read, file_write, run_tests]
+      trust_level: partial
+      requires_approval: true
 
 # Optional: For multi-file editors
 documents:
@@ -243,6 +278,11 @@ documents:
 - `promptrek generate` - Create editor-specific prompts
 - `promptrek preview` - Preview generated output without creating files
 - `promptrek sync` - Sync editor files back to PrompTrek format
+- `promptrek migrate` - Migrate v1/v2.0 files to v2.1 format
+- `promptrek plugins list` - List all plugins in a .promptrek.yaml file (v2.1+)
+- `promptrek plugins generate` - Generate plugin files for a specific editor (v2.1+)
+- `promptrek plugins validate` - Validate plugin configuration (v2.1+)
+- `promptrek plugins sync` - Sync plugins from editor files (v2.1+)
 - `promptrek agents` - Generate agent-specific instructions
 - `promptrek install-hooks` - Set up pre-commit hooks (use `--activate` to activate automatically)
 - `promptrek list-editors` - Show supported editors and their status
