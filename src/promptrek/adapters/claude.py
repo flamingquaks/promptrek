@@ -2,10 +2,12 @@
 Claude Code adapter implementation.
 """
 
+import json
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import click
+import yaml
 
 from ..core.exceptions import ValidationError
 from ..core.models import UniversalPrompt, UniversalPromptV2
@@ -74,7 +76,16 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
                 f.write(content)
             click.echo(f"✅ Generated: {output_file}")
 
-        return [output_file]
+        generated_files = [output_file]
+
+        # Generate v2.1 plugin files if present
+        if isinstance(prompt, UniversalPromptV2) and prompt.plugins:
+            plugin_files = self._generate_v21_plugins(
+                prompt, output_dir, dry_run, verbose, variables
+            )
+            generated_files.extend(plugin_files)
+
+        return generated_files
 
     def generate_multiple(
         self,
@@ -203,6 +214,189 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
             file_path=file_path,
             editor_name="Claude Code",
         )
+
+    def _generate_v21_plugins(
+        self,
+        prompt: UniversalPromptV2,
+        output_dir: Path,
+        dry_run: bool,
+        verbose: bool,
+        variables: Optional[Dict[str, Any]] = None,
+    ) -> List[Path]:
+        """Generate v2.1 plugin files for Claude Code."""
+        if not prompt.plugins:
+            return []
+
+        created_files = []
+        claude_dir = output_dir / ".claude"
+
+        # Generate MCP server configurations
+        if prompt.plugins.mcp_servers:
+            mcp_file = claude_dir / "mcp.json"
+            mcp_config = {
+                "mcpServers": {
+                    server.name: {
+                        "command": server.command,
+                        **({"args": server.args} if server.args else {}),
+                        **({"env": server.env} if server.env else {}),
+                    }
+                    for server in prompt.plugins.mcp_servers
+                }
+            }
+
+            if dry_run:
+                click.echo(f"  📁 Would create: {mcp_file}")
+                if verbose:
+                    click.echo(f"    {json.dumps(mcp_config, indent=2)[:200]}...")
+            else:
+                claude_dir.mkdir(parents=True, exist_ok=True)
+                with open(mcp_file, "w", encoding="utf-8") as f:
+                    json.dump(mcp_config, f, indent=2)
+                click.echo(f"✅ Generated: {mcp_file}")
+            created_files.append(mcp_file)
+
+        # Generate slash commands
+        if prompt.plugins.commands:
+            commands_dir = claude_dir / "commands"
+            for command in prompt.plugins.commands:
+                # Apply variable substitution
+                command_prompt = command.prompt
+                if variables:
+                    for var_name, var_value in variables.items():
+                        placeholder = "{{{ " + var_name + " }}}"
+                        command_prompt = command_prompt.replace(placeholder, var_value)
+
+                command_file = commands_dir / f"{command.name}.md"
+                content = self._build_command_content(command, command_prompt)
+
+                if dry_run:
+                    click.echo(f"  📁 Would create: {command_file}")
+                    if verbose:
+                        preview = content[:200] + "..." if len(content) > 200 else content
+                        click.echo(f"    {preview}")
+                else:
+                    commands_dir.mkdir(parents=True, exist_ok=True)
+                    with open(command_file, "w", encoding="utf-8") as f:
+                        f.write(content)
+                    click.echo(f"✅ Generated: {command_file}")
+                created_files.append(command_file)
+
+        # Generate agents
+        if prompt.plugins.agents:
+            agents_dir = claude_dir / "agents"
+            for agent in prompt.plugins.agents:
+                # Apply variable substitution
+                agent_prompt = agent.system_prompt
+                if variables:
+                    for var_name, var_value in variables.items():
+                        placeholder = "{{{ " + var_name + " }}}"
+                        agent_prompt = agent_prompt.replace(placeholder, var_value)
+
+                agent_file = agents_dir / f"{agent.name}.md"
+                content = self._build_agent_content(agent, agent_prompt)
+
+                if dry_run:
+                    click.echo(f"  📁 Would create: {agent_file}")
+                    if verbose:
+                        preview = content[:200] + "..." if len(content) > 200 else content
+                        click.echo(f"    {preview}")
+                else:
+                    agents_dir.mkdir(parents=True, exist_ok=True)
+                    with open(agent_file, "w", encoding="utf-8") as f:
+                        f.write(content)
+                    click.echo(f"✅ Generated: {agent_file}")
+                created_files.append(agent_file)
+
+        # Generate hooks
+        if prompt.plugins.hooks:
+            hooks_file = claude_dir / "hooks.yaml"
+            hooks_config = {
+                "hooks": [
+                    {
+                        "name": hook.name,
+                        "event": hook.event,
+                        "command": hook.command,
+                        **({"conditions": hook.conditions} if hook.conditions else {}),
+                        "requires_reapproval": hook.requires_reapproval,
+                    }
+                    for hook in prompt.plugins.hooks
+                ]
+            }
+
+            if dry_run:
+                click.echo(f"  📁 Would create: {hooks_file}")
+                if verbose:
+                    click.echo(f"    {yaml.dump(hooks_config, default_flow_style=False)[:200]}...")
+            else:
+                claude_dir.mkdir(parents=True, exist_ok=True)
+                with open(hooks_file, "w", encoding="utf-8") as f:
+                    yaml.dump(hooks_config, f, default_flow_style=False)
+                click.echo(f"✅ Generated: {hooks_file}")
+            created_files.append(hooks_file)
+
+        return created_files
+
+    def _build_command_content(self, command: Any, prompt: str) -> str:
+        """Build markdown content for a slash command."""
+        lines = []
+        lines.append(f"# {command.name}")
+        lines.append("")
+        lines.append(f"**Description:** {command.description}")
+        lines.append("")
+
+        if command.system_message:
+            lines.append("## System Message")
+            lines.append(command.system_message)
+            lines.append("")
+
+        lines.append("## Prompt")
+        lines.append(prompt)
+        lines.append("")
+
+        if command.examples:
+            lines.append("## Examples")
+            for example in command.examples:
+                lines.append(f"- {example}")
+            lines.append("")
+
+        if command.trust_metadata:
+            lines.append("## Trust Metadata")
+            lines.append(f"- Trusted: {command.trust_metadata.trusted}")
+            lines.append(f"- Requires Approval: {command.trust_metadata.requires_approval}")
+            lines.append("")
+
+        return "\n".join(lines)
+
+    def _build_agent_content(self, agent: Any, system_prompt: str) -> str:
+        """Build markdown content for an agent."""
+        lines = []
+        lines.append(f"# {agent.name}")
+        lines.append("")
+        lines.append(f"**Description:** {agent.description}")
+        lines.append("")
+
+        lines.append("## System Prompt")
+        lines.append(system_prompt)
+        lines.append("")
+
+        if agent.tools:
+            lines.append("## Available Tools")
+            for tool in agent.tools:
+                lines.append(f"- {tool}")
+            lines.append("")
+
+        lines.append("## Configuration")
+        lines.append(f"- Trust Level: {agent.trust_level}")
+        lines.append(f"- Requires Approval: {agent.requires_approval}")
+        lines.append("")
+
+        if agent.context:
+            lines.append("## Additional Context")
+            for key, value in agent.context.items():
+                lines.append(f"- **{key}**: {value}")
+            lines.append("")
+
+        return "\n".join(lines)
 
     def _build_content(
         self,
