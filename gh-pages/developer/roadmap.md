@@ -204,9 +204,54 @@ title: Implementation Roadmap
 
 ---
 
-## Future Enhancements (v0.1.0+)
+## v0.1.0 - Schema v2.1.0 with Plugin Support - ✅ COMPLETED
 
-The following features are planned for future releases but not required for v0.0.1:
+**Status**: Completed
+**Release Date**: TBD
+
+### Features Delivered
+
+#### Schema v2.1.0 - Plugin Ecosystem
+- [x] **#68: Integrate Claude Code & Cursor Plugin Systems**
+  - [x] Add plugin models (TrustMetadata, MCPServer, Command, Agent, Hook, PluginConfig)
+  - [x] Extend UniversalPromptV2 with optional `plugins` field
+  - [x] Claude adapter: Generate MCP servers, commands, agents, hooks
+  - [x] Cursor adapter: Generate agent schemas and MCP configurations
+  - [x] Variable substitution in plugin configurations
+  - [x] Trust metadata for security controls
+  - [x] 100% backward compatible with v2.0.0
+
+#### Plugin CLI Commands
+- [x] `promptrek plugins list` - List all plugins in a file
+- [x] `promptrek plugins generate` - Generate plugin files for specific editor
+- [x] `promptrek plugins validate` - Validate plugin configuration
+- [x] `promptrek plugins sync` - Sync plugins from editor files
+
+#### Testing & Documentation
+- [x] Comprehensive unit tests for v2.1 models (961 total tests, 85.19% coverage)
+- [x] Integration tests for plugin generation and sync (20 tests)
+- [x] Updated UPF specification with v2.1 schema and plugin examples
+- [x] Updated README with v2.1 features and plugin examples
+- [x] Updated gh-pages documentation (index.md, quick-start.md)
+
+#### Migration & Compatibility
+- [x] Migration support: v1.0.0 → v2.1.0, v2.0.0 → v2.1.0
+- [x] Pre-commit hooks updated for v2.1 validation
+- [x] Example files demonstrating all plugin types
+- [x] Backward compatibility verified (v2.0 files work without modification)
+
+**Deliverables**:
+- Schema v2.1.0 with full plugin support
+- MCP server integration for Claude Code and Cursor
+- Custom commands, autonomous agents, and event hooks
+- Trust metadata and security controls
+- Complete documentation and examples
+
+---
+
+## Future Enhancements (v0.2.0+)
+
+The following features are planned for future releases:
 
 ### User Experience Improvements
 - [ ] Interactive setup wizard for first-time users
