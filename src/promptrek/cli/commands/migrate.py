@@ -63,7 +63,9 @@ def migrate_command(
     if not output_file:
         # Default: replace .promptrek.yaml with .v2.promptrek.yaml or .v21.promptrek.yaml
         if isinstance(prompt, UniversalPromptV2):
-            output_file = input_file.parent / f"{input_file.stem}.v21{input_file.suffix}"
+            output_file = (
+                input_file.parent / f"{input_file.stem}.v21{input_file.suffix}"
+            )
         else:
             output_file = input_file.parent / f"{input_file.stem}.v2{input_file.suffix}"
 

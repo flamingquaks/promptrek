@@ -95,7 +95,11 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
                 merged_vars.update(variables)
 
             plugin_files = self._generate_v21_plugins(
-                prompt, output_dir, dry_run, verbose, merged_vars if merged_vars else None
+                prompt,
+                output_dir,
+                dry_run,
+                verbose,
+                merged_vars if merged_vars else None,
             )
             generated_files.extend(plugin_files)
 
@@ -299,7 +303,9 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
                 if dry_run:
                     click.echo(f"  📁 Would create: {command_file}")
                     if verbose:
-                        preview = content[:200] + "..." if len(content) > 200 else content
+                        preview = (
+                            content[:200] + "..." if len(content) > 200 else content
+                        )
                         click.echo(f"    {preview}")
                 else:
                     commands_dir.mkdir(parents=True, exist_ok=True)
@@ -325,7 +331,9 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
                 if dry_run:
                     click.echo(f"  📁 Would create: {agent_file}")
                     if verbose:
-                        preview = content[:200] + "..." if len(content) > 200 else content
+                        preview = (
+                            content[:200] + "..." if len(content) > 200 else content
+                        )
                         click.echo(f"    {preview}")
                 else:
                     agents_dir.mkdir(parents=True, exist_ok=True)
@@ -353,7 +361,9 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
             if dry_run:
                 click.echo(f"  📁 Would create: {hooks_file}")
                 if verbose:
-                    click.echo(f"    {yaml.dump(hooks_config, default_flow_style=False)[:200]}...")
+                    click.echo(
+                        f"    {yaml.dump(hooks_config, default_flow_style=False)[:200]}..."
+                    )
             else:
                 claude_dir.mkdir(parents=True, exist_ok=True)
                 with open(hooks_file, "w", encoding="utf-8") as f:
@@ -389,7 +399,9 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
         if command.trust_metadata:
             lines.append("## Trust Metadata")
             lines.append(f"- Trusted: {command.trust_metadata.trusted}")
-            lines.append(f"- Requires Approval: {command.trust_metadata.requires_approval}")
+            lines.append(
+                f"- Requires Approval: {command.trust_metadata.requires_approval}"
+            )
             lines.append("")
 
         return "\n".join(lines)

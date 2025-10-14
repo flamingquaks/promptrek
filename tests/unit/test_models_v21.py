@@ -97,9 +97,7 @@ class TestMCPServer:
     def test_mcp_server_with_trust_metadata(self) -> None:
         """Test MCPServer with trust metadata."""
         trust = TrustMetadata(trusted=True, trust_level="full")
-        server = MCPServer(
-            name="trusted-server", command="node", trust_metadata=trust
-        )
+        server = MCPServer(name="trusted-server", command="node", trust_metadata=trust)
         assert server.trust_metadata is not None
         assert server.trust_metadata.trusted is True
 
@@ -259,9 +257,7 @@ class TestPluginConfig:
         """Test PluginConfig with all plugin types."""
         config = PluginConfig(
             mcp_servers=[MCPServer(name="server", command="npx")],
-            commands=[
-                Command(name="cmd", description="test", prompt="do something")
-            ],
+            commands=[Command(name="cmd", description="test", prompt="do something")],
             agents=[
                 Agent(name="agent", description="test", system_prompt="test prompt")
             ],
@@ -282,9 +278,7 @@ class TestUniversalPromptV2WithPlugins:
         """Test v2.1.0 prompt without plugins (backward compatible)."""
         prompt = UniversalPromptV2(
             schema_version="2.1.0",
-            metadata=PromptMetadata(
-                title="Test", description="Test prompt"
-            ),
+            metadata=PromptMetadata(title="Test", description="Test prompt"),
             content="# Test content",
         )
         assert prompt.schema_version == "2.1.0"

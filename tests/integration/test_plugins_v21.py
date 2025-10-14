@@ -438,9 +438,7 @@ plugins:
     def test_plugins_command_list(self, v21_prompt_full, tmp_path):
         """Test 'promptrek plugins list' command."""
         runner = CliRunner()
-        result = runner.invoke(
-            cli, ["plugins", "list", "--file", str(v21_prompt_full)]
-        )
+        result = runner.invoke(cli, ["plugins", "list", "--file", str(v21_prompt_full)])
 
         assert result.exit_code == 0
         assert "MCP Servers" in result.output
@@ -631,9 +629,7 @@ variables:
 
         runner = CliRunner()
         v21_file = tmp_path / "v21.promptrek.yaml"
-        result = runner.invoke(
-            cli, ["migrate", str(v20_file), "-o", str(v21_file)]
-        )
+        result = runner.invoke(cli, ["migrate", str(v20_file), "-o", str(v21_file)])
 
         assert result.exit_code == 0
         assert v21_file.exists()
@@ -681,12 +677,16 @@ class TestPluginExamples:
             if (current / "pyproject.toml").exists():
                 return current
             current = current.parent
-        raise FileNotFoundError("Could not find project root (pyproject.toml not found)")
+        raise FileNotFoundError(
+            "Could not find project root (pyproject.toml not found)"
+        )
 
     def test_mcp_servers_example(self):
         """Test mcp-servers example file."""
         project_root = self._get_project_root()
-        example_file = project_root / "examples" / "v21-plugins" / "mcp-servers.promptrek.yaml"
+        example_file = (
+            project_root / "examples" / "v21-plugins" / "mcp-servers.promptrek.yaml"
+        )
         assert example_file.exists(), f"Example file not found: {example_file}"
 
         runner = CliRunner()
@@ -697,7 +697,9 @@ class TestPluginExamples:
     def test_custom_commands_example(self):
         """Test custom-commands example file."""
         project_root = self._get_project_root()
-        example_file = project_root / "examples" / "v21-plugins" / "custom-commands.promptrek.yaml"
+        example_file = (
+            project_root / "examples" / "v21-plugins" / "custom-commands.promptrek.yaml"
+        )
         assert example_file.exists(), f"Example file not found: {example_file}"
 
         runner = CliRunner()
@@ -708,7 +710,12 @@ class TestPluginExamples:
     def test_autonomous_agents_example(self):
         """Test autonomous-agents example file."""
         project_root = self._get_project_root()
-        example_file = project_root / "examples" / "v21-plugins" / "autonomous-agents.promptrek.yaml"
+        example_file = (
+            project_root
+            / "examples"
+            / "v21-plugins"
+            / "autonomous-agents.promptrek.yaml"
+        )
         assert example_file.exists(), f"Example file not found: {example_file}"
 
         runner = CliRunner()
@@ -719,7 +726,9 @@ class TestPluginExamples:
     def test_generate_from_examples(self, tmp_path):
         """Test generating plugin files from example configurations."""
         project_root = self._get_project_root()
-        example_file = project_root / "examples" / "v21-plugins" / "mcp-servers.promptrek.yaml"
+        example_file = (
+            project_root / "examples" / "v21-plugins" / "mcp-servers.promptrek.yaml"
+        )
 
         runner = CliRunner()
         result = runner.invoke(

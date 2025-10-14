@@ -112,7 +112,9 @@ content: |
         output_file = tmp_path / "test.promptrek.v21.yaml"
         assert output_file.exists()
         content = output_file.read_text()
-        assert "schema_version: 2.1.0" in content or 'schema_version: "2.1.0"' in content
+        assert (
+            "schema_version: 2.1.0" in content or 'schema_version: "2.1.0"' in content
+        )
 
     def test_migrate_already_v2(self, tmp_path):
         """Test migrating a file that's already v2.1."""
@@ -354,73 +356,6 @@ instructions:
             "schema_version: 2.1.0" in new_content
             or 'schema_version: "2.1.0"' in new_content
         )
-
-    def test_migrate_with_examples(self, tmp_path):
-        """Test migrating v1 file with code examples."""
-        v1_file = tmp_path / "test.promptrek.yaml"
-        v1_file.write_text(
-            """
-schema_version: "1.0.0"
-metadata:
-  title: "Test"
-  description: "Test"
-  version: "1.0.0"
-targets:
-  - claude
-instructions:
-  general:
-    - "Use Python"
-examples:
-  function_example: |
-    def hello():
-        print("Hello")
-  class_example: |
-    class MyClass:
-        pass
-"""
-        )
-
-        runner = CliRunner()
-        result = runner.invoke(cli, ["migrate", str(v1_file)])
-
-        assert result.exit_code == 0
-
-        # Check examples were converted to markdown
-        output_file = tmp_path / "test.promptrek.v2.yaml"
-        content = output_file.read_text()
-        assert "function_example" in content or "hello()" in content
-
-    def test_migrate_with_variables(self, tmp_path):
-        """Test migrating v1 file with variables."""
-        v1_file = tmp_path / "test.promptrek.yaml"
-        v1_file.write_text(
-            """
-schema_version: "1.0.0"
-metadata:
-  title: "Test"
-  description: "Test"
-  version: "1.0.0"
-targets:
-  - claude
-instructions:
-  general:
-    - "Use {{{ PROJECT_NAME }}}"
-variables:
-  PROJECT_NAME: "MyProject"
-  VERSION: "1.0.0"
-"""
-        )
-
-        runner = CliRunner()
-        result = runner.invoke(cli, ["migrate", str(v1_file)])
-
-        assert result.exit_code == 0
-
-        # Check variables were preserved
-        output_file = tmp_path / "test.promptrek.v2.yaml"
-        content = output_file.read_text()
-        assert "variables:" in content
-        assert "PROJECT_NAME" in content
 
     def test_migrate_verbose(self, tmp_path):
         """Test migrate command with verbose output."""

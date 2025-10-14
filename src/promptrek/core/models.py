@@ -154,7 +154,8 @@ class TrustMetadata(BaseModel):
         default=True, description="Whether actions require explicit approval"
     )
     source: Optional[str] = Field(
-        default=None, description="Source of the plugin (e.g., 'official', 'community', 'local')"
+        default=None,
+        description="Source of the plugin (e.g., 'official', 'community', 'local')",
     )
     verified_by: Optional[str] = Field(
         default=None, description="Who verified this plugin"
@@ -250,7 +251,8 @@ class Hook(BaseModel):
 
     name: str = Field(..., description="Hook name/identifier")
     event: str = Field(
-        ..., description="Event that triggers the hook (e.g., 'pre-commit', 'post-save')"
+        ...,
+        description="Event that triggers the hook (e.g., 'pre-commit', 'post-save')",
     )
     command: str = Field(..., description="Command to execute")
     conditions: Optional[Dict[str, Any]] = Field(
@@ -259,9 +261,7 @@ class Hook(BaseModel):
     requires_reapproval: bool = Field(
         default=True, description="Whether hook requires reapproval after changes"
     )
-    description: Optional[str] = Field(
-        default=None, description="Hook description"
-    )
+    description: Optional[str] = Field(default=None, description="Hook description")
     trust_metadata: Optional[TrustMetadata] = Field(
         default=None, description="Trust and security metadata"
     )
@@ -276,12 +276,8 @@ class MarketplaceMetadata(BaseModel):
     marketplace_url: Optional[str] = Field(
         default=None, description="URL to marketplace listing"
     )
-    rating: Optional[float] = Field(
-        default=None, description="User rating (0-5)"
-    )
-    downloads: Optional[int] = Field(
-        default=None, description="Number of downloads"
-    )
+    rating: Optional[float] = Field(default=None, description="User rating (0-5)")
+    downloads: Optional[int] = Field(default=None, description="Number of downloads")
     last_updated: Optional[str] = Field(
         default=None, description="Last update date (ISO 8601)"
     )
@@ -299,9 +295,7 @@ class PluginConfig(BaseModel):
     agents: Optional[List[Agent]] = Field(
         default=None, description="Agent configurations"
     )
-    hooks: Optional[List[Hook]] = Field(
-        default=None, description="Hook configurations"
-    )
+    hooks: Optional[List[Hook]] = Field(default=None, description="Hook configurations")
     marketplace_metadata: Optional[MarketplaceMetadata] = Field(
         default=None, description="Plugin marketplace metadata"
     )

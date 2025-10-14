@@ -193,7 +193,9 @@ def validate_plugins_command(
     if not prompt_file:
         potential_files = list(Path.cwd().glob("*.promptrek.yaml"))
         if not potential_files:
-            raise CLIError("No prompt file specified and no .promptrek.yaml files found.")
+            raise CLIError(
+                "No prompt file specified and no .promptrek.yaml files found."
+            )
         prompt_file = potential_files[0]
 
     # Resolve paths
@@ -231,9 +233,7 @@ def validate_plugins_command(
             if not server.command:
                 errors.append(f"MCP server '{server.name}' missing command")
             if server.trust_metadata and not server.trust_metadata.trusted:
-                warnings.append(
-                    f"MCP server '{server.name}' is not marked as trusted"
-                )
+                warnings.append(f"MCP server '{server.name}' is not marked as trusted")
 
     # Validate commands
     if prompt.plugins.commands:

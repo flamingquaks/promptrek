@@ -148,7 +148,11 @@ class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
                 merged_vars.update(variables)
 
             plugin_files = self._generate_v21_plugins(
-                prompt, output_dir, dry_run, verbose, merged_vars if merged_vars else None
+                prompt,
+                output_dir,
+                dry_run,
+                verbose,
+                merged_vars if merged_vars else None,
             )
             created_files.extend(plugin_files)
 
@@ -257,7 +261,11 @@ class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
                     "name": command.name,
                     "description": command.description,
                     "prompt": command_prompt,
-                    **({"outputFormat": command.output_format} if command.output_format else {}),
+                    **(
+                        {"outputFormat": command.output_format}
+                        if command.output_format
+                        else {}
+                    ),
                     "requiresApproval": command.requires_approval,
                 }
 
