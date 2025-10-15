@@ -11,13 +11,14 @@ import click
 from ..core.exceptions import ValidationError
 from ..core.models import UniversalPrompt, UniversalPromptV2
 from .base import EditorAdapter
+from .mcp_mixin import MCPGenerationMixin
 from .sync_mixin import MarkdownSyncMixin
 
 # Maximum number of instructions to include in agent configuration
 MAX_AGENT_INSTRUCTIONS = 3
 
 
-class AmazonQAdapter(MarkdownSyncMixin, EditorAdapter):
+class AmazonQAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
     """Adapter for Amazon Q AI assistant."""
 
     _description = "Amazon Q (.amazonq/rules/, .amazonq/cli-agents/)"
@@ -30,6 +31,16 @@ class AmazonQAdapter(MarkdownSyncMixin, EditorAdapter):
             file_patterns=self._file_patterns,
         )
 
+    def get_mcp_config_strategy(self) -> Dict[str, Any]:
+        """Get MCP configuration strategy for Amazon Q adapter."""
+        return {
+            "supports_project": True,
+            "project_path": ".amazonq/mcp.json",
+            "system_path": str(Path.home() / ".aws" / "amazonq" / "mcp.json"),
+            "requires_confirmation": False,
+            "config_format": "json",
+        }
+
     def generate(
         self,
         prompt: Union[UniversalPrompt, UniversalPromptV2],
@@ -40,6 +51,12 @@ class AmazonQAdapter(MarkdownSyncMixin, EditorAdapter):
         headless: bool = False,
     ) -> List[Path]:
         """Generate Amazon Q configuration files."""
+
+        # V2.1: Handle plugins if present
+        if isinstance(prompt, UniversalPromptV2) and prompt.plugins:
+            return self._generate_v21_plugins(
+                prompt, output_dir, dry_run, verbose, variables
+            )
 
         # V2: Use documents field for multi-file rules or main content for single file
         if isinstance(prompt, UniversalPromptV2):
@@ -132,6 +149,98 @@ class AmazonQAdapter(MarkdownSyncMixin, EditorAdapter):
                     f.write(content)
                 click.echo(f"✅ Generated: {output_file}")
                 created_files.append(output_file)
+
+        return created_files
+
+    def _generate_v21_plugins(
+        self,
+        prompt: UniversalPromptV2,
+        output_dir: Path,
+        dry_run: bool,
+        verbose: bool,
+        variables: Optional[Dict[str, Any]] = None,
+    ) -> List[Path]:
+        """Generate Amazon Q files from v2.1 schema with plugin support."""
+        created_files = []
+
+        # First, generate the regular v2 markdown files
+        markdown_files = self._generate_v2(
+            prompt, output_dir, dry_run, verbose, variables
+        )
+        created_files.extend(markdown_files)
+
+        # Then, handle plugins if present
+        if prompt.plugins and prompt.plugins.mcp_servers:
+            mcp_files = self._generate_mcp_config(
+                prompt.plugins.mcp_servers,
+                output_dir,
+                dry_run,
+                verbose,
+                variables,
+            )
+            created_files.extend(mcp_files)
+
+        return created_files
+
+    def _generate_mcp_config(
+        self,
+        mcp_servers: list,
+        output_dir: Path,
+        dry_run: bool,
+        verbose: bool,
+        variables: Optional[Dict[str, Any]] = None,
+    ) -> List[Path]:
+        """Generate MCP configuration for Amazon Q."""
+        strategy = self.get_mcp_config_strategy()
+        created_files = []
+
+        # Try project-level first (preferred)
+        if strategy["supports_project"] and strategy["project_path"]:
+            project_config_path = output_dir / strategy["project_path"]
+
+            # Build MCP servers config (Amazon Q uses standard MCP format)
+            mcp_config = self.build_mcp_servers_config(
+                mcp_servers, variables, format_style="standard"
+            )
+
+            # Check if config already exists
+            existing_config = self.read_existing_mcp_config(project_config_path)
+
+            if existing_config:
+                # Merge with existing config
+                if verbose:
+                    click.echo("  ℹ️  Merging MCP servers with existing Amazon Q config")
+                merged_config = self.merge_mcp_config(
+                    existing_config, mcp_config, format_style="standard"
+                )
+            else:
+                merged_config = mcp_config
+
+            # Write the config
+            if self.write_mcp_config_file(
+                merged_config, project_config_path, dry_run, verbose
+            ):
+                created_files.append(project_config_path)
+
+        # Fallback to system-wide if project-level failed
+        elif strategy["system_path"]:
+            system_path = Path(strategy["system_path"]).expanduser()
+
+            # Build and write system-wide config
+            mcp_config = self.build_mcp_servers_config(
+                mcp_servers, variables, format_style="standard"
+            )
+
+            existing_config = self.read_existing_mcp_config(system_path)
+            if existing_config:
+                merged_config = self.merge_mcp_config(
+                    existing_config, mcp_config, format_style="standard"
+                )
+            else:
+                merged_config = mcp_config
+
+            if self.write_mcp_config_file(merged_config, system_path, dry_run, verbose):
+                created_files.append(system_path)
 
         return created_files
 

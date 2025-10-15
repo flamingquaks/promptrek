@@ -590,7 +590,7 @@ def plugins_list(ctx: click.Context, prompt_file: Optional[Path]) -> None:
     "--editor",
     "-e",
     type=str,
-    help="Editor to generate for (claude, cursor, or 'all')",
+    help="Editor to generate for (claude, cursor, continue, windsurf, cline, amazon-q, kiro, or 'all')",
 )
 @click.option(
     "--output",
@@ -604,6 +604,18 @@ def plugins_list(ctx: click.Context, prompt_file: Optional[Path]) -> None:
     is_flag=True,
     help="Show what would be generated without creating files",
 )
+@click.option(
+    "--force-system-wide",
+    "-s",
+    is_flag=True,
+    help="Force system-wide configuration (skip project-level)",
+)
+@click.option(
+    "--yes",
+    "-y",
+    is_flag=True,
+    help="Auto-confirm all prompts (use with caution for system-wide changes)",
+)
 @click.pass_context
 def plugins_generate(
     ctx: click.Context,
@@ -611,10 +623,39 @@ def plugins_generate(
     editor: Optional[str],
     output_dir: Optional[Path],
     dry_run: bool,
+    force_system_wide: bool,
+    yes: bool,
 ) -> None:
-    """Generate plugin files for editors."""
+    """Generate plugin files for editors.
+
+    Supports MCP servers, custom commands, agents, and hooks for v2.1+ schemas.
+
+    Configuration Strategy:
+    - Project-level configs are preferred when available
+    - System-wide configs require confirmation (use --yes to auto-confirm)
+    - Use --force-system-wide to skip project-level and use system configs
+
+    Examples:
+        # Generate for Claude with project-level config
+        promptrek plugins generate --editor claude
+
+        # Generate for Windsurf (system-wide only, will prompt for confirmation)
+        promptrek plugins generate --editor windsurf
+
+        # Auto-confirm system-wide changes
+        promptrek plugins generate --editor windsurf --yes
+
+        # Generate for all editors with plugin support
+        promptrek plugins generate --editor all
+    """
     try:
-        generate_plugins_command(ctx, prompt_file, editor, output_dir, dry_run)
+        # Store flags in context for commands to access
+        ctx.obj["force_system_wide"] = force_system_wide
+        ctx.obj["auto_confirm"] = yes
+
+        generate_plugins_command(
+            ctx, prompt_file, editor, output_dir, dry_run, force_system_wide, yes
+        )
     except PrompTrekError as e:
         click.echo(f"Error: {e}", err=True)
         ctx.exit(1)

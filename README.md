@@ -271,6 +271,69 @@ documents:
       - Rule 2
 ```
 
+####  🔌 Plugin Configuration (v2.1+)
+
+PrompTrek v2.1 introduces MCP server integration with a **project-first strategy**:
+
+**Supported Plugin Types:**
+- **MCP Servers** - Model Context Protocol servers for external tools (filesystem, GitHub, databases, etc.)
+- **Custom Commands** - Slash commands for AI editors
+- **Autonomous Agents** - AI agents with specific tools and permissions
+
+**Editor Support Matrix:**
+
+| Editor | MCP Servers | Custom Commands | Agents | Config Location |
+|--------|-------------|-----------------|--------|-----------------|
+| **Claude Code** | ✅ | ⚠️ | ⚠️ | `.claude/mcp.json` (project) |
+| **Cursor** | ✅ | ✅ | ✅ | `.cursor/mcp.json` (project) |
+| **Continue** | ✅ | ✅ | ⚠️ | `.continue/config.json` (unified) |
+| **Cline** | ✅ | ⚠️ | ⚠️ | `.vscode/settings.json` (project) |
+| **Kiro** | ✅ | ⚠️ | ⚠️ | `.kiro/settings/mcp.json` (project) |
+| **Windsurf** | ✅ | ⚠️ | ⚠️ | `~/.codeium/windsurf/mcp_config.json` (system-wide) |
+| **Amazon Q** | ✅ | ⚠️ | ⚠️ | `.amazonq/mcp.json` (project) |
+
+✅ = Full support | ⚠️ = Partial/Planned
+
+**MCP Server Configuration Strategy:**
+
+PrompTrek uses a **project-first** strategy with system-wide fallback:
+
+1. **Try project-level first** (`.editor/mcp.json`) - Preferred for team collaboration
+2. **Fall back to system-wide** (`~/.editor/mcp.json`) - Only when project-level isn't supported
+3. **User confirmation required** - For system-wide changes (especially Windsurf)
+
+**Plugin Commands:**
+
+```bash
+# Generate MCP servers for an editor
+promptrek plugins generate project.promptrek.yaml -e claude
+
+# Generate for all supported editors
+promptrek plugins generate project.promptrek.yaml --all
+
+# Force system-wide generation (skip project-level)
+promptrek plugins generate project.promptrek.yaml -e windsurf --force-system-wide
+
+# Auto-confirm system-wide changes (skip prompts)
+promptrek plugins generate project.promptrek.yaml -e windsurf --yes
+
+# Dry run to preview without writing
+promptrek plugins generate project.promptrek.yaml -e cursor --dry-run -v
+
+# Override variables at generation time
+promptrek plugins generate project.promptrek.yaml -e claude \
+  -V GITHUB_TOKEN=ghp_newtoken \
+  -V API_KEY=secret123
+```
+
+**Example Files:**
+
+See [`examples/v21-plugins/`](https://github.com/flamingquaks/promptrek/tree/main/examples/v21-plugins) for comprehensive examples:
+- `mcp-servers.promptrek.yaml` - MCP server configurations
+- `custom-commands.promptrek.yaml` - Slash command examples
+- `autonomous-agents.promptrek.yaml` - Agent configurations
+- `complete-example.promptrek.yaml` - All features combined
+
 ### Available Commands
 
 - `promptrek init` - Create a new universal prompt file with templates (use `--setup-hooks` to automatically configure pre-commit)

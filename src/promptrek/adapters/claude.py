@@ -250,11 +250,12 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
 
         # Generate MCP server configurations
         if prompt.plugins.mcp_servers:
-            mcp_file = claude_dir / "mcp.json"
+            mcp_file = output_dir / ".mcp.json"  # Project root, per Claude Code docs
             mcp_servers = {}
             for server in prompt.plugins.mcp_servers:
                 server_config: Dict[str, Any] = {
                     "command": server.command,
+                    "type": "stdio",  # Default to stdio type per Claude Code docs
                 }
                 if server.args:
                     server_config["args"] = server.args
@@ -280,7 +281,7 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
                 if verbose:
                     click.echo(f"    {json.dumps(mcp_config, indent=2)[:200]}...")
             else:
-                claude_dir.mkdir(parents=True, exist_ok=True)
+                # MCP file goes in project root, no need to create claude_dir
                 with open(mcp_file, "w", encoding="utf-8") as f:
                     json.dump(mcp_config, f, indent=2)
                 click.echo(f"✅ Generated: {mcp_file}")

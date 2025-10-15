@@ -236,8 +236,8 @@ plugins:
 
         assert result.exit_code == 0
 
-        # Check MCP config file was created
-        mcp_file = tmp_path / ".claude" / "mcp.json"
+        # Check MCP config file was created (at project root per Claude Code docs)
+        mcp_file = tmp_path / ".mcp.json"
         assert mcp_file.exists()
 
         # Validate MCP config structure
@@ -430,7 +430,7 @@ plugins:
         assert result.exit_code == 0
 
         # All plugin files should exist
-        assert (tmp_path / ".claude" / "mcp.json").exists()
+        assert (tmp_path / ".mcp.json").exists()
         assert (tmp_path / ".claude" / "commands" / "test-cmd.md").exists()
         assert (tmp_path / ".claude" / "agents" / "test-agent.md").exists()
         assert (tmp_path / ".claude" / "hooks.yaml").exists()
@@ -468,7 +468,7 @@ plugins:
         )
 
         assert result.exit_code == 0
-        assert (tmp_path / ".claude" / "mcp.json").exists()
+        assert (tmp_path / ".mcp.json").exists()
 
     def test_plugins_command_validate(self, v21_prompt_full):
         """Test 'promptrek plugins validate' command."""
@@ -545,7 +545,7 @@ variables:
         assert result.exit_code == 0
 
         # Check variable substitution in MCP config
-        mcp_file = tmp_path / ".claude" / "mcp.json"
+        mcp_file = tmp_path / ".mcp.json"
         mcp_config = json.loads(mcp_file.read_text())
 
         env = mcp_config["mcpServers"]["api-server"]["env"]

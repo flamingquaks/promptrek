@@ -5,7 +5,7 @@ Provides commands for listing, generating, validating, and syncing plugin config
 """
 
 from pathlib import Path
-from typing import Optional
+from typing import Any, Dict, Optional, cast
 
 import click
 
@@ -101,6 +101,8 @@ def generate_plugins_command(
     editor: Optional[str],
     output_dir: Optional[Path],
     dry_run: bool,
+    force_system_wide: bool = False,
+    auto_confirm: bool = False,
 ) -> None:
     """
     Generate plugin files for specified editor(s).
@@ -111,6 +113,8 @@ def generate_plugins_command(
         editor: Editor to generate for (or 'all')
         output_dir: Output directory for generated files
         dry_run: Whether to show what would be generated without creating files
+        force_system_wide: Force system-wide config (skip project-level)
+        auto_confirm: Auto-confirm all prompts (for system-wide changes)
     """
     verbose = ctx.obj.get("verbose", False)
 
@@ -150,12 +154,26 @@ def generate_plugins_command(
         return
 
     # Determine which editors to generate for
+    all_plugin_editors = [
+        "claude",
+        "cursor",
+        "continue",
+        "windsurf",
+        "cline",
+        "amazon-q",
+        "kiro",
+    ]
+
     if editor and editor.lower() == "all":
-        editors = ["claude", "cursor"]  # Only editors with plugin support
+        editors = all_plugin_editors
     elif editor:
         editors = [editor.lower()]
     else:
-        editors = ["claude", "cursor"]  # Default to plugin-supporting editors
+        # Default to editors with full plugin support (Claude, Cursor)
+        editors = ["claude", "cursor"]
+
+    # Display MCP configuration strategy if verbose
+    display_mcp_strategy_summary(editors, verbose)
 
     # Generate for each editor
     click.echo(f"\n🔌 Generating plugin files for {', '.join(editors)}...\n")
@@ -163,6 +181,11 @@ def generate_plugins_command(
     for editor_name in editors:
         try:
             adapter = registry.get(editor_name)
+
+            # Store config flags in context for adapters to access
+            ctx.obj["force_system_wide"] = force_system_wide
+            ctx.obj["auto_confirm"] = auto_confirm
+
             files = adapter.generate(
                 prompt, output_dir, dry_run=dry_run, verbose=verbose
             )
@@ -272,3 +295,94 @@ def validate_plugins_command(
         click.echo("✅ All plugin configurations are valid!")
     elif not errors:
         click.echo("\n✅ No critical errors found.")
+
+
+# Helper functions for MCP configuration strategy
+
+
+def get_mcp_config_strategy(adapter_name: str) -> Dict[str, Any]:
+    """
+    Get MCP configuration strategy for an adapter.
+
+    Args:
+        adapter_name: Name of the adapter (e.g., 'claude', 'cursor')
+
+    Returns:
+        Dictionary containing:
+            - supports_project: bool - Whether project-level config is supported
+            - project_path: str or None - Relative path for project config
+            - system_path: str or None - System-wide config path
+            - requires_confirmation: bool - Whether system-wide needs confirmation
+    """
+    strategies = {
+        "claude": {
+            "supports_project": True,
+            "project_path": ".claude/mcp.json",
+            "system_path": "~/Library/Application Support/Claude/claude_desktop_config.json",
+            "requires_confirmation": False,  # Project preferred
+        },
+        "cursor": {
+            "supports_project": True,
+            "project_path": ".cursor/mcp-servers.json",
+            "system_path": None,
+            "requires_confirmation": False,
+        },
+        "continue": {
+            "supports_project": True,
+            "project_path": ".continue/config.json",
+            "system_path": "~/.continue/config.json",
+            "requires_confirmation": False,
+        },
+        "windsurf": {
+            "supports_project": False,
+            "project_path": None,
+            "system_path": "~/.codeium/windsurf/mcp_config.json",
+            "requires_confirmation": True,  # Always confirm system-wide
+        },
+        "cline": {
+            "supports_project": True,
+            "project_path": ".vscode/settings.json",
+            "system_path": None,
+            "requires_confirmation": False,
+        },
+        "amazon-q": {
+            "supports_project": True,
+            "project_path": ".amazonq/mcp.json",
+            "system_path": "~/.aws/amazonq/mcp.json",
+            "requires_confirmation": False,
+        },
+        "kiro": {
+            "supports_project": True,
+            "project_path": ".kiro/settings/mcp.json",
+            "system_path": None,
+            "requires_confirmation": False,
+        },
+    }
+    return cast(Dict[str, Any], strategies.get(adapter_name, {}))
+
+
+def display_mcp_strategy_summary(editors: list, verbose: bool = False) -> None:
+    """
+    Display MCP configuration strategy summary for editors.
+
+    Args:
+        editors: List of editor names
+        verbose: Whether to show verbose output
+    """
+    if not verbose:
+        return
+
+    click.echo("\n📋 MCP Configuration Strategy:")
+    for editor_name in editors:
+        strategy = get_mcp_config_strategy(editor_name)
+        if strategy.get("supports_project"):
+            click.echo(
+                f"  ✅ {editor_name}: Project-level ({strategy['project_path']})"
+            )
+        elif strategy.get("system_path"):
+            click.echo(
+                f"  ⚠️  {editor_name}: System-wide only ({strategy['system_path']})"
+            )
+        else:
+            click.echo(f"  ℹ️  {editor_name}: No MCP support configured")
+    click.echo("")

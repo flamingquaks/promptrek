@@ -214,8 +214,8 @@ class TestCursorAdapterComprehensive:
         mdc_files = [f for f in files if f.suffix == ".mdc"]
         assert len(mdc_files) >= 3
 
-    def test_generate_v1_with_examples(self, adapter, tmp_path):
-        """Test v1 generation with code examples."""
+    def test_generate_v1_with_multiple_examples(self, adapter, tmp_path):
+        """Test v1 generation with multiple code examples."""
         prompt = UniversalPrompt(
             schema_version="1.0.0",
             metadata=PromptMetadata(title="Test", description="Test"),

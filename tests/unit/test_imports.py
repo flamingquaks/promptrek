@@ -109,3 +109,165 @@ instructions:
         # Should raise an error
         with pytest.raises(Exception):
             processor.process_imports(prompt, tmp_path)
+
+    def test_process_imports_with_examples(self, processor, tmp_path):
+        """Test processing imports with examples."""
+        # Create an imported file with examples
+        imported_file = tmp_path / "imported.promptrek.yaml"
+        imported_file.write_text(
+            """schema_version: 1.0.0
+metadata:
+  title: Imported
+  description: Imported prompt
+targets:
+  - claude
+examples:
+  example1: "Code example 1"
+  example2: "Code example 2"
+"""
+        )
+
+        # Create main prompt with import
+        prompt = UniversalPrompt(
+            schema_version="1.0.0",
+            metadata=PromptMetadata(title="Main", description="Main"),
+            targets=["claude"],
+            instructions=Instructions(general=["Main instruction"]),
+            imports=[ImportConfig(path="imported.promptrek.yaml")],
+        )
+
+        result = processor.process_imports(prompt, tmp_path)
+
+        # Result should have merged examples
+        assert result.examples is not None
+        assert "example1" in result.examples
+        assert "example2" in result.examples
+
+    def test_process_imports_with_examples_and_prefix(self, processor, tmp_path):
+        """Test processing imports with examples and prefix."""
+        # Create an imported file with examples
+        imported_file = tmp_path / "imported.promptrek.yaml"
+        imported_file.write_text(
+            """schema_version: 1.0.0
+metadata:
+  title: Imported
+  description: Imported prompt
+targets:
+  - claude
+examples:
+  example1: "Code example 1"
+"""
+        )
+
+        # Create main prompt with import and prefix
+        prompt = UniversalPrompt(
+            schema_version="1.0.0",
+            metadata=PromptMetadata(title="Main", description="Main"),
+            targets=["claude"],
+            instructions=Instructions(general=["Main instruction"]),
+            imports=[ImportConfig(path="imported.promptrek.yaml", prefix="imported")],
+        )
+
+        result = processor.process_imports(prompt, tmp_path)
+
+        # Result should have prefixed examples
+        assert result.examples is not None
+        assert "imported_example1" in result.examples
+
+    def test_process_imports_with_variables(self, processor, tmp_path):
+        """Test processing imports with variables."""
+        # Create an imported file with variables
+        imported_file = tmp_path / "imported.promptrek.yaml"
+        imported_file.write_text(
+            """schema_version: 1.0.0
+metadata:
+  title: Imported
+  description: Imported prompt
+targets:
+  - claude
+variables:
+  VAR1: "value1"
+  VAR2: "value2"
+"""
+        )
+
+        # Create main prompt with import
+        prompt = UniversalPrompt(
+            schema_version="1.0.0",
+            metadata=PromptMetadata(title="Main", description="Main"),
+            targets=["claude"],
+            instructions=Instructions(general=["Main instruction"]),
+            imports=[ImportConfig(path="imported.promptrek.yaml")],
+        )
+
+        result = processor.process_imports(prompt, tmp_path)
+
+        # Result should have merged variables
+        assert result.variables is not None
+        assert "VAR1" in result.variables
+        assert "VAR2" in result.variables
+
+    def test_process_imports_with_variables_and_prefix(self, processor, tmp_path):
+        """Test processing imports with variables and prefix."""
+        # Create an imported file with variables
+        imported_file = tmp_path / "imported.promptrek.yaml"
+        imported_file.write_text(
+            """schema_version: 1.0.0
+metadata:
+  title: Imported
+  description: Imported prompt
+targets:
+  - claude
+variables:
+  VAR1: "value1"
+"""
+        )
+
+        # Create main prompt with import and prefix
+        prompt = UniversalPrompt(
+            schema_version="1.0.0",
+            metadata=PromptMetadata(title="Main", description="Main"),
+            targets=["claude"],
+            instructions=Instructions(general=["Main instruction"]),
+            variables={"EXISTING_VAR": "existing"},
+            imports=[ImportConfig(path="imported.promptrek.yaml", prefix="imported")],
+        )
+
+        result = processor.process_imports(prompt, tmp_path)
+
+        # Result should have prefixed variables
+        assert result.variables is not None
+        assert "imported_VAR1" in result.variables
+        assert "EXISTING_VAR" in result.variables
+
+    def test_merge_instructions_with_new_category(self, processor, tmp_path):
+        """Test merging instructions with new category."""
+        # Create an imported file with new instruction category
+        imported_file = tmp_path / "imported.promptrek.yaml"
+        imported_file.write_text(
+            """schema_version: 1.0.0
+metadata:
+  title: Imported
+  description: Imported prompt
+targets:
+  - claude
+instructions:
+  security:
+    - Security instruction 1
+"""
+        )
+
+        # Create main prompt without security instructions
+        prompt = UniversalPrompt(
+            schema_version="1.0.0",
+            metadata=PromptMetadata(title="Main", description="Main"),
+            targets=["claude"],
+            instructions=Instructions(general=["Main instruction"]),
+            imports=[ImportConfig(path="imported.promptrek.yaml")],
+        )
+
+        result = processor.process_imports(prompt, tmp_path)
+
+        # Result should have security category
+        assert result.instructions.security is not None
+        assert len(result.instructions.security) == 1
