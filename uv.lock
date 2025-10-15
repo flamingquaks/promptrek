@@ -579,7 +579,7 @@ requires-dist = [
     { name = "pydantic", specifier = ">=2.0.0" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=7.0.0" },
     { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=4.0.0" },
-    { name = "pyyaml", specifier = ">=6.0" },
+    { name = "pyyaml", specifier = ">=5.4" },
     { name = "types-pyyaml", marker = "extra == 'dev'", specifier = ">=6.0.12.20241230" },
     { name = "yamllint", marker = "extra == 'dev'", specifier = ">=1.35.0" },
 ]
