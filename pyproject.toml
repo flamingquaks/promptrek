@@ -11,7 +11,7 @@ requires-python = ">=3.9"
 authors = [
     {name = "Addie Rudy", email = "developer@flamingquaks.dev"}
 ]
-keywords = ["ai", "prompts", "copilot", "cursor", "continue", "cli"]
+keywords = ["ai", "prompts", "copilot", "cursor", "continue", "cli", "editor", "tool", "utility"]
 classifiers = [
     "Intended Audience :: Developers",
     "Operating System :: OS Independent",
@@ -29,9 +29,6 @@ dependencies = [
     "PyYAML>=6.0",
     "Jinja2>=3.1.0",
     "pydantic>=2.0.0",
-    "isort>=6.0.1",
-    "black>=25.9.0",
-    "flake8>=7.3.0",
 ]
 
 [project.scripts]
