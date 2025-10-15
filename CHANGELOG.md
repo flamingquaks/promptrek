@@ -1,3 +1,33 @@
+# [](https://github.com/flamingquaks/promptrek/compare/v0.1.1...v) (2025-10-15)
+
+
+### Bug Fixes
+
+* Downgrade PyYAML dependency version to 5.4 in configuration files ([8199b08](https://github.com/flamingquaks/promptrek/commit/8199b08022eee738cfc9c35ab85a9dd65ec737d8))
+* Update keywords and remove unnecessary dependencies in configuration files ([5da5d6c](https://github.com/flamingquaks/promptrek/commit/5da5d6cc395ff1801241105a9622bcb10ab89820))
+
+
+### Features
+
+* Add v2.1 plugin support and enhance configurations ([#69](https://github.com/flamingquaks/promptrek/issues/69)) ([ceb3d51](https://github.com/flamingquaks/promptrek/commit/ceb3d5150790a4353ddd6e42912c0205246e9e7c))
+
+
+
+## [0.1.1](https://github.com/flamingquaks/promptrek/compare/v0.0.7...v0.1.1) (2025-10-13)
+
+
+### Bug Fixes
+
+* Correct changelog sections and reorder entries for clarity ([14436e3](https://github.com/flamingquaks/promptrek/commit/14436e37b0be48bce44dc310c19d73f461d9fabb))
+* update hook stages to pre-commit for validation and prevention checks ([#65](https://github.com/flamingquaks/promptrek/issues/65)) ([f3273b4](https://github.com/flamingquaks/promptrek/commit/f3273b41adbf44b1820e285abe265a1b6ae87678))
+
+
+### Features
+
+* Enhance changelog generation with last stable version detection ([cc0f395](https://github.com/flamingquaks/promptrek/commit/cc0f3953da4fbadadf132addb8be5498f73e55c3))
+
+
+
 # [](https://github.com/flamingquaks/promptrek/compare/v0.0.7...v) (2025-10-13)
 
 
