@@ -33,17 +33,17 @@ promptrek --version
 Create a new universal prompt file using one of our templates:
 
 ```bash
-# Basic initialization with pre-commit hooks (creates v2 format by default)
+# Basic initialization with pre-commit hooks (creates v2.1 format by default)
 promptrek init --setup-hooks --output my-project.promptrek.yaml
 
-# Use a specific template with hooks (v2 format)
+# Use a specific template with hooks (v2.1 format)
 promptrek init --template react --setup-hooks --output my-react-app.promptrek.yaml
 promptrek init --template api --setup-hooks --output my-api.promptrek.yaml
 
 # Create v1 format (legacy)
 promptrek init --v1 --output legacy.promptrek.yaml
 
-# Migrate existing v1 file to v2
+# Migrate existing v1 or v2.0 file to v2.1
 promptrek migrate old.promptrek.yaml -o new.promptrek.yaml
 ```
 
@@ -70,10 +70,10 @@ See [examples on GitHub](https://github.com/flamingquaks/promptrek/tree/main/exa
 
 Edit the generated `.promptrek.yaml` file to match your project needs.
 
-**Using v2 Format (Recommended - Default)**:
+**Using v2.1 Format (Recommended - Default)**:
 
 ```yaml
-schema_version: "2.0.0"
+schema_version: "2.1.0"
 
 metadata:
   title: "My Project Assistant"
@@ -115,11 +115,12 @@ variables:
   AUTHOR_EMAIL: "your.email@example.com"
 ```
 
-**Benefits of v2**:
+**Benefits of v2.1**:
 - ✅ **No `targets` field** - Works with ALL editors automatically
 - ✅ **Simpler format** - Just markdown content
 - ✅ **Lossless sync** - Parse editor files back without data loss
 - ✅ **Editor-friendly** - Matches how AI editors use markdown
+- ✅ **Plugin support** - Configure MCP servers, commands, agents, and hooks (v2.1+)
 
 <details>
 <summary>📚 Click to see v1 format (legacy)</summary>

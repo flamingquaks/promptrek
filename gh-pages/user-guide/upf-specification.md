@@ -9,8 +9,9 @@ title: UPF Specification
 
 The Universal Prompt Format (UPF) is a standardized YAML-based format for defining AI assistant prompts that can be converted to various editor-specific formats.
 
-PrompTrek supports **two schema versions**:
-- **v2.0.0** (Recommended): Markdown-first, simpler format with lossless bidirectional sync
+PrompTrek supports **three schema versions**:
+- **v2.1.0** (Latest): Markdown-first with plugin support (MCP servers, commands, agents, hooks)
+- **v2.0.0** (Stable): Markdown-first, simpler format with lossless bidirectional sync
 - **v1.0.0** (Legacy): Structured format with complex nested fields
 
 ## File Extension
@@ -19,12 +20,410 @@ PrompTrek supports **two schema versions**:
 
 ## Schema Versions
 
-- **Current (Recommended)**: `2.0.0` - [Jump to v2 Specification](#schema-v20-recommended)
+- **Latest**: `2.1.0` - [Jump to v2.1 Specification](#schema-v21-latest)
+- **Stable**: `2.0.0` - [Jump to v2.0 Specification](#schema-v20-stable)
 - **Legacy**: `1.0.0` - [Jump to v1 Specification](#schema-v10-legacy)
 
 ---
 
-## Schema v2.0 (Recommended)
+## Schema v2.1 (Latest)
+
+**New in v2.1.0**: Plugin support for MCP servers, custom commands, autonomous agents, and event-driven hooks.
+
+### Key Benefits
+
+- ✅ **All v2.0 benefits** - Markdown-first, lossless sync, works with all editors
+- ✅ **MCP Server Integration** - Configure Model Context Protocol servers
+- ✅ **Custom Commands** - Define slash commands for AI editors
+- ✅ **Autonomous Agents** - Configure AI agents with specific tools and permissions
+- ✅ **Event Hooks** - Automate workflows with event-driven hooks
+- ✅ **Trust Metadata** - Security controls for plugin execution
+- ✅ **Backward Compatible** - v2.0 files work without modification
+
+### Complete v2.1 Schema
+
+```yaml
+# Schema version (required)
+schema_version: "2.1.0"
+
+# Metadata about the prompt file (required)
+metadata:
+  title: string                    # Human-readable title (required)
+  description: string              # Brief description of purpose (required)
+  version: string                  # Semantic version of this prompt (optional)
+  author: string                   # Author name or email (optional)
+  created: string                  # ISO 8601 date (YYYY-MM-DD) (optional)
+  updated: string                  # ISO 8601 date (YYYY-MM-DD) (optional)
+  tags: [string]                   # Tags for categorization (optional)
+
+# Main markdown content (required)
+content: string                    # Raw markdown content
+
+# Optional: Multi-file support for editors like Continue, Windsurf, Kiro
+documents:
+  - name: string                   # Document name (becomes filename)
+    content: string                # Raw markdown content for this document
+
+# Template variables (optional)
+variables:
+  variable_name: string            # Variable value
+
+# Plugin configurations (optional, new in v2.1.0)
+plugins:
+  # MCP (Model Context Protocol) servers
+  mcp_servers:
+    - name: string                 # Server name/identifier (required)
+      command: string              # Command to start the server (required)
+      args: [string]               # Command line arguments (optional)
+      env:                         # Environment variables (optional)
+        VAR_NAME: string
+      description: string          # Human-readable description (optional)
+      trust_metadata:              # Trust and security metadata (optional)
+        trusted: boolean           # Whether this plugin is trusted
+        trust_level: string        # 'full', 'partial', or 'untrusted'
+        requires_approval: boolean # Whether actions require approval
+        source: string             # Source of the plugin
+        verified_by: string        # Who verified this plugin
+        verified_date: string      # When verified (ISO 8601)
+
+  # Custom slash commands
+  commands:
+    - name: string                 # Command name (required, e.g., 'review-code')
+      description: string          # Command description (required)
+      prompt: string               # Prompt template (required)
+      output_format: string        # Expected output format (optional)
+      requires_approval: boolean   # Whether execution requires approval (optional)
+      system_message: string       # Optional system message (optional)
+      examples: [string]           # Usage examples (optional)
+      trust_metadata: {}           # Trust metadata (optional)
+
+  # Autonomous agents
+  agents:
+    - name: string                 # Agent name (required)
+      description: string          # Agent description (required)
+      system_prompt: string        # System prompt for the agent (required)
+      tools: [string]              # Available tools (optional)
+      trust_level: string          # Trust level: 'full', 'partial', 'untrusted'
+      requires_approval: boolean   # Whether actions require approval
+      context: {}                  # Additional context (optional)
+      trust_metadata: {}           # Trust metadata (optional)
+
+  # Event-driven hooks
+  hooks:
+    - name: string                 # Hook name (required)
+      event: string                # Trigger event (required, e.g., 'pre-commit')
+      command: string              # Command to execute (required)
+      conditions: {}               # Execution conditions (optional)
+      requires_reapproval: boolean # Whether hook requires reapproval (optional)
+      description: string          # Hook description (optional)
+      trust_metadata: {}           # Trust metadata (optional)
+
+  # Marketplace metadata
+  marketplace_metadata:
+    plugin_id: string              # Unique plugin identifier (optional)
+    marketplace_url: string        # URL to marketplace listing (optional)
+    rating: number                 # User rating 0-5 (optional)
+    downloads: number              # Number of downloads (optional)
+    last_updated: string           # Last update date (optional)
+```
+
+### v2.1 Plugin Examples
+
+#### MCP Servers
+
+Configure Model Context Protocol servers for external integrations:
+
+```yaml
+schema_version: "2.1.0"
+metadata:
+  title: "Project with MCP Servers"
+  description: "AI assistant with GitHub and filesystem access"
+  version: "1.0.0"
+content: |
+  # Project Guidelines
+  Use MCP servers for external integrations.
+
+variables:
+  GITHUB_TOKEN: "ghp_your_token_here"
+
+plugins:
+  mcp_servers:
+    - name: filesystem
+      command: npx
+      args:
+        - "-y"
+        - "@modelcontextprotocol/server-filesystem"
+        - "/path/to/allowed/directory"
+      description: "Filesystem access for the AI"
+      trust_metadata:
+        trusted: true
+        trust_level: partial
+        source: official
+
+    - name: github
+      command: npx
+      args:
+        - "-y"
+        - "@modelcontextprotocol/server-github"
+      env:
+        GITHUB_TOKEN: "{{{ GITHUB_TOKEN }}}"
+      description: "GitHub integration"
+      trust_metadata:
+        trusted: true
+        trust_level: full
+        source: official
+```
+
+#### Custom Commands
+
+Define slash commands for your AI editor:
+
+```yaml
+schema_version: "2.1.0"
+metadata:
+  title: "Project with Custom Commands"
+  description: "AI assistant with custom slash commands"
+  version: "1.0.0"
+content: |
+  # Project Guidelines
+  Use custom commands for common tasks.
+
+plugins:
+  commands:
+    - name: review-pr
+      description: "Review pull request for code quality"
+      prompt: |
+        Review this pull request for:
+        - Code quality and best practices
+        - Security vulnerabilities
+        - Performance issues
+        - Test coverage
+
+        Provide specific, actionable feedback.
+      output_format: markdown
+      requires_approval: false
+      system_message: "You are an expert code reviewer"
+      examples:
+        - "review-pr --pr=123"
+        - "review-pr --detailed"
+
+    - name: generate-tests
+      description: "Generate unit tests for selected code"
+      prompt: |
+        Generate comprehensive unit tests for the selected code.
+        Include:
+        - Normal operation tests
+        - Edge cases
+        - Error handling
+        - Mocking external dependencies
+      requires_approval: false
+```
+
+#### Autonomous Agents
+
+Configure AI agents with specific tools and permissions:
+
+```yaml
+schema_version: "2.1.0"
+metadata:
+  title: "Project with Autonomous Agents"
+  description: "AI assistant with configured agents"
+  version: "1.0.0"
+content: |
+  # Project Guidelines
+  Use agents for automated tasks.
+
+plugins:
+  agents:
+    - name: test-generator
+      description: "Automatically generate unit tests"
+      system_prompt: |
+        You are a test automation expert. Generate comprehensive tests that:
+        - Cover normal operations
+        - Test edge cases
+        - Handle error conditions
+        - Mock external dependencies appropriately
+      tools:
+        - file_read
+        - file_write
+        - run_tests
+      trust_level: partial
+      requires_approval: true
+      context:
+        framework: pytest
+        coverage_target: 80
+
+    - name: bug-fixer
+      description: "Automatically fix common bugs"
+      system_prompt: |
+        You are a bug-fixing specialist. Identify and fix bugs while:
+        - Understanding the root cause
+        - Applying minimal, focused changes
+        - Adding tests to prevent regression
+      tools:
+        - file_read
+        - file_write
+        - git_diff
+      trust_level: untrusted
+      requires_approval: true
+```
+
+#### Event Hooks
+
+Automate workflows with event-driven hooks:
+
+```yaml
+schema_version: "2.1.0"
+metadata:
+  title: "Project with Event Hooks"
+  description: "AI assistant with automated workflows"
+  version: "1.0.0"
+content: |
+  # Project Guidelines
+  Hooks automate common workflows.
+
+plugins:
+  hooks:
+    - name: pre-commit-tests
+      event: pre-commit
+      command: "npm test"
+      description: "Run tests before every commit"
+      requires_reapproval: true
+
+    - name: auto-regenerate
+      event: post-save
+      command: "promptrek generate --all"
+      conditions:
+        file_pattern: "*.promptrek.yaml"
+      requires_reapproval: false
+      description: "Auto-regenerate editor files when .promptrek.yaml changes"
+```
+
+### Complete v2.1 Example
+
+```yaml
+schema_version: "2.1.0"
+
+metadata:
+  title: "Full Stack TypeScript Project"
+  description: "AI assistant with MCP servers, commands, and agents"
+  version: "1.0.0"
+  author: "dev-team@company.com"
+  tags: ["typescript", "fullstack", "ai-enhanced"]
+
+content: |
+  # Full Stack TypeScript Project
+
+  ## Project Overview
+  Modern full-stack application with TypeScript, React, and Node.js.
+  Enhanced with MCP servers for GitHub integration and filesystem access.
+
+  **Tech Stack:**
+  - React 18 with TypeScript
+  - Node.js with Express
+  - PostgreSQL database
+  - Jest for testing
+
+  ## Development Guidelines
+
+  ### General Principles
+  - Write type-safe code with strict TypeScript
+  - Use functional programming patterns
+  - Add comprehensive tests for all features
+  - Document complex business logic
+
+  ### Code Style
+  - Use named exports
+  - Prefer arrow functions
+  - Follow ESLint and Prettier configs
+  - Use meaningful variable names
+
+variables:
+  PROJECT_NAME: "FullStack App"
+  GITHUB_TOKEN: "ghp_token_here"
+  GITHUB_OWNER: "myorg"
+
+plugins:
+  mcp_servers:
+    - name: github
+      command: npx
+      args: ["-y", "@modelcontextprotocol/server-github"]
+      env:
+        GITHUB_TOKEN: "{{{ GITHUB_TOKEN }}}"
+        GITHUB_OWNER: "{{{ GITHUB_OWNER }}}"
+      description: "GitHub API integration"
+      trust_metadata:
+        trusted: true
+        trust_level: full
+        source: official
+
+  commands:
+    - name: review-code
+      description: "Review code for quality and best practices"
+      prompt: |
+        Review the selected code for:
+        - TypeScript best practices
+        - Code quality and maintainability
+        - Security vulnerabilities
+        - Performance optimizations
+      output_format: markdown
+      requires_approval: false
+
+  agents:
+    - name: test-generator
+      description: "Generate comprehensive unit tests"
+      system_prompt: |
+        Generate Jest tests with TypeScript that cover:
+        - Normal operations
+        - Edge cases
+        - Error handling
+        Target 80% coverage.
+      tools: [file_read, file_write, run_tests]
+      trust_level: partial
+      requires_approval: true
+      context:
+        framework: jest
+        coverage_target: 80
+
+  hooks:
+    - name: pre-commit
+      event: pre-commit
+      command: "npm run lint && npm test"
+      description: "Run linting and tests before commit"
+      requires_reapproval: true
+```
+
+### CLI Commands for Plugins
+
+```bash
+# List all plugins in a .promptrek.yaml file
+promptrek plugins list --file project.promptrek.yaml
+
+# Generate plugin files for a specific editor
+promptrek plugins generate --file project.promptrek.yaml --editor claude --output .
+
+# Validate plugin configuration
+promptrek plugins validate --file project.promptrek.yaml
+
+# Sync plugins from editor files back to .promptrek.yaml
+promptrek plugins sync --editor claude --source-dir . --output synced.promptrek.yaml
+```
+
+### Migration from v2.0 to v2.1
+
+v2.0 files are **100% compatible** with v2.1 - no migration needed! Simply add the `plugins` field when you're ready:
+
+```bash
+# Optional: Explicitly migrate to v2.1
+promptrek migrate old.promptrek.yaml -o new.promptrek.yaml
+
+# v2.0 files work as-is (plugins field is optional)
+promptrek generate v2.0-file.promptrek.yaml --editor claude
+```
+
+---
+
+## Schema v2.0 (Stable)
 
 **New in v2.0.0**: Simpler markdown-first approach that aligns with how AI editors actually work.
 

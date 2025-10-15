@@ -1,0 +1,95 @@
+schema_version: 2.1.0
+metadata:
+  title: MCP Servers Example
+  description: Example configuration demonstrating MCP server integration
+  version: 1.0.0
+  author: PrompTrek Team
+  tags: [mcp, plugins, example]
+
+content: |
+  # MCP Servers Configuration Example
+
+  This configuration demonstrates how to integrate Model Context Protocol (MCP) servers
+  with Claude Code and Cursor using PrompTrek.
+
+  ## What are MCP Servers?
+
+  MCP servers provide additional capabilities to AI assistants through a standardized
+  protocol. They can offer:
+  - File system access
+  - Database connections
+  - API integrations
+  - Custom tools and functions
+
+  ## Using This Configuration
+
+  1. Generate plugin files: `promptrek plugins generate -e claude`
+  2. The MCP server configurations will be created in `.claude/mcp.json`
+  3. Claude Code will automatically load these servers on startup
+
+plugins:
+  mcp_servers:
+    # Filesystem server - provides file system access
+    - name: filesystem
+      command: npx
+      args:
+        - "-y"
+        - "@modelcontextprotocol/server-filesystem"
+        - "/path/to/allowed/directory"
+      description: Provides read/write access to specified directories
+      trust_metadata:
+        trusted: true
+        trust_level: partial
+        requires_approval: true
+        source: official
+        verified_by: Anthropic
+        verified_date: "2025-01-15"
+
+    # GitHub server - integrates with GitHub API
+    - name: github
+      command: npx
+      args:
+        - "-y"
+        - "@modelcontextprotocol/server-github"
+      env:
+        GITHUB_TOKEN: "{{{ GITHUB_TOKEN }}}"
+        GITHUB_OWNER: "{{{ GITHUB_OWNER }}}"
+      description: Access GitHub repositories, issues, and pull requests
+      trust_metadata:
+        trusted: true
+        trust_level: full
+        requires_approval: false
+        source: official
+
+    # PostgreSQL server - database access
+    - name: postgres
+      command: npx
+      args:
+        - "-y"
+        - "@modelcontextprotocol/server-postgres"
+      env:
+        POSTGRES_CONNECTION_STRING: "{{{ DATABASE_URL }}}"
+      description: Query and manage PostgreSQL databases
+      trust_metadata:
+        trusted: false
+        trust_level: untrusted
+        requires_approval: true
+        source: community
+
+    # Slack server - Slack integration
+    - name: slack
+      command: npx
+      args:
+        - "-y"
+        - "@modelcontextprotocol/server-slack"
+      env:
+        SLACK_BOT_TOKEN: "{{{ SLACK_BOT_TOKEN }}}"
+        SLACK_TEAM_ID: "{{{ SLACK_TEAM_ID }}}"
+      description: Send messages and manage Slack workspace
+
+variables:
+  GITHUB_TOKEN: "your-github-token"
+  GITHUB_OWNER: "your-username"
+  DATABASE_URL: "postgresql://localhost/mydb"
+  SLACK_BOT_TOKEN: "xoxb-your-token"
+  SLACK_TEAM_ID: "T1234567"

@@ -138,6 +138,171 @@ class DocumentConfig(BaseModel):
     content: str = Field(..., description="Raw markdown content")
 
 
+# V2.1 Models - Plugin support (v2.1.0+)
+
+
+class TrustMetadata(BaseModel):
+    """Security and trust metadata for plugins."""
+
+    trusted: bool = Field(
+        default=False, description="Whether this plugin/config is trusted"
+    )
+    trust_level: Optional[str] = Field(
+        default=None, description="Trust level: 'full', 'partial', 'untrusted'"
+    )
+    requires_approval: bool = Field(
+        default=True, description="Whether actions require explicit approval"
+    )
+    source: Optional[str] = Field(
+        default=None,
+        description="Source of the plugin (e.g., 'official', 'community', 'local')",
+    )
+    verified_by: Optional[str] = Field(
+        default=None, description="Who verified this plugin"
+    )
+    verified_date: Optional[str] = Field(
+        default=None, description="When this plugin was verified (ISO 8601)"
+    )
+
+    @field_validator("trust_level")
+    @classmethod
+    def validate_trust_level(cls, v: Optional[str]) -> Optional[str]:
+        """Validate trust level is one of allowed values."""
+        if v is not None and v not in ["full", "partial", "untrusted"]:
+            raise ValueError("Trust level must be 'full', 'partial', or 'untrusted'")
+        return v
+
+
+class MCPServer(BaseModel):
+    """Model Context Protocol (MCP) server configuration."""
+
+    name: str = Field(..., description="Server name/identifier")
+    command: str = Field(..., description="Command to start the server")
+    args: Optional[List[str]] = Field(
+        default=None, description="Command line arguments"
+    )
+    env: Optional[Dict[str, str]] = Field(
+        default=None, description="Environment variables"
+    )
+    description: Optional[str] = Field(
+        default=None, description="Human-readable description"
+    )
+    trust_metadata: Optional[TrustMetadata] = Field(
+        default=None, description="Trust and security metadata"
+    )
+
+
+class Command(BaseModel):
+    """Slash command configuration for AI editors."""
+
+    name: str = Field(..., description="Command name (e.g., 'review-code')")
+    description: str = Field(..., description="Command description")
+    prompt: str = Field(..., description="Prompt template for the command")
+    output_format: Optional[str] = Field(
+        default=None, description="Expected output format (e.g., 'markdown', 'json')"
+    )
+    requires_approval: bool = Field(
+        default=False, description="Whether command execution requires approval"
+    )
+    system_message: Optional[str] = Field(
+        default=None, description="Optional system message for the command"
+    )
+    examples: Optional[List[str]] = Field(
+        default=None, description="Example usage of the command"
+    )
+    trust_metadata: Optional[TrustMetadata] = Field(
+        default=None, description="Trust and security metadata"
+    )
+
+
+class Agent(BaseModel):
+    """Autonomous agent configuration."""
+
+    name: str = Field(..., description="Agent name/identifier")
+    description: str = Field(..., description="Agent description and purpose")
+    system_prompt: str = Field(..., description="System prompt for the agent")
+    tools: Optional[List[str]] = Field(
+        default=None, description="Available tools for the agent"
+    )
+    trust_level: str = Field(
+        default="untrusted", description="Trust level for agent actions"
+    )
+    requires_approval: bool = Field(
+        default=True, description="Whether agent actions require approval"
+    )
+    context: Optional[Dict[str, Any]] = Field(
+        default=None, description="Additional context for the agent"
+    )
+    trust_metadata: Optional[TrustMetadata] = Field(
+        default=None, description="Trust and security metadata"
+    )
+
+    @field_validator("trust_level")
+    @classmethod
+    def validate_trust_level(cls, v: str) -> str:
+        """Validate trust level is one of allowed values."""
+        if v not in ["full", "partial", "untrusted"]:
+            raise ValueError("Trust level must be 'full', 'partial', or 'untrusted'")
+        return v
+
+
+class Hook(BaseModel):
+    """Event-driven automation hook configuration."""
+
+    name: str = Field(..., description="Hook name/identifier")
+    event: str = Field(
+        ...,
+        description="Event that triggers the hook (e.g., 'pre-commit', 'post-save')",
+    )
+    command: str = Field(..., description="Command to execute")
+    conditions: Optional[Dict[str, Any]] = Field(
+        default=None, description="Conditions for hook execution"
+    )
+    requires_reapproval: bool = Field(
+        default=True, description="Whether hook requires reapproval after changes"
+    )
+    description: Optional[str] = Field(default=None, description="Hook description")
+    trust_metadata: Optional[TrustMetadata] = Field(
+        default=None, description="Trust and security metadata"
+    )
+
+
+class MarketplaceMetadata(BaseModel):
+    """Metadata for plugin marketplace listings."""
+
+    plugin_id: Optional[str] = Field(
+        default=None, description="Unique plugin identifier"
+    )
+    marketplace_url: Optional[str] = Field(
+        default=None, description="URL to marketplace listing"
+    )
+    rating: Optional[float] = Field(default=None, description="User rating (0-5)")
+    downloads: Optional[int] = Field(default=None, description="Number of downloads")
+    last_updated: Optional[str] = Field(
+        default=None, description="Last update date (ISO 8601)"
+    )
+
+
+class PluginConfig(BaseModel):
+    """Container for all plugin configurations (v2.1.0+)."""
+
+    mcp_servers: Optional[List[MCPServer]] = Field(
+        default=None, description="MCP server configurations"
+    )
+    commands: Optional[List[Command]] = Field(
+        default=None, description="Slash command configurations"
+    )
+    agents: Optional[List[Agent]] = Field(
+        default=None, description="Agent configurations"
+    )
+    hooks: Optional[List[Hook]] = Field(default=None, description="Hook configurations")
+    marketplace_metadata: Optional[MarketplaceMetadata] = Field(
+        default=None, description="Plugin marketplace metadata"
+    )
+
+    model_config = ConfigDict(extra="forbid")
+
+
 class UniversalPromptV2(BaseModel):
     """Simplified UPF v2 schema - markdown-first approach."""
 
@@ -149,6 +314,9 @@ class UniversalPromptV2(BaseModel):
     )
     variables: Optional[Dict[str, str]] = Field(
         default=None, description="Template variables"
+    )
+    plugins: Optional[PluginConfig] = Field(
+        default=None, description="Plugin configurations (v2.1.0+)"
     )
 
     @field_validator("schema_version")

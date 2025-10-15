@@ -197,3 +197,29 @@ class TestVariableSubstitution:
         assert "VAR2" in undefined
         assert "VAR3" in undefined
         assert "VAR1" not in undefined
+
+    def test_environment_variable_strict_mode_error(self):
+        """Test strict mode raises error for undefined environment variables."""
+        vs = VariableSubstitution()
+        content = "Path: ${UNDEFINED_ENV_VAR}"
+
+        # Make sure the env var doesn't exist
+        if "UNDEFINED_ENV_VAR" in os.environ:
+            del os.environ["UNDEFINED_ENV_VAR"]
+
+        with pytest.raises(
+            TemplateError, match="Undefined environment variable: UNDEFINED_ENV_VAR"
+        ):
+            vs.substitute(content, {}, env_variables=True, strict=True)
+
+    def test_environment_variable_non_strict_mode(self):
+        """Test non-strict mode leaves undefined env variables unchanged."""
+        vs = VariableSubstitution()
+        content = "Path: ${UNDEFINED_ENV_VAR}"
+
+        # Make sure the env var doesn't exist
+        if "UNDEFINED_ENV_VAR" in os.environ:
+            del os.environ["UNDEFINED_ENV_VAR"]
+
+        result = vs.substitute(content, {}, env_variables=True, strict=False)
+        assert result == "Path: ${UNDEFINED_ENV_VAR}"

@@ -1,0 +1,291 @@
+schema_version: 2.1.0
+metadata:
+  title: Continue Unified Config Example
+  description: Example showing Continue's unified plugin configuration
+  version: 1.0.0
+  author: PrompTrek Team
+  tags: [continue, unified-config, mcp, commands]
+
+content: |
+  # Continue Unified Configuration Example
+
+  Continue uses a unique unified configuration format that combines:
+  - MCP servers (`mcpServers`)
+  - Slash commands (`slashCommands`)
+  - Context providers
+  - Model configurations
+
+  This example shows how PrompTrek generates Continue's unified `.continue/config.json`.
+
+  ## Features
+
+  ### MCP Servers
+  Continue supports MCP servers in the same format as Claude Code and Cursor:
+  - Filesystem access
+  - GitHub integration
+  - Custom servers
+
+  ### Slash Commands
+  Continue's slash commands are powerful and customizable:
+  - `/edit` - Code editing
+  - `/comment` - Add comments
+  - Custom commands with prompts
+
+  ## Quick Start
+
+  ```bash
+  # Generate Continue config
+  promptrek plugins generate continue-unified.promptrek.yaml -e continue
+
+  # Restart Continue extension
+  # Open VS Code command palette (Cmd/Ctrl+Shift+P)
+  # Type "Developer: Reload Window"
+  ```
+
+  ## Continue Config Structure
+
+  The generated `.continue/config.json` will have this structure:
+  ```json
+  {
+    "mcpServers": {
+      "server-name": { ... }
+    },
+    "slashCommands": [
+      { "name": "command", "prompt": "..." }
+    ],
+    "models": [ ... ],
+    "contextProviders": [ ... ]
+  }
+  ```
+
+plugins:
+  mcp_servers:
+    # Filesystem server for code access
+    - name: filesystem
+      command: npx
+      args:
+        - "-y"
+        - "@modelcontextprotocol/server-filesystem"
+        - "{{{ WORKSPACE_ROOT }}}"
+      description: Access project files
+      trust_metadata:
+        trusted: true
+        trust_level: partial
+        requires_approval: true
+
+    # GitHub MCP server
+    - name: github
+      command: npx
+      args:
+        - "-y"
+        - "@modelcontextprotocol/server-github"
+      env:
+        GITHUB_TOKEN: "{{{ GITHUB_TOKEN }}}"
+      description: GitHub API integration
+      trust_metadata:
+        trusted: true
+        trust_level: full
+
+    # Brave Search for web queries
+    - name: brave-search
+      command: npx
+      args:
+        - "-y"
+        - "@modelcontextprotocol/server-brave-search"
+      env:
+        BRAVE_API_KEY: "{{{ BRAVE_API_KEY }}}"
+      description: Web search capabilities
+
+  commands:
+    # Code refactoring command
+    - name: refactor
+      description: Refactor selected code for better quality
+      prompt: |
+        Refactor the selected code following these principles:
+
+        1. **Simplification:**
+           - Break down complex functions
+           - Reduce nesting levels
+           - Extract reusable components
+
+        2. **Naming:**
+           - Use descriptive variable names
+           - Follow language conventions
+           - Avoid abbreviations
+
+        3. **DRY Principle:**
+           - Eliminate code duplication
+           - Create utility functions
+           - Use composition
+
+        4. **Performance:**
+           - Optimize loops
+           - Reduce allocations
+           - Cache when appropriate
+
+        5. **Testing:**
+           - Ensure tests still pass
+           - Add tests for new functions
+           - Maintain coverage
+
+        Show before/after code and explain changes.
+      output_format: code
+      requires_approval: false
+      examples:
+        - "/refactor"
+
+    # Explain code command
+    - name: explain
+      description: Explain how selected code works
+      prompt: |
+        Provide a clear explanation of this code:
+
+        **Overview:**
+        - What does this code do?
+        - Why is it structured this way?
+
+        **Details:**
+        - Key algorithms and data structures
+        - Important variables and their roles
+        - Control flow and logic
+
+        **Context:**
+        - How it fits in the larger system
+        - Dependencies and relationships
+        - Potential edge cases
+
+        **Examples:**
+        - Input/output examples
+        - Common use cases
+
+        Use simple language and include diagrams if helpful.
+      output_format: markdown
+      requires_approval: false
+
+    # Generate commit message
+    - name: commit
+      description: Generate a commit message for staged changes
+      prompt: |
+        Generate a conventional commit message for the staged changes:
+
+        **Format:**
+        ```
+        <type>(<scope>): <subject>
+
+        <body>
+
+        <footer>
+        ```
+
+        **Types:**
+        - feat: New feature
+        - fix: Bug fix
+        - docs: Documentation
+        - style: Formatting
+        - refactor: Code restructuring
+        - test: Adding tests
+        - chore: Maintenance
+
+        **Requirements:**
+        - Subject max 50 chars
+        - Body wraps at 72 chars
+        - Explain what and why, not how
+        - Reference issue numbers
+
+        Analyze the diff and generate an appropriate message.
+      output_format: text
+      requires_approval: false
+      examples:
+        - "/commit"
+
+    # Add type hints (Python/TypeScript)
+    - name: types
+      description: Add or fix type annotations
+      prompt: |
+        Add comprehensive type annotations:
+
+        **Python:**
+        - Function signatures with typing module
+        - Class attributes with type hints
+        - Return type annotations
+        - Generic types where appropriate
+
+        **TypeScript:**
+        - Interface definitions
+        - Type aliases
+        - Generic constraints
+        - Utility types
+
+        **Best Practices:**
+        - Use specific types over `any`
+        - Define custom types for complex structures
+        - Add docstrings/JSDoc
+        - Handle optional parameters
+
+        Update the code with proper types.
+      output_format: code
+      requires_approval: false
+
+    # Performance analysis
+    - name: perf
+      description: Analyze code performance and suggest optimizations
+      prompt: |
+        Analyze performance and suggest optimizations:
+
+        **Time Complexity:**
+        - Algorithm complexity (Big O)
+        - Bottlenecks and slow operations
+        - Opportunities for caching
+
+        **Space Complexity:**
+        - Memory usage patterns
+        - Unnecessary allocations
+        - Data structure choices
+
+        **Optimizations:**
+        - Algorithm improvements
+        - Lazy evaluation
+        - Parallel processing
+        - Database query optimization
+
+        **Benchmarks:**
+        - Expected performance gains
+        - Trade-offs to consider
+
+        Provide concrete code examples.
+      output_format: markdown
+      requires_approval: false
+
+    # Generate tests
+    - name: test-gen
+      description: Generate comprehensive unit tests
+      prompt: |
+        Generate unit tests for the selected code:
+
+        **Test Cases:**
+        - Happy path (normal inputs)
+        - Edge cases (boundary values)
+        - Error cases (invalid inputs)
+        - Null/undefined handling
+
+        **Structure:**
+        - Use Arrange-Act-Assert pattern
+        - Clear, descriptive test names
+        - One concept per test
+        - Mock external dependencies
+
+        **Coverage:**
+        - All public methods
+        - All branches
+        - Error handling paths
+
+        Use the project's testing framework (Jest, pytest, etc.).
+      output_format: code
+      requires_approval: false
+      examples:
+        - "/test-gen"
+
+variables:
+  WORKSPACE_ROOT: "${workspaceFolder}"
+  GITHUB_TOKEN: "ghp_your_github_token"
+  BRAVE_API_KEY: "BSA_your_brave_api_key"

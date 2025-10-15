@@ -161,7 +161,7 @@ class ImportProcessor:
         prefix: Optional[str],
     ) -> None:
         """Merge examples from imported file."""
-        if "examples" not in base_data:
+        if "examples" not in base_data or base_data["examples"] is None:
             base_data["examples"] = {}
 
         base_examples = base_data["examples"]
@@ -178,7 +178,7 @@ class ImportProcessor:
         prefix: Optional[str],
     ) -> None:
         """Merge variables from imported file."""
-        if "variables" not in base_data:
+        if "variables" not in base_data or base_data["variables"] is None:
             base_data["variables"] = {}
 
         base_variables = base_data["variables"]

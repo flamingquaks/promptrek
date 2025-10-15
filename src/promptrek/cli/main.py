@@ -16,6 +16,11 @@ from .commands.generate import generate_command
 from .commands.hooks import check_generated_command, install_hooks_command
 from .commands.init import init_command
 from .commands.migrate import migrate_command
+from .commands.plugins import (
+    generate_plugins_command,
+    list_plugins_command,
+    validate_plugins_command,
+)
 from .commands.preview import preview_command
 from .commands.sync import sync_command
 from .commands.validate import validate_command
@@ -529,6 +534,151 @@ def check_generated(ctx: click.Context, files: tuple[str, ...]) -> None:
     """
     try:
         check_generated_command(ctx, list(files))
+    except PrompTrekError as e:
+        click.echo(f"Error: {e}", err=True)
+        ctx.exit(1)
+    except Exception as e:
+        if ctx.obj.get("verbose"):
+            raise
+        click.echo(f"Unexpected error: {e}", err=True)
+        ctx.exit(1)
+
+
+@cli.group()
+@click.pass_context
+def plugins(ctx: click.Context) -> None:
+    """Manage plugin configurations (v2.1.0+).
+
+    Plugin commands allow you to work with MCP servers, slash commands,
+    agents, and hooks defined in your PrompTrek v2.1+ configuration.
+    """
+    pass
+
+
+@plugins.command("list")
+@click.option(
+    "--file",
+    "-f",
+    "prompt_file",
+    type=click.Path(path_type=Path),
+    help="PrompTrek file to list plugins from (auto-detects if not specified)",
+)
+@click.pass_context
+def plugins_list(ctx: click.Context, prompt_file: Optional[Path]) -> None:
+    """List all configured plugins."""
+    try:
+        list_plugins_command(ctx, prompt_file)
+    except PrompTrekError as e:
+        click.echo(f"Error: {e}", err=True)
+        ctx.exit(1)
+    except Exception as e:
+        if ctx.obj.get("verbose"):
+            raise
+        click.echo(f"Unexpected error: {e}", err=True)
+        ctx.exit(1)
+
+
+@plugins.command("generate")
+@click.option(
+    "--file",
+    "-f",
+    "prompt_file",
+    type=click.Path(path_type=Path),
+    help="PrompTrek file to generate from (auto-detects if not specified)",
+)
+@click.option(
+    "--editor",
+    "-e",
+    type=str,
+    help="Editor to generate for (claude, cursor, continue, windsurf, cline, amazon-q, kiro, or 'all')",
+)
+@click.option(
+    "--output",
+    "-o",
+    "output_dir",
+    type=click.Path(path_type=Path),
+    help="Output directory (default: current directory)",
+)
+@click.option(
+    "--dry-run",
+    is_flag=True,
+    help="Show what would be generated without creating files",
+)
+@click.option(
+    "--force-system-wide",
+    "-s",
+    is_flag=True,
+    help="Force system-wide configuration (skip project-level)",
+)
+@click.option(
+    "--yes",
+    "-y",
+    is_flag=True,
+    help="Auto-confirm all prompts (use with caution for system-wide changes)",
+)
+@click.pass_context
+def plugins_generate(
+    ctx: click.Context,
+    prompt_file: Optional[Path],
+    editor: Optional[str],
+    output_dir: Optional[Path],
+    dry_run: bool,
+    force_system_wide: bool,
+    yes: bool,
+) -> None:
+    """Generate plugin files for editors.
+
+    Supports MCP servers, custom commands, agents, and hooks for v2.1+ schemas.
+
+    Configuration Strategy:
+    - Project-level configs are preferred when available
+    - System-wide configs require confirmation (use --yes to auto-confirm)
+    - Use --force-system-wide to skip project-level and use system configs
+
+    Examples:
+        # Generate for Claude with project-level config
+        promptrek plugins generate --editor claude
+
+        # Generate for Windsurf (system-wide only, will prompt for confirmation)
+        promptrek plugins generate --editor windsurf
+
+        # Auto-confirm system-wide changes
+        promptrek plugins generate --editor windsurf --yes
+
+        # Generate for all editors with plugin support
+        promptrek plugins generate --editor all
+    """
+    try:
+        # Store flags in context for commands to access
+        ctx.obj["force_system_wide"] = force_system_wide
+        ctx.obj["auto_confirm"] = yes
+
+        generate_plugins_command(
+            ctx, prompt_file, editor, output_dir, dry_run, force_system_wide, yes
+        )
+    except PrompTrekError as e:
+        click.echo(f"Error: {e}", err=True)
+        ctx.exit(1)
+    except Exception as e:
+        if ctx.obj.get("verbose"):
+            raise
+        click.echo(f"Unexpected error: {e}", err=True)
+        ctx.exit(1)
+
+
+@plugins.command("validate")
+@click.option(
+    "--file",
+    "-f",
+    "prompt_file",
+    type=click.Path(path_type=Path),
+    help="PrompTrek file to validate (auto-detects if not specified)",
+)
+@click.pass_context
+def plugins_validate(ctx: click.Context, prompt_file: Optional[Path]) -> None:
+    """Validate plugin configurations."""
+    try:
+        validate_plugins_command(ctx, prompt_file)
     except PrompTrekError as e:
         click.echo(f"Error: {e}", err=True)
         ctx.exit(1)

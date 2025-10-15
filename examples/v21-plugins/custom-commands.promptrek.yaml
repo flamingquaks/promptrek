@@ -1,0 +1,122 @@
+schema_version: 2.1.0
+metadata:
+  title: Custom Commands Example
+  description: Example slash commands for AI editors
+  version: 1.0.0
+  author: PrompTrek Team
+  tags: [commands, plugins, example]
+
+content: |
+  # Custom Slash Commands Example
+
+  This configuration demonstrates how to define custom slash commands for
+  Claude Code and other AI editors.
+
+  ## Available Commands
+
+  Use these commands in your AI editor by typing `/command-name`.
+
+  - `/review-pr` - Comprehensive pull request review
+  - `/generate-tests` - Generate unit tests for code
+  - `/write-docs` - Generate documentation
+  - `/security-audit` - Security vulnerability scan
+
+plugins:
+  commands:
+    # Pull request review command
+    - name: review-pr
+      description: Perform comprehensive code review of a pull request
+      prompt: |
+        Review the pull request with the following criteria:
+
+        **Code Quality:**
+        - Adherence to coding standards and best practices
+        - Code readability and maintainability
+        - Proper error handling
+        - Appropriate use of design patterns
+
+        **Testing:**
+        - Adequate test coverage
+        - Edge cases handled
+        - Tests are meaningful and not trivial
+
+        **Documentation:**
+        - Code is well-documented
+        - README updated if needed
+        - API changes documented
+
+        **Security:**
+        - No security vulnerabilities
+        - Input validation present
+        - Authentication/authorization correct
+
+        **Performance:**
+        - No obvious performance issues
+        - Efficient algorithms used
+        - Database queries optimized
+
+        Provide a structured review with sections for each criterion.
+      output_format: markdown
+      requires_approval: false
+      system_message: You are an expert code reviewer with years of experience
+      examples:
+        - "/review-pr #123"
+        - "/review-pr https://github.com/org/repo/pull/456"
+      trust_metadata:
+        trusted: true
+        trust_level: full
+        source: local
+
+    # Test generation command
+    - name: generate-tests
+      description: Generate comprehensive unit tests for a code file
+      prompt: |
+        Generate unit tests for the provided code with:
+        - Test cases for normal operation
+        - Edge case testing
+        - Error condition handling
+        - Mocking external dependencies
+        - Clear test descriptions
+        - Good code coverage
+
+        Use the project's testing framework and follow existing test patterns.
+      output_format: code
+      requires_approval: false
+      examples:
+        - "/generate-tests src/utils/parser.ts"
+        - "/generate-tests --coverage=90 src/api/handler.py"
+
+    # Documentation generation command
+    - name: write-docs
+      description: Generate comprehensive documentation for code
+      prompt: |
+        Generate documentation including:
+        - Overview and purpose
+        - API reference
+        - Usage examples
+        - Configuration options
+        - Common pitfalls
+        - Links to related documentation
+
+        Use the project's documentation format (JSDoc, Python docstrings, etc.).
+      output_format: markdown
+      requires_approval: false
+
+    # Security audit command
+    - name: security-audit
+      description: Perform security vulnerability scan
+      prompt: |
+        Analyze the code for security vulnerabilities:
+        - SQL injection risks
+        - XSS vulnerabilities
+        - CSRF protection
+        - Authentication/authorization issues
+        - Sensitive data exposure
+        - Dependency vulnerabilities
+        - Secure configuration
+
+        Provide severity ratings and remediation steps.
+      requires_approval: true
+      trust_metadata:
+        trusted: true
+        requires_approval: true

@@ -2,6 +2,7 @@
 Cursor editor adapter implementation.
 """
 
+import json
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
@@ -136,6 +137,149 @@ class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
                     f.write(content)
                 click.echo(f"✅ Generated: {output_file}")
                 created_files.append(output_file)
+
+        # Generate v2.1 plugin files if present
+        if isinstance(prompt, UniversalPromptV2) and prompt.plugins:
+            # Merge variables for plugins
+            merged_vars = {}
+            if prompt.variables:
+                merged_vars.update(prompt.variables)
+            if variables:
+                merged_vars.update(variables)
+
+            plugin_files = self._generate_v21_plugins(
+                prompt,
+                output_dir,
+                dry_run,
+                verbose,
+                merged_vars if merged_vars else None,
+            )
+            created_files.extend(plugin_files)
+
+        return created_files
+
+    def _generate_v21_plugins(
+        self,
+        prompt: UniversalPromptV2,
+        output_dir: Path,
+        dry_run: bool,
+        verbose: bool,
+        variables: Optional[Dict[str, Any]] = None,
+    ) -> List[Path]:
+        """Generate v2.1 plugin files for Cursor."""
+        if not prompt.plugins:
+            return []
+
+        created_files = []
+        cursor_dir = output_dir / ".cursor"
+
+        # Generate MCP server configurations
+        if prompt.plugins.mcp_servers:
+            mcp_file = cursor_dir / "mcp-servers.json"
+            mcp_servers = {}
+            for server in prompt.plugins.mcp_servers:
+                server_config: Dict[str, Any] = {
+                    "command": server.command,
+                }
+                if server.args:
+                    server_config["args"] = server.args
+                if server.env:
+                    # Apply variable substitution to env vars
+                    env_vars = {}
+                    for key, value in server.env.items():
+                        substituted_value = value
+                        if variables:
+                            for var_name, var_value in variables.items():
+                                placeholder = "{{{ " + var_name + " }}}"
+                                substituted_value = substituted_value.replace(
+                                    placeholder, var_value
+                                )
+                        env_vars[key] = substituted_value
+                    server_config["env"] = env_vars
+                mcp_servers[server.name] = server_config
+
+            mcp_config = {"mcpServers": mcp_servers}
+
+            if dry_run:
+                click.echo(f"  📁 Would create: {mcp_file}")
+                if verbose:
+                    click.echo(f"    {json.dumps(mcp_config, indent=2)[:200]}...")
+            else:
+                cursor_dir.mkdir(parents=True, exist_ok=True)
+                with open(mcp_file, "w", encoding="utf-8") as f:
+                    json.dump(mcp_config, f, indent=2)
+                click.echo(f"✅ Generated: {mcp_file}")
+            created_files.append(mcp_file)
+
+        # Generate agent schemas
+        if prompt.plugins.agents:
+            schemas_dir = cursor_dir / "agent-schemas"
+            for agent in prompt.plugins.agents:
+                # Apply variable substitution
+                agent_prompt = agent.system_prompt
+                if variables:
+                    for var_name, var_value in variables.items():
+                        placeholder = "{{{ " + var_name + " }}}"
+                        agent_prompt = agent_prompt.replace(placeholder, var_value)
+
+                schema_file = schemas_dir / f"{agent.name}.json"
+                agent_schema = {
+                    "name": agent.name,
+                    "description": agent.description,
+                    "systemPrompt": agent_prompt,
+                    "tools": agent.tools or [],
+                    "trustLevel": agent.trust_level,
+                    "requiresApproval": agent.requires_approval,
+                    **({"context": agent.context} if agent.context else {}),
+                }
+
+                if dry_run:
+                    click.echo(f"  📁 Would create: {schema_file}")
+                    if verbose:
+                        preview = json.dumps(agent_schema, indent=2)[:200] + "..."
+                        click.echo(f"    {preview}")
+                else:
+                    schemas_dir.mkdir(parents=True, exist_ok=True)
+                    with open(schema_file, "w", encoding="utf-8") as f:
+                        json.dump(agent_schema, f, indent=2)
+                    click.echo(f"✅ Generated: {schema_file}")
+                created_files.append(schema_file)
+
+        # Generate agent functions (tools available to agents)
+        if prompt.plugins.commands:
+            functions_dir = cursor_dir / "agent-functions"
+            for command in prompt.plugins.commands:
+                # Apply variable substitution
+                command_prompt = command.prompt
+                if variables:
+                    for var_name, var_value in variables.items():
+                        placeholder = "{{{ " + var_name + " }}}"
+                        command_prompt = command_prompt.replace(placeholder, var_value)
+
+                function_file = functions_dir / f"{command.name}.json"
+                function_schema = {
+                    "name": command.name,
+                    "description": command.description,
+                    "prompt": command_prompt,
+                    **(
+                        {"outputFormat": command.output_format}
+                        if command.output_format
+                        else {}
+                    ),
+                    "requiresApproval": command.requires_approval,
+                }
+
+                if dry_run:
+                    click.echo(f"  📁 Would create: {function_file}")
+                    if verbose:
+                        preview = json.dumps(function_schema, indent=2)[:200] + "..."
+                        click.echo(f"    {preview}")
+                else:
+                    functions_dir.mkdir(parents=True, exist_ok=True)
+                    with open(function_file, "w", encoding="utf-8") as f:
+                        json.dump(function_schema, f, indent=2)
+                    click.echo(f"✅ Generated: {function_file}")
+                created_files.append(function_file)
 
         return created_files
 

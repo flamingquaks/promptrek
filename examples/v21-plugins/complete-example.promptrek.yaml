@@ -1,0 +1,341 @@
+schema_version: 2.1.0
+metadata:
+  title: Complete v2.1 Plugin Example
+  description: Comprehensive example showing all v2.1 plugin features together
+  version: 1.0.0
+  author: PrompTrek Team
+  tags: [mcp, commands, agents, complete-example]
+
+content: |
+  # Complete PrompTrek v2.1 Plugin Configuration
+
+  This is a comprehensive example demonstrating all v2.1 plugin features:
+  - MCP (Model Context Protocol) servers
+  - Custom slash commands
+  - Autonomous agents
+
+  ## Quick Start
+
+  1. **Set environment variables:**
+     ```bash
+     export GITHUB_TOKEN="your-github-token"
+     export OPENAI_API_KEY="your-openai-key"
+     ```
+
+  2. **Generate for your editor:**
+     ```bash
+     # For Claude Code
+     promptrek plugins generate project.promptrek.yaml -e claude
+
+     # For Cursor
+     promptrek plugins generate project.promptrek.yaml -e cursor
+
+     # For Continue
+     promptrek plugins generate project.promptrek.yaml -e continue
+     ```
+
+  3. **Use in your editor:**
+     - MCP servers load automatically
+     - Use slash commands: `/review`, `/test`, `/docs`
+     - Configure agents for autonomous workflows
+
+  ## Editor Support
+
+  | Feature | Claude | Cursor | Continue | Cline | Windsurf |
+  |---------|--------|--------|----------|-------|----------|
+  | MCP Servers | ✅ | ✅ | ✅ | ✅ | ✅ |
+  | Custom Commands | ⚠️ | ✅ | ✅ | ⚠️ | ⚠️ |
+  | Agents | ⚠️ | ✅ | ⚠️ | ⚠️ | ⚠️ |
+
+  ✅ = Full support | ⚠️ = Partial/Planned
+
+plugins:
+  # MCP Servers - External tools and data sources
+  mcp_servers:
+    # Filesystem access for reading/writing files
+    - name: filesystem
+      command: npx
+      args:
+        - "-y"
+        - "@modelcontextprotocol/server-filesystem"
+        - "{{{ PROJECT_ROOT }}}"
+      description: Provides file system access to project directory
+      trust_metadata:
+        trusted: true
+        trust_level: partial
+        requires_approval: true
+        source: official
+        verified_by: Anthropic
+
+    # GitHub integration for repository access
+    - name: github
+      command: npx
+      args:
+        - "-y"
+        - "@modelcontextprotocol/server-github"
+      env:
+        GITHUB_TOKEN: "{{{ GITHUB_TOKEN }}}"
+        GITHUB_OWNER: "{{{ GITHUB_OWNER }}}"
+      description: Access GitHub repositories, issues, and PRs
+      trust_metadata:
+        trusted: true
+        trust_level: full
+        requires_approval: false
+        source: official
+
+    # Web search for documentation and answers
+    - name: web-search
+      command: npx
+      args:
+        - "-y"
+        - "@modelcontextprotocol/server-brave-search"
+      env:
+        BRAVE_API_KEY: "{{{ BRAVE_API_KEY }}}"
+      description: Search the web for documentation and solutions
+
+  # Custom Commands - Slash commands for common tasks
+  commands:
+    # Code review command
+    - name: review
+      description: Comprehensive code review with best practices
+      prompt: |
+        Perform a thorough code review focusing on:
+
+        **Code Quality:**
+        - Clean code principles
+        - SOLID principles
+        - DRY (Don't Repeat Yourself)
+        - Proper error handling
+
+        **Security:**
+        - Input validation
+        - SQL injection prevention
+        - XSS protection
+        - Authentication/authorization
+
+        **Performance:**
+        - Algorithm efficiency
+        - Database query optimization
+        - Memory management
+        - Caching opportunities
+
+        **Testing:**
+        - Test coverage
+        - Edge cases
+        - Error scenarios
+        - Integration tests
+
+        **Documentation:**
+        - Code comments
+        - API documentation
+        - README updates
+
+        Provide specific, actionable feedback with code examples.
+      output_format: markdown
+      requires_approval: false
+      system_message: You are a senior software architect with 15+ years of experience
+      examples:
+        - "/review src/api/users.ts"
+        - "/review --focus=security src/auth/"
+      trust_metadata:
+        trusted: true
+        trust_level: full
+        source: local
+
+    # Test generation command
+    - name: test
+      description: Generate comprehensive unit tests
+      prompt: |
+        Generate unit tests following these guidelines:
+
+        1. **Test Structure:**
+           - Arrange, Act, Assert pattern
+           - Clear test names describing behavior
+           - One assertion per test
+
+        2. **Coverage:**
+           - Happy path scenarios
+           - Edge cases (empty, null, undefined)
+           - Error conditions
+           - Boundary values
+
+        3. **Best Practices:**
+           - Mock external dependencies
+           - Use fixtures/factories
+           - Avoid test interdependencies
+           - Fast execution
+
+        4. **Test Types:**
+           - Unit tests for functions
+           - Integration tests for workflows
+           - Property-based tests where applicable
+
+        Use the project's testing framework and follow existing patterns.
+      output_format: code
+      requires_approval: false
+      examples:
+        - "/test src/utils/parser.ts"
+        - "/test --coverage=90 src/api/"
+
+    # Documentation generation
+    - name: docs
+      description: Generate comprehensive documentation
+      prompt: |
+        Create documentation including:
+
+        **Overview:**
+        - Purpose and goals
+        - Key features
+        - Architecture diagram
+
+        **API Reference:**
+        - Function signatures
+        - Parameter descriptions
+        - Return values
+        - Usage examples
+
+        **Guides:**
+        - Getting started
+        - Common use cases
+        - Best practices
+        - Troubleshooting
+
+        **Additional:**
+        - Configuration options
+        - Environment variables
+        - Dependencies
+        - Contributing guidelines
+
+        Use Markdown format with clear headings and code examples.
+      output_format: markdown
+      requires_approval: false
+
+    # Refactoring suggestions
+    - name: refactor
+      description: Suggest code refactorings
+      prompt: |
+        Analyze code and suggest refactorings:
+
+        - Extract functions/classes
+        - Remove code duplication
+        - Simplify complex conditions
+        - Improve variable naming
+        - Apply design patterns
+        - Optimize performance
+
+        For each suggestion:
+        1. Explain the issue
+        2. Show before/after code
+        3. Justify the change
+        4. Note any risks
+      requires_approval: true
+      trust_metadata:
+        requires_approval: true
+
+  # Autonomous Agents - AI agents for automated workflows
+  agents:
+    # Bug detection and fixing agent
+    - name: bug-hunter
+      description: Identifies and fixes bugs automatically
+      system_prompt: |
+        You are a bug detection and fixing specialist. Your workflow:
+
+        1. **Detection:**
+           - Analyze error logs
+           - Review failing tests
+           - Check edge cases
+           - Use static analysis
+
+        2. **Root Cause:**
+           - Trace the bug origin
+           - Identify related code
+           - Understand the impact
+
+        3. **Fix:**
+           - Apply minimal changes
+           - Maintain code style
+           - Add regression tests
+           - Update documentation
+
+        4. **Verification:**
+           - Run full test suite
+           - Check for side effects
+           - Validate fix
+
+        Be thorough and cautious. When in doubt, ask for approval.
+      tools:
+        - file_read
+        - file_write
+        - run_tests
+        - git_diff
+        - static_analysis
+      trust_level: untrusted
+      requires_approval: true
+      context:
+        max_files_per_fix: 5
+        require_tests: true
+        auto_commit: false
+      trust_metadata:
+        trusted: true
+        trust_level: untrusted
+        requires_approval: true
+        source: local
+
+    # Code quality improvement agent
+    - name: quality-guardian
+      description: Monitors and improves code quality
+      system_prompt: |
+        You are a code quality guardian. Continuously monitor:
+
+        - Code smells and anti-patterns
+        - Complexity metrics
+        - Code duplication
+        - Test coverage
+        - Documentation completeness
+
+        When issues are found:
+        1. Prioritize by severity
+        2. Suggest improvements
+        3. Provide examples
+        4. Track progress
+
+        Focus on maintainability and long-term code health.
+      tools:
+        - file_read
+        - static_analysis
+        - complexity_analysis
+        - coverage_analysis
+      trust_level: partial
+      requires_approval: false
+      trust_metadata:
+        trusted: true
+        trust_level: partial
+        source: local
+
+    # Documentation maintenance agent
+    - name: doc-keeper
+      description: Keeps documentation up-to-date
+      system_prompt: |
+        You maintain documentation quality. Ensure:
+
+        - API docs match code signatures
+        - Examples are tested and working
+        - README is comprehensive
+        - Changelogs are updated
+        - Dead links are fixed
+
+        Update docs automatically when code changes.
+        Flag breaking changes for review.
+      tools:
+        - file_read
+        - file_write
+        - link_checker
+        - code_analyzer
+      trust_level: partial
+      requires_approval: true
+
+variables:
+  PROJECT_ROOT: "/Users/username/projects/myproject"
+  GITHUB_TOKEN: "ghp_your_token_here"
+  GITHUB_OWNER: "your-username"
+  BRAVE_API_KEY: "BSA_your_brave_api_key"

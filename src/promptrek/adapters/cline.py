@@ -10,10 +10,11 @@ import click
 from ..core.exceptions import ValidationError
 from ..core.models import UniversalPrompt, UniversalPromptV2
 from .base import EditorAdapter
+from .mcp_mixin import MCPGenerationMixin
 from .sync_mixin import MarkdownSyncMixin
 
 
-class ClineAdapter(MarkdownSyncMixin, EditorAdapter):
+class ClineAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
     """Adapter for Cline terminal-based AI assistant."""
 
     _description = "Cline (.clinerules, .clinerules/*.md)"
@@ -26,6 +27,16 @@ class ClineAdapter(MarkdownSyncMixin, EditorAdapter):
             file_patterns=self._file_patterns,
         )
 
+    def get_mcp_config_strategy(self) -> Dict[str, Any]:
+        """Get MCP configuration strategy for Cline adapter."""
+        return {
+            "supports_project": True,
+            "project_path": ".vscode/settings.json",
+            "system_path": None,
+            "requires_confirmation": False,
+            "config_format": "json",
+        }
+
     def generate(
         self,
         prompt: Union[UniversalPrompt, UniversalPromptV2],
@@ -36,6 +47,12 @@ class ClineAdapter(MarkdownSyncMixin, EditorAdapter):
         headless: bool = False,
     ) -> List[Path]:
         """Generate Cline rules files - supports both single file and directory formats."""
+
+        # V2.1: Handle plugins if present
+        if isinstance(prompt, UniversalPromptV2) and prompt.plugins:
+            return self._generate_v21_plugins(
+                prompt, output_dir, dry_run, verbose, variables
+            )
 
         # V2: Use documents field for multi-file rules or main content for single file
         if isinstance(prompt, UniversalPromptV2):
@@ -128,6 +145,80 @@ class ClineAdapter(MarkdownSyncMixin, EditorAdapter):
                     f.write(content)
                 click.echo(f"✅ Generated: {output_file}")
                 created_files.append(output_file)
+
+        return created_files
+
+    def _generate_v21_plugins(
+        self,
+        prompt: UniversalPromptV2,
+        output_dir: Path,
+        dry_run: bool,
+        verbose: bool,
+        variables: Optional[Dict[str, Any]] = None,
+    ) -> List[Path]:
+        """Generate Cline files from v2.1 schema with plugin support."""
+        created_files = []
+
+        # First, generate the regular v2 markdown files
+        markdown_files = self._generate_v2(
+            prompt, output_dir, dry_run, verbose, variables
+        )
+        created_files.extend(markdown_files)
+
+        # Then, handle plugins if present
+        if prompt.plugins and prompt.plugins.mcp_servers:
+            mcp_files = self._generate_mcp_config(
+                prompt.plugins.mcp_servers,
+                output_dir,
+                dry_run,
+                verbose,
+                variables,
+            )
+            created_files.extend(mcp_files)
+
+        return created_files
+
+    def _generate_mcp_config(
+        self,
+        mcp_servers: list,
+        output_dir: Path,
+        dry_run: bool,
+        verbose: bool,
+        variables: Optional[Dict[str, Any]] = None,
+    ) -> List[Path]:
+        """Generate MCP configuration for Cline in .vscode/settings.json."""
+        strategy = self.get_mcp_config_strategy()
+        created_files = []
+
+        # Cline only supports project-level via VS Code settings
+        if strategy["supports_project"] and strategy["project_path"]:
+            settings_path = output_dir / strategy["project_path"]
+
+            # Build MCP servers config (uses standard MCP format)
+            mcp_config = self.build_mcp_servers_config(
+                mcp_servers, variables, format_style="standard"
+            )
+
+            # Read existing VS Code settings
+            existing_settings = self.read_existing_mcp_config(settings_path)
+
+            if existing_settings:
+                # Merge with existing settings
+                if verbose:
+                    click.echo(
+                        "  ℹ️  Merging MCP servers with existing VS Code settings"
+                    )
+                merged_settings = existing_settings.copy()
+                # Add/update mcpServers section
+                merged_settings.update(mcp_config)
+            else:
+                merged_settings = mcp_config
+
+            # Write the settings file
+            if self.write_mcp_config_file(
+                merged_settings, settings_path, dry_run, verbose
+            ):
+                created_files.append(settings_path)
 
         return created_files
 

@@ -16,10 +16,11 @@ from ..core.models import (
     UniversalPromptV2,
 )
 from .base import EditorAdapter
+from .mcp_mixin import MCPGenerationMixin
 from .sync_mixin import MarkdownSyncMixin
 
 
-class WindsurfAdapter(MarkdownSyncMixin, EditorAdapter):
+class WindsurfAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
     """Adapter for Windsurf AI assistant."""
 
     _description = "Windsurf (.windsurf/rules/)"
@@ -32,6 +33,18 @@ class WindsurfAdapter(MarkdownSyncMixin, EditorAdapter):
             file_patterns=self._file_patterns,
         )
 
+    def get_mcp_config_strategy(self) -> Dict[str, Any]:
+        """Get MCP configuration strategy for Windsurf adapter."""
+        return {
+            "supports_project": False,  # Windsurf only supports system-wide
+            "project_path": None,
+            "system_path": str(
+                Path.home() / ".codeium" / "windsurf" / "mcp_config.json"
+            ),
+            "requires_confirmation": True,  # Always confirm system-wide changes
+            "config_format": "json",
+        }
+
     def generate(
         self,
         prompt: Union[UniversalPrompt, UniversalPromptV2],
@@ -42,6 +55,12 @@ class WindsurfAdapter(MarkdownSyncMixin, EditorAdapter):
         headless: bool = False,
     ) -> List[Path]:
         """Generate Windsurf configuration files."""
+
+        # V2.1: Handle plugins if present
+        if isinstance(prompt, UniversalPromptV2) and prompt.plugins:
+            return self._generate_v21_plugins(
+                prompt, output_dir, dry_run, verbose, variables
+            )
 
         # V2: Use documents field for multi-file generation
         if isinstance(prompt, UniversalPromptV2):
@@ -124,6 +143,84 @@ class WindsurfAdapter(MarkdownSyncMixin, EditorAdapter):
                     f.write(content)
                 click.echo(f"✅ Generated: {output_file}")
                 created_files.append(output_file)
+
+        return created_files
+
+    def _generate_v21_plugins(
+        self,
+        prompt: UniversalPromptV2,
+        output_dir: Path,
+        dry_run: bool,
+        verbose: bool,
+        variables: Optional[Dict[str, Any]] = None,
+    ) -> List[Path]:
+        """Generate Windsurf files from v2.1 schema with plugin support."""
+        created_files = []
+
+        # First, generate the regular v2 markdown files
+        markdown_files = self._generate_v2(
+            prompt, output_dir, dry_run, verbose, variables
+        )
+        created_files.extend(markdown_files)
+
+        # Then, handle plugins if present
+        if prompt.plugins and prompt.plugins.mcp_servers:
+            mcp_files = self._generate_mcp_config(
+                prompt.plugins.mcp_servers,
+                output_dir,
+                dry_run,
+                verbose,
+                variables,
+            )
+            created_files.extend(mcp_files)
+
+        return created_files
+
+    def _generate_mcp_config(
+        self,
+        mcp_servers: list,
+        output_dir: Path,
+        dry_run: bool,
+        verbose: bool,
+        variables: Optional[Dict[str, Any]] = None,
+    ) -> List[Path]:
+        """Generate MCP configuration for Windsurf (system-wide only with confirmation)."""
+        strategy = self.get_mcp_config_strategy()
+        created_files: List[Path] = []
+
+        # Windsurf only supports system-wide
+        if strategy["system_path"]:
+            system_path = Path(strategy["system_path"]).expanduser()
+
+            # Always confirm with user for system-wide changes
+            if not self.confirm_system_wide_mcp_update(
+                "Windsurf", system_path, dry_run
+            ):
+                if verbose:
+                    click.echo("  ⏭️  Skipping Windsurf MCP configuration")
+                return created_files
+
+            # Build MCP servers config (uses standard MCP format)
+            mcp_config = self.build_mcp_servers_config(
+                mcp_servers, variables, format_style="standard"
+            )
+
+            # Check if config already exists
+            existing_config = self.read_existing_mcp_config(system_path)
+
+            if existing_config:
+                # Merge with existing config
+                if verbose:
+                    click.echo("  ℹ️  Merging MCP servers with existing Windsurf config")
+                merged_config = self.merge_mcp_config(
+                    existing_config, mcp_config, format_style="standard"
+                )
+            else:
+                merged_config = mcp_config
+
+            # Write the config
+            if self.write_mcp_config_file(merged_config, system_path, dry_run, verbose):
+                created_files.append(system_path)
 
         return created_files
 
