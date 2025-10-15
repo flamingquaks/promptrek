@@ -211,9 +211,7 @@ class WindsurfAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
             if existing_config:
                 # Merge with existing config
                 if verbose:
-                    click.echo(
-                        "  ℹ️  Merging MCP servers with existing Windsurf config"
-                    )
+                    click.echo("  ℹ️  Merging MCP servers with existing Windsurf config")
                 merged_config = self.merge_mcp_config(
                     existing_config, mcp_config, format_style="standard"
                 )

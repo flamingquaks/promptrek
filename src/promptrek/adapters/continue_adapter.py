@@ -273,9 +273,7 @@ class ContinueAdapter(MCPGenerationMixin, EditorAdapter):
             if existing_config:
                 # Merge with existing config
                 if verbose:
-                    click.echo(
-                        "  ℹ️  Merging MCP servers with existing Continue config"
-                    )
+                    click.echo("  ℹ️  Merging MCP servers with existing Continue config")
                 merged_config = self.merge_mcp_config(
                     existing_config, mcp_config, format_style="standard"
                 )
