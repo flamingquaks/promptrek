@@ -1,3 +1,30 @@
+# [](https://github.com/flamingquaks/promptrek/compare/v0.2.0...v) (2025-10-16)
+
+
+### Features
+
+* Add .gitignore configuration for editor-specific files ([#72](https://github.com/flamingquaks/promptrek/issues/72)) ([e1b2f04](https://github.com/flamingquaks/promptrek/commit/e1b2f046e183a005121ec62705a27f9fc329d3f3))
+* Add support for UniversalPromptV3 and enhance migration functionality ([#70](https://github.com/flamingquaks/promptrek/issues/70)) ([e3e4319](https://github.com/flamingquaks/promptrek/commit/e3e431924982c65822eb3f662ff8de80d308e9c6))
+* Update documentation for v3.0.0 schema, including migration guide and deprecation warnings ([bb393d4](https://github.com/flamingquaks/promptrek/commit/bb393d4f6b0f278e005163ebf0f042005cff927c))
+* Upgrade Project's promptrek config - schema version to 3.0.0 ([c53c2a5](https://github.com/flamingquaks/promptrek/commit/c53c2a5d80b1d21bb2c408b4b1fdfac7c4d3b4cd))
+
+
+
+# [0.2.0](https://github.com/flamingquaks/promptrek/compare/v0.1.1...v0.2.0) (2025-10-15)
+
+
+### Bug Fixes
+
+* Downgrade PyYAML dependency version to 5.4 in configuration files ([8199b08](https://github.com/flamingquaks/promptrek/commit/8199b08022eee738cfc9c35ab85a9dd65ec737d8))
+* Update keywords and remove unnecessary dependencies in configuration files ([5da5d6c](https://github.com/flamingquaks/promptrek/commit/5da5d6cc395ff1801241105a9622bcb10ab89820))
+
+
+### Features
+
+* Add v2.1 plugin support and enhance configurations ([#69](https://github.com/flamingquaks/promptrek/issues/69)) ([ceb3d51](https://github.com/flamingquaks/promptrek/commit/ceb3d5150790a4353ddd6e42912c0205246e9e7c))
+
+
+
 # [](https://github.com/flamingquaks/promptrek/compare/v0.1.1...v) (2025-10-15)
 
 
