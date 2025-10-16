@@ -10,7 +10,7 @@ from typing import Any, Dict, List, Sequence, Union
 import yaml
 from pydantic import ValidationError
 
-from .exceptions import UPFFileNotFoundError, UPFParsingError
+from .exceptions import DeprecationWarnings, UPFFileNotFoundError, UPFParsingError
 from .models import UniversalPrompt, UniversalPromptV2, UniversalPromptV3
 
 
@@ -222,18 +222,8 @@ class UPFParser:
             )
 
             if has_old_structure:
-                # Emit deprecation warning
-                warning_msg = (
-                    f"\n⚠️  DEPRECATION WARNING in {source}:\n"
-                    f"   Detected nested plugin structure (plugins.mcp_servers, etc.)\n"
-                    f"   This structure is deprecated in v3.0 and will be removed in v4.0.\n"
-                    f"   Please migrate to top-level fields:\n"
-                    f"     - Move 'plugins.mcp_servers' → 'mcp_servers' (top-level)\n"
-                    f"     - Move 'plugins.commands' → 'commands' (top-level)\n"
-                    f"     - Move 'plugins.agents' → 'agents' (top-level)\n"
-                    f"     - Move 'plugins.hooks' → 'hooks' (top-level)\n"
-                    f"   Run: promptrek migrate {source} to auto-migrate\n"
-                )
+                # Emit deprecation warning using centralized message
+                warning_msg = DeprecationWarnings.v3_nested_plugins_warning(source)
                 print(warning_msg, file=sys.stderr)
 
                 # Auto-promote nested fields to top-level

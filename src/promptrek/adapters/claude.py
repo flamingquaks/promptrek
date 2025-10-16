@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 import click
 import yaml
 
-from ..core.exceptions import ValidationError
+from ..core.exceptions import DeprecationWarnings, ValidationError
 from ..core.models import UniversalPrompt, UniversalPromptV2, UniversalPromptV3
 from .base import EditorAdapter
 from .sync_mixin import SingleFileMarkdownSyncMixin
@@ -269,27 +269,19 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
             # V2.1: Use nested plugins structure (deprecated)
             if prompt.plugins.mcp_servers:
                 click.echo(
-                    "⚠️  Using deprecated plugins.mcp_servers structure "
-                    "(use top-level mcp_servers in v3.0)"
+                    DeprecationWarnings.v3_nested_plugin_field_warning("mcp_servers")
                 )
                 mcp_servers = prompt.plugins.mcp_servers
             if prompt.plugins.commands:
                 click.echo(
-                    "⚠️  Using deprecated plugins.commands structure "
-                    "(use top-level commands in v3.0)"
+                    DeprecationWarnings.v3_nested_plugin_field_warning("commands")
                 )
                 commands = prompt.plugins.commands
             if prompt.plugins.agents:
-                click.echo(
-                    "⚠️  Using deprecated plugins.agents structure "
-                    "(use top-level agents in v3.0)"
-                )
+                click.echo(DeprecationWarnings.v3_nested_plugin_field_warning("agents"))
                 agents = prompt.plugins.agents
             if prompt.plugins.hooks:
-                click.echo(
-                    "⚠️  Using deprecated plugins.hooks structure "
-                    "(use top-level hooks in v3.0)"
-                )
+                click.echo(DeprecationWarnings.v3_nested_plugin_field_warning("hooks"))
                 hooks = prompt.plugins.hooks
 
         # Generate MCP server configurations
