@@ -70,7 +70,33 @@ Available templates:
 - `react` - React/TypeScript web application
 - `api` - Node.js/Python API service
 
-### 2. Validate Your Configuration
+**Note:** When you run `promptrek init`, it automatically:
+- Creates `.gitignore` if it doesn't exist
+- Adds `variables.promptrek.yaml` to `.gitignore`
+- Adds all editor-specific file patterns to `.gitignore` (18 patterns including `.github/copilot-instructions.md`, `.cursor/rules/*.mdc`, etc.)
+
+### 2. Configure .gitignore Management (Optional)
+
+If you have existing editor files already committed to git, clean them up:
+
+```bash
+# Add patterns to .gitignore and remove committed files from git
+promptrek config-ignores --remove-cached
+
+# Preview what would be done
+promptrek config-ignores --dry-run
+
+# Use specific config file
+promptrek config-ignores --config custom.promptrek.yaml
+```
+
+You can also control this behavior in your `.promptrek.yaml`:
+```yaml
+# Set to false to disable automatic .gitignore management
+ignore_editor_files: false
+```
+
+### 3. Validate Your Configuration
 
 ```bash
 promptrek validate my-project.promptrek.yaml
@@ -81,7 +107,7 @@ Use `--strict` to treat warnings as errors:
 promptrek validate my-project.promptrek.yaml --strict
 ```
 
-### 3. Generate Editor-Specific Prompts
+### 4. Generate Editor-Specific Prompts
 
 Generate for a specific editor:
 ```bash
@@ -100,7 +126,7 @@ Preview what would be generated (dry run):
 promptrek generate my-project.promptrek.yaml --editor copilot --dry-run
 ```
 
-### 4. Preview Generated Output
+### 5. Preview Generated Output
 
 Preview what will be generated without creating files:
 ```bash

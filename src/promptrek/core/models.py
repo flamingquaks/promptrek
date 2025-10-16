@@ -453,6 +453,10 @@ class UniversalPromptV2(BaseModel):
     plugins: Optional[PluginConfig] = Field(
         default=None, description="Plugin configurations (v2.1.0+ - deprecated in v3.0)"
     )
+    ignore_editor_files: Optional[bool] = Field(
+        default=None,
+        description="Automatically add editor-specific files to .gitignore (default: True)",
+    )
 
     @field_validator("schema_version")
     @classmethod
@@ -514,6 +518,10 @@ class UniversalPromptV3(BaseModel):
     plugins: Optional[List[PluginEntry]] = Field(
         default=None, description="Plugin marketplace entries (v3.0+)"
     )
+    ignore_editor_files: Optional[bool] = Field(
+        default=None,
+        description="Automatically add editor-specific files to .gitignore (default: True)",
+    )
 
     @field_validator("schema_version")
     @classmethod
@@ -568,6 +576,10 @@ class UniversalPrompt(BaseModel):
     )
     imports: Optional[List[ImportConfig]] = Field(
         default=None, description="Import other prompt files"
+    )
+    ignore_editor_files: Optional[bool] = Field(
+        default=None,
+        description="Automatically add editor-specific files to .gitignore (default: True)",
     )
 
     @field_validator("schema_version")

@@ -222,7 +222,7 @@ title: Home
           <div class="code-block">
             <code>promptrek init --setup-hooks --output my-project.promptrek.yaml</code>
           </div>
-          <p>Initialize your first universal prompt with pre-commit hooks</p>
+          <p>Initialize your first universal prompt with pre-commit hooks and auto .gitignore setup</p>
         </div>
       </div>
 

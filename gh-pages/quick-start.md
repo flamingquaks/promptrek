@@ -49,6 +49,13 @@ promptrek migrate old.promptrek.yaml -o new.promptrek.yaml
 
 **💡 Tip:** The `--setup-hooks` flag automatically configures pre-commit hooks to validate your `.promptrek.yaml` files and prevent accidental commits of generated files. This ensures your team maintains clean version control!
 
+**🔐 .gitignore Management:** When you run `promptrek init`, it automatically:
+- Creates `.gitignore` if it doesn't exist
+- Adds `variables.promptrek.yaml` to `.gitignore`
+- Adds 18 editor-specific file patterns to `.gitignore` (including `.github/copilot-instructions.md`, `.cursor/rules/*.mdc`, `.continue/rules/*.md`, etc.)
+
+This prevents generated editor files from being committed to version control. You can disable this with `ignore_editor_files: false` in your config.
+
 **Available templates:**
 - `basic` - General project template
 - `react` - React/TypeScript web application
@@ -172,7 +179,33 @@ Use `--strict` to treat warnings as errors:
 promptrek validate my-project.promptrek.yaml --strict
 ```
 
-### 4. (Optional) Create Local Variables File
+### 4. Configure .gitignore (Optional)
+
+If you have existing editor files already committed to git, you can clean them up:
+
+```bash
+# Add patterns to .gitignore and remove committed files from git
+promptrek config-ignores --remove-cached
+
+# Preview what would be done
+promptrek config-ignores --dry-run
+
+# Use specific config file
+promptrek config-ignores --config my-project.promptrek.yaml
+```
+
+**What this command does:**
+- Adds all editor file patterns to `.gitignore` (18 patterns)
+- With `--remove-cached`: Runs `git rm --cached` on existing committed editor files
+- Respects the `ignore_editor_files` setting in your config
+
+You can control this behavior in your `.promptrek.yaml`:
+```yaml
+# Set to false to disable automatic .gitignore management
+ignore_editor_files: false
+```
+
+### 5. (Optional) Create Local Variables File
 
 For user-specific variables like names, emails, or API keys that should NOT be committed:
 
@@ -185,7 +218,7 @@ API_KEY: "your-secret-key"
 
 Variables from this file override defaults in your `.promptrek.yaml` file. See [Local Variables](user-guide.html#local-variables-file) for details.
 
-### 5. Preview Generated Output (Optional)
+### 6. Preview Generated Output (Optional)
 
 Preview what will be generated without creating files:
 
@@ -205,7 +238,7 @@ The preview shows:
 - Any warnings or notices
 - No actual files are written
 
-### 6. Generate Editor-Specific Prompts
+### 7. Generate Editor-Specific Prompts
 
 Now generate prompts for your preferred editors:
 

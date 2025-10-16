@@ -12,6 +12,7 @@ import click
 from .. import __version__
 from ..core.exceptions import PrompTrekError
 from .commands.agents import agents_command
+from .commands.config_ignores import config_ignores_command
 from .commands.generate import generate_command
 from .commands.hooks import check_generated_command, install_hooks_command
 from .commands.init import init_command
@@ -679,6 +680,61 @@ def plugins_validate(ctx: click.Context, prompt_file: Optional[Path]) -> None:
     """Validate plugin configurations."""
     try:
         validate_plugins_command(ctx, prompt_file)
+    except PrompTrekError as e:
+        click.echo(f"Error: {e}", err=True)
+        ctx.exit(1)
+    except Exception as e:
+        if ctx.obj.get("verbose"):
+            raise
+        click.echo(f"Unexpected error: {e}", err=True)
+        ctx.exit(1)
+
+
+@cli.command()
+@click.option(
+    "--config",
+    "-c",
+    type=click.Path(path_type=Path),
+    help="Path to PrompTrek config file (auto-detects if not specified)",
+)
+@click.option(
+    "--remove-cached",
+    "-r",
+    is_flag=True,
+    help="Run 'git rm --cached' on existing committed files",
+)
+@click.option(
+    "--dry-run",
+    is_flag=True,
+    help="Show what would be done without making changes",
+)
+@click.pass_context
+def config_ignores(
+    ctx: click.Context,
+    config: Optional[Path],
+    remove_cached: bool,
+    dry_run: bool,
+) -> None:
+    """Configure .gitignore to exclude editor-specific files.
+
+    This command adds editor file patterns to .gitignore and optionally
+    removes them from git cache if they were previously committed.
+
+    The command respects the ignore_editor_files setting in your PrompTrek
+    configuration file.
+
+    Examples:
+        # Add patterns to .gitignore
+        promptrek config-ignores
+
+        # Add patterns and remove cached files
+        promptrek config-ignores --remove-cached
+
+        # Show what would be done
+        promptrek config-ignores --dry-run
+    """
+    try:
+        config_ignores_command(ctx, config, remove_cached, dry_run)
     except PrompTrekError as e:
         click.echo(f"Error: {e}", err=True)
         ctx.exit(1)

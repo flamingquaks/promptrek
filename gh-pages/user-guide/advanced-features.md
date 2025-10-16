@@ -66,10 +66,29 @@ ENVIRONMENT: "development"
 
 **How it works:**
 
-1. When you run `promptrek init`, it automatically adds `variables.promptrek.yaml` to your `.gitignore`
+1. When you run `promptrek init`, it automatically:
+   - Adds `variables.promptrek.yaml` to `.gitignore`
+   - Adds 18 editor-specific file patterns to `.gitignore`
 2. Create your local variables file manually with user-specific values
 3. PrompTrek automatically loads variables from this file when generating
 4. Pre-commit hooks prevent accidental commits of this file
+
+**Editor files automatically excluded:**
+
+When `ignore_editor_files` is enabled (default), PrompTrek adds these patterns to `.gitignore`:
+- `.github/copilot-instructions.md`, `.github/instructions/*.instructions.md`, `.github/prompts/*.prompt.md`
+- `.cursor/rules/*.mdc`, `.cursor/rules/index.mdc`, `AGENTS.md`
+- `.continue/rules/*.md`
+- `.windsurf/rules/*.md`
+- `.clinerules`, `.clinerules/*.md`
+- `.claude/CLAUDE.md`, `.claude-context.md`
+- `.amazonq/rules/*.md`, `.amazonq/cli-agents/*.json`
+- `.assistant/rules/*.md`
+- `.kiro/steering/*.md`
+- `.tabnine_commands`
+- `.vscode/mcp.json`
+
+You can disable this with `ignore_editor_files: false` in your config.
 
 **Variable Precedence (highest to lowest):**
 
@@ -326,6 +345,95 @@ This will:
 3. Process conditionals for Claude editor
 4. Override variables via CLI
 5. Merge all instructions and content
+
+## .gitignore Management
+
+PrompTrek automatically manages `.gitignore` to prevent committing generated editor files. This keeps your repository clean by ensuring only the source `.promptrek.yaml` files are version controlled.
+
+### Automatic Configuration on Init
+
+When you run `promptrek init`, it automatically:
+- Creates `.gitignore` if it doesn't exist
+- Adds `variables.promptrek.yaml` to `.gitignore`
+- Adds 18 editor-specific file patterns to `.gitignore`
+
+### Configuration Option
+
+Control .gitignore management in your `.promptrek.yaml`:
+
+```yaml
+schema_version: "2.1.0"
+metadata:
+  title: "My Project"
+  # ...
+
+# Set to false to disable automatic .gitignore management (default: true)
+ignore_editor_files: false
+```
+
+### Manual Management with config-ignores
+
+If you have existing editor files already committed to git, use the `config-ignores` command:
+
+```bash
+# Add patterns to .gitignore
+promptrek config-ignores
+
+# Add patterns and remove committed files from git
+promptrek config-ignores --remove-cached
+
+# Preview what would be done
+promptrek config-ignores --dry-run
+
+# Use specific config file
+promptrek config-ignores --config custom.promptrek.yaml
+```
+
+**What the `--remove-cached` flag does:**
+1. Adds all editor file patterns to `.gitignore`
+2. Runs `git rm --cached` on each matching file already in git
+3. Files remain in your working directory but are staged for removal from git
+4. You need to commit the changes to complete the un-tracking
+
+**Example workflow for cleaning up committed files:**
+
+```bash
+# Clean up previously committed editor files
+promptrek config-ignores --remove-cached
+
+# Review the changes
+git status
+
+# Commit the changes
+git commit -m "Untrack generated editor files"
+git push
+```
+
+### Editor Files Automatically Excluded
+
+When `ignore_editor_files` is enabled (default: true), these patterns are added to `.gitignore`:
+
+- **GitHub Copilot**: `.github/copilot-instructions.md`, `.github/instructions/*.instructions.md`, `.github/prompts/*.prompt.md`
+- **Cursor**: `.cursor/rules/*.mdc`, `.cursor/rules/index.mdc`, `AGENTS.md`
+- **Continue**: `.continue/rules/*.md`
+- **Windsurf**: `.windsurf/rules/*.md`
+- **Cline**: `.clinerules`, `.clinerules/*.md`
+- **Claude**: `.claude/CLAUDE.md`, `.claude-context.md`
+- **Amazon Q**: `.amazonq/rules/*.md`, `.amazonq/cli-agents/*.json`
+- **JetBrains**: `.assistant/rules/*.md`
+- **Kiro**: `.kiro/steering/*.md`
+- **Tabnine**: `.tabnine_commands`
+- **MCP Configs**: `.vscode/mcp.json`
+
+### Sync Command Integration
+
+The `promptrek sync` command also respects the `ignore_editor_files` configuration. After syncing editor files back to PrompTrek format, it automatically updates `.gitignore` if enabled.
+
+```bash
+# Sync from Continue and update .gitignore
+promptrek sync --editor continue --output project.promptrek.yaml
+# .gitignore is automatically updated if ignore_editor_files: true
+```
 
 ## Best Practices
 
