@@ -668,3 +668,183 @@ content: "# Content"
             "description" in str(exc_info.value).lower()
             or "missing" in str(exc_info.value).lower()
         )
+
+
+class TestUPFParserV1Imports:
+    """Test UPFParser functionality for v1 imports feature."""
+
+    def test_parse_v1_with_imports(self, tmp_path):
+        """Test parsing a v1 file with imports."""
+        # Create a base file to import
+        base_data = {
+            "schema_version": "1.0.0",
+            "metadata": {
+                "title": "Base Project",
+                "description": "Base configuration",
+                "version": "1.0.0",
+                "author": "Test",
+            },
+            "context": {
+                "project_type": "web",
+                "technologies": ["Python"],
+            },
+            "instructions": {
+                "general": ["Write clean code"],
+            },
+            "targets": ["claude"],
+        }
+        base_file = tmp_path / "base.promptrek.yaml"
+        base_file.write_text(yaml.dump(base_data))
+
+        # Create a main file that imports the base
+        main_data = {
+            "schema_version": "1.0.0",
+            "metadata": {
+                "title": "Main Project",
+                "description": "Main configuration with imports",
+                "version": "1.0.0",
+                "author": "Test",
+            },
+            "imports": [{"path": "base.promptrek.yaml"}],
+            "instructions": {
+                "general": ["Follow project guidelines"],
+            },
+            "targets": ["claude"],
+        }
+        main_file = tmp_path / "main.promptrek.yaml"
+        main_file.write_text(yaml.dump(main_data))
+
+        parser = UPFParser()
+        prompt = parser.parse_file(main_file)
+
+        assert isinstance(prompt, UniversalPrompt)
+        assert prompt.metadata.title == "Main Project"
+        # Check that imports were processed (base instructions should be included)
+        assert len(prompt.instructions.general) >= 1
+
+    def test_parse_dict_unexpected_error(self):
+        """Test handling of unexpected error during parse_dict."""
+        parser = UPFParser()
+
+        # Create data that will cause an unexpected error during model initialization
+        # Using a mock to force an unexpected exception
+        import unittest.mock as mock
+
+        with mock.patch("promptrek.core.parser.UniversalPrompt") as mock_model:
+            mock_model.side_effect = RuntimeError("Unexpected error")
+
+            data = {
+                "schema_version": "1.0.0",
+                "metadata": {"title": "Test", "description": "Test"},
+                "targets": ["claude"],
+                "instructions": {"general": ["Test"]},
+            }
+
+            with pytest.raises(UPFParsingError) as exc_info:
+                parser.parse_dict(data)
+
+            assert "Unexpected error" in str(exc_info.value)
+
+
+class TestUPFParserV3:
+    """Test UPFParser functionality for v3 schema."""
+
+    def test_parse_v3_basic(self, tmp_path):
+        """Test parsing a basic v3 file."""
+        import yaml
+
+        v3_data = {
+            "schema_version": "3.0.0",
+            "metadata": {
+                "title": "V3 Test Project",
+                "description": "Test v3 schema",
+                "version": "1.0.0",
+                "author": "Test Author",
+            },
+            "content": "# V3 Test\n\nContent here.",
+        }
+        file_path = tmp_path / "v3.promptrek.yaml"
+        file_path.write_text(yaml.dump(v3_data))
+
+        from promptrek.core.models import UniversalPromptV3
+        from promptrek.core.parser import UPFParser
+
+        parser = UPFParser()
+        prompt = parser.parse_file(file_path)
+
+        assert isinstance(prompt, UniversalPromptV3)
+        assert prompt.schema_version == "3.0.0"
+        assert prompt.metadata.title == "V3 Test Project"
+
+    def test_parse_v3_with_mcp(self, tmp_path):
+        """Test parsing v3 with MCP servers."""
+        import yaml
+
+        v3_data = {
+            "schema_version": "3.0.0",
+            "metadata": {"title": "V3 MCP", "description": "Test", "version": "1.0.0"},
+            "content": "# Content",
+            "mcp_servers": [{"name": "test", "command": "node", "args": ["server.js"]}],
+        }
+        file_path = tmp_path / "v3-mcp.promptrek.yaml"
+        file_path.write_text(yaml.dump(v3_data))
+
+        from promptrek.core.models import UniversalPromptV3
+        from promptrek.core.parser import UPFParser
+
+        parser = UPFParser()
+        prompt = parser.parse_file(file_path)
+
+        assert isinstance(prompt, UniversalPromptV3)
+        assert prompt.mcp_servers is not None
+        assert len(prompt.mcp_servers) == 1
+
+    def test_parse_v3_with_nested_plugins_backward_compat(self, tmp_path):
+        """Test parsing v3 with deprecated nested plugins structure."""
+        import sys
+        from io import StringIO
+
+        import yaml
+
+        v3_data = {
+            "schema_version": "3.0.0",
+            "metadata": {
+                "title": "V3 Legacy",
+                "description": "Test",
+                "version": "1.0.0",
+            },
+            "content": "# Content",
+            "plugins": {
+                "mcp_servers": [{"name": "test", "command": "node"}],
+                "commands": [
+                    {"name": "test-cmd", "description": "Test", "prompt": "Test"}
+                ],
+            },
+        }
+        file_path = tmp_path / "v3-legacy.promptrek.yaml"
+        file_path.write_text(yaml.dump(v3_data))
+
+        from promptrek.core.models import UniversalPromptV3
+        from promptrek.core.parser import UPFParser
+
+        # Capture stderr to check for deprecation warning
+        old_stderr = sys.stderr
+        sys.stderr = StringIO()
+
+        try:
+            parser = UPFParser()
+            prompt = parser.parse_file(file_path)
+
+            # Check deprecation warning was emitted
+            warning_output = sys.stderr.getvalue()
+            assert "DEPRECATION WARNING" in warning_output
+            assert "plugins.mcp_servers" in warning_output
+
+            # Check that fields were auto-promoted
+            assert isinstance(prompt, UniversalPromptV3)
+            assert prompt.mcp_servers is not None
+            assert len(prompt.mcp_servers) == 1
+            assert prompt.commands is not None
+            assert len(prompt.commands) == 1
+        finally:
+            sys.stderr = old_stderr

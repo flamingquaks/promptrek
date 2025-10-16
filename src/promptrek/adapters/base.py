@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from ..core.exceptions import ValidationError
-from ..core.models import UniversalPrompt, UniversalPromptV2
+from ..core.models import UniversalPrompt, UniversalPromptV2, UniversalPromptV3
 from ..utils import ConditionalProcessor, VariableSubstitution
 
 
@@ -32,7 +32,7 @@ class EditorAdapter(ABC):
     @abstractmethod
     def generate(
         self,
-        prompt: Union[UniversalPrompt, UniversalPromptV2],
+        prompt: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3],
         output_dir: Path,
         dry_run: bool = False,
         verbose: bool = False,
@@ -43,7 +43,7 @@ class EditorAdapter(ABC):
         Generate editor-specific files from a universal prompt.
 
         Args:
-            prompt: The parsed universal prompt (v1 or v2)
+            prompt: The parsed universal prompt (v1, v2, or v3)
             output_dir: Directory to generate files in
             dry_run: If True, don't create files, just show what would be created
             verbose: Enable verbose output
@@ -57,13 +57,13 @@ class EditorAdapter(ABC):
 
     @abstractmethod
     def validate(
-        self, prompt: Union[UniversalPrompt, UniversalPromptV2]
+        self, prompt: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3]
     ) -> List[ValidationError]:
         """
         Validate a prompt for this specific editor.
 
         Args:
-            prompt: The universal prompt to validate (v1 or v2)
+            prompt: The universal prompt to validate (v1, v2, or v3)
 
         Returns:
             List of validation errors specific to this editor
@@ -93,15 +93,15 @@ class EditorAdapter(ABC):
 
     def parse_files(
         self, source_dir: Path
-    ) -> Union["UniversalPrompt", "UniversalPromptV2"]:
+    ) -> Union["UniversalPrompt", "UniversalPromptV2", "UniversalPromptV3"]:
         """
-        Parse editor-specific files back into a UniversalPrompt or UniversalPromptV2.
+        Parse editor-specific files back into a UniversalPrompt, UniversalPromptV2, or UniversalPromptV3.
 
         Args:
             source_dir: Directory containing editor-specific files
 
         Returns:
-            UniversalPrompt or UniversalPromptV2 object parsed from editor files
+            UniversalPrompt, UniversalPromptV2, or UniversalPromptV3 object parsed from editor files
 
         Raises:
             NotImplementedError: If adapter doesn't support reverse parsing
@@ -124,14 +124,14 @@ class EditorAdapter(ABC):
 
     def substitute_variables(
         self,
-        prompt: Union[UniversalPrompt, UniversalPromptV2],
+        prompt: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3],
         variables: Optional[Dict[str, Any]] = None,
-    ) -> Union[UniversalPrompt, UniversalPromptV2]:
+    ) -> Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3]:
         """
         Apply variable substitution to a prompt if this adapter supports it.
 
         Args:
-            prompt: The universal prompt (v1 or v2)
+            prompt: The universal prompt (v1, v2, or v3)
             variables: Additional variables to substitute
 
         Returns:
@@ -140,9 +140,9 @@ class EditorAdapter(ABC):
         if not self.supports_variables():
             return prompt
 
-        # V2 prompts don't need structured variable substitution
+        # V2/V3 prompts don't need structured variable substitution
         # (it's done directly on content in the adapter)
-        if isinstance(prompt, UniversalPromptV2):
+        if isinstance(prompt, (UniversalPromptV2, UniversalPromptV3)):
             return prompt
 
         return self._variable_substitution.substitute_prompt(
@@ -151,14 +151,14 @@ class EditorAdapter(ABC):
 
     def process_conditionals(
         self,
-        prompt: Union[UniversalPrompt, UniversalPromptV2],
+        prompt: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3],
         variables: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         """
         Process conditional instructions if this adapter supports them.
 
         Args:
-            prompt: The universal prompt (v1 or v2)
+            prompt: The universal prompt (v1, v2, or v3)
             variables: Variables for condition evaluation
 
         Returns:
@@ -167,8 +167,8 @@ class EditorAdapter(ABC):
         if not self.supports_conditionals():
             return {}
 
-        # V2 prompts don't have conditions field
-        if isinstance(prompt, UniversalPromptV2):
+        # V2/V3 prompts don't have conditions field
+        if isinstance(prompt, (UniversalPromptV2, UniversalPromptV3)):
             return {}
 
         # Add editor name to variables for condition evaluation
@@ -179,7 +179,9 @@ class EditorAdapter(ABC):
 
     def generate_multiple(
         self,
-        prompt_files: List[Tuple[Union[UniversalPrompt, UniversalPromptV2], Path]],
+        prompt_files: List[
+            Tuple[Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3], Path]
+        ],
         output_dir: Path,
         dry_run: bool = False,
         verbose: bool = False,
@@ -193,7 +195,7 @@ class EditorAdapter(ABC):
         for each input prompt file.
 
         Args:
-            prompt_files: List of (UniversalPrompt or UniversalPromptV2, Path) tuples
+            prompt_files: List of (UniversalPrompt, UniversalPromptV2, or UniversalPromptV3, Path) tuples
             output_dir: Directory to generate files in
             dry_run: If True, don't create files, just show what would be created
             verbose: Enable verbose output
@@ -212,7 +214,9 @@ class EditorAdapter(ABC):
 
     def generate_merged(
         self,
-        prompt_files: List[Tuple[Union[UniversalPrompt, UniversalPromptV2], Path]],
+        prompt_files: List[
+            Tuple[Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3], Path]
+        ],
         output_dir: Path,
         dry_run: bool = False,
         verbose: bool = False,
@@ -226,7 +230,7 @@ class EditorAdapter(ABC):
         files into a single configuration.
 
         Args:
-            prompt_files: List of (UniversalPrompt or UniversalPromptV2, Path) tuples
+            prompt_files: List of (UniversalPrompt, UniversalPromptV2, or UniversalPromptV3, Path) tuples
             output_dir: Directory to generate files in
             dry_run: If True, don't create files, just show what would be created
             verbose: Enable verbose output

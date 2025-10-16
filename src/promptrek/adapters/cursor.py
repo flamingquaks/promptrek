@@ -8,8 +8,8 @@ from typing import Any, Dict, List, Optional, Union
 
 import click
 
-from ..core.exceptions import ValidationError
-from ..core.models import UniversalPrompt, UniversalPromptV2
+from ..core.exceptions import DeprecationWarnings, ValidationError
+from ..core.models import UniversalPrompt, UniversalPromptV2, UniversalPromptV3
 from .base import EditorAdapter
 from .sync_mixin import MarkdownSyncMixin
 
@@ -29,7 +29,7 @@ class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
 
     def generate(
         self,
-        prompt: Union[UniversalPrompt, UniversalPromptV2],
+        prompt: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3],
         output_dir: Path,
         dry_run: bool = False,
         verbose: bool = False,
@@ -38,8 +38,8 @@ class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
     ) -> List[Path]:
         """Generate Cursor configuration files."""
 
-        # V2: Use documents field for multi-file rules or main content for single file
-        if isinstance(prompt, UniversalPromptV2):
+        # V2/V3: Use documents field for multi-file rules or main content for single file
+        if isinstance(prompt, (UniversalPromptV2, UniversalPromptV3)):
             return self._generate_v2(prompt, output_dir, dry_run, verbose, variables)
 
         # V1: Apply variable substitution if supported
@@ -75,13 +75,13 @@ class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
 
     def _generate_v2(
         self,
-        prompt: UniversalPromptV2,
+        prompt: Union[UniversalPromptV2, UniversalPromptV3],
         output_dir: Path,
         dry_run: bool,
         verbose: bool,
         variables: Optional[Dict[str, Any]] = None,
     ) -> List[Path]:
-        """Generate Cursor files from v2 schema (using documents for rules or content for single file)."""
+        """Generate Cursor files from v2/v3 schema (using documents for rules or content for single file)."""
         rules_dir = output_dir / ".cursor" / "rules"
         created_files = []
 
@@ -138,8 +138,8 @@ class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
                 click.echo(f"✅ Generated: {output_file}")
                 created_files.append(output_file)
 
-        # Generate v2.1 plugin files if present
-        if isinstance(prompt, UniversalPromptV2) and prompt.plugins:
+        # Generate plugin files for v2.1/v3.0
+        if isinstance(prompt, (UniversalPromptV2, UniversalPromptV3)):
             # Merge variables for plugins
             merged_vars = {}
             if prompt.variables:
@@ -147,7 +147,7 @@ class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
             if variables:
                 merged_vars.update(variables)
 
-            plugin_files = self._generate_v21_plugins(
+            plugin_files = self._generate_plugins(
                 prompt,
                 output_dir,
                 dry_run,
@@ -158,26 +158,49 @@ class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
 
         return created_files
 
-    def _generate_v21_plugins(
+    def _generate_plugins(
         self,
-        prompt: UniversalPromptV2,
+        prompt: Union[UniversalPromptV2, UniversalPromptV3],
         output_dir: Path,
         dry_run: bool,
         verbose: bool,
         variables: Optional[Dict[str, Any]] = None,
     ) -> List[Path]:
-        """Generate v2.1 plugin files for Cursor."""
-        if not prompt.plugins:
-            return []
-
+        """Generate plugin files for Cursor (v2.1 and v3.0 compatible)."""
         created_files = []
         cursor_dir = output_dir / ".cursor"
 
+        # Extract plugin data from either v3 top-level or v2.1 nested structure
+        mcp_servers = None
+        agents = None
+        commands = None
+
+        if isinstance(prompt, UniversalPromptV3):
+            # V3: Check top-level fields
+            mcp_servers = prompt.mcp_servers
+            agents = prompt.agents
+            commands = prompt.commands
+        elif isinstance(prompt, UniversalPromptV2) and prompt.plugins:
+            # V2.1: Use nested plugins structure (deprecated)
+            if prompt.plugins.mcp_servers:
+                click.echo(
+                    DeprecationWarnings.v3_nested_plugin_field_warning("mcp_servers")
+                )
+                mcp_servers = prompt.plugins.mcp_servers
+            if prompt.plugins.agents:
+                click.echo(DeprecationWarnings.v3_nested_plugin_field_warning("agents"))
+                agents = prompt.plugins.agents
+            if prompt.plugins.commands:
+                click.echo(
+                    DeprecationWarnings.v3_nested_plugin_field_warning("commands")
+                )
+                commands = prompt.plugins.commands
+
         # Generate MCP server configurations
-        if prompt.plugins.mcp_servers:
+        if mcp_servers:
             mcp_file = cursor_dir / "mcp-servers.json"
-            mcp_servers = {}
-            for server in prompt.plugins.mcp_servers:
+            mcp_servers_config = {}
+            for server in mcp_servers:
                 server_config: Dict[str, Any] = {
                     "command": server.command,
                 }
@@ -196,9 +219,9 @@ class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
                                 )
                         env_vars[key] = substituted_value
                     server_config["env"] = env_vars
-                mcp_servers[server.name] = server_config
+                mcp_servers_config[server.name] = server_config
 
-            mcp_config = {"mcpServers": mcp_servers}
+            mcp_config = {"mcpServers": mcp_servers_config}
 
             if dry_run:
                 click.echo(f"  📁 Would create: {mcp_file}")
@@ -212,9 +235,9 @@ class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
             created_files.append(mcp_file)
 
         # Generate agent schemas
-        if prompt.plugins.agents:
+        if agents:
             schemas_dir = cursor_dir / "agent-schemas"
-            for agent in prompt.plugins.agents:
+            for agent in agents:
                 # Apply variable substitution
                 agent_prompt = agent.system_prompt
                 if variables:
@@ -246,9 +269,9 @@ class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
                 created_files.append(schema_file)
 
         # Generate agent functions (tools available to agents)
-        if prompt.plugins.commands:
+        if commands:
             functions_dir = cursor_dir / "agent-functions"
-            for command in prompt.plugins.commands:
+            for command in commands:
                 # Apply variable substitution
                 command_prompt = command.prompt
                 if variables:
@@ -285,14 +308,14 @@ class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
 
     def _generate_rules_system(
         self,
-        prompt: Union[UniversalPrompt, UniversalPromptV2],
+        prompt: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3],
         output_dir: Path,
         dry_run: bool,
         verbose: bool,
     ) -> List[Path]:
         """Generate modern .cursor/rules/ system with .mdc files."""
-        # V2 doesn't generate rules system
-        if isinstance(prompt, UniversalPromptV2):
+        # V2/V3 doesn't generate rules system
+        if isinstance(prompt, (UniversalPromptV2, UniversalPromptV3)):
             return []
 
         rules_dir = output_dir / ".cursor" / "rules"
@@ -379,14 +402,14 @@ class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
 
     def _generate_index_file(
         self,
-        prompt: Union[UniversalPrompt, UniversalPromptV2],
+        prompt: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3],
         output_dir: Path,
         dry_run: bool,
         verbose: bool,
     ) -> List[Path]:
         """Generate main index.mdc file for project overview."""
-        # V2 uses simpler structure
-        if isinstance(prompt, UniversalPromptV2):
+        # V2/V3 uses simpler structure
+        if isinstance(prompt, (UniversalPromptV2, UniversalPromptV3)):
             return []
 
         rules_dir = output_dir / ".cursor" / "rules"
@@ -414,14 +437,14 @@ class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
 
     def _generate_agents_file(
         self,
-        prompt: Union[UniversalPrompt, UniversalPromptV2],
+        prompt: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3],
         output_dir: Path,
         dry_run: bool,
         verbose: bool,
     ) -> List[Path]:
         """Generate AGENTS.md file for simple agent instructions."""
-        # V2 doesn't generate agents file
-        if isinstance(prompt, UniversalPromptV2):
+        # V2/V3 doesn't generate agents file
+        if isinstance(prompt, (UniversalPromptV2, UniversalPromptV3)):
             return []
         agents_file = output_dir / "AGENTS.md"
         content = self._build_agents_content(prompt)
@@ -469,7 +492,9 @@ class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
 
     def generate_merged(
         self,
-        prompt_files: List[tuple[Union[UniversalPrompt, UniversalPromptV2], Path]],
+        prompt_files: List[
+            tuple[Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3], Path]
+        ],
         output_dir: Path,
         dry_run: bool = False,
         verbose: bool = False,
@@ -515,13 +540,13 @@ class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
         return created_files
 
     def validate(
-        self, prompt: Union[UniversalPrompt, UniversalPromptV2]
+        self, prompt: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3]
     ) -> List[ValidationError]:
         """Validate prompt for Cursor."""
         errors = []
 
-        # V2 validation: check content exists
-        if isinstance(prompt, UniversalPromptV2):
+        # V2/V3 validation: check content exists
+        if isinstance(prompt, (UniversalPromptV2, UniversalPromptV3)):
             if not prompt.content or not prompt.content.strip():
                 errors.append(
                     ValidationError(
@@ -705,14 +730,14 @@ class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
 
     def _generate_ignore_files(
         self,
-        prompt: Union[UniversalPrompt, UniversalPromptV2],
+        prompt: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3],
         output_dir: Path,
         dry_run: bool,
         verbose: bool,
     ) -> List[Path]:
         """Generate Cursor ignore files for better indexing control."""
-        # V2 doesn't generate ignore files
-        if isinstance(prompt, UniversalPromptV2):
+        # V2/V3 doesn't generate ignore files
+        if isinstance(prompt, (UniversalPromptV2, UniversalPromptV3)):
             return []
         created_files = []
 
@@ -901,7 +926,9 @@ class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
 
     def _build_merged_content(
         self,
-        prompt_files: List[tuple[Union[UniversalPrompt, UniversalPromptV2], Path]],
+        prompt_files: List[
+            tuple[Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3], Path]
+        ],
         variables: Optional[Dict[str, Any]] = None,
         headless: bool = False,
     ) -> str:
@@ -962,7 +989,9 @@ class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
 
     def _build_merged_index_content(
         self,
-        prompt_files: List[tuple[Union[UniversalPrompt, UniversalPromptV2], Path]],
+        prompt_files: List[
+            tuple[Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3], Path]
+        ],
         variables: Optional[Dict[str, Any]] = None,
         headless: bool = False,
     ) -> str:
@@ -1087,15 +1116,15 @@ class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
 
     def _generate_source_specific_rules(
         self,
-        prompt: Union[UniversalPrompt, UniversalPromptV2],
+        prompt: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3],
         source_file: Path,
         rules_dir: Path,
         dry_run: bool,
         verbose: bool,
     ) -> List[Path]:
         """Generate source-specific MDC rules for a prompt file."""
-        # V2 doesn't generate source-specific rules
-        if isinstance(prompt, UniversalPromptV2):
+        # V2/V3 doesn't generate source-specific rules
+        if isinstance(prompt, (UniversalPromptV2, UniversalPromptV3)):
             return []
         created_files = []
 
@@ -1230,9 +1259,9 @@ class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
 
     def parse_files(
         self, source_dir: Path
-    ) -> Union[UniversalPrompt, UniversalPromptV2]:
+    ) -> Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3]:
         """
-        Parse Cursor files back into a UniversalPrompt or UniversalPromptV2.
+        Parse Cursor files back into a UniversalPrompt, UniversalPromptV2, or UniversalPromptV3.
 
         Args:
             source_dir: Directory containing Cursor configuration files

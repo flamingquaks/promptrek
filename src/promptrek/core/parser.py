@@ -10,8 +10,8 @@ from typing import Any, Dict, List, Sequence, Union
 import yaml
 from pydantic import ValidationError
 
-from .exceptions import UPFFileNotFoundError, UPFParsingError
-from .models import UniversalPrompt, UniversalPromptV2
+from .exceptions import DeprecationWarnings, UPFFileNotFoundError, UPFParsingError
+from .models import UniversalPrompt, UniversalPromptV2, UniversalPromptV3
 
 
 class UPFParser:
@@ -23,7 +23,7 @@ class UPFParser:
 
     def parse_file(
         self, file_path: Union[str, Path]
-    ) -> Union[UniversalPrompt, UniversalPromptV2]:
+    ) -> Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3]:
         """
         Parse a UPF file from disk.
 
@@ -31,7 +31,7 @@ class UPFParser:
             file_path: Path to the .promptrek.yaml file
 
         Returns:
-            Parsed UniversalPrompt (v1) or UniversalPromptV2 (v2) object
+            Parsed UniversalPrompt (v1), UniversalPromptV2 (v2), or UniversalPromptV3 (v3)
 
         Raises:
             UPFFileNotFoundError: If the file doesn't exist
@@ -68,18 +68,19 @@ class UPFParser:
 
     def parse_dict(
         self, data: Dict[str, Any], source: str = "<dict>"
-    ) -> Union[UniversalPrompt, UniversalPromptV2]:
+    ) -> Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3]:
         """
         Parse a UPF dictionary into a UniversalPrompt object.
 
         Automatically detects schema version and uses appropriate model.
+        Handles backward compatibility for v3 files with nested plugins structure.
 
         Args:
             data: Dictionary containing UPF data
             source: Source identifier for error messages
 
         Returns:
-            Parsed UniversalPrompt (v1) or UniversalPromptV2 (v2) object
+            Parsed UniversalPrompt (v1), UniversalPromptV2 (v2), or UniversalPromptV3 (v3)
 
         Raises:
             UPFParsingError: If parsing or validation fails
@@ -94,7 +95,11 @@ class UPFParser:
         major_version = self._get_major_version(schema_version)
 
         try:
-            if major_version == "2":
+            if major_version == "3":
+                # Check for deprecated nested plugins structure and auto-promote
+                data = self._handle_v3_backward_compatibility(data, source)
+                return UniversalPromptV3(**data)
+            elif major_version == "2":
                 # Use v2 model
                 return UniversalPromptV2(**data)
             else:
@@ -115,7 +120,7 @@ class UPFParser:
 
     def parse_string(
         self, yaml_content: str, source: str = "<string>"
-    ) -> Union[UniversalPrompt, UniversalPromptV2]:
+    ) -> Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3]:
         """
         Parse a UPF YAML string into a UniversalPrompt object.
 
@@ -124,7 +129,7 @@ class UPFParser:
             source: Source identifier for error messages
 
         Returns:
-            Parsed UniversalPrompt (v1) or UniversalPromptV2 (v2) object
+            Parsed UniversalPrompt (v1), UniversalPromptV2 (v2), or UniversalPromptV3 (v3)
 
         Raises:
             UPFParsingError: If parsing fails
@@ -190,9 +195,77 @@ class UPFParser:
 
         return f"Validation errors in {source}:\n" + "\n".join(messages)
 
+    def _handle_v3_backward_compatibility(
+        self, data: Dict[str, Any], source: str
+    ) -> Dict[str, Any]:
+        """
+        Handle backward compatibility for v3.0 files with nested plugins structure.
+
+        Automatically promotes plugins.mcp_servers, plugins.commands, etc. to top-level.
+        Emits deprecation warnings when old structure is detected.
+
+        Args:
+            data: Dictionary containing v3 UPF data
+            source: Source identifier for warnings
+
+        Returns:
+            Modified data dictionary with promoted fields
+        """
+        import sys
+
+        # Check if using old nested plugins structure
+        if "plugins" in data and isinstance(data["plugins"], dict):
+            old_plugins = data["plugins"]
+            has_old_structure = any(
+                key in old_plugins
+                for key in ["mcp_servers", "commands", "agents", "hooks"]
+            )
+
+            if has_old_structure:
+                # Emit deprecation warning using centralized message
+                warning_msg = DeprecationWarnings.v3_nested_plugins_warning(source)
+                print(warning_msg, file=sys.stderr)
+
+                # Auto-promote nested fields to top-level
+                data_copy = data.copy()
+
+                # Promote mcp_servers if not already at top-level
+                if "mcp_servers" in old_plugins and "mcp_servers" not in data_copy:
+                    data_copy["mcp_servers"] = old_plugins["mcp_servers"]
+
+                # Promote commands if not already at top-level
+                if "commands" in old_plugins and "commands" not in data_copy:
+                    data_copy["commands"] = old_plugins["commands"]
+
+                # Promote agents if not already at top-level
+                if "agents" in old_plugins and "agents" not in data_copy:
+                    data_copy["agents"] = old_plugins["agents"]
+
+                # Promote hooks if not already at top-level
+                if "hooks" in old_plugins and "hooks" not in data_copy:
+                    data_copy["hooks"] = old_plugins["hooks"]
+
+                # Remove plugins field or convert marketplace_metadata
+                # If plugins only had the promoted fields, remove it
+                remaining_plugins = {
+                    k: v
+                    for k, v in old_plugins.items()
+                    if k not in ["mcp_servers", "commands", "agents", "hooks"]
+                }
+                if remaining_plugins:
+                    # Keep remaining fields (like marketplace_metadata)
+                    data_copy["plugins"] = remaining_plugins
+                else:
+                    # Remove empty plugins field
+                    data_copy.pop("plugins", None)
+
+                return data_copy
+
+        return data
+
     def parse_multiple_files(
         self, file_paths: Sequence[Union[str, Path]]
-    ) -> Union[UniversalPrompt, UniversalPromptV2]:
+    ) -> Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3]:
         """
         Parse multiple UPF files and merge them into a single UniversalPrompt.
 
@@ -220,7 +293,7 @@ class UPFParser:
 
     def parse_directory(
         self, directory: Union[str, Path], recursive: bool = True
-    ) -> Union[UniversalPrompt, UniversalPromptV2]:
+    ) -> Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3]:
         """
         Find and parse all UPF files in a directory, merging them into one.
 
@@ -246,9 +319,9 @@ class UPFParser:
 
     def _merge_prompts(
         self,
-        base: Union[UniversalPrompt, UniversalPromptV2],
-        additional: Union[UniversalPrompt, UniversalPromptV2],
-    ) -> Union[UniversalPrompt, UniversalPromptV2]:
+        base: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3],
+        additional: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3],
+    ) -> Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3]:
         """
         Merge two UniversalPrompt objects, with additional taking precedence.
 
@@ -259,12 +332,12 @@ class UPFParser:
         Returns:
             Merged UniversalPrompt object
         """
-        # V2 merging: simple content concatenation
-        if isinstance(base, UniversalPromptV2) or isinstance(
-            additional, UniversalPromptV2
+        # V2/V3 merging: simple content concatenation
+        if isinstance(base, (UniversalPromptV2, UniversalPromptV3)) or isinstance(
+            additional, (UniversalPromptV2, UniversalPromptV3)
         ):
-            # For v2, we can't meaningfully merge - just return the additional
-            # This is a limitation of the simplified v2 format
+            # For v2/v3, we can't meaningfully merge - just return the additional
+            # This is a limitation of the simplified v2/v3 format
             return additional
 
         # Convert to dicts for easier merging (v1 only)

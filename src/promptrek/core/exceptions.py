@@ -100,3 +100,43 @@ class CLIError(PrompTrekError):
     """Raised for CLI-specific errors."""
 
     pass
+
+
+class DeprecationWarnings:
+    """Centralized deprecation warning messages for PrompTrek."""
+
+    @staticmethod
+    def v3_nested_plugins_warning(source: str) -> str:
+        """
+        Get deprecation warning for v3.0 nested plugins structure.
+
+        Args:
+            source: The source file or context where the deprecated structure was found
+
+        Returns:
+            Formatted deprecation warning message
+        """
+        return (
+            f"\n⚠️  DEPRECATION WARNING in {source}:\n"
+            f"   Detected nested plugin structure (plugins.mcp_servers, etc.)\n"
+            f"   This structure is deprecated in v3.0 and will be removed in v4.0.\n"
+            f"   Please migrate to top-level fields:\n"
+            f"     - Move 'plugins.mcp_servers' → 'mcp_servers' (top-level)\n"
+            f"     - Move 'plugins.commands' → 'commands' (top-level)\n"
+            f"     - Move 'plugins.agents' → 'agents' (top-level)\n"
+            f"     - Move 'plugins.hooks' → 'hooks' (top-level)\n"
+            f"   Run: promptrek migrate {source} to auto-migrate\n"
+        )
+
+    @staticmethod
+    def v3_nested_plugin_field_warning(field_name: str) -> str:
+        """
+        Get short deprecation warning for a specific nested plugin field.
+
+        Args:
+            field_name: The plugin field name (e.g., 'mcp_servers', 'commands')
+
+        Returns:
+            Formatted short deprecation warning
+        """
+        return f"⚠️  Using deprecated plugins.{field_name} structure (use top-level {field_name} in v3.0)"

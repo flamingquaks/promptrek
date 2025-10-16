@@ -7,8 +7,8 @@ from typing import Any, Dict, List, Optional, Union
 
 import click
 
-from ..core.exceptions import ValidationError
-from ..core.models import UniversalPrompt, UniversalPromptV2
+from ..core.exceptions import DeprecationWarnings, ValidationError
+from ..core.models import UniversalPrompt, UniversalPromptV2, UniversalPromptV3
 from .base import EditorAdapter
 from .mcp_mixin import MCPGenerationMixin
 from .sync_mixin import MarkdownSyncMixin
@@ -39,7 +39,7 @@ class ClineAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
 
     def generate(
         self,
-        prompt: Union[UniversalPrompt, UniversalPromptV2],
+        prompt: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3],
         output_dir: Path,
         dry_run: bool = False,
         verbose: bool = False,
@@ -48,13 +48,19 @@ class ClineAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
     ) -> List[Path]:
         """Generate Cline rules files - supports both single file and directory formats."""
 
-        # V2.1: Handle plugins if present
-        if isinstance(prompt, UniversalPromptV2) and prompt.plugins:
-            return self._generate_v21_plugins(
+        # V3: Always use plugin generation (handles rules + plugins)
+        if isinstance(prompt, UniversalPromptV3):
+            return self._generate_plugins(
                 prompt, output_dir, dry_run, verbose, variables
             )
 
-        # V2: Use documents field for multi-file rules or main content for single file
+        # V2.1: Handle plugins if present
+        if isinstance(prompt, UniversalPromptV2) and prompt.plugins:
+            return self._generate_plugins(
+                prompt, output_dir, dry_run, verbose, variables
+            )
+
+        # V2: Use documents field for multi-file rules or main content for single file (no plugins)
         if isinstance(prompt, UniversalPromptV2):
             return self._generate_v2(prompt, output_dir, dry_run, verbose, variables)
 
@@ -84,13 +90,13 @@ class ClineAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
 
     def _generate_v2(
         self,
-        prompt: UniversalPromptV2,
+        prompt: Union[UniversalPromptV2, UniversalPromptV3],
         output_dir: Path,
         dry_run: bool,
         verbose: bool,
         variables: Optional[Dict[str, Any]] = None,
     ) -> List[Path]:
-        """Generate Cline files from v2 schema (using documents for multi-file or content for single file)."""
+        """Generate Cline files from v2/v3 schema (using documents for multi-file or content for single file)."""
         created_files = []
 
         # If documents field is present, generate directory format with separate files
@@ -148,27 +154,41 @@ class ClineAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
 
         return created_files
 
-    def _generate_v21_plugins(
+    def _generate_plugins(
         self,
-        prompt: UniversalPromptV2,
+        prompt: Union[UniversalPromptV2, UniversalPromptV3],
         output_dir: Path,
         dry_run: bool,
         verbose: bool,
         variables: Optional[Dict[str, Any]] = None,
     ) -> List[Path]:
-        """Generate Cline files from v2.1 schema with plugin support."""
+        """Generate Cline files from v2.1/v3.0 schema with plugin support."""
         created_files = []
 
-        # First, generate the regular v2 markdown files
+        # First, generate the regular v2/v3 markdown files
         markdown_files = self._generate_v2(
             prompt, output_dir, dry_run, verbose, variables
         )
         created_files.extend(markdown_files)
 
-        # Then, handle plugins if present
-        if prompt.plugins and prompt.plugins.mcp_servers:
+        # Then, extract and handle MCP servers from either v3 top-level or v2.1 nested structure
+        mcp_servers = None
+
+        if isinstance(prompt, UniversalPromptV3):
+            # V3: Check top-level field
+            mcp_servers = prompt.mcp_servers
+        elif isinstance(prompt, UniversalPromptV2) and prompt.plugins:
+            # V2.1: Use nested plugins structure (deprecated)
+            if prompt.plugins.mcp_servers:
+                click.echo(
+                    DeprecationWarnings.v3_nested_plugin_field_warning("mcp_servers")
+                )
+                mcp_servers = prompt.plugins.mcp_servers
+
+        # Generate MCP config if we have MCP servers
+        if mcp_servers:
             mcp_files = self._generate_mcp_config(
-                prompt.plugins.mcp_servers,
+                mcp_servers,
                 output_dir,
                 dry_run,
                 verbose,
@@ -223,13 +243,13 @@ class ClineAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
         return created_files
 
     def validate(
-        self, prompt: Union[UniversalPrompt, UniversalPromptV2]
+        self, prompt: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3]
     ) -> List[ValidationError]:
         """Validate prompt for Cline."""
         errors = []
 
-        # V2 validation: check content exists
-        if isinstance(prompt, UniversalPromptV2):
+        # V2/V3 validation: check content exists
+        if isinstance(prompt, (UniversalPromptV2, UniversalPromptV3)):
             if not prompt.content or not prompt.content.strip():
                 errors.append(
                     ValidationError(
@@ -270,8 +290,8 @@ class ClineAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
 
     def parse_files(
         self, source_dir: Path
-    ) -> Union[UniversalPrompt, UniversalPromptV2]:
-        """Parse Cline files back into a UniversalPrompt or UniversalPromptV2."""
+    ) -> Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3]:
+        """Parse Cline files back into a UniversalPrompt, UniversalPromptV2, or UniversalPromptV3."""
         return self.parse_markdown_rules_files(
             source_dir=source_dir,
             rules_subdir=".clinerules",
@@ -424,11 +444,11 @@ class ClineAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
         return "\n".join(lines) if lines else ""
 
     def _should_use_directory_format(
-        self, prompt: Union[UniversalPrompt, UniversalPromptV2]
+        self, prompt: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3]
     ) -> bool:
         """Determine if directory format should be used based on complexity."""
-        # V2 uses single file format
-        if isinstance(prompt, UniversalPromptV2):
+        # V2/V3 uses single file format
+        if isinstance(prompt, (UniversalPromptV2, UniversalPromptV3)):
             return False
 
         complexity_score = 0
@@ -468,15 +488,15 @@ class ClineAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
 
     def _generate_directory_format(
         self,
-        prompt: Union[UniversalPrompt, UniversalPromptV2],
+        prompt: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3],
         conditional_content: Optional[Dict[str, Any]],
         output_dir: Path,
         dry_run: bool,
         verbose: bool,
     ) -> List[Path]:
         """Generate multiple files in .clinerules/ directory."""
-        # V2 shouldn't reach here (uses single file), but handle it anyway
-        if isinstance(prompt, UniversalPromptV2):
+        # V2/V3 shouldn't reach here (uses single file), but handle it anyway
+        if isinstance(prompt, (UniversalPromptV2, UniversalPromptV3)):
             return self._generate_single_file_format(
                 prompt, conditional_content, output_dir, dry_run, verbose
             )
@@ -513,7 +533,7 @@ class ClineAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
 
     def _generate_single_file_format(
         self,
-        prompt: Union[UniversalPrompt, UniversalPromptV2],
+        prompt: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3],
         conditional_content: Optional[Dict[str, Any]],
         output_dir: Path,
         dry_run: bool,
@@ -522,8 +542,8 @@ class ClineAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
         """Generate single .clinerules file."""
         output_file = output_dir / ".clinerules"
 
-        # For V2, use content directly
-        if isinstance(prompt, UniversalPromptV2):
+        # For V2/V3, use content directly
+        if isinstance(prompt, (UniversalPromptV2, UniversalPromptV3)):
             content = prompt.content
         else:
             # Create unified content for single file (V1)

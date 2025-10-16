@@ -5,9 +5,9 @@ Provides comprehensive validation for Universal Prompt Format files
 beyond basic schema validation.
 """
 
-from typing import List, Union
+from typing import Any, Dict, List, Union, cast
 
-from .models import UniversalPrompt, UniversalPromptV2
+from .models import UniversalPrompt, UniversalPromptV2, UniversalPromptV3
 
 
 class ValidationResult:
@@ -71,24 +71,24 @@ class UPFValidator:
         pass
 
     def validate(
-        self, prompt: Union[UniversalPrompt, UniversalPromptV2]
+        self, prompt: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3]
     ) -> ValidationResult:
         """
         Perform comprehensive validation of a UPF object.
 
         Args:
-            prompt: The UniversalPrompt (v1) or UniversalPromptV2 to validate
+            prompt: The UniversalPrompt (v1), UniversalPromptV2, or UniversalPromptV3 to validate
 
         Returns:
             ValidationResult with errors and warnings
         """
         result = ValidationResult()
 
-        # V2 has simpler validation
-        if isinstance(prompt, UniversalPromptV2):
+        # V2/V3 has simpler validation
+        if isinstance(prompt, (UniversalPromptV2, UniversalPromptV3)):
             self._validate_metadata(prompt, result)
 
-            # V2 specific: check content exists
+            # V2/V3 specific: check content exists
             if not prompt.content or not prompt.content.strip():
                 result.add_error("Content cannot be empty")
 
@@ -103,6 +103,19 @@ class UPFValidator:
                         result.add_error(f"Document {i+1} has empty name")
                     if not doc.content.strip():
                         result.add_error(f"Document {i+1} has empty content")
+
+            # V3 specific: validate plugin fields
+            if isinstance(prompt, UniversalPromptV3):
+                if prompt.mcp_servers:
+                    for i, server in enumerate(prompt.mcp_servers):
+                        # Access fields directly (TypedDict at type level, but could be dict or object at runtime)
+                        server_name = server["name"] if isinstance(server, dict) else server.name  # type: ignore
+                        server_command = server["command"] if isinstance(server, dict) else server.command  # type: ignore
+
+                        if not server_name:
+                            result.add_error(f"MCP server {i+1} has no name")
+                        if not server_command:
+                            result.add_error(f"MCP server {i+1} has no command")
 
             return result
 
@@ -159,7 +172,7 @@ class UPFValidator:
 
     def _validate_metadata(
         self,
-        prompt: Union[UniversalPrompt, UniversalPromptV2],
+        prompt: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3],
         result: ValidationResult,
     ) -> None:
         """Validate metadata section."""
@@ -257,7 +270,7 @@ class UPFValidator:
 
     def _validate_variables(
         self,
-        prompt: Union[UniversalPrompt, UniversalPromptV2],
+        prompt: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3],
         result: ValidationResult,
     ) -> None:
         """Validate variables section."""

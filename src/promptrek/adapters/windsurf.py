@@ -8,12 +8,13 @@ from typing import Any, Dict, List, Optional, Union
 
 import click
 
-from ..core.exceptions import ValidationError
+from ..core.exceptions import DeprecationWarnings, ValidationError
 from ..core.models import (
     DocumentConfig,
     PromptMetadata,
     UniversalPrompt,
     UniversalPromptV2,
+    UniversalPromptV3,
 )
 from .base import EditorAdapter
 from .mcp_mixin import MCPGenerationMixin
@@ -47,7 +48,7 @@ class WindsurfAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
 
     def generate(
         self,
-        prompt: Union[UniversalPrompt, UniversalPromptV2],
+        prompt: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3],
         output_dir: Path,
         dry_run: bool = False,
         verbose: bool = False,
@@ -56,13 +57,19 @@ class WindsurfAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
     ) -> List[Path]:
         """Generate Windsurf configuration files."""
 
-        # V2.1: Handle plugins if present
-        if isinstance(prompt, UniversalPromptV2) and prompt.plugins:
-            return self._generate_v21_plugins(
+        # V3: Always use plugin generation (handles markdown + plugins)
+        if isinstance(prompt, UniversalPromptV3):
+            return self._generate_plugins(
                 prompt, output_dir, dry_run, verbose, variables
             )
 
-        # V2: Use documents field for multi-file generation
+        # V2.1: Handle plugins if present
+        if isinstance(prompt, UniversalPromptV2) and prompt.plugins:
+            return self._generate_plugins(
+                prompt, output_dir, dry_run, verbose, variables
+            )
+
+        # V2: Use documents field for multi-file generation (no plugins)
         if isinstance(prompt, UniversalPromptV2):
             return self._generate_v2(prompt, output_dir, dry_run, verbose, variables)
 
@@ -81,13 +88,13 @@ class WindsurfAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
 
     def _generate_v2(
         self,
-        prompt: UniversalPromptV2,
+        prompt: Union[UniversalPromptV2, UniversalPromptV3],
         output_dir: Path,
         dry_run: bool,
         verbose: bool,
         variables: Optional[Dict[str, Any]] = None,
     ) -> List[Path]:
-        """Generate Windsurf files from v2 schema."""
+        """Generate Windsurf files from v2/v3 schema."""
         rules_dir = output_dir / ".windsurf" / "rules"
         created_files = []
 
@@ -146,27 +153,41 @@ class WindsurfAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
 
         return created_files
 
-    def _generate_v21_plugins(
+    def _generate_plugins(
         self,
-        prompt: UniversalPromptV2,
+        prompt: Union[UniversalPromptV2, UniversalPromptV3],
         output_dir: Path,
         dry_run: bool,
         verbose: bool,
         variables: Optional[Dict[str, Any]] = None,
     ) -> List[Path]:
-        """Generate Windsurf files from v2.1 schema with plugin support."""
+        """Generate Windsurf files from v2.1/v3.0 schema with plugin support."""
         created_files = []
 
-        # First, generate the regular v2 markdown files
+        # First, generate the regular v2/v3 markdown files
         markdown_files = self._generate_v2(
             prompt, output_dir, dry_run, verbose, variables
         )
         created_files.extend(markdown_files)
 
-        # Then, handle plugins if present
-        if prompt.plugins and prompt.plugins.mcp_servers:
+        # Then, extract and handle MCP servers from either v3 top-level or v2.1 nested structure
+        mcp_servers = None
+
+        if isinstance(prompt, UniversalPromptV3):
+            # V3: Check top-level field
+            mcp_servers = prompt.mcp_servers
+        elif isinstance(prompt, UniversalPromptV2) and prompt.plugins:
+            # V2.1: Use nested plugins structure (deprecated)
+            if prompt.plugins.mcp_servers:
+                click.echo(
+                    DeprecationWarnings.v3_nested_plugin_field_warning("mcp_servers")
+                )
+                mcp_servers = prompt.plugins.mcp_servers
+
+        # Generate MCP config if we have MCP servers
+        if mcp_servers:
             mcp_files = self._generate_mcp_config(
-                prompt.plugins.mcp_servers,
+                mcp_servers,
                 output_dir,
                 dry_run,
                 verbose,
@@ -225,13 +246,13 @@ class WindsurfAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
         return created_files
 
     def validate(
-        self, prompt: Union[UniversalPrompt, UniversalPromptV2]
+        self, prompt: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3]
     ) -> List[ValidationError]:
         """Validate prompt for Windsurf."""
         errors = []
 
-        # V2 validation: check content exists
-        if isinstance(prompt, UniversalPromptV2):
+        # V2/V3 validation: check content exists
+        if isinstance(prompt, (UniversalPromptV2, UniversalPromptV3)):
             if not prompt.content or not prompt.content.strip():
                 errors.append(
                     ValidationError(
@@ -264,8 +285,8 @@ class WindsurfAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
 
     def parse_files(
         self, source_dir: Path
-    ) -> Union[UniversalPrompt, UniversalPromptV2]:
-        """Parse Windsurf files back into a UniversalPromptV2."""
+    ) -> Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3]:
+        """Parse Windsurf files back into a UniversalPromptV2 or UniversalPromptV3."""
         # Parse markdown files from .windsurf/rules/
         rules_dir = source_dir / ".windsurf" / "rules"
 
@@ -332,7 +353,7 @@ class WindsurfAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
 
     def _generate_rules_system(
         self,
-        prompt: Union[UniversalPrompt, UniversalPromptV2],
+        prompt: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3],
         conditional_content: Optional[Dict[str, Any]],
         output_dir: Path,
         dry_run: bool,
@@ -484,7 +505,9 @@ class WindsurfAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
         return "\n".join(lines)
 
     def _build_tech_rules_content(
-        self, tech: str, prompt: Union[UniversalPrompt, UniversalPromptV2]
+        self,
+        tech: str,
+        prompt: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3],
     ) -> str:
         """Build technology-specific rules content."""
         lines = []
