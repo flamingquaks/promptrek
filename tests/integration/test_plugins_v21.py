@@ -608,8 +608,8 @@ content: |
 class TestPluginMigration:
     """Test migration to v2.1.0 schema."""
 
-    def test_migrate_v20_to_v21(self, tmp_path):
-        """Test migrating v2.0.0 to v2.1.0."""
+    def test_migrate_v20_to_v30(self, tmp_path):
+        """Test migrating v2.0.0 to v3.0.0."""
         v20_file = tmp_path / "v20.promptrek.yaml"
         v20_file.write_text(
             """
@@ -628,41 +628,55 @@ variables:
         )
 
         runner = CliRunner()
-        v21_file = tmp_path / "v21.promptrek.yaml"
-        result = runner.invoke(cli, ["migrate", str(v20_file), "-o", str(v21_file)])
+        v3_file = tmp_path / "v3.promptrek.yaml"
+        result = runner.invoke(cli, ["migrate", str(v20_file), "-o", str(v3_file)])
 
         assert result.exit_code == 0
-        assert v21_file.exists()
+        assert v3_file.exists()
 
         # Check migrated file
-        migrated = yaml.safe_load(v21_file.read_text())
-        assert migrated["schema_version"] == "2.1.0"
+        migrated = yaml.safe_load(v3_file.read_text())
+        assert migrated["schema_version"] == "3.0.0"
         assert migrated["metadata"]["title"] == "Old Project"
         assert migrated["content"] == "# Old Project\n\nSome content here.\n"
         assert migrated["variables"]["VAR1"] == "value1"
-        # plugins field should be None/absent
+        # plugins field should be None/absent (repurposed for marketplace in v3)
         assert "plugins" not in migrated or migrated.get("plugins") is None
 
-    def test_migrate_v21_no_op(self, tmp_path):
-        """Test migrating v2.1.0 is a no-op."""
+    def test_migrate_v21_to_v3(self, tmp_path):
+        """Test migrating v2.1.0 to v3.0.0."""
         v21_file = tmp_path / "v21.promptrek.yaml"
         v21_file.write_text(
             """
 schema_version: "2.1.0"
 metadata:
-  title: "Already V2.1"
-  description: "Test"
+  title: "V2.1 Project"
+  description: "Test v2.1 to v3 migration"
   version: "1.0.0"
 content: |
-  # Already V2.1
+  # V2.1 Project
+plugins:
+  mcp_servers:
+    - name: test-server
+      command: npx
+      args: ["-y", "@test/server"]
 """
         )
 
         runner = CliRunner()
-        result = runner.invoke(cli, ["migrate", str(v21_file)])
+        v3_file = tmp_path / "v3.promptrek.yaml"
+        result = runner.invoke(cli, ["migrate", str(v21_file), "-o", str(v3_file)])
 
         assert result.exit_code == 0
-        assert "already v2.1 format" in result.output
+        assert v3_file.exists()
+
+        # Check that nested plugins.mcp_servers was promoted to top-level mcp_servers
+        migrated = yaml.safe_load(v3_file.read_text())
+        assert migrated["schema_version"] == "3.0.0"
+        assert "mcp_servers" in migrated
+        assert migrated["mcp_servers"][0]["name"] == "test-server"
+        # Old nested plugins field should not exist
+        assert "plugins" not in migrated or migrated.get("plugins") is None
 
 
 class TestPluginExamples:

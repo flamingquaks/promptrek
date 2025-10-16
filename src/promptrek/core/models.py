@@ -357,9 +357,7 @@ class PluginEntry(BaseModel):
     tags: Optional[List[str]] = Field(
         default=None, description="Tags for categorization (alias for keywords)"
     )
-    strict: bool = Field(
-        default=True, description="Require plugin.json manifest file"
-    )
+    strict: bool = Field(default=True, description="Require plugin.json manifest file")
     commands: Optional[List[str]] = Field(
         default=None, description="Custom command file paths"
     )

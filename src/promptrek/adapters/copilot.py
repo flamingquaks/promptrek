@@ -17,12 +17,14 @@ from ..core.models import (
     PromptMetadata,
     UniversalPrompt,
     UniversalPromptV2,
+    UniversalPromptV3,
 )
 from .base import EditorAdapter
+from .mcp_mixin import MCPGenerationMixin
 from .sync_mixin import SingleFileMarkdownSyncMixin
 
 
-class CopilotAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
+class CopilotAdapter(MCPGenerationMixin, SingleFileMarkdownSyncMixin, EditorAdapter):
     """Adapter for GitHub Copilot."""
 
     _description = (
@@ -42,9 +44,19 @@ class CopilotAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
             file_patterns=self._file_patterns,
         )
 
+    def get_mcp_config_strategy(self) -> Dict[str, Any]:
+        """Get MCP configuration strategy for Copilot adapter."""
+        return {
+            "supports_project": True,
+            "project_path": ".vscode/mcp.json",
+            "system_path": None,  # Copilot only supports project-level
+            "requires_confirmation": False,
+            "config_format": "json",
+        }
+
     def generate(
         self,
-        prompt: Union[UniversalPrompt, UniversalPromptV2],
+        prompt: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3],
         output_dir: Path,
         dry_run: bool = False,
         verbose: bool = False,
@@ -52,6 +64,18 @@ class CopilotAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
         headless: bool = False,
     ) -> List[Path]:
         """Generate GitHub Copilot configuration files."""
+
+        # V3: Always use plugin generation (handles instructions + plugins)
+        if isinstance(prompt, UniversalPromptV3):
+            return self._generate_plugins(
+                prompt, output_dir, dry_run, verbose, variables, headless
+            )
+
+        # V2.1: Handle plugins if present
+        if isinstance(prompt, UniversalPromptV2) and prompt.plugins:
+            return self._generate_plugins(
+                prompt, output_dir, dry_run, verbose, variables, headless
+            )
 
         # V2: Direct markdown output
         if isinstance(prompt, UniversalPromptV2):
@@ -94,14 +118,14 @@ class CopilotAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
 
     def _generate_v2(
         self,
-        prompt: UniversalPromptV2,
+        prompt: Union[UniversalPromptV2, UniversalPromptV3],
         output_dir: Path,
         dry_run: bool,
         verbose: bool,
         variables: Optional[Dict[str, Any]] = None,
         headless: bool = False,
     ) -> List[Path]:
-        """Generate Copilot files from v2 schema."""
+        """Generate Copilot files from v2/v3 schema."""
         github_dir = output_dir / ".github"
         output_file = github_dir / "copilot-instructions.md"
 
@@ -142,9 +166,96 @@ class CopilotAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
 
         return [output_file]
 
+    def _generate_plugins(
+        self,
+        prompt: Union[UniversalPromptV2, UniversalPromptV3],
+        output_dir: Path,
+        dry_run: bool,
+        verbose: bool,
+        variables: Optional[Dict[str, Any]] = None,
+        headless: bool = False,
+    ) -> List[Path]:
+        """Generate Copilot files from v2.1/v3.0 schema with plugin support."""
+        created_files = []
+
+        # First, generate the regular v2/v3 markdown files
+        markdown_files = self._generate_v2(
+            prompt, output_dir, dry_run, verbose, variables, headless
+        )
+        created_files.extend(markdown_files)
+
+        # Then, extract and handle MCP servers from either v3 top-level or v2.1 nested structure
+        mcp_servers = None
+
+        if isinstance(prompt, UniversalPromptV3):
+            # V3: Check top-level field
+            mcp_servers = prompt.mcp_servers
+        elif isinstance(prompt, UniversalPromptV2) and prompt.plugins:
+            # V2.1: Use nested plugins structure (deprecated)
+            if prompt.plugins.mcp_servers:
+                click.echo(
+                    "⚠️  Using deprecated plugins.mcp_servers structure (use top-level mcp_servers in v3.0)"
+                )
+                mcp_servers = prompt.plugins.mcp_servers
+
+        # Generate MCP config if we have MCP servers
+        if mcp_servers:
+            mcp_files = self._generate_mcp_config(
+                mcp_servers,
+                output_dir,
+                dry_run,
+                verbose,
+                variables,
+            )
+            created_files.extend(mcp_files)
+
+        return created_files
+
+    def _generate_mcp_config(
+        self,
+        mcp_servers: list,
+        output_dir: Path,
+        dry_run: bool,
+        verbose: bool,
+        variables: Optional[Dict[str, Any]] = None,
+    ) -> List[Path]:
+        """Generate MCP configuration for Copilot (project-only)."""
+        strategy = self.get_mcp_config_strategy()
+        created_files = []
+
+        # Copilot only supports project-level
+        if strategy["supports_project"] and strategy["project_path"]:
+            project_config_path = output_dir / strategy["project_path"]
+
+            # Build MCP servers config (uses standard MCP format)
+            mcp_config = self.build_mcp_servers_config(
+                mcp_servers, variables, format_style="standard"
+            )
+
+            # Check if config already exists
+            existing_config = self.read_existing_mcp_config(project_config_path)
+
+            if existing_config:
+                # Merge with existing config
+                if verbose:
+                    click.echo("  ℹ️  Merging MCP servers with existing Copilot config")
+                merged_config = self.merge_mcp_config(
+                    existing_config, mcp_config, format_style="standard"
+                )
+            else:
+                merged_config = mcp_config
+
+            # Write the config
+            if self.write_mcp_config_file(
+                merged_config, project_config_path, dry_run, verbose
+            ):
+                created_files.append(project_config_path)
+
+        return created_files
+
     def _generate_copilot_instructions(
         self,
-        prompt: Union[UniversalPrompt, UniversalPromptV2],
+        prompt: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3],
         conditional_content: Optional[Dict[str, Any]],
         output_dir: Path,
         dry_run: bool,
@@ -155,8 +266,8 @@ class CopilotAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
         github_dir = output_dir / ".github"
         output_file = github_dir / "copilot-instructions.md"
 
-        # For V2, use content directly
-        if isinstance(prompt, UniversalPromptV2):
+        # For V2/V3, use content directly
+        if isinstance(prompt, (UniversalPromptV2, UniversalPromptV3)):
             content = prompt.content
         elif headless:
             content = self._build_headless_content(prompt, conditional_content)
@@ -180,14 +291,14 @@ class CopilotAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
 
     def _generate_path_specific_instructions(
         self,
-        prompt: Union[UniversalPrompt, UniversalPromptV2],
+        prompt: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3],
         output_dir: Path,
         dry_run: bool,
         verbose: bool,
     ) -> List[Path]:
         """Generate path-specific .github/instructions/*.instructions.md files."""
-        # V2 doesn't generate path-specific files
-        if isinstance(prompt, UniversalPromptV2):
+        # V2/V3 doesn't generate path-specific files
+        if isinstance(prompt, (UniversalPromptV2, UniversalPromptV3)):
             return []
 
         instructions_dir = output_dir / ".github" / "instructions"
@@ -269,14 +380,14 @@ class CopilotAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
 
     def _generate_prompt_files(
         self,
-        prompt: Union[UniversalPrompt, UniversalPromptV2],
+        prompt: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3],
         output_dir: Path,
         dry_run: bool,
         verbose: bool,
     ) -> List[Path]:
         """Generate experimental .github/prompts/*.prompt.md files."""
-        # V2 doesn't generate experimental prompt files
-        if isinstance(prompt, UniversalPromptV2):
+        # V2/V3 doesn't generate experimental prompt files
+        if isinstance(prompt, (UniversalPromptV2, UniversalPromptV3)):
             return []
 
         prompts_dir = output_dir / ".github" / "prompts"
@@ -306,7 +417,9 @@ class CopilotAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
 
     def generate_merged(
         self,
-        prompt_files: List[Tuple[Union[UniversalPrompt, UniversalPromptV2], Path]],
+        prompt_files: List[
+            Tuple[Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3], Path]
+        ],
         output_dir: Path,
         dry_run: bool = False,
         verbose: bool = False,
@@ -315,8 +428,11 @@ class CopilotAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
     ) -> List[Path]:
         """Generate merged GitHub Copilot instructions from multiple prompt files."""
 
-        # Check if any v2 files (use simple concatenation for v2)
-        has_v2 = any(isinstance(p, UniversalPromptV2) for p, _ in prompt_files)
+        # Check if any v2/v3 files (use simple concatenation for v2/v3)
+        has_v2 = any(
+            isinstance(p, (UniversalPromptV2, UniversalPromptV3))
+            for p, _ in prompt_files
+        )
 
         if has_v2:
             content = self._build_merged_content_v2(prompt_files, variables, headless)
@@ -351,11 +467,13 @@ class CopilotAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
 
     def _build_merged_content_v2(
         self,
-        prompt_files: List[Tuple[Union[UniversalPrompt, UniversalPromptV2], Path]],
+        prompt_files: List[
+            Tuple[Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3], Path]
+        ],
         variables: Optional[Dict[str, Any]] = None,
         headless: bool = False,
     ) -> str:
-        """Build merged content from v2 prompts (simple markdown concatenation)."""
+        """Build merged content from v2/v3 prompts (simple markdown concatenation)."""
         lines = []
 
         # Add headless header if requested
@@ -385,7 +503,7 @@ class CopilotAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
 
         # Concatenate all content
         for i, (prompt, source_file) in enumerate(prompt_files, 1):
-            if isinstance(prompt, UniversalPromptV2):
+            if isinstance(prompt, (UniversalPromptV2, UniversalPromptV3)):
                 content = prompt.content
             else:
                 # Convert v1 to markdown on the fly
@@ -408,7 +526,9 @@ class CopilotAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
 
     def _build_merged_content(
         self,
-        prompt_files: Sequence[Tuple[Union[UniversalPrompt, UniversalPromptV2], Path]],
+        prompt_files: Sequence[
+            Tuple[Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3], Path]
+        ],
         variables: Optional[Dict[str, Any]] = None,
     ) -> str:
         """Build merged GitHub Copilot instructions from multiple prompt files."""
@@ -442,8 +562,8 @@ class CopilotAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
             lines.append(processed_prompt.metadata.description)
             lines.append("")
 
-            # For V2, use content directly
-            if isinstance(processed_prompt, UniversalPromptV2):
+            # For V2/V3, use content directly
+            if isinstance(processed_prompt, (UniversalPromptV2, UniversalPromptV3)):
                 lines.append(processed_prompt.content)
                 lines.append("")
                 continue
@@ -470,7 +590,9 @@ class CopilotAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
 
     def _build_merged_headless_content(
         self,
-        prompt_files: Sequence[Tuple[Union[UniversalPrompt, UniversalPromptV2], Path]],
+        prompt_files: Sequence[
+            Tuple[Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3], Path]
+        ],
         variables: Optional[Dict[str, Any]] = None,
     ) -> str:
         """Build merged headless content with embedded generation instructions."""
@@ -503,7 +625,7 @@ class CopilotAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
 
     def parse_files(
         self, source_dir: Path
-    ) -> Union[UniversalPrompt, UniversalPromptV2]:
+    ) -> Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3]:
         """
         Parse GitHub Copilot files back into a UniversalPromptV2.
 
@@ -820,13 +942,13 @@ class CopilotAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
         return Instructions(**base_dict)
 
     def validate(
-        self, prompt: Union[UniversalPrompt, UniversalPromptV2]
+        self, prompt: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3]
     ) -> List[ValidationError]:
         """Validate prompt for Copilot."""
         errors = []
 
-        # V2 validation: check content exists
-        if isinstance(prompt, UniversalPromptV2):
+        # V2/V3 validation: check content exists
+        if isinstance(prompt, (UniversalPromptV2, UniversalPromptV3)):
             if not prompt.content or not prompt.content.strip():
                 errors.append(
                     ValidationError(
