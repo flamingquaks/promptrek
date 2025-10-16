@@ -73,25 +73,33 @@ class TestConfigIgnoresCommand:
         ctx = MagicMock()
 
         with pytest.raises(CLIError) as exc_info:
-            config_ignores_command(ctx, config_file=None, remove_cached=False, dry_run=False)
+            config_ignores_command(
+                ctx, config_file=None, remove_cached=False, dry_run=False
+            )
 
         assert "No PrompTrek config file found" in str(exc_info.value)
 
     @patch("promptrek.cli.commands.config_ignores.configure_gitignore")
     @patch("promptrek.cli.commands.config_ignores.UPFParser")
-    def test_raises_error_when_config_file_not_exists(self, mock_parser, mock_config, tmp_path):
+    def test_raises_error_when_config_file_not_exists(
+        self, mock_parser, mock_config, tmp_path
+    ):
         """Should raise error when specified config file doesn't exist."""
         ctx = MagicMock()
         config_file = tmp_path / "nonexistent.promptrek.yaml"
 
         with pytest.raises(CLIError) as exc_info:
-            config_ignores_command(ctx, config_file=config_file, remove_cached=False, dry_run=False)
+            config_ignores_command(
+                ctx, config_file=config_file, remove_cached=False, dry_run=False
+            )
 
         assert "Config file not found" in str(exc_info.value)
 
     @patch("promptrek.cli.commands.config_ignores.configure_gitignore")
     @patch("promptrek.cli.commands.config_ignores.UPFParser")
-    def test_configures_gitignore_successfully(self, mock_parser, mock_config, tmp_path):
+    def test_configures_gitignore_successfully(
+        self, mock_parser, mock_config, tmp_path
+    ):
         """Should configure .gitignore successfully."""
         ctx = MagicMock()
         config_file = tmp_path / "project.promptrek.yaml"
@@ -107,7 +115,9 @@ class TestConfigIgnoresCommand:
         # Mock configure_gitignore to return success
         mock_config.return_value = {"patterns_added": 5, "files_removed": []}
 
-        config_ignores_command(ctx, config_file=config_file, remove_cached=False, dry_run=False)
+        config_ignores_command(
+            ctx, config_file=config_file, remove_cached=False, dry_run=False
+        )
 
         assert mock_config.called
         call_args = mock_config.call_args
@@ -136,7 +146,9 @@ class TestConfigIgnoresCommand:
         # Mock user declining to continue
         mock_confirm.return_value = False
 
-        config_ignores_command(ctx, config_file=config_file, remove_cached=False, dry_run=False)
+        config_ignores_command(
+            ctx, config_file=config_file, remove_cached=False, dry_run=False
+        )
 
         assert mock_confirm.called
         # Should not call configure_gitignore if user declines
@@ -144,7 +156,9 @@ class TestConfigIgnoresCommand:
 
     @patch("promptrek.cli.commands.config_ignores.configure_gitignore")
     @patch("promptrek.cli.commands.config_ignores.UPFParser")
-    def test_removes_cached_files_when_requested(self, mock_parser, mock_config, tmp_path):
+    def test_removes_cached_files_when_requested(
+        self, mock_parser, mock_config, tmp_path
+    ):
         """Should remove cached files when remove_cached is True."""
         ctx = MagicMock()
         config_file = tmp_path / "project.promptrek.yaml"
@@ -163,14 +177,18 @@ class TestConfigIgnoresCommand:
             "files_removed": ["file1.md", "file2.md"],
         }
 
-        config_ignores_command(ctx, config_file=config_file, remove_cached=True, dry_run=False)
+        config_ignores_command(
+            ctx, config_file=config_file, remove_cached=True, dry_run=False
+        )
 
         call_args = mock_config.call_args
         assert call_args[1]["remove_cached"] is True
 
     @patch("promptrek.cli.commands.config_ignores.configure_gitignore")
     @patch("promptrek.cli.commands.config_ignores.UPFParser")
-    def test_dry_run_mode_does_not_make_changes(self, mock_parser, mock_config, tmp_path):
+    def test_dry_run_mode_does_not_make_changes(
+        self, mock_parser, mock_config, tmp_path
+    ):
         """Should not make changes in dry-run mode."""
         ctx = MagicMock()
         config_file = tmp_path / "project.promptrek.yaml"
@@ -183,7 +201,9 @@ class TestConfigIgnoresCommand:
         mock_parser_instance.parse_file.return_value = mock_prompt
         mock_parser.return_value = mock_parser_instance
 
-        config_ignores_command(ctx, config_file=config_file, remove_cached=True, dry_run=True)
+        config_ignores_command(
+            ctx, config_file=config_file, remove_cached=True, dry_run=True
+        )
 
         # Should not call configure_gitignore in dry-run mode
         assert not mock_config.called
@@ -202,7 +222,9 @@ class TestConfigIgnoresCommand:
         mock_parser.return_value = mock_parser_instance
 
         with pytest.raises(CLIError) as exc_info:
-            config_ignores_command(ctx, config_file=config_file, remove_cached=False, dry_run=False)
+            config_ignores_command(
+                ctx, config_file=config_file, remove_cached=False, dry_run=False
+            )
 
         assert "Failed to parse config file" in str(exc_info.value)
 
@@ -221,7 +243,9 @@ class TestConfigIgnoresCLI:
     @patch("promptrek.cli.commands.config_ignores.configure_gitignore")
     @patch("promptrek.cli.commands.config_ignores._find_config_file")
     @patch("promptrek.cli.commands.config_ignores.UPFParser")
-    def test_cli_config_ignores_basic(self, mock_parser, mock_find, mock_config, tmp_path):
+    def test_cli_config_ignores_basic(
+        self, mock_parser, mock_find, mock_config, tmp_path
+    ):
         """Should run config-ignores command successfully."""
         runner = CliRunner()
 
@@ -247,7 +271,9 @@ class TestConfigIgnoresCLI:
 
     @patch("promptrek.cli.commands.config_ignores.configure_gitignore")
     @patch("promptrek.cli.commands.config_ignores.UPFParser")
-    def test_cli_config_ignores_with_config_option(self, mock_parser, mock_config, tmp_path):
+    def test_cli_config_ignores_with_config_option(
+        self, mock_parser, mock_config, tmp_path
+    ):
         """Should accept --config option."""
         runner = CliRunner()
 
@@ -272,7 +298,9 @@ class TestConfigIgnoresCLI:
     @patch("promptrek.cli.commands.config_ignores.configure_gitignore")
     @patch("promptrek.cli.commands.config_ignores._find_config_file")
     @patch("promptrek.cli.commands.config_ignores.UPFParser")
-    def test_cli_config_ignores_dry_run(self, mock_parser, mock_find, mock_config, tmp_path):
+    def test_cli_config_ignores_dry_run(
+        self, mock_parser, mock_find, mock_config, tmp_path
+    ):
         """Should support --dry-run option."""
         runner = CliRunner()
 
@@ -297,7 +325,9 @@ class TestConfigIgnoresCLI:
     @patch("promptrek.cli.commands.config_ignores.configure_gitignore")
     @patch("promptrek.cli.commands.config_ignores._find_config_file")
     @patch("promptrek.cli.commands.config_ignores.UPFParser")
-    def test_cli_config_ignores_remove_cached(self, mock_parser, mock_find, mock_config, tmp_path):
+    def test_cli_config_ignores_remove_cached(
+        self, mock_parser, mock_find, mock_config, tmp_path
+    ):
         """Should support --remove-cached option."""
         runner = CliRunner()
 

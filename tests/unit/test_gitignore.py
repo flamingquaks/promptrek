@@ -58,7 +58,9 @@ class TestReadGitignore:
     def test_ignores_comments_and_empty_lines(self, tmp_path):
         """Should ignore comments and empty lines."""
         gitignore_path = tmp_path / ".gitignore"
-        gitignore_path.write_text("# Comment\n*.pyc\n\n__pycache__\n# Another comment\n")
+        gitignore_path.write_text(
+            "# Comment\n*.pyc\n\n__pycache__\n# Another comment\n"
+        )
 
         patterns = read_gitignore(gitignore_path)
         assert patterns == {"*.pyc", "__pycache__"}
@@ -240,9 +242,7 @@ class TestConfigureGitignore:
 
     @patch("promptrek.utils.gitignore.add_patterns_to_gitignore")
     @patch("promptrek.utils.gitignore.remove_cached_files")
-    def test_adds_editor_patterns_when_requested(
-        self, mock_remove, mock_add, tmp_path
-    ):
+    def test_adds_editor_patterns_when_requested(self, mock_remove, mock_add, tmp_path):
         """Should add editor file patterns when add_editor_files is True."""
         mock_add.return_value = 5
         mock_remove.return_value = []
@@ -254,9 +254,7 @@ class TestConfigureGitignore:
 
     @patch("promptrek.utils.gitignore.add_patterns_to_gitignore")
     @patch("promptrek.utils.gitignore.remove_cached_files")
-    def test_removes_cached_files_when_requested(
-        self, mock_remove, mock_add, tmp_path
-    ):
+    def test_removes_cached_files_when_requested(self, mock_remove, mock_add, tmp_path):
         """Should remove cached files when remove_cached is True."""
         mock_add.return_value = 5
         mock_remove.return_value = ["file1.md", "file2.md"]
@@ -286,9 +284,7 @@ class TestConfigureGitignore:
 
     @patch("promptrek.utils.gitignore.add_patterns_to_gitignore")
     @patch("promptrek.utils.gitignore.remove_cached_files")
-    def test_combines_editor_and_custom_patterns(
-        self, mock_remove, mock_add, tmp_path
-    ):
+    def test_combines_editor_and_custom_patterns(self, mock_remove, mock_add, tmp_path):
         """Should combine editor and custom patterns when both requested."""
         mock_add.return_value = 10
         mock_remove.return_value = []
@@ -335,16 +331,17 @@ class TestGitignoreEdgeCases:
         """Should handle permission errors gracefully."""
         gitignore_path = tmp_path / ".gitignore"
         gitignore_path.write_text("existing")
-        
+
         # Make file read-only
         import os
+
         os.chmod(gitignore_path, 0o444)
-        
+
         patterns = ["new_pattern"]
         count = add_patterns_to_gitignore(gitignore_path, patterns)
-        
+
         # Should return 0 on error
         assert count == 0
-        
+
         # Restore permissions for cleanup
         os.chmod(gitignore_path, 0o644)
