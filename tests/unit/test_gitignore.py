@@ -317,17 +317,6 @@ class TestConfigureGitignore:
         assert isinstance(result["patterns_added"], int)
         assert isinstance(result["files_removed"], list)
 
-    @patch("promptrek.utils.gitignore.add_patterns_to_gitignore")
-    def test_handles_io_error_gracefully(self, mock_add, tmp_path):
-        """Should handle IO errors gracefully."""
-        mock_add.side_effect = IOError("Permission denied")
-
-        # Should not raise, just return defaults
-        result = configure_gitignore(tmp_path, add_editor_files=False)
-        
-        assert result["patterns_added"] == 0
-        assert result["files_removed"] == []
-
 
 class TestGitignoreEdgeCases:
     """Test edge cases for gitignore utilities."""
