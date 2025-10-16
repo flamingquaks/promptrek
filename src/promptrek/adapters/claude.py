@@ -10,7 +10,7 @@ import click
 import yaml
 
 from ..core.exceptions import ValidationError
-from ..core.models import UniversalPrompt, UniversalPromptV2
+from ..core.models import UniversalPrompt, UniversalPromptV2, UniversalPromptV3
 from .base import EditorAdapter
 from .sync_mixin import SingleFileMarkdownSyncMixin
 
@@ -30,7 +30,7 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
 
     def generate(
         self,
-        prompt: Union[UniversalPrompt, UniversalPromptV2],
+        prompt: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3],
         output_dir: Path,
         dry_run: bool = False,
         verbose: bool = False,
@@ -43,9 +43,9 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
         claude_dir = output_dir / ".claude"
         output_file = claude_dir / "CLAUDE.md"
 
-        # Check if this is v2 (simplified) or v1 (complex)
-        if isinstance(prompt, UniversalPromptV2):
-            # V2: Direct markdown output (lossless!)
+        # Check if this is v3/v2 (simplified) or v1 (complex)
+        if isinstance(prompt, (UniversalPromptV2, UniversalPromptV3)):
+            # V2/V3: Direct markdown output (lossless!)
             content = prompt.content
 
             # Merge variables: prompt variables + CLI/local overrides
@@ -85,8 +85,8 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
 
         generated_files = [output_file]
 
-        # Generate v2.1 plugin files if present
-        if isinstance(prompt, UniversalPromptV2) and prompt.plugins:
+        # Generate plugin files for v2.1/v3.0
+        if isinstance(prompt, (UniversalPromptV2, UniversalPromptV3)):
             # Merge variables for plugins too
             merged_vars = {}
             if prompt.variables:
@@ -94,7 +94,8 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
             if variables:
                 merged_vars.update(variables)
 
-            plugin_files = self._generate_v21_plugins(
+            # Check for v3 top-level fields first, then v2.1 nested structure
+            plugin_files = self._generate_plugins(
                 prompt,
                 output_dir,
                 dry_run,
@@ -107,7 +108,9 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
 
     def generate_multiple(
         self,
-        prompt_files: List[Tuple[Union[UniversalPrompt, UniversalPromptV2], Path]],
+        prompt_files: List[
+            Tuple[Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3], Path]
+        ],
         output_dir: Path,
         dry_run: bool = False,
         verbose: bool = False,
@@ -121,10 +124,10 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
 
         for prompt, source_file in prompt_files:
             # Only support v1 prompts in generate_multiple (for now)
-            # V2 prompts should use the main generate() method
-            if isinstance(prompt, UniversalPromptV2):
+            # V2/V3 prompts should use the main generate() method
+            if isinstance(prompt, (UniversalPromptV2, UniversalPromptV3)):
                 click.echo(
-                    f"⚠️  Skipping v2 prompt from {source_file} (use generate() instead)"
+                    f"⚠️  Skipping v2/v3 prompt from {source_file} (use generate() instead)"
                 )
                 continue
 
@@ -167,13 +170,13 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
         return generated_files
 
     def validate(
-        self, prompt: Union[UniversalPrompt, UniversalPromptV2]
+        self, prompt: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3]
     ) -> List[ValidationError]:
         """Validate prompt for Claude."""
         errors = []
 
-        # V2 validation: just check content exists
-        if isinstance(prompt, UniversalPromptV2):
+        # V2/V3 validation: just check content exists
+        if isinstance(prompt, (UniversalPromptV2, UniversalPromptV3)):
             if not prompt.content or not prompt.content.strip():
                 errors.append(
                     ValidationError(
@@ -219,40 +222,81 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
 
     def parse_files(
         self, source_dir: Path
-    ) -> Union[UniversalPrompt, UniversalPromptV2]:
+    ) -> Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3]:
         """
         Parse Claude Code files back into a UniversalPrompt.
 
-        Uses v2 format by default for lossless sync.
+        Uses v2 format by default for lossless sync (can be upgraded to v3).
         """
         file_path = ".claude/CLAUDE.md"
         # Use v2 sync for lossless roundtrip
+        # Note: Parser will auto-upgrade to v3 if schema_version is 3.x.x
         return self.parse_single_markdown_file_v2(
             source_dir=source_dir,
             file_path=file_path,
             editor_name="Claude Code",
         )
 
-    def _generate_v21_plugins(
+    def _generate_plugins(
         self,
-        prompt: UniversalPromptV2,
+        prompt: Union[UniversalPromptV2, UniversalPromptV3],
         output_dir: Path,
         dry_run: bool,
         verbose: bool,
         variables: Optional[Dict[str, Any]] = None,
     ) -> List[Path]:
-        """Generate v2.1 plugin files for Claude Code."""
-        if not prompt.plugins:
-            return []
+        """
+        Generate plugin files for Claude Code (v2.1 and v3.0 compatible).
 
+        Checks for v3 top-level fields first, then falls back to v2.1 nested structure.
+        """
         created_files = []
         claude_dir = output_dir / ".claude"
 
+        # Extract plugin data from v3 top-level or v2.1 nested structure
+        mcp_servers = None
+        commands = None
+        agents = None
+        hooks = None
+
+        if isinstance(prompt, UniversalPromptV3):
+            # V3: Check top-level fields first
+            mcp_servers = prompt.mcp_servers
+            commands = prompt.commands
+            agents = prompt.agents
+            hooks = prompt.hooks
+        elif isinstance(prompt, UniversalPromptV2) and prompt.plugins:
+            # V2.1: Use nested plugins structure (deprecated)
+            if prompt.plugins.mcp_servers:
+                click.echo(
+                    "⚠️  Using deprecated plugins.mcp_servers structure "
+                    "(use top-level mcp_servers in v3.0)"
+                )
+                mcp_servers = prompt.plugins.mcp_servers
+            if prompt.plugins.commands:
+                click.echo(
+                    "⚠️  Using deprecated plugins.commands structure "
+                    "(use top-level commands in v3.0)"
+                )
+                commands = prompt.plugins.commands
+            if prompt.plugins.agents:
+                click.echo(
+                    "⚠️  Using deprecated plugins.agents structure "
+                    "(use top-level agents in v3.0)"
+                )
+                agents = prompt.plugins.agents
+            if prompt.plugins.hooks:
+                click.echo(
+                    "⚠️  Using deprecated plugins.hooks structure "
+                    "(use top-level hooks in v3.0)"
+                )
+                hooks = prompt.plugins.hooks
+
         # Generate MCP server configurations
-        if prompt.plugins.mcp_servers:
+        if mcp_servers:
             mcp_file = output_dir / ".mcp.json"  # Project root, per Claude Code docs
-            mcp_servers = {}
-            for server in prompt.plugins.mcp_servers:
+            mcp_servers_config = {}
+            for server in mcp_servers:
                 server_config: Dict[str, Any] = {
                     "command": server.command,
                     "type": "stdio",  # Default to stdio type per Claude Code docs
@@ -272,9 +316,9 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
                                 )
                         env_vars[key] = substituted_value
                     server_config["env"] = env_vars
-                mcp_servers[server.name] = server_config
+                mcp_servers_config[server.name] = server_config
 
-            mcp_config = {"mcpServers": mcp_servers}
+            mcp_config = {"mcpServers": mcp_servers_config}
 
             if dry_run:
                 click.echo(f"  📁 Would create: {mcp_file}")
@@ -288,9 +332,9 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
             created_files.append(mcp_file)
 
         # Generate slash commands
-        if prompt.plugins.commands:
+        if commands:
             commands_dir = claude_dir / "commands"
-            for command in prompt.plugins.commands:
+            for command in commands:
                 # Apply variable substitution
                 command_prompt = command.prompt
                 if variables:
@@ -316,9 +360,9 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
                 created_files.append(command_file)
 
         # Generate agents
-        if prompt.plugins.agents:
+        if agents:
             agents_dir = claude_dir / "agents"
-            for agent in prompt.plugins.agents:
+            for agent in agents:
                 # Apply variable substitution
                 agent_prompt = agent.system_prompt
                 if variables:
@@ -344,7 +388,7 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
                 created_files.append(agent_file)
 
         # Generate hooks
-        if prompt.plugins.hooks:
+        if hooks:
             hooks_file = claude_dir / "hooks.yaml"
             hooks_config = {
                 "hooks": [
@@ -355,7 +399,7 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
                         **({"conditions": hook.conditions} if hook.conditions else {}),
                         "requires_reapproval": hook.requires_reapproval,
                     }
-                    for hook in prompt.plugins.hooks
+                    for hook in hooks
                 ]
             }
 
