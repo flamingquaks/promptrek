@@ -355,6 +355,9 @@ documents:
 variables:
   variable_name: string            # Variable value
 
+# .gitignore management (optional)
+ignore_editor_files: boolean       # Auto-exclude generated editor files (default: true)
+
 # Plugin configurations (optional, new in v2.1.0)
 plugins:
   # MCP (Model Context Protocol) servers
@@ -749,6 +752,9 @@ documents:
 # Template variables (optional)
 variables:
   variable_name: string            # Variable value
+
+# .gitignore management (optional)
+ignore_editor_files: boolean       # Auto-exclude generated editor files (default: true)
 ```
 
 ### v2 Field Descriptions
@@ -1009,6 +1015,9 @@ examples:
 variables:
   variable_name: string            # Default value or placeholder
   # ... more variables
+
+# .gitignore management (optional)
+ignore_editor_files: boolean       # Auto-exclude generated editor files (default: true)
 
 # Editor-specific configurations (optional)
 editor_specific:

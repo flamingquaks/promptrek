@@ -17,6 +17,7 @@ AI coding assistants like GitHub Copilot, Cursor, Continue, and others all use d
 - **Multi-Editor Support**: Generate prompts for any supported AI editor automatically (no `targets` field needed in v2!)
 - **Bidirectional Sync**: Parse editor files back to `.promptrek.yaml` without data loss (v2 lossless sync)
 - **Plugin Ecosystem**: Configure MCP servers, custom commands, autonomous agents, and event hooks (v2.1+)
+- **Auto .gitignore Management**: Automatically exclude generated editor files from version control
 - **Team Consistency**: Share prompt configurations across team members regardless of their editor choice
 - **Easy Migration**: Switch between AI editors without losing your prompt configurations
 
@@ -81,6 +82,31 @@ promptrek generate --all
 ```
 
 3. Use the generated prompts in your preferred editor!
+
+## 🔐 Automatic .gitignore Management
+
+PrompTrek automatically manages `.gitignore` to prevent committing generated editor files:
+
+```bash
+# Initialize project - automatically adds editor files to .gitignore
+promptrek init --output project.promptrek.yaml
+
+# Configure .gitignore manually
+promptrek config-ignores
+
+# Remove already-committed editor files from git
+promptrek config-ignores --remove-cached
+```
+
+**What gets ignored:**
+- Generated editor configurations (`.github/copilot-instructions.md`, `.cursor/rules/*.mdc`, etc.)
+- Local variables file (`variables.promptrek.yaml`)
+
+**Configuration option:**
+```yaml
+# Disable automatic .gitignore management
+ignore_editor_files: false
+```
 
 ## 📖 Documentation
 
