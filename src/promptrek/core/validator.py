@@ -108,11 +108,13 @@ class UPFValidator:
             if isinstance(prompt, UniversalPromptV3):
                 if prompt.mcp_servers:
                     for i, server in enumerate(prompt.mcp_servers):
-                        # MCP servers are TypedDict (which are dict at runtime)
-                        server_dict = cast(Dict[str, Any], server)
-                        if not server_dict.get("name"):
+                        # Access fields directly (TypedDict at type level, but could be dict or object at runtime)
+                        server_name = server["name"] if isinstance(server, dict) else server.name  # type: ignore
+                        server_command = server["command"] if isinstance(server, dict) else server.command  # type: ignore
+
+                        if not server_name:
                             result.add_error(f"MCP server {i+1} has no name")
-                        if not server_dict.get("command"):
+                        if not server_command:
                             result.add_error(f"MCP server {i+1} has no command")
 
             return result
