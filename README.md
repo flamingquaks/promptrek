@@ -185,7 +185,45 @@ ls .continue/rules/
 
 **Note:** The `--setup-hooks` flag automatically configures pre-commit hooks to validate your `.promptrek.yaml` files and prevent accidental commits of generated files.
 
-### 🆕 Schema v2.1.0 (Latest)
+### 🆕 Schema v3.0.0 (Beta)
+
+PrompTrek v3.0.0 introduces a **cleaner plugin architecture** by promoting plugin fields to the top level:
+
+**What's New:**
+- ✨ **Top-Level Plugin Fields** - Cleaner, flatter structure (no `plugins` wrapper)
+- ✅ **100% Backward Compatible** - v2.1 files continue to work with deprecation warnings
+- 🔄 **Automatic Migration** - Built-in tools to convert v2.1 → v3.0
+- 📋 **Deprecation System** - Centralized warnings guide migration path
+
+**Before (v2.1) vs After (v3.0):**
+```yaml
+# v2.1 - Nested structure (deprecated)
+schema_version: "2.1.0"
+plugins:                    # ❌ Unnecessary wrapper
+  mcp_servers: [...]
+  commands: [...]
+
+# v3.0 - Flat structure (recommended)
+schema_version: "3.0.0"
+mcp_servers: [...]          # ✅ Top-level
+commands: [...]             # ✅ Top-level
+```
+
+**Migration:**
+```bash
+# Auto-migrate v2.1 to v3.0
+promptrek migrate project.promptrek.yaml -o project-v3.promptrek.yaml
+
+# Migrate in place
+promptrek migrate project.promptrek.yaml --in-place
+```
+
+**Documentation:**
+- 📖 [V3 Migration Guide](./docs/V3_MIGRATION_GUIDE.md) - Complete migration instructions
+- ⚠️ [Deprecation Warnings](./docs/DEPRECATION_WARNINGS.md) - Understanding deprecation messages
+- 🎯 Migration timeline: v2.1 structure deprecated in v3.0, will be removed in v4.0
+
+### 🆕 Schema v2.1.0 (Stable)
 
 PrompTrek now supports **v2.1.0 schema** with plugin support for advanced AI editor features:
 

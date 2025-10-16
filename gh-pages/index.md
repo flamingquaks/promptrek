@@ -9,8 +9,12 @@ title: Home
       <h2 class="section-title">One Prompt Configuration.<br>Every AI Editor.</h2>
       <p class="intro-description">Stop recreating prompts for different AI coding assistants. PrompTrek lets you write comprehensive coding guidelines once and automatically generates the perfect configuration for GitHub Copilot, Cursor, Continue, and more.</p>
       <div class="v2-badge">
-        <span class="badge-new">NEW</span>
+        <span class="badge-new">STABLE</span>
         <span class="badge-text">Schema v2.1.0: Markdown-first with plugin support (MCP servers, commands, agents, hooks)!</span>
+      </div>
+      <div class="v2-badge" style="margin-top: 10px;">
+        <span class="badge-new" style="background-color: #2196F3;">BETA</span>
+        <span class="badge-text">Schema v3.0.0: Top-level plugin fields, cleaner architecture. <a href="user-guide/upf-specification.html#schema-v30-beta" style="color: #2196F3; text-decoration: underline;">Learn more →</a></span>
       </div>
     </div>
   </div>

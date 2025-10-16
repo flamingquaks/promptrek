@@ -9,8 +9,9 @@ title: UPF Specification
 
 The Universal Prompt Format (UPF) is a standardized YAML-based format for defining AI assistant prompts that can be converted to various editor-specific formats.
 
-PrompTrek supports **three schema versions**:
-- **v2.1.0** (Latest): Markdown-first with plugin support (MCP servers, commands, agents, hooks)
+PrompTrek supports **four schema versions**:
+- **v3.0.0** (Beta): Top-level plugin fields, cleaner architecture (backward compatible with v2.1)
+- **v2.1.0** (Stable): Markdown-first with plugin support (MCP servers, commands, agents, hooks)
 - **v2.0.0** (Stable): Markdown-first, simpler format with lossless bidirectional sync
 - **v1.0.0** (Legacy): Structured format with complex nested fields
 
@@ -20,13 +21,299 @@ PrompTrek supports **three schema versions**:
 
 ## Schema Versions
 
-- **Latest**: `2.1.0` - [Jump to v2.1 Specification](#schema-v21-latest)
+- **Beta**: `3.0.0` - [Jump to v3.0 Specification](#schema-v30-beta)
+- **Stable**: `2.1.0` - [Jump to v2.1 Specification](#schema-v21-stable)
 - **Stable**: `2.0.0` - [Jump to v2.0 Specification](#schema-v20-stable)
 - **Legacy**: `1.0.0` - [Jump to v1 Specification](#schema-v10-legacy)
 
 ---
 
-## Schema v2.1 (Latest)
+## Schema v3.0 (Beta)
+
+**New in v3.0.0**: Cleaner plugin architecture by promoting plugin fields to the top level.
+
+### What's New in v3.0
+
+- ✨ **Top-Level Plugin Fields** - No more `plugins` wrapper, cleaner YAML structure
+- ✅ **100% Backward Compatible** - v2.1 files continue to work with deprecation warnings
+- 🔄 **Automatic Migration** - Built-in tools to convert v2.1 → v3.0
+- 📋 **Centralized Deprecation System** - Consistent warnings guide migration path
+- 🎯 **Future-Proof** - Easier to extend with new plugin types
+
+### Key Changes from v2.1
+
+**Before (v2.1) - Nested structure:**
+```yaml
+schema_version: "2.1.0"
+plugins:                    # ❌ Unnecessary wrapper
+  mcp_servers: [...]
+  commands: [...]
+  agents: [...]
+  hooks: [...]
+```
+
+**After (v3.0) - Flat structure:**
+```yaml
+schema_version: "3.0.0"
+mcp_servers: [...]          # ✅ Top-level
+commands: [...]             # ✅ Top-level
+agents: [...]               # ✅ Top-level
+hooks: [...]                # ✅ Top-level
+```
+
+### Complete v3.0 Schema
+
+```yaml
+# Schema version (required)
+schema_version: "3.0.0"
+
+# Metadata about the prompt file (required)
+metadata:
+  title: string                    # Human-readable title (required)
+  description: string              # Brief description of purpose (required)
+  version: string                  # Semantic version of this prompt (optional)
+  author: string                   # Author name or email (optional)
+  created: string                  # ISO 8601 date (YYYY-MM-DD) (optional)
+  updated: string                  # ISO 8601 date (YYYY-MM-DD) (optional)
+  tags: [string]                   # Tags for categorization (optional)
+
+# Main markdown content (required)
+content: string                    # Raw markdown content
+
+# Optional: Multi-file support for editors like Continue, Windsurf, Kiro
+documents:
+  - name: string                   # Document name (becomes filename)
+    content: string                # Raw markdown content for this document
+
+# Template variables (optional)
+variables:
+  variable_name: string            # Variable value
+
+# MCP (Model Context Protocol) servers - NOW TOP-LEVEL in v3.0
+mcp_servers:
+  - name: string                   # Server name/identifier (required)
+    command: string                # Command to start the server (required)
+    args: [string]                 # Command line arguments (optional)
+    env:                           # Environment variables (optional)
+      VAR_NAME: string
+    description: string            # Human-readable description (optional)
+    trust_metadata:                # Trust and security metadata (optional)
+      trusted: boolean             # Whether this plugin is trusted
+      trust_level: string          # 'full', 'partial', or 'untrusted'
+      requires_approval: boolean   # Whether actions require approval
+      source: string               # Source of the plugin
+      verified_by: string          # Who verified this plugin
+      verified_date: string        # When verified (ISO 8601)
+
+# Custom slash commands - NOW TOP-LEVEL in v3.0
+commands:
+  - name: string                   # Command name (required, e.g., 'review-code')
+    description: string            # Command description (required)
+    prompt: string                 # Prompt template (required)
+    output_format: string          # Expected output format (optional)
+    requires_approval: boolean     # Whether execution requires approval (optional)
+    system_message: string         # Optional system message (optional)
+    examples: [string]             # Usage examples (optional)
+    trust_metadata: {}             # Trust metadata (optional)
+
+# Autonomous agents - NOW TOP-LEVEL in v3.0
+agents:
+  - name: string                   # Agent name (required)
+    description: string            # Agent description (required)
+    system_prompt: string          # System prompt for the agent (required)
+    tools: [string]                # Available tools (optional)
+    trust_level: string            # Trust level: 'full', 'partial', 'untrusted'
+    requires_approval: boolean     # Whether actions require approval
+    context: {}                    # Additional context (optional)
+    trust_metadata: {}             # Trust metadata (optional)
+
+# Event-driven hooks - NOW TOP-LEVEL in v3.0
+hooks:
+  - name: string                   # Hook name (required)
+    event: string                  # Trigger event (required, e.g., 'pre-commit')
+    command: string                # Command to execute (required)
+    conditions: {}                 # Execution conditions (optional)
+    requires_reapproval: boolean   # Whether hook requires reapproval (optional)
+    description: string            # Hook description (optional)
+    trust_metadata: {}             # Trust metadata (optional)
+```
+
+### Complete v3.0 Example
+
+```yaml
+schema_version: "3.0.0"
+
+metadata:
+  title: "Full Stack TypeScript Project"
+  description: "AI assistant with MCP servers, commands, and agents"
+  version: "1.0.0"
+  author: "dev-team@company.com"
+  tags: ["typescript", "fullstack", "ai-enhanced"]
+
+content: |
+  # Full Stack TypeScript Project
+
+  ## Project Overview
+  Modern full-stack application with TypeScript, React, and Node.js.
+  Enhanced with MCP servers for GitHub integration and filesystem access.
+
+  **Tech Stack:**
+  - React 18 with TypeScript
+  - Node.js with Express
+  - PostgreSQL database
+  - Jest for testing
+
+  ## Development Guidelines
+
+  ### General Principles
+  - Write type-safe code with strict TypeScript
+  - Use functional programming patterns
+  - Add comprehensive tests for all features
+  - Document complex business logic
+
+  ### Code Style
+  - Use named exports
+  - Prefer arrow functions
+  - Follow ESLint and Prettier configs
+  - Use meaningful variable names
+
+variables:
+  PROJECT_NAME: "FullStack App"
+  GITHUB_TOKEN: "ghp_token_here"
+  GITHUB_OWNER: "myorg"
+
+# Top-level plugin fields (v3.0 flat structure)
+mcp_servers:
+  - name: github
+    command: npx
+    args: ["-y", "@modelcontextprotocol/server-github"]
+    env:
+      GITHUB_TOKEN: "{{{ GITHUB_TOKEN }}}"
+      GITHUB_OWNER: "{{{ GITHUB_OWNER }}}"
+    description: "GitHub API integration"
+    trust_metadata:
+      trusted: true
+      trust_level: full
+      source: official
+
+commands:
+  - name: review-code
+    description: "Review code for quality and best practices"
+    prompt: |
+      Review the selected code for:
+      - TypeScript best practices
+      - Code quality and maintainability
+      - Security vulnerabilities
+      - Performance optimizations
+    output_format: markdown
+    requires_approval: false
+
+agents:
+  - name: test-generator
+    description: "Generate comprehensive unit tests"
+    system_prompt: |
+      Generate Jest tests with TypeScript that cover:
+      - Normal operations
+      - Edge cases
+      - Error handling
+      Target 80% coverage.
+    tools: [file_read, file_write, run_tests]
+    trust_level: partial
+    requires_approval: true
+    context:
+      framework: jest
+      coverage_target: 80
+
+hooks:
+  - name: pre-commit
+    event: pre-commit
+    command: "npm run lint && npm test"
+    description: "Run linting and tests before commit"
+    requires_reapproval: true
+```
+
+### Migration from v2.1 to v3.0
+
+Use the `promptrek migrate` command to convert v2.1 files to v3.0:
+
+```bash
+# Migrate to v3.0 format
+promptrek migrate project.promptrek.yaml -o project-v3.promptrek.yaml
+
+# Migrate in place
+promptrek migrate project.promptrek.yaml --in-place
+```
+
+The migration tool:
+- ✅ Promotes nested `plugins.mcp_servers` → `mcp_servers` (top-level)
+- ✅ Promotes nested `plugins.commands` → `commands` (top-level)
+- ✅ Promotes nested `plugins.agents` → `agents` (top-level)
+- ✅ Promotes nested `plugins.hooks` → `hooks` (top-level)
+- ✅ Preserves all metadata, content, variables, and documents
+- ✅ Updates schema_version from "2.1.0" to "3.0.0"
+
+### Backward Compatibility
+
+**v2.1 files continue to work in v3.0!**
+
+When you use a v2.1 file (with nested `plugins.*` structure) in PrompTrek v3.0:
+1. ⚠️ A deprecation warning is displayed
+2. ✅ The parser automatically promotes nested fields to top-level internally
+3. ✅ Your file works without modification
+
+**Deprecation Warning Example:**
+```
+⚠️  DEPRECATION WARNING in project.promptrek.yaml:
+   Detected nested plugin structure (plugins.mcp_servers, etc.)
+   This structure is deprecated in v3.0 and will be removed in v4.0.
+   Please migrate to top-level fields:
+     - Move 'plugins.mcp_servers' → 'mcp_servers' (top-level)
+     - Move 'plugins.commands' → 'commands' (top-level)
+     - Move 'plugins.agents' → 'agents' (top-level)
+     - Move 'plugins.hooks' → 'hooks' (top-level)
+   Run: promptrek migrate project.promptrek.yaml to auto-migrate
+```
+
+**Migration Timeline:**
+- **v2.1.0** (Released): Introduced nested `plugins.*` structure
+- **v3.0.0** (Current): Nested structure deprecated, top-level recommended
+- **v4.0.0** (Future): Nested structure will be removed entirely
+
+### Benefits of v3.0
+
+1. **Cleaner YAML Structure**
+   ```yaml
+   # v2.1 - Extra nesting
+   plugins:
+     mcp_servers: [...]
+
+   # v3.0 - Flat and clean
+   mcp_servers: [...]
+   ```
+
+2. **Consistency with v2.0 Philosophy**
+   - v2.0 introduced a flatter, markdown-first approach
+   - v3.0 extends this philosophy to plugins
+
+3. **Easier to Read and Write**
+   - Less indentation
+   - More intuitive structure
+   - Follows YAML best practices
+
+4. **Future-Proof**
+   - Easier to add new plugin types without more nesting
+   - Better tooling support (IDE auto-completion, validation)
+
+### Documentation
+
+For detailed migration information:
+- 📖 [V3 Migration Guide](../../docs/V3_MIGRATION_GUIDE.md) - Complete migration instructions
+- ⚠️ [Deprecation Warnings](../../docs/DEPRECATION_WARNINGS.md) - Understanding deprecation system
+- 🎯 Migration timeline and backward compatibility details
+
+---
+
+## Schema v2.1 (Stable)
 
 **New in v2.1.0**: Plugin support for MCP servers, custom commands, autonomous agents, and event-driven hooks.
 
