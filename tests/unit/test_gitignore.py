@@ -316,3 +316,46 @@ class TestConfigureGitignore:
         assert "files_removed" in result
         assert isinstance(result["patterns_added"], int)
         assert isinstance(result["files_removed"], list)
+
+    @patch("promptrek.utils.gitignore.add_patterns_to_gitignore")
+    def test_handles_io_error_gracefully(self, mock_add, tmp_path):
+        """Should handle IO errors gracefully."""
+        mock_add.side_effect = IOError("Permission denied")
+
+        # Should not raise, just return defaults
+        result = configure_gitignore(tmp_path, add_editor_files=False)
+        
+        assert result["patterns_added"] == 0
+        assert result["files_removed"] == []
+
+
+class TestGitignoreEdgeCases:
+    """Test edge cases for gitignore utilities."""
+
+    def test_read_gitignore_handles_decode_error(self, tmp_path):
+        """Should handle file decode errors gracefully."""
+        gitignore_path = tmp_path / ".gitignore"
+        # Write invalid UTF-8 bytes
+        gitignore_path.write_bytes(b"\xff\xfe")
+
+        # Should return empty set on error
+        patterns = read_gitignore(gitignore_path)
+        assert patterns == set()
+
+    def test_add_patterns_handles_permission_error(self, tmp_path):
+        """Should handle permission errors gracefully."""
+        gitignore_path = tmp_path / ".gitignore"
+        gitignore_path.write_text("existing")
+        
+        # Make file read-only
+        import os
+        os.chmod(gitignore_path, 0o444)
+        
+        patterns = ["new_pattern"]
+        count = add_patterns_to_gitignore(gitignore_path, patterns)
+        
+        # Should return 0 on error
+        assert count == 0
+        
+        # Restore permissions for cleanup
+        os.chmod(gitignore_path, 0o644)
