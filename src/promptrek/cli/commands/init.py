@@ -10,6 +10,7 @@ from typing import Optional
 import click
 
 from ...core.exceptions import CLIError
+from ...utils.gitignore import configure_gitignore
 from ..yaml_writer import write_promptrek_yaml
 
 
@@ -61,8 +62,11 @@ def init_command(
 
     click.echo(f"✅ Initialized universal prompt file: {output_path}")
 
-    # Add variables.promptrek.yaml to .gitignore
+    # Add variables.promptrek.yaml and editor files to .gitignore
     _add_to_gitignore(output_path.parent)
+
+    # Also configure editor files in .gitignore by default
+    configure_gitignore(output_path.parent, add_editor_files=True, remove_cached=False)
 
     click.echo("📝 Edit the file to customize your prompt configuration")
     click.echo(f"🔍 Run 'promptrek validate {output_path}' to check your configuration")

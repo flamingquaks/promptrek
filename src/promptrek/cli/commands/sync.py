@@ -21,6 +21,7 @@ from ...core.models import (
     UniversalPromptV2,
 )
 from ...core.parser import UPFParser
+from ...utils.gitignore import configure_gitignore
 from ..yaml_writer import write_promptrek_yaml
 
 
@@ -89,6 +90,9 @@ def sync_command(
     else:
         _write_prompt_file(merged_prompt, output_file)
         click.echo(f"✅ Synced {editor} configuration to: {output_file}")
+
+        # Check and apply ignore_editor_files configuration
+        _apply_gitignore_config(merged_prompt, output_file.parent)
 
 
 def _merge_metadata(existing_data: dict, parsed: UniversalPrompt) -> dict:
@@ -332,3 +336,24 @@ def _write_prompt_file(
     """Write prompt to YAML file with proper multi-line formatting."""
     prompt_data = prompt.model_dump(exclude_none=True, by_alias=True)
     write_promptrek_yaml(prompt_data, output_file)
+
+
+def _apply_gitignore_config(
+    prompt: Union[UniversalPrompt, UniversalPromptV2], project_dir: Path
+) -> None:
+    """
+    Apply .gitignore configuration based on prompt settings.
+
+    Args:
+        prompt: The prompt configuration
+        project_dir: Project directory
+    """
+    # Check if ignore_editor_files is set (default to True if not specified)
+    ignore_editor_files = getattr(prompt, "ignore_editor_files", None)
+
+    # Default to True if not specified
+    if ignore_editor_files is None:
+        ignore_editor_files = True
+
+    if ignore_editor_files:
+        configure_gitignore(project_dir, add_editor_files=True, remove_cached=False)
