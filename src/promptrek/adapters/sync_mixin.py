@@ -369,18 +369,19 @@ class SingleFileMarkdownSyncMixin:
 
         # Extract title from first H1 or use default
         title = (
-            self._extract_title_from_markdown(content) or f"{editor_name} Configuration"
+            (frontmatter_data.get("title") if frontmatter_data and "title" in frontmatter_data else self._extract_title_from_markdown(content))
+            or f"{editor_name} Configuration"
         )
 
-        # Create metadata
+        # Create metadata, using frontmatter fields if present
         metadata = PromptMetadata(
             title=title,
-            description=f"Synced from {file_path}",
-            version="1.0.0",
-            author="PrompTrek Sync",
-            created=datetime.now().isoformat(),
-            updated=datetime.now().isoformat(),
-            tags=[editor_name.lower().replace(" ", "-"), "synced"],
+            description=frontmatter_data.get("description") if frontmatter_data and "description" in frontmatter_data else f"Synced from {file_path}",
+            version=frontmatter_data.get("version") if frontmatter_data and "version" in frontmatter_data else "1.0.0",
+            author=frontmatter_data.get("author") if frontmatter_data and "author" in frontmatter_data else "PrompTrek Sync",
+            created=frontmatter_data.get("created") if frontmatter_data and "created" in frontmatter_data else datetime.now().isoformat(),
+            updated=frontmatter_data.get("updated") if frontmatter_data and "updated" in frontmatter_data else datetime.now().isoformat(),
+            tags=frontmatter_data.get("tags") if frontmatter_data and "tags" in frontmatter_data else [editor_name.lower().replace(" ", "-"), "synced"],
         )
 
         # Build v3 prompt with raw markdown content
