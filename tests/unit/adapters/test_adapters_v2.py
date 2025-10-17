@@ -13,7 +13,6 @@ from promptrek.adapters.copilot import CopilotAdapter
 from promptrek.adapters.cursor import CursorAdapter
 from promptrek.adapters.jetbrains import JetBrainsAdapter
 from promptrek.adapters.kiro import KiroAdapter
-from promptrek.adapters.tabnine import TabnineAdapter
 from promptrek.core.models import DocumentConfig, PromptMetadata, UniversalPromptV2
 
 
@@ -288,27 +287,6 @@ class TestKiroAdapterV2(TestAdapterV2Base):
         general_file = steering_dir / "general-rules.md"
         assert general_file.exists()
         assert "Rule 1" in general_file.read_text()
-
-
-class TestTabnineAdapterV2(TestAdapterV2Base):
-    """Test Tabnine adapter with v2 schema."""
-
-    @pytest.fixture
-    def adapter(self):
-        """Create Tabnine adapter instance."""
-        return TabnineAdapter()
-
-    def test_generate_v2(self, adapter, sample_v2_prompt, tmp_path):
-        """Test v2 generation converts to comment format."""
-        files = adapter.generate(sample_v2_prompt, tmp_path)
-
-        assert len(files) == 1
-        tabnine_file = tmp_path / ".tabnine_commands"
-        assert tabnine_file.exists()
-
-        content = tabnine_file.read_text()
-        # Content should be converted to comment format
-        assert "# Test Project" in content or "#" in content
 
 
 class TestJetBrainsAdapterV2(TestAdapterV2Base):

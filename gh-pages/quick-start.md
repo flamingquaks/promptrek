@@ -288,9 +288,6 @@ PrompTrek generates sophisticated configuration files for each editor:
 ### Windsurf
 - `.windsurf/rules/*.md` - Organized markdown rule files by category and technology
 
-### Tabnine
-- `.tabnine_commands` - Basic context guidance (limited support - prompts/MCP configured via IDE)
-
 ### Amazon Q
 - `.amazonq/rules/*.md` - Rules directory for coding guidelines
 - `.amazonq/cli-agents/*.json` - CLI agents for code review, security, and testing

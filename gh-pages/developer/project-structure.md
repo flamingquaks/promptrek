@@ -117,7 +117,6 @@ src/promptrek/
 │   ├── kiro.py                  # Kiro adapter
 │   ├── amazon_q.py              # Amazon Q adapter
 │   ├── jetbrains.py             # JetBrains AI adapter
-│   ├── tabnine.py               # Tabnine adapter
 │   ├── sync_mixin.py            # Sync functionality
 │   └── base.py                  # Base adapter class
 ├── templates/                   # Built-in templates

@@ -10,7 +10,6 @@ from .cursor import CursorAdapter
 from .jetbrains import JetBrainsAdapter
 from .kiro import KiroAdapter
 from .registry import AdapterCapability, AdapterRegistry, registry
-from .tabnine import TabnineAdapter
 from .windsurf import WindsurfAdapter
 
 # Register built-in adapters with their capabilities
@@ -98,10 +97,6 @@ registry.register_class(
     ],
 )
 
-registry.register_class(
-    "tabnine", TabnineAdapter, [AdapterCapability.GLOBAL_CONFIG_ONLY]
-)
-
 # Windsurf - generates project-level rules files
 registry.register_class(
     "windsurf",
@@ -125,7 +120,6 @@ __all__ = [
     "ClineAdapter",
     "WindsurfAdapter",
     "KiroAdapter",
-    "TabnineAdapter",
     "AmazonQAdapter",
     "JetBrainsAdapter",
 ]

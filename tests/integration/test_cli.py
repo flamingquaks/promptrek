@@ -439,7 +439,6 @@ instructions:
         assert "copilot" in result.output
         assert "cursor" in result.output
         assert "✅" in result.output  # Project Configuration File Support
-        assert "ℹ️" in result.output  # Global Configuration Only
 
     def test_generate_command_missing_editor_and_all(self, sample_upf_file):
         """Test generate command fails when neither editor nor all is specified."""

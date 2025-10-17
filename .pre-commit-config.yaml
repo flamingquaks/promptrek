@@ -13,7 +13,7 @@ repos:
     name: Prevent committing generated files
     entry: uv run promptrek check-generated
     language: system
-    files: (?x)(^\.github/(copilot-instructions\.md|instructions/.*\.instructions\.md|prompts/.*\.prompt\.md)$|^(\.cursorrules|\.cursor/.*|\.cursorignore|\.cursorindexingignore|AGENTS\.md)$|^(config\.yaml|\.continue/.*)$|^(\.claude/.*|CLAUDE\.md)$|^\.clinerules/.*$|^\.windsurf/.*$|^\.kiro/.*$|^\.tabnine_commands$|^\.amazonq/.*$|^\.assistant/.*)
+    files: (?x)(^\.github/(copilot-instructions\.md|instructions/.*\.instructions\.md|prompts/.*\.prompt\.md)$|^(\.cursorrules|\.cursor/.*|\.cursorignore|\.cursorindexingignore|AGENTS\.md)$|^(config\.yaml|\.continue/.*)$|^(\.claude/.*|CLAUDE\.md)$|^\.clinerules/.*$|^\.windsurf/.*$|^\.kiro/.*$|^\.amazonq/.*$|^\.assistant/.*)
     stages:
     - pre-commit
     always_run: false
