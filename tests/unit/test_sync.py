@@ -24,6 +24,7 @@ from promptrek.core.models import (
     PromptMetadata,
     UniversalPrompt,
     UniversalPromptV2,
+    UniversalPromptV3,
 )
 
 
@@ -77,17 +78,17 @@ class TestSyncCommand:
 """
         )
 
-        # Test parsing (now returns V2 schema)
+        # Test parsing (now returns V3 schema)
         adapter = ContinueAdapter()
         parsed_prompt = adapter.parse_files(tmp_path)
 
-        assert isinstance(parsed_prompt, UniversalPromptV2)
-        assert parsed_prompt.schema_version == "2.0.0"
+        assert isinstance(parsed_prompt, UniversalPromptV3)  # V3 schema
+        assert parsed_prompt.schema_version == "3.0.0"
         assert (
             parsed_prompt.metadata.title == "Continue AI Assistant"
-        )  # V2 uses default title
+        )  # V3 uses default title
 
-        # V2 schema uses documents instead of instructions
+        # V3 schema uses documents instead of instructions
         assert parsed_prompt.documents is not None
         assert len(parsed_prompt.documents) >= 2  # general.md and code-style.md
 
@@ -125,8 +126,9 @@ class TestSyncCommand:
         adapter = ContinueAdapter()
         parsed_prompt = adapter.parse_files(tmp_path)
 
-        # V2 schema
-        assert isinstance(parsed_prompt, UniversalPromptV2)
+        # V3 schema
+        assert isinstance(parsed_prompt, UniversalPromptV3)  # V3 schema
+        assert parsed_prompt.schema_version == "3.0.0"
         assert parsed_prompt.metadata.title == "Continue AI Assistant"
         assert len(parsed_prompt.documents) == 1
         assert parsed_prompt.documents[0].name == "general"
@@ -397,11 +399,11 @@ Some other text that should be ignored.
         # Should overwrite without asking
         sync_command(ctx, tmp_path, "continue", output_file, False, True)
 
-        # File should have new content (V2 schema)
+        # File should have new content (V3 schema)
         content = yaml.safe_load(output_file.read_text())
-        assert content["schema_version"] == "2.0.0"
+        assert content["schema_version"] == "3.0.0"
         assert content["metadata"]["title"] == "Continue AI Assistant"
-        # V2 uses documents, not instructions
+        # V3 uses documents, not instructions
         assert "documents" in content
         assert len(content["documents"]) == 1
         assert content["documents"][0]["name"] == "general"
@@ -421,8 +423,9 @@ Some other text that should be ignored.
         adapter = ContinueAdapter()
         parsed_prompt = adapter.parse_files(tmp_path)
 
-        # V2 schema: tech-specific files become documents
-        assert isinstance(parsed_prompt, UniversalPromptV2)
+        # V3 schema: tech-specific files become documents
+        assert isinstance(parsed_prompt, UniversalPromptV3)  # V3 schema
+        assert parsed_prompt.schema_version == "3.0.0"
         assert parsed_prompt.documents is not None
 
         # Check documents were created for each technology

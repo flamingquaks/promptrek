@@ -19,6 +19,7 @@ from ...core.models import (
     PromptMetadata,
     UniversalPrompt,
     UniversalPromptV2,
+    UniversalPromptV3,
 )
 from ...core.parser import UPFParser
 from ...utils.gitignore import configure_gitignore
@@ -220,18 +221,20 @@ def _merge_context(existing_data: dict, parsed: UniversalPrompt) -> dict:
 
 
 def _merge_prompts(
-    existing: Union[UniversalPrompt, UniversalPromptV2],
-    parsed: Union[UniversalPrompt, UniversalPromptV2],
+    existing: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3],
+    parsed: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3],
     editor: str,
-) -> Union[UniversalPrompt, UniversalPromptV2]:
+) -> Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3]:
     """
     Merge parsed prompt data with existing PrompTrek configuration.
 
-    V1 and V2 are separate schemas - no cross-schema merging.
+    V1, V2, and V3 are separate schemas - no cross-schema merging.
+    - V3 + V3 = V3 (update content and documents)
     - V2 + V2 = V2 (update content and documents)
     - V1 + V1 = V1 (merge instructions and context)
+    - V3 + V1/V2 = Replace with V3 (warn user)
     - V2 + V1 = Replace with V2 (warn user)
-    - V1 + V2 = Replace with V1 (warn user)
+    - V1 + V2/V3 = Replace with V1 (warn user)
 
     Args:
         existing: Existing PrompTrek configuration
@@ -239,8 +242,45 @@ def _merge_prompts(
         editor: Editor name being synced
 
     Returns:
-        Merged UniversalPrompt or UniversalPromptV2
+        Merged UniversalPrompt, UniversalPromptV2, or UniversalPromptV3
     """
+    # V3 schema handling
+    if isinstance(parsed, UniversalPromptV3):
+        if isinstance(existing, UniversalPromptV3):
+            # V3 + V3: Merge within V3 schema
+            merged_data = existing.model_dump(exclude_none=True)
+            merged_data["content"] = parsed.content
+
+            # Update metadata timestamp
+            metadata = merged_data.get("metadata", {})
+            if parsed.metadata.updated:
+                metadata["updated"] = parsed.metadata.updated
+            else:
+                metadata["updated"] = datetime.now().isoformat()[:10]
+            merged_data["metadata"] = metadata
+
+            # Update documents if present
+            if parsed.documents:
+                merged_data["documents"] = [
+                    doc.model_dump(exclude_none=True) for doc in parsed.documents
+                ]
+
+            return UniversalPromptV3.model_validate(merged_data)
+        else:
+            # V1 or V2 exists, V3 parsed: Replace with V3 (no cross-schema merge)
+            click.echo(
+                f"⚠️  Existing file is {type(existing).__name__} schema, parsed files are V3. Replacing with V3 schema."
+            )
+            # Preserve metadata title/description from existing if V3 has defaults
+            if (
+                parsed.metadata.title == "Continue AI Assistant"
+                and existing.metadata.title
+            ):
+                parsed.metadata.title = existing.metadata.title
+            if existing.metadata.description and not parsed.metadata.description:
+                parsed.metadata.description = existing.metadata.description
+            return parsed
+
     # V2 schema handling
     if isinstance(parsed, UniversalPromptV2):
         if isinstance(existing, UniversalPromptV2):
@@ -311,19 +351,21 @@ def _merge_prompts(
     )
 
 
-def _preview_prompt(prompt: Union[UniversalPrompt, UniversalPromptV2]) -> None:
+def _preview_prompt(
+    prompt: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3],
+) -> None:
     """Preview the prompt that would be written."""
     click.echo("📄 Preview of configuration that would be written:")
     click.echo(f"  Title: {prompt.metadata.title}")
     click.echo(f"  Description: {prompt.metadata.description}")
 
-    # V2 schema - show content length
-    if isinstance(prompt, UniversalPromptV2):
+    # V3 or V2 schema - show content length
+    if isinstance(prompt, (UniversalPromptV2, UniversalPromptV3)):
         click.echo(f"  Content length: {len(prompt.content)} characters")
         if prompt.documents:
             click.echo(f"  Documents: {len(prompt.documents)} files")
     # V1 schema - show instructions
-    elif prompt.instructions:
+    elif hasattr(prompt, "instructions") and prompt.instructions:
         instructions_data = prompt.instructions.model_dump(exclude_none=True)
         for category, instructions in instructions_data.items():
             if instructions:
@@ -331,7 +373,8 @@ def _preview_prompt(prompt: Union[UniversalPrompt, UniversalPromptV2]) -> None:
 
 
 def _write_prompt_file(
-    prompt: Union[UniversalPrompt, UniversalPromptV2], output_file: Path
+    prompt: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3],
+    output_file: Path,
 ) -> None:
     """Write prompt to YAML file with proper multi-line formatting."""
     prompt_data = prompt.model_dump(exclude_none=True, by_alias=True)
@@ -339,7 +382,8 @@ def _write_prompt_file(
 
 
 def _apply_gitignore_config(
-    prompt: Union[UniversalPrompt, UniversalPromptV2], project_dir: Path
+    prompt: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3],
+    project_dir: Path,
 ) -> None:
     """
     Apply .gitignore configuration based on prompt settings.

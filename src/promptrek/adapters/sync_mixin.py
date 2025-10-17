@@ -19,6 +19,7 @@ from ..core.models import (
     PromptMetadata,
     UniversalPrompt,
     UniversalPromptV2,
+    UniversalPromptV3,
 )
 
 
@@ -328,6 +329,63 @@ class SingleFileMarkdownSyncMixin:
         # Build v2 prompt with raw markdown content
         return UniversalPromptV2(
             schema_version="2.0.0",
+            metadata=metadata,
+            content=content.strip(),  # Raw markdown content, lossless!
+            variables={},
+        )
+
+    def parse_single_markdown_file_v3(
+        self,
+        source_dir: Path,
+        file_path: str,
+        editor_name: str = "AI Assistant",
+    ) -> UniversalPromptV3:
+        """
+        Parse a single markdown file into UniversalPromptV3 (lossless).
+
+        This method preserves the markdown content exactly as-is, extracting
+        only minimal metadata. Uses v3.0 schema with top-level plugin fields.
+        Perfect for lossless bidirectional sync.
+
+        Args:
+            source_dir: Root directory containing editor configuration
+            file_path: Path to the file relative to source_dir
+            editor_name: Name of the editor for metadata
+
+        Returns:
+            UniversalPromptV3 object with lossless markdown content
+        """
+        md_file = source_dir / file_path
+
+        if not md_file.exists():
+            raise FileNotFoundError(f"File not found: {md_file}")
+
+        # Read the file
+        with open(md_file, "r", encoding="utf-8") as f:
+            full_content = f.read()
+
+        # Extract frontmatter if present
+        frontmatter_data, content = self._extract_frontmatter(full_content)
+
+        # Extract title from first H1 or use default
+        title = (
+            self._extract_title_from_markdown(content) or f"{editor_name} Configuration"
+        )
+
+        # Create metadata
+        metadata = PromptMetadata(
+            title=title,
+            description=f"Synced from {file_path}",
+            version="1.0.0",
+            author="PrompTrek Sync",
+            created=datetime.now().isoformat(),
+            updated=datetime.now().isoformat(),
+            tags=[editor_name.lower().replace(" ", "-"), "synced"],
+        )
+
+        # Build v3 prompt with raw markdown content
+        return UniversalPromptV3(
+            schema_version="3.0.0",
             metadata=metadata,
             content=content.strip(),  # Raw markdown content, lossless!
             variables={},

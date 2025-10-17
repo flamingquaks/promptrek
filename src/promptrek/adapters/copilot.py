@@ -628,19 +628,19 @@ class CopilotAdapter(MCPGenerationMixin, SingleFileMarkdownSyncMixin, EditorAdap
         self, source_dir: Path
     ) -> Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3]:
         """
-        Parse GitHub Copilot files back into a UniversalPromptV2.
+        Parse GitHub Copilot files back into a UniversalPromptV3.
 
-        Uses v2 format for lossless sync.
+        Uses v3.0 format for lossless sync with clean top-level plugin structure.
 
         Args:
             source_dir: Directory containing Copilot configuration files
 
         Returns:
-            UniversalPromptV2 object parsed from Copilot files
+            UniversalPromptV3 object parsed from Copilot files
         """
         file_path = ".github/copilot-instructions.md"
-        # Use v2 sync for lossless roundtrip
-        return self.parse_single_markdown_file_v2(
+        # Use v3 sync for lossless roundtrip with clean top-level plugins
+        return self.parse_single_markdown_file_v3(
             source_dir=source_dir,
             file_path=file_path,
             editor_name="GitHub Copilot",

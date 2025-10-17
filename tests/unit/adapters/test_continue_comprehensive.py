@@ -9,6 +9,7 @@ from promptrek.core.models import (
     PromptMetadata,
     UniversalPrompt,
     UniversalPromptV2,
+    UniversalPromptV3,
 )
 
 
@@ -406,7 +407,7 @@ class TestContinueAdapterComprehensive:
 
         result = adapter.parse_files(tmp_path)
 
-        assert isinstance(result, UniversalPromptV2)
+        assert isinstance(result, UniversalPromptV3)
         assert result.documents is not None
         assert len(result.documents) == 3
         assert any(doc.name == "general" for doc in result.documents)
@@ -423,7 +424,7 @@ class TestContinueAdapterComprehensive:
         result = adapter.parse_files(tmp_path)
 
         # Should still succeed even if some files have issues
-        assert isinstance(result, UniversalPromptV2)
+        assert isinstance(result, UniversalPromptV3)
 
     def test_parse_files_v1_fallback(self, adapter, tmp_path):
         """Test v1 parsing fallback when no rules directory."""
@@ -443,7 +444,9 @@ rules:
         try:
             result = adapter.parse_files(tmp_path)
             # Should return v1 format
-            assert isinstance(result, (UniversalPrompt, UniversalPromptV2))
+            assert isinstance(
+                result, (UniversalPrompt, UniversalPromptV2, UniversalPromptV3)
+            )
         except Exception:
             # Might fail if config.yaml structure is wrong, that's ok
             pass
@@ -488,7 +491,7 @@ rules:
 
         result = adapter.parse_files(tmp_path)
 
-        assert isinstance(result, UniversalPromptV2)
+        assert isinstance(result, UniversalPromptV3)
         # Should have parsed multiple documents
         if result.documents:
             assert len(result.documents) >= 3
