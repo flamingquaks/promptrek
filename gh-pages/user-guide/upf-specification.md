@@ -1089,7 +1089,7 @@ List of AI editors/tools that this prompt configuration supports.
 - `continue`: Continue extension
 - `claude_code`: Claude Code
 - `kiro`: Kiro AI assistant
-- `cline`: Cline terminal assistant
+- `cline`: Cline VSCode extension (autonomous AI coding agent)
 - `windsurf`: Windsurf
 - `tabnine`: Tabnine
 - `amazon_q`: Amazon Q (formerly CodeWhisperer)

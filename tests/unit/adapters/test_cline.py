@@ -29,7 +29,10 @@ class TestClineAdapter(TestAdapterBase):
     def test_init(self, adapter):
         """Test adapter initialization."""
         assert adapter.name == "cline"
-        assert adapter.description == "Cline (.clinerules, .clinerules/*.md)"
+        assert (
+            adapter.description
+            == "Cline VSCode Extension (.clinerules, .clinerules/*.md)"
+        )
         assert ".clinerules" in adapter.file_patterns
         assert ".clinerules/*.md" in adapter.file_patterns
 

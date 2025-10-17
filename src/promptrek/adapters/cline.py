@@ -1,5 +1,5 @@
 """
-Cline (terminal-based AI assistant) adapter implementation.
+Cline (VSCode AI coding assistant extension) adapter implementation.
 """
 
 from pathlib import Path
@@ -15,9 +15,9 @@ from .sync_mixin import MarkdownSyncMixin
 
 
 class ClineAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
-    """Adapter for Cline terminal-based AI assistant."""
+    """Adapter for Cline VSCode AI coding assistant extension."""
 
-    _description = "Cline (.clinerules, .clinerules/*.md)"
+    _description = "Cline VSCode Extension (.clinerules, .clinerules/*.md)"
     _file_patterns = [".clinerules", ".clinerules/*.md"]
 
     def __init__(self) -> None:

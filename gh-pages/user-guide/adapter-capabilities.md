@@ -197,13 +197,14 @@ Full support for PrompTrek v3.0 schema with top-level plugin fields.
 
 **Unique Features**:
 - ✅ Simple markdown format
-- ✅ Terminal-based AI assistance
-- ✅ Straightforward configuration
+- ✅ VSCode-integrated autonomous agent
+- ✅ File creation/editing with user approval
+- ✅ Command execution and browser automation
 - ✅ Bidirectional sync
-- ✅ MCP server support
+- ✅ MCP server support (via VSCode settings)
 - ✅ v3.0 schema with top-level plugins
 
-**Best For**: Terminal-focused developers, simple setups
+**Best For**: VSCode users wanting autonomous AI assistance, task automation workflows
 
 ---
 
