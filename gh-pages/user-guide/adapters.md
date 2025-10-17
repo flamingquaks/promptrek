@@ -5,7 +5,7 @@ title: Editor Adapters
 
 # Editor Adapters
 
-PrompTrek supports 10 AI-powered code editors and assistants. Each adapter generates editor-specific configuration files optimized for that particular tool.
+PrompTrek supports 9 AI-powered code editors and assistants. Each adapter generates editor-specific configuration files optimized for that particular tool.
 
 > **📊 Looking for a detailed feature comparison?** See the [Adapter Capabilities Matrix](adapter-capabilities.html) for a comprehensive breakdown of features supported by each adapter.
 
@@ -309,35 +309,6 @@ AI assistant configuration for developing PrompTrek
 - `{category}.md` - Additional instruction category files
 
 Each steering document includes YAML frontmatter with `inclusion: always` to ensure it's always loaded by Kiro.
-
-### ⚠️ Tabnine
-**Generated Files**: `.tabnine_commands`
-**Features**: ⚠️ Limited Support, ✅ Variables, ✅ Conditionals
-
-Tabnine adapter generates a single commands file with project context for code completion.
-
-**Commands File (.tabnine_commands)**:
-```markdown
-# Tabnine Commands for My Project
-
-# A modern web application
-
-## Project Context
-# Type: web_application
-# Technologies: typescript, react, node
-
-## Coding Guidelines
-
-# Write clean, maintainable code
-# Follow TypeScript best practices
-# Use React functional components with hooks
-
-## Usage
-# This file provides context to Tabnine for better code completions
-# Tabnine will use these guidelines to suggest more relevant code
-```
-
-**Note**: Tabnine does not support full project-level configuration via files. Prompts and MCP are configured through the IDE/editor interface. The `.tabnine_commands` file provides basic context guidance.
 
 ### ✅ Amazon Q
 **Generated Files**: `.amazonq/rules/*.md`, `.amazonq/cli-agents/*.json`

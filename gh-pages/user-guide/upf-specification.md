@@ -1091,7 +1091,6 @@ List of AI editors/tools that this prompt configuration supports.
 - `kiro`: Kiro AI assistant
 - `cline`: Cline VSCode extension (autonomous AI coding agent)
 - `windsurf`: Windsurf
-- `tabnine`: Tabnine
 - `amazon_q`: Amazon Q (formerly CodeWhisperer)
 - `jetbrains_ai`: JetBrains AI Assistant
 

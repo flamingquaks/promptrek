@@ -46,7 +46,6 @@ class TestAdvancedWorkflows:
                 "kiro",
                 "cline",
                 "jetbrains",
-                "tabnine",
             ],
             "context": {
                 "project_type": "{{ PROJECT_TYPE }}",

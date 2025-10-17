@@ -45,8 +45,6 @@ def get_editor_file_patterns() -> List[str]:
         ".assistant/rules/*.md",
         # Kiro
         ".kiro/steering/*.md",
-        # Tabnine
-        ".tabnine_commands",
         # MCP configs
         ".vscode/mcp.json",
     ]

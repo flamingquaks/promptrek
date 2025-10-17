@@ -48,7 +48,6 @@ Protected file patterns:
 - `.clinerules/` - Cline configuration
 - `.windsurf/` - Windsurf configuration
 - `.kiro/` - Kiro configuration
-- `.tabnine_commands` - Tabnine configuration
 - `.amazonq/` - Amazon Q configuration
 - `.assistant/` - JetBrains AI configuration
 
@@ -118,9 +117,6 @@ config.yaml
 
 # Kiro generated files
 .kiro/
-
-# Tabnine generated files
-.tabnine_commands
 
 # Amazon Q generated files
 .amazonq/

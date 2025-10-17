@@ -12,7 +12,7 @@ metadata:
 content: |-
   ## Project Overview
 
-  PrompTrek is a universal AI editor prompt management tool that converts `project.promptrek.yaml` files into editor-specific configuration files for various AI coding assistants (GitHub Copilot, Cursor, Continue, Claude Code, Windsurf, Cline, Kiro, Amazon Q, JetBrains AI, Tabnine).
+  PrompTrek is a universal AI editor prompt management tool that converts `project.promptrek.yaml` files into editor-specific configuration files for various AI coding assistants (GitHub Copilot, Cursor, Continue, Claude Code, Windsurf, Cline, Kiro, Amazon Q, JetBrains AI).
 
   **Key Features**:
   - **Schema v3.0.0 (Stable)**: Top-level plugin fields for cleaner structure
@@ -131,14 +131,14 @@ content: |-
   **3. Adapter System** (`src/promptrek/adapters/`)
   - `base.py`: Abstract `EditorAdapter` class with common interface
   - `registry.py`: Adapter registration and capability management via `AdapterRegistry`
-  - Individual adapters: `copilot.py`, `cursor.py`, `continue_adapter.py`, `claude.py`, `windsurf.py`, `cline.py`, `kiro.py`, `amazon_q.py`, `jetbrains.py`, `tabnine.py`
+  - Individual adapters: `copilot.py`, `cursor.py`, `continue_adapter.py`, `claude.py`, `windsurf.py`, `cline.py`, `kiro.py`, `amazon_q.py`, `jetbrains.py`
   - `sync_mixin.py`: Bidirectional sync support with v2/v3 lossless methods
     - `SingleFileMarkdownSyncMixin`: For editors with single markdown files (Claude, Copilot)
     - `MarkdownSyncMixin`: For editors with multiple markdown files (Continue, Windsurf, Kiro)
     - **V2/V3 Sync**: `parse_single_markdown_file_v2()` and `parse_single_markdown_file_v3()` for lossless roundtrip
   - `mcp_mixin.py`: MCP server generation support for v2.1+ plugin configurations
 
-  **All 10 Adapters Support v2/v3 Schemas**:
+  **All 9 Adapters Support v2/v3 Schemas**:
   - ✅ Claude (`claude.py`) - Lossless sync, single markdown
   - ✅ Copilot (`copilot.py`) - Lossless sync, headless mode
   - ✅ Continue (`continue_adapter.py`) - Multi-file with `documents`
@@ -146,7 +146,6 @@ content: |-
   - ✅ Kiro (`kiro.py`) - Multi-file steering docs
   - ✅ Cursor (`cursor.py`) - Multi-file `.mdc` rules with `documents`
   - ✅ Cline (`cline.py`) - Single or multi-file directory
-  - ✅ Tabnine (`tabnine.py`) - Markdown to comment conversion
   - ✅ JetBrains (`jetbrains.py`) - Multi-file rules
   - ✅ Amazon Q (`amazon_q.py`) - Multi-file rules
 
@@ -369,7 +368,7 @@ content: |-
 
   - **V3 Schema is Stable**: Top-level plugin fields, production-ready
   - **V3.0 is the Default**: `promptrek init` creates v3.0 format by default
-  - **V2.x Schema is Legacy**: All 10 adapters support v2.x with automatic migration to v3.0
+  - **V2.x Schema is Legacy**: All 9 adapters support v2.x with automatic migration to v3.0
   - **Migration Available**: Use `promptrek migrate` to convert v1 → v2 → v3
   - **Generated files should NOT be committed**: Pre-commit hooks prevent this
   - **Use uv for all operations**: Project uses uv for dependency management

@@ -265,3 +265,31 @@ class TestValidatorCoverage:
         assert not validator._is_valid_variable_name("123_START")
         assert not validator._is_valid_variable_name("")
         assert not validator._is_valid_variable_name("SPECIAL-CHAR")
+
+    def test_validate_targets_none(self):
+        """Test validation when targets is None."""
+        validator = UPFValidator()
+        prompt = UniversalPrompt(
+            schema_version="1.0.0",
+            metadata=PromptMetadata(title="Test", description="Test"),
+            targets=None,  # None targets should be OK
+        )
+
+        result = validator.validate(prompt)
+        # Should pass validation (targets is optional)
+        assert result.is_valid or result.has_warnings
+
+    def test_validate_empty_description(self):
+        """Test validation with empty description."""
+        validator = UPFValidator()
+        prompt = UniversalPrompt(
+            schema_version="1.0.0",
+            metadata=PromptMetadata(title="Test", description="   "),  # Empty
+            targets=["claude"],
+        )
+
+        result = validator.validate(prompt)
+        assert not result.is_valid
+        assert any(
+            "description cannot be empty" in str(err).lower() for err in result.errors
+        )

@@ -739,7 +739,7 @@ class TestProcessSingleFile:
         mock_parser.parse_file.return_value = UniversalPrompt(
             schema_version="1.0.0",
             metadata=PromptMetadata(title="Test", description="Test"),
-            targets=["tabnine"],
+            targets=["copilot"],
             instructions=Instructions(general=["test"]),
         )
         mock_parser_class.return_value = mock_parser
@@ -751,7 +751,7 @@ class TestProcessSingleFile:
         mock_validator_class.return_value = mock_validator
 
         with patch("promptrek.cli.commands.generate.registry") as mock_registry:
-            mock_registry.list_adapters.return_value = ["tabnine"]
+            mock_registry.list_adapters.return_value = ["copilot"]
             mock_registry.has_capability.return_value = False  # No project files
             mock_registry.get_adapter_info.return_value = {
                 "capabilities": [AdapterCapability.GLOBAL_CONFIG_ONLY.value]
@@ -761,7 +761,7 @@ class TestProcessSingleFile:
             ctx.obj = {"verbose": False}
 
             _process_single_file(
-                ctx, sample_upf_file, "tabnine", tmp_path, False, False, None, False
+                ctx, sample_upf_file, "copilot", tmp_path, False, False, None, False
             )
 
             # Should echo info about global config

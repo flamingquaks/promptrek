@@ -52,7 +52,7 @@ title: Home
 
 <section class="editors-section">
   <div class="container">
-    <h2 class="section-title">10 Supported AI Editors</h2>
+    <h2 class="section-title">9 Supported AI Editors</h2>
     <p class="section-description">Generate perfect configurations for all major AI coding assistants from one universal format</p>
 
     <div class="editors-grid">
@@ -152,19 +152,6 @@ title: Home
           <span class="feature-badge">📁 Project</span>
           <span class="feature-badge">🔄 Variables</span>
           <span class="feature-badge">🎯 Conditionals</span>
-        </div>
-      </div>
-
-      <div class="editor-card">
-        <div class="editor-icon">
-         <img src="assets/tabnine.png" alt="Tabnine" width="32" height="32" onerror="this.style.display='none'; thisnextElementSibling.style.display='inline';">
-          <span style="display:none;">📝</span>
-        </div>
-        <h4>Tabnine</h4>
-        <p>Commands file for code completion context</p>
-        <div class="feature-badges">
-          <span class="feature-badge">⚠️ Limited</span>
-          <span class="feature-badge">🔄 Variables</span>
         </div>
       </div>
 
@@ -345,7 +332,7 @@ variables:
       <div class="feature-card-modern">
         <div class="feature-icon">🔄</div>
         <h3>Bidirectional Sync</h3>
-        <p>Sync editor configurations back to PrompTrek format. All 10 supported editors now support seamless two-way updates.</p>
+        <p>Sync editor configurations back to PrompTrek format. All 9 supported editors now support seamless two-way updates.</p>
       </div>
 
       <div class="feature-card-modern">
@@ -369,7 +356,7 @@ variables:
       <div class="feature-card-modern">
         <div class="feature-icon">🎨</div>
         <h3>Multi-Editor Support</h3>
-        <p>Generate prompts for 10 major AI coding assistants from a single source. Never write the same prompt twice.</p>
+        <p>Generate prompts for 9 major AI coding assistants from a single source. Never write the same prompt twice.</p>
       </div>
 
       <div class="feature-card-modern">

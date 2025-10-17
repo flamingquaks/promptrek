@@ -143,7 +143,6 @@ For technical architecture and development planning, see the developer documenta
 - **Cline** - `.clinerules/*.md`, `.vscode/settings.json` (MCP) - VSCode autonomous AI agent with markdown rules
 - **Claude Code** - `.claude/context.md` - Rich context format with detailed project information
 - **Windsurf** - `.windsurf/rules/*.md` - Organized markdown rule files for AI-powered coding assistance
-- **Tabnine** - `.tabnine_commands` - Basic context guidance (limited support - full config via IDE)
 - **Amazon Q** - `.amazonq/rules/*.md`, `.amazonq/cli-agents/*.json` - Rules directory and CLI agents with sync support
 - **JetBrains AI** - `.assistant/rules/*.md` - Markdown rules for IDE-integrated AI assistance
 
@@ -446,7 +445,6 @@ PrompTrek generates editor-specific files that should **not** be committed to ve
 - `.kiro/` - Kiro
 - `.amazonq/` - Amazon Q
 - `.assistant/` - JetBrains AI
-- `.tabnine_commands` - Tabnine
 
 These files are automatically ignored via `.gitignore` and the pre-commit hooks will prevent accidental commits.
 
@@ -616,7 +614,6 @@ Generate optimized configurations for all major AI coding assistants:
 - **Windsurf** → `.windsurf/rules/*.md` with organized guidelines
 - **Amazon Q** → `.amazonq/rules/*.md` + CLI agents + sync support
 - **JetBrains AI** → `.assistant/rules/*.md` for IDE integration
-- **Tabnine** → `.tabnine_commands` (limited support)
 
 ## 📄 License
 

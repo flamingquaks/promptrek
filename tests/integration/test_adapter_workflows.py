@@ -207,7 +207,6 @@ class TestAdapterWorkflows:
                 "cline",
                 "windsurf",
                 "jetbrains",
-                "tabnine",
             ],
             "context": {
                 "project_type": "full_stack_application",
@@ -583,43 +582,6 @@ class TestAdapterWorkflows:
             yaml.dump(upf_content, f, default_flow_style=False)
         return upf_file
 
-    @pytest.fixture
-    def tabnine_upf_file(self, temp_dir):
-        """Create UPF file configured for Tabnine adapter."""
-        upf_content = {
-            "schema_version": "1.0.0",
-            "metadata": {
-                "title": "Tabnine Assistant",
-                "description": "Tabnine integration test project",
-                "version": "1.0.0",
-                "author": "test@example.com",
-                "tags": ["test", "tabnine", "autocomplete"],
-            },
-            "targets": ["tabnine"],
-            "context": {
-                "project_type": "mobile_application",
-                "technologies": ["react-native", "typescript", "expo"],
-                "description": "React Native mobile app with Tabnine assistance",
-            },
-            "instructions": {
-                "general": [
-                    "Use React Native best practices",
-                    "Implement proper navigation patterns",
-                    "Use TypeScript for type safety",
-                ],
-                "mobile_specific": [
-                    "Handle platform differences gracefully",
-                    "Optimize for performance",
-                    "Use appropriate native modules",
-                ],
-            },
-            "variables": {"APP_NAME": "tabnine-mobile", "EXPO_VERSION": "49.0.0"},
-        }
-        upf_file = temp_dir / "tabnine_test.promptrek.yaml"
-        with open(upf_file, "w") as f:
-            yaml.dump(upf_content, f, default_flow_style=False)
-        return upf_file
-
     def test_windsurf_basic_generation(self, runner, windsurf_upf_file, temp_dir):
         """Test Windsurf adapter basic generation workflow."""
         with runner.isolated_filesystem(temp_dir=temp_dir):
@@ -721,67 +683,6 @@ class TestAdapterWorkflows:
                 str(jetbrains_upf_file),
                 "--editor",
                 "jetbrains",
-                "--dry-run",
-            ],
-        )
-
-        assert result.exit_code == 0
-        assert "Dry run mode" in result.output
-
-    def test_tabnine_basic_generation(self, runner, tabnine_upf_file, temp_dir):
-        """Test Tabnine adapter basic generation workflow."""
-        with runner.isolated_filesystem(temp_dir=temp_dir):
-            result = runner.invoke(
-                cli, ["generate", str(tabnine_upf_file), "--editor", "tabnine"]
-            )
-
-            assert result.exit_code == 0
-            assert "Generated:" in result.output
-
-    def test_tabnine_with_variables(self, runner, tabnine_upf_file, temp_dir):
-        """Test Tabnine adapter with variable substitution."""
-        with runner.isolated_filesystem(temp_dir=temp_dir):
-            result = runner.invoke(
-                cli,
-                [
-                    "generate",
-                    str(tabnine_upf_file),
-                    "--editor",
-                    "tabnine",
-                    "-V",
-                    "APP_NAME=custom-mobile-app",
-                    "-V",
-                    "EXPO_VERSION=50.0.0",
-                ],
-            )
-
-            assert result.exit_code == 0
-
-    def test_tabnine_error_scenarios(self, runner, tabnine_upf_file):
-        """Test Tabnine adapter error handling scenarios."""
-        result = runner.invoke(
-            cli,
-            [
-                "generate",
-                str(tabnine_upf_file),
-                "--editor",
-                "tabnine",
-                "--invalid-flag",
-            ],
-        )
-
-        assert result.exit_code != 0
-
-    def test_tabnine_dry_run_verbose(self, runner, tabnine_upf_file):
-        """Test Tabnine adapter dry-run with verbose output."""
-        result = runner.invoke(
-            cli,
-            [
-                "--verbose",
-                "generate",
-                str(tabnine_upf_file),
-                "--editor",
-                "tabnine",
                 "--dry-run",
             ],
         )

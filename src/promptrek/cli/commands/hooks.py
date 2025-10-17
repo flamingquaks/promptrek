@@ -76,8 +76,6 @@ def check_generated_command(ctx: click.Context, files: List[str]) -> None:
         # Kiro files
         ".kiro/steering/*.md",
         ".kiro/specs/*.md",
-        # Tabnine files
-        ".tabnine_commands",
         # Amazon Q files
         ".amazonq/rules/*.md",
         ".amazonq/cli-agents/*.json",
@@ -253,7 +251,6 @@ def install_hooks_command(
                 r"^\.clinerules/.*$|"
                 r"^\.windsurf/.*$|"
                 r"^\.kiro/.*$|"
-                r"^\.tabnine_commands$|"
                 r"^\.amazonq/.*$|"
                 r"^\.assistant/.*"
                 r")",

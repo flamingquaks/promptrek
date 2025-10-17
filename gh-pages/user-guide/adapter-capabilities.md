@@ -18,7 +18,6 @@ This document provides a comprehensive comparison of features supported by each 
 | **Cline** | ✅ | ✅ | ✅ | - | ✅ | - | ✅ |
 | **Claude Code** | ✅ | ✅ | ✅ | - | ✅ | - | ✅ |
 | **Windsurf** | ✅ | ✅ | ✅ | - | ✅ | - | ✅ |
-| **Tabnine** | ✅ | ✅ | - | - | - | ✅ | ✅ |
 | **Amazon Q** | ✅ | ✅ | ✅ | - | ✅ | - | ✅ |
 | **JetBrains AI** | ✅ | ✅ | ✅ | - | ✅ | - | ✅ |
 
@@ -57,7 +56,7 @@ conditions:
 ### Bidirectional Sync
 Ability to read editor-specific files and create/update PrompTrek configuration from them.
 
-**Supported by**: All adapters except Tabnine
+**Supported by**: All adapters
 
 **Command**:
 ```bash
@@ -79,19 +78,12 @@ promptrek generate project.promptrek.yaml --editor copilot --headless
 ### Project Files
 Generates project-level configuration files that can be committed to version control.
 
-**Supported by**: All adapters except Tabnine
+**Supported by**: All adapters
 
 **Examples**:
 - `.github/copilot-instructions.md`
 - `.cursor/rules/index.mdc`
 - `.clinerules/*.md`
-
-### Global Config Only
-Editor configuration is managed globally, not per-project.
-
-**Supported by**: Tabnine
-
-**Note**: PrompTrek can still generate configuration guidance, but setup is done through the editor's global settings.
 
 ### v3.0 Schema Support
 Full support for PrompTrek v3.0 schema with top-level plugin fields.
@@ -244,26 +236,6 @@ Full support for PrompTrek v3.0 schema with top-level plugin fields.
 
 ---
 
-### Tabnine
-
-**Files Generated**:
-- `.tabnine_commands` (basic context file)
-
-**Configuration Method**:
-- Team configuration via admin panel
-- Global settings per-user
-- Limited project-level support
-
-**Unique Features**:
-- ✅ Comment-based context
-- ✅ v3.0 schema support
-- ⚠️ No bidirectional sync
-- ⚠️ MCP configured via IDE only
-
-**Best For**: Organizations with centralized configuration
-
----
-
 ### Amazon Q
 
 **Files Generated**:
@@ -338,7 +310,7 @@ promptrek generate project-v2.promptrek.yaml --all
 
 ✅ **Completed**:
 - **v3.0 Schema (Stable)**: All adapters support top-level plugin fields
-- **Extended Bidirectional Sync**: Now supported by 9 out of 10 editors
+- **Extended Bidirectional Sync**: Now supported by all 9 editors
 - **Production Ready**: v3.0 is now the recommended stable schema
 - **MCP Integration**: Project-first strategy with system-wide fallback
 

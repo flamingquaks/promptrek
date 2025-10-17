@@ -37,8 +37,6 @@ GENERATED_FILE_PATTERNS = {
     # Kiro files
     ".kiro/steering/*.md",
     ".kiro/specs/*.md",
-    # Tabnine files
-    ".tabnine_commands",
     # Amazon Q files
     ".amazonq/rules/*.md",
     ".amazonq/cli-agents/*.json",

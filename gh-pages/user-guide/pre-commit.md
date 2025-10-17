@@ -80,7 +80,6 @@ repos:
             ^\.clinerules/.*$|
             ^\.windsurf/.*$|
             ^\.kiro/.*$|
-            ^\.tabnine_commands$|
             ^\.amazonq/.*$|
             ^\.assistant/.*
           )
@@ -134,7 +133,6 @@ Validate PrompTrek files.....................................Failed
 - `.clinerules/` - Cline
 - `.windsurf/` - Windsurf
 - `.kiro/` - Kiro
-- `.tabnine_commands` - Tabnine
 - `.amazonq/` - Amazon Q
 - `.assistant/` - JetBrains AI
 
@@ -272,9 +270,6 @@ config.yaml
 
 # Kiro
 .kiro/
-
-# Tabnine
-.tabnine_commands
 
 # Amazon Q
 .amazonq/
