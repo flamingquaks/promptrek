@@ -6,8 +6,8 @@ title: Home
 <section class="intro-section">
   <div class="container">
     <div class="intro-content">
-      <h2 class="section-title">One Prompt Configuration.<br>Every AI Editor.</h2>
-      <p class="intro-description">Stop recreating prompts for different AI coding assistants. PrompTrek lets you write comprehensive coding guidelines once and automatically generates the perfect configuration for GitHub Copilot, Cursor, Continue, and more.</p>
+      <h2 class="section-title">One Configuration.<br>Every AI Editor.<br>Prompts, Plugins & Beyond.</h2>
+      <p class="intro-description">Define your complete AI editor setup once - prompts, MCP servers, custom commands, autonomous agents, and event hooks - then let PrompTrek take it on a journey across every platform. Stop recreating configurations for GitHub Copilot, Cursor, Continue, Claude Code, and more.</p>
       <div class="v2-badge">
         <span class="badge-new">STABLE</span>
         <span class="badge-text">Schema v3.0.0: Top-level plugin fields, cleaner architecture. <a href="user-guide/upf-specification.html#schema-v30-stable" style="color: #4CAF50; text-decoration: underline;">Learn more →</a></span>

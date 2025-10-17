@@ -1,9 +1,10 @@
 # Site settings
 title: PrompTrek
-description: Universal AI Editor prompt storage solution that dynamically maps prompt data to a wide-range of agentic/AI editors and tools.
-tagline: Taking your coding prompts on a journey to every AI editor!
+description: Taking your AI editor configurations on a journey across every platform - manage prompts, MCP servers, custom commands, autonomous agents, and event hooks from one universal source.
+tagline: Taking your AI editor configurations on a journey across every platform!
 url: "https://promptrek.ai"
 baseurl: ""
+logo: /assets/promptrek-logo-with-text.png
 
 # Build settings
 markdown: kramdown

@@ -5,13 +5,13 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "promptrek"
 version = "0.3.1"
-description = "Universal AI Editor prompt storage solution"
+description = "Universal AI coding assistant configuration - manage prompts, MCP servers, plugins, commands, agents, and hooks across all major AI editors"
 readme = "README.md"
 requires-python = ">=3.9"
 authors = [
     {name = "Addie Rudy", email = "developer@flamingquaks.dev"}
 ]
-keywords = ["ai", "prompts", "copilot", "cursor", "continue", "cli", "editor", "tool", "utility"]
+keywords = ["ai", "prompts", "copilot", "cursor", "continue", "claude", "mcp", "plugins", "agents", "cli", "editor", "tool", "utility"]
 classifiers = [
     "Intended Audience :: Developers",
     "Operating System :: OS Independent",
