@@ -10,11 +10,11 @@ title: Home
       <p class="intro-description">Stop recreating prompts for different AI coding assistants. PrompTrek lets you write comprehensive coding guidelines once and automatically generates the perfect configuration for GitHub Copilot, Cursor, Continue, and more.</p>
       <div class="v2-badge">
         <span class="badge-new">STABLE</span>
-        <span class="badge-text">Schema v2.1.0: Markdown-first with plugin support (MCP servers, commands, agents, hooks)!</span>
+        <span class="badge-text">Schema v3.0.0: Top-level plugin fields, cleaner architecture. <a href="user-guide/upf-specification.html#schema-v30-stable" style="color: #4CAF50; text-decoration: underline;">Learn more →</a></span>
       </div>
       <div class="v2-badge" style="margin-top: 10px;">
-        <span class="badge-new" style="background-color: #2196F3;">BETA</span>
-        <span class="badge-text">Schema v3.0.0: Top-level plugin fields, cleaner architecture. <a href="user-guide/upf-specification.html#schema-v30-beta" style="color: #2196F3; text-decoration: underline;">Learn more →</a></span>
+        <span class="badge-new" style="background-color: #FF9800;">LEGACY</span>
+        <span class="badge-text">Schema v2.x: Nested plugin structure (deprecated, migration available)</span>
       </div>
     </div>
   </div>
@@ -247,10 +247,10 @@ title: Home
     <div class="example-grid">
 
       <div class="example-input">
-        <h3>Universal Configuration (v2.1.0)</h3>
+        <h3>Universal Configuration (v3.0.0)</h3>
         <p>Write your prompt once in PrompTrek format:</p>
         <div class="code-example">
-<pre><code>schema_version: "2.1.0"
+<pre><code>schema_version: "3.0.0"
 metadata:
   title: "Full-Stack Development Assistant"
   description: "Production-ready coding standards"
@@ -280,7 +280,7 @@ content: |
 variables:
   TEAM_NAME: "Engineering Team"</code></pre>
         </div>
-        <p class="schema-note">✨ <strong>v2.1.0 Schema</strong>: Markdown-first with plugin support. No <code>targets</code> field needed - works with ALL editors! Configure MCP servers, commands, agents, and hooks.</p>
+        <p class="schema-note">✨ <strong>v3.0.0 Schema</strong>: Markdown-first with clean top-level plugins. No <code>targets</code> field needed - works with ALL editors! MCP servers, commands, agents, and hooks at the top level.</p>
       </div>
 
       <div class="example-output">

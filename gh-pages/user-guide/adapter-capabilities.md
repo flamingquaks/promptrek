@@ -100,10 +100,11 @@ Full support for PrompTrek v3.0 schema with top-level plugin fields.
 
 **Features**:
 - Top-level `mcp_servers`, `commands`, `agents`, `hooks` fields
-- 100% backward compatible with v2.1 nested structure
-- Automatic migration and deprecation warnings
+- 100% backward compatible with v2.x nested structure
+- Automatic migration for legacy v2.x files
+- Production-ready stable schema
 
-**Learn more**: [v3.0 Schema Specification](./upf-specification.html#schema-v30-beta)
+**Learn more**: [v3.0 Schema Specification](./upf-specification.html#schema-v30-stable)
 
 ## Detailed Adapter Capabilities
 
@@ -320,24 +321,24 @@ promptrek generate project.promptrek.yaml --all
 
 ### Upgrading to v3.0 Schema
 
-All adapters support the new v3.0 schema with top-level plugin fields:
+All adapters support the v3.0 schema with top-level plugin fields:
 
 ```bash
-# Migrate v2.1 to v3.0
+# Migrate v2.x to v3.0
 promptrek migrate project.promptrek.yaml -o project-v3.promptrek.yaml
 
-# V2.1 files still work with deprecation warnings
-promptrek generate project-v2.1.promptrek.yaml --all
+# V2.x files still work with automatic migration
+promptrek generate project-v2.promptrek.yaml --all
 ```
 
 ## Capability Planning
 
-### Recent Enhancements (v0.2.0)
+### Recent Enhancements (v0.3.0)
 
 ✅ **Completed**:
+- **v3.0 Schema (Stable)**: All adapters support top-level plugin fields
 - **Extended Bidirectional Sync**: Now supported by 9 out of 10 editors
-- **v3.0 Schema**: All adapters support top-level plugin fields
-- **Centralized Deprecation System**: Consistent warnings across all adapters
+- **Production Ready**: v3.0 is now the recommended stable schema
 - **MCP Integration**: Project-first strategy with system-wide fallback
 
 ### Future Enhancements (v0.3.0+)

@@ -10,9 +10,9 @@ title: UPF Specification
 The Universal Prompt Format (UPF) is a standardized YAML-based format for defining AI assistant prompts that can be converted to various editor-specific formats.
 
 PrompTrek supports **four schema versions**:
-- **v3.0.0** (Beta): Top-level plugin fields, cleaner architecture (backward compatible with v2.1)
-- **v2.1.0** (Stable): Markdown-first with plugin support (MCP servers, commands, agents, hooks)
-- **v2.0.0** (Stable): Markdown-first, simpler format with lossless bidirectional sync
+- **v3.0.0** (Stable): Top-level plugin fields, cleaner architecture (backward compatible with v2.x)
+- **v2.1.0** (Legacy): Markdown-first with nested plugin support (superseded by v3.0)
+- **v2.0.0** (Legacy): Markdown-first, simpler format with lossless bidirectional sync
 - **v1.0.0** (Legacy): Structured format with complex nested fields
 
 ## File Extension
@@ -21,24 +21,24 @@ PrompTrek supports **four schema versions**:
 
 ## Schema Versions
 
-- **Beta**: `3.0.0` - [Jump to v3.0 Specification](#schema-v30-beta)
-- **Stable**: `2.1.0` - [Jump to v2.1 Specification](#schema-v21-stable)
-- **Stable**: `2.0.0` - [Jump to v2.0 Specification](#schema-v20-stable)
+- **Stable**: `3.0.0` - [Jump to v3.0 Specification](#schema-v30-stable)
+- **Legacy**: `2.1.0` - [Jump to v2.1 Specification](#schema-v21-legacy)
+- **Legacy**: `2.0.0` - [Jump to v2.0 Specification](#schema-v20-legacy)
 - **Legacy**: `1.0.0` - [Jump to v1 Specification](#schema-v10-legacy)
 
 ---
 
-## Schema v3.0 (Beta)
+## Schema v3.0 (Stable)
 
-**New in v3.0.0**: Cleaner plugin architecture by promoting plugin fields to the top level.
+**v3.0.0**: Cleaner plugin architecture by promoting plugin fields to the top level.
 
 ### What's New in v3.0
 
 - ✨ **Top-Level Plugin Fields** - No more `plugins` wrapper, cleaner YAML structure
-- ✅ **100% Backward Compatible** - v2.1 files continue to work with deprecation warnings
-- 🔄 **Automatic Migration** - Built-in tools to convert v2.1 → v3.0
-- 📋 **Centralized Deprecation System** - Consistent warnings guide migration path
-- 🎯 **Future-Proof** - Easier to extend with new plugin types
+- ✅ **100% Backward Compatible** - v2.x files continue to work with automatic migration
+- 🔄 **Automatic Migration** - Built-in tools to convert v2.x → v3.0
+- 📋 **Production Ready** - Stable schema for all new projects
+- 🎯 **Recommended** - Use v3.0 for all new projects
 
 ### Key Changes from v2.1
 
@@ -313,19 +313,24 @@ For detailed migration information:
 
 ---
 
-## Schema v2.1 (Stable)
+## Schema v2.1 (Legacy)
 
-**New in v2.1.0**: Plugin support for MCP servers, custom commands, autonomous agents, and event-driven hooks.
+**v2.1.0** (Superseded by v3.0): Plugin support for MCP servers, custom commands, autonomous agents, and event-driven hooks with nested structure.
 
-### Key Benefits
+### Migration to v3.0
 
-- ✅ **All v2.0 benefits** - Markdown-first, lossless sync, works with all editors
-- ✅ **MCP Server Integration** - Configure Model Context Protocol servers
-- ✅ **Custom Commands** - Define slash commands for AI editors
-- ✅ **Autonomous Agents** - Configure AI agents with specific tools and permissions
-- ✅ **Event Hooks** - Automate workflows with event-driven hooks
-- ✅ **Trust Metadata** - Security controls for plugin execution
-- ✅ **Backward Compatible** - v2.0 files work without modification
+**All v2.1 features are available in v3.0 with cleaner top-level structure.**
+
+Migrate to v3.0 for:
+- ✅ Cleaner YAML structure (no `plugins` wrapper)
+- ✅ Easier to read and maintain
+- ✅ Better IDE support and auto-completion
+- ✅ Production-ready stable schema
+
+```bash
+# Migrate v2.1 to v3.0
+promptrek migrate project.promptrek.yaml -o project-v3.promptrek.yaml
+```
 
 ### Complete v2.1 Schema
 
@@ -713,9 +718,9 @@ promptrek generate v2.0-file.promptrek.yaml --editor claude
 
 ---
 
-## Schema v2.0 (Stable)
+## Schema v2.0 (Legacy)
 
-**New in v2.0.0**: Simpler markdown-first approach that aligns with how AI editors actually work.
+**v2.0.0** (Superseded by v3.0): Simpler markdown-first approach that aligns with how AI editors actually work.
 
 ### Key Benefits
 

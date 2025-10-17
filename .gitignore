@@ -124,3 +124,22 @@ vendor/
 # PrompTrek local variables (user-specific, not committed)
 variables.promptrek.yaml
 test-project/
+
+# PrompTrek editor-specific files (generated, not committed)
+.github/copilot-instructions.md
+.github/instructions/*.instructions.md
+.github/prompts/*.prompt.md
+.cursor/rules/*.mdc
+.cursor/rules/index.mdc
+.continue/rules/*.md
+.windsurf/rules/*.md
+.clinerules
+.clinerules/*.md
+.claude/CLAUDE.md
+.claude-context.md
+.amazonq/rules/*.md
+.amazonq/cli-agents/*.json
+.assistant/rules/*.md
+.kiro/steering/*.md
+.tabnine_commands
+.vscode/mcp.json

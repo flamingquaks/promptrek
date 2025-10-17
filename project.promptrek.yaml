@@ -1,20 +1,22 @@
 schema_version: 3.0.0
 metadata:
-  title: PrompTrek Project Documentation
-  description: Comprehensive documentation for the PrompTrek project, including architecture,
-    development commands, testing, and guidelines for adding new editor adapters.
+  title: Run all tests with coverage
+  description: Synced from .claude/CLAUDE.md
   version: 1.0.0
   author: PrompTrek Sync
-  created: '2025-10-09T22:03:21'
-  updated: '2025-10-16T12:05:15.211878'
+  created: '2025-10-17T09:51:15.670275'
+  updated: '2025-10-17T09:51:15.670281'
+  tags:
+  - claude-code
+  - synced
 content: |-
   ## Project Overview
 
   PrompTrek is a universal AI editor prompt management tool that converts `project.promptrek.yaml` files into editor-specific configuration files for various AI coding assistants (GitHub Copilot, Cursor, Continue, Claude Code, Windsurf, Cline, Kiro, Amazon Q, JetBrains AI, Tabnine).
 
   **Key Features**:
-  - **Schema v3.0.0 (Beta)**: Top-level plugin fields for cleaner structure
-  - **Schema v2.1.0 (Stable)**: Markdown-first with plugin support (MCP servers, commands, agents, hooks)
+  - **Schema v3.0.0 (Stable)**: Top-level plugin fields for cleaner structure
+  - **Schema v2.x (Legacy)**: Markdown-first with nested plugin support (superseded by v3.0)
   - **Lossless Bidirectional Sync**: Parse editor files back to `project.promptrek.yaml` without data loss
   - **Multi-Format Support**: Works with all major AI editors automatically (no `targets` field needed in v2+)
   - **Variable Substitution**: Use `{{{ VARIABLE_NAME }}}` for dynamic content
@@ -318,17 +320,17 @@ content: |-
 
   ## Schema Version Comparison
 
-  | Feature | v1.x.x (Legacy) | v2.x.x (Stable) | v3.x.x (Beta) |
-  |---------|----------------|-----------------|---------------|
+  | Feature | v1.x.x (Legacy) | v2.x.x (Legacy) | v3.x.x (Stable) |
+  |---------|----------------|-----------------|-----------------|
   | **Format** | Structured YAML | Markdown-first | Markdown-first |
   | **`targets` field** | Required | Not needed | Not needed |
   | **Content** | Categorized instructions | Single `content` field | Single `content` field |
   | **Lossless sync** | ❌ | ✅ | ✅ |
   | **Plugin support** | ❌ | ✅ (nested) | ✅ (top-level) |
   | **Plugin fields** | N/A | `plugins.mcp_servers` | `mcp_servers` (top-level) |
-  | **`plugins` field** | N/A | Plugin config wrapper | Marketplace entries |
+  | **`plugins` field** | N/A | Plugin config wrapper | Reserved for marketplace |
   | **Backward compat** | v1 only | v1 + v2 | v1 + v2 + v3 |
-  | **Migration** | → v2 → v3 | → v3 | Current |
+  | **Migration** | → v2 → v3 | → v3 | Current (Stable) |
 
   **Migration Path**:
   ```bash
@@ -365,9 +367,9 @@ content: |-
 
   ## Important Notes
 
-  - **V3 Schema is Beta**: Top-level plugin fields, backward compatible with v2.1
-  - **V2.1 Schema is Stable**: All 10 adapters support v2.x with comprehensive test coverage
-  - **V2.1 is the Default**: `promptrek init` creates v2.1 format by default
+  - **V3 Schema is Stable**: Top-level plugin fields, production-ready
+  - **V3.0 is the Default**: `promptrek init` creates v3.0 format by default
+  - **V2.x Schema is Legacy**: All 10 adapters support v2.x with automatic migration to v3.0
   - **Migration Available**: Use `promptrek migrate` to convert v1 → v2 → v3
   - **Generated files should NOT be committed**: Pre-commit hooks prevent this
   - **Use uv for all operations**: Project uses uv for dependency management
@@ -377,20 +379,21 @@ content: |-
 
   ## Schema Quick Reference
 
-  **When to use v3.0 (Beta - Recommended for new projects with plugins)**:
+  **When to use v3.0 (Stable - Recommended for all projects)**:
   - ✅ You want the cleanest plugin structure (top-level fields)
   - ✅ You're using MCP servers, commands, agents, or hooks
-  - ✅ You want future-proof format with marketplace support
-  - ⚠️ Note: Still in beta, stable release coming soon
+  - ✅ You want the stable, production-ready format
+  - ✅ You prefer writing markdown with clean YAML structure
+  - 🎯 **Recommended**: Use v3.0 for all new projects
 
-  **When to use v2.1 (Stable - Recommended for production)**:
-  - ✅ You want a proven, stable schema
-  - ✅ You need markdown-first format with plugin support
-  - ✅ You want lossless bidirectional sync
-  - ✅ You prefer writing markdown over structured YAML
-  - ⚠️ Note: Nested plugin structure (`plugins.mcp_servers`) deprecated in v3
+  **When to use v2.x (Legacy - Migration recommended)**:
+  - ⚠️ You have existing v2.x files (consider migrating to v3.0)
+  - ⚠️ Nested plugin structure (`plugins.mcp_servers`) is legacy
+  - ✅ v2.x files continue to work with automatic migration
+  - 💡 **Migration**: Use `promptrek migrate` to convert to v3.0
 
   **When to use v1.0 (Legacy - Not recommended)**:
-  - ⚠️ You have existing v1 files (consider migrating to v2/v3)
-  - ⚠️ You need highly structured instruction categories
-  - ⚠️ You rely on complex conditional logic
+  - ⚠️ You have existing v1 files (migrate to v3.0)
+  - ⚠️ Structured instruction categories (superseded by markdown)
+  - ❌ **Not recommended**: Migrate to v3.0 for better maintainability
+variables: {}

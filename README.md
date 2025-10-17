@@ -13,19 +13,19 @@ A universal AI Editor prompt storage solution that dynamically maps prompt data 
 
 AI coding assistants like GitHub Copilot, Cursor, Continue, and others all use different prompt formats and configuration methods. When working across teams or switching between editors, you have to maintain separate prompt configurations for each tool. PrompTrek solves this by:
 
-- **Universal Format**: Create prompts once in a standardized format (now with **v2.1.0 schema** - simpler with plugin support!)
-- **Multi-Editor Support**: Generate prompts for any supported AI editor automatically (no `targets` field needed in v2!)
-- **Bidirectional Sync**: Parse editor files back to `.promptrek.yaml` without data loss (v2 lossless sync)
-- **Plugin Ecosystem**: Configure MCP servers, custom commands, autonomous agents, and event hooks (v2.1+)
+- **Universal Format**: Create prompts once in a standardized format (now with **v3.0.0 schema** - cleaner architecture with top-level plugins!)
+- **Multi-Editor Support**: Generate prompts for any supported AI editor automatically (no `targets` field needed!)
+- **Bidirectional Sync**: Parse editor files back to `.promptrek.yaml` without data loss (lossless sync)
+- **Plugin Ecosystem**: Configure MCP servers, custom commands, autonomous agents, and event hooks with clean top-level fields
 - **Auto .gitignore Management**: Automatically exclude generated editor files from version control
 - **Team Consistency**: Share prompt configurations across team members regardless of their editor choice
 - **Easy Migration**: Switch between AI editors without losing your prompt configurations
 
 ## 🚀 Quick Example
 
-1. Create a universal prompt file (`.promptrek.yaml`) using the **v2.1 format** (recommended):
+1. Create a universal prompt file (`.promptrek.yaml`) using the **v3.0 format** (recommended):
 ```yaml
-schema_version: "2.1.0"
+schema_version: "3.0.0"
 metadata:
   title: "My Project Assistant"
   description: "AI assistant for React TypeScript project"
@@ -211,19 +211,19 @@ ls .continue/rules/
 
 **Note:** The `--setup-hooks` flag automatically configures pre-commit hooks to validate your `.promptrek.yaml` files and prevent accidental commits of generated files.
 
-### 🆕 Schema v3.0.0 (Beta)
+### 🆕 Schema v3.0.0 (Stable)
 
 PrompTrek v3.0.0 introduces a **cleaner plugin architecture** by promoting plugin fields to the top level:
 
 **What's New:**
 - ✨ **Top-Level Plugin Fields** - Cleaner, flatter structure (no `plugins` wrapper)
-- ✅ **100% Backward Compatible** - v2.1 files continue to work with deprecation warnings
-- 🔄 **Automatic Migration** - Built-in tools to convert v2.1 → v3.0
-- 📋 **Deprecation System** - Centralized warnings guide migration path
+- ✅ **100% Backward Compatible** - v2.x files continue to work with automatic migration
+- 🔄 **Automatic Migration** - Built-in tools to convert v2.x → v3.0
+- 📋 **Production Ready** - Stable schema for all new projects
 
-**Before (v2.1) vs After (v3.0):**
+**Before (v2.x) vs After (v3.0):**
 ```yaml
-# v2.1 - Nested structure (deprecated)
+# v2.x - Nested structure (legacy)
 schema_version: "2.1.0"
 plugins:                    # ❌ Unnecessary wrapper
   mcp_servers: [...]
@@ -247,36 +247,28 @@ promptrek migrate project.promptrek.yaml --in-place
 **Documentation:**
 - 📖 [V3 Migration Guide](./docs/V3_MIGRATION_GUIDE.md) - Complete migration instructions
 - ⚠️ [Deprecation Warnings](./docs/DEPRECATION_WARNINGS.md) - Understanding deprecation messages
-- 🎯 Migration timeline: v2.1 structure deprecated in v3.0, will be removed in v4.0
+- 🎯 **Recommended for all new projects** - Use v3.0 schema for cleaner configuration
 
-### 🆕 Schema v2.1.0 (Stable)
+### Schema v2.x (Legacy - Deprecated)
 
-PrompTrek now supports **v2.1.0 schema** with plugin support for advanced AI editor features:
+PrompTrek v2.x schema with nested plugin support (superseded by v3.0):
 
-**Key Benefits:**
-- ✅ **All v2.0 benefits** - Markdown-first, lossless sync, works with all editors
-- ✅ **MCP Server Integration** - Configure Model Context Protocol servers for external tools
-- ✅ **Custom Commands** - Define slash commands for AI editors (Claude Code, Cursor)
-- ✅ **Autonomous Agents** - Configure AI agents with specific tools and permissions
-- ✅ **Event Hooks** - Automate workflows with event-driven hooks
-- ✅ **Trust Metadata** - Security controls for plugin execution
-- ✅ **100% Backward Compatible** - v2.0 files work without modification
-
-**Quick Migration:**
+**Migration to v3.0:**
+All v2.x features are available in v3.0 with cleaner syntax:
 ```bash
-# Migrate existing v1 file to v2.1
+# Migrate v2.x files to v3.0
 uv run promptrek migrate old.promptrek.yaml -o new.promptrek.yaml
 
-# Or create a new v2.1 file from scratch
-uv run promptrek init  # v2.1 is now the default!
+# Create new v3.0 file (default)
+uv run promptrek init
 
-# Create a v1 file (legacy)
-uv run promptrek init --v1
+# v2.x files still work but show migration suggestions
+uv run promptrek generate old-v2.promptrek.yaml --all
 ```
 
-**V2.1 Format Example:**
+**V3.0 Format Example:**
 ```yaml
-schema_version: "2.1.0"
+schema_version: "3.0.0"
 metadata:
   title: "My Project"
   description: "AI assistant"
@@ -295,9 +287,8 @@ variables:
   PROJECT_NAME: "my-project"
   GITHUB_TOKEN: "ghp_your_token_here"
 
-# Optional: Plugin configurations (v2.1+)
-plugins:
-  mcp_servers:
+# Top-level plugin configurations (v3.0 clean structure)
+mcp_servers:
     - name: github
       command: npx
       args: ["-y", "@modelcontextprotocol/server-github"]
@@ -308,7 +299,7 @@ plugins:
         trusted: true
         trust_level: full
 
-  commands:
+commands:
     - name: review-code
       description: "Review code for quality"
       prompt: |
@@ -318,7 +309,7 @@ plugins:
         - Performance optimizations
       output_format: markdown
 
-  agents:
+agents:
     - name: test-generator
       description: "Generate unit tests"
       system_prompt: "Generate comprehensive tests with Jest"
@@ -335,9 +326,9 @@ documents:
       - Rule 2
 ```
 
-####  🔌 Plugin Configuration (v2.1+)
+####  🔌 Plugin Configuration (v3.0)
 
-PrompTrek v2.1 introduces MCP server integration with a **project-first strategy**:
+PrompTrek v3.0 provides MCP server integration with a **clean top-level structure**:
 
 **Supported Plugin Types:**
 - **MCP Servers** - Model Context Protocol servers for external tools (filesystem, GitHub, databases, etc.)
@@ -405,11 +396,11 @@ See [`examples/v21-plugins/`](https://github.com/flamingquaks/promptrek/tree/mai
 - `promptrek generate` - Create editor-specific prompts
 - `promptrek preview` - Preview generated output without creating files
 - `promptrek sync` - Sync editor files back to PrompTrek format
-- `promptrek migrate` - Migrate v1/v2.0 files to v2.1 format
-- `promptrek plugins list` - List all plugins in a .promptrek.yaml file (v2.1+)
-- `promptrek plugins generate` - Generate plugin files for a specific editor (v2.1+)
-- `promptrek plugins validate` - Validate plugin configuration (v2.1+)
-- `promptrek plugins sync` - Sync plugins from editor files (v2.1+)
+- `promptrek migrate` - Migrate v1/v2.x files to v3.0 format
+- `promptrek plugins list` - List all plugins in a .promptrek.yaml file
+- `promptrek plugins generate` - Generate plugin files for a specific editor
+- `promptrek plugins validate` - Validate plugin configuration
+- `promptrek plugins sync` - Sync plugins from editor files
 - `promptrek agents` - Generate agent-specific instructions
 - `promptrek install-hooks` - Set up pre-commit hooks (use `--activate` to activate automatically)
 - `promptrek list-editors` - Show supported editors and their status
