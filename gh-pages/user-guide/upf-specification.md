@@ -35,7 +35,7 @@ schema_version: 3.0.0
 # ... rest of your configuration
 ```
 
-See the [Schema Documentation]({{ site.baseurl }}/schema/) for more details.
+See the [Schema Documentation](https://flamingquaks.github.io/promptrek/schema/) for more details.
 
 ## Schema Versions
 
