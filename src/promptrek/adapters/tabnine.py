@@ -15,6 +15,7 @@ from ..core.models import (
     PromptMetadata,
     UniversalPrompt,
     UniversalPromptV2,
+    UniversalPromptV3,
 )
 from .base import EditorAdapter
 
@@ -34,7 +35,7 @@ class TabnineAdapter(EditorAdapter):
 
     def generate(
         self,
-        prompt: Union[UniversalPrompt, UniversalPromptV2],
+        prompt: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3],
         output_dir: Path,
         dry_run: bool = False,
         verbose: bool = False,
@@ -43,8 +44,8 @@ class TabnineAdapter(EditorAdapter):
     ) -> List[Path]:
         """Generate Tabnine configuration files."""
 
-        # V2: Convert markdown content to comment-based format
-        if isinstance(prompt, UniversalPromptV2):
+        # V2/V3: Convert markdown content to comment-based format
+        if isinstance(prompt, (UniversalPromptV2, UniversalPromptV3)):
             return self._generate_v2(prompt, output_dir, dry_run, verbose, variables)
 
         # V1: Apply variable substitution if supported
@@ -83,13 +84,13 @@ class TabnineAdapter(EditorAdapter):
 
     def _generate_v2(
         self,
-        prompt: UniversalPromptV2,
+        prompt: Union[UniversalPromptV2, UniversalPromptV3],
         output_dir: Path,
         dry_run: bool,
         verbose: bool,
         variables: Optional[Dict[str, Any]] = None,
     ) -> List[Path]:
-        """Generate Tabnine file from v2 schema (convert markdown to comment format)."""
+        """Generate Tabnine file from v2/v3 schema (convert markdown to comment format)."""
         # Apply variable substitution
         content = prompt.content
         if variables:
@@ -126,13 +127,13 @@ class TabnineAdapter(EditorAdapter):
             return [commands_file]
 
     def validate(
-        self, prompt: Union[UniversalPrompt, UniversalPromptV2]
+        self, prompt: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3]
     ) -> List[ValidationError]:
         """Validate prompt for Tabnine."""
         errors = []
 
-        # V2 validation: check content exists
-        if isinstance(prompt, UniversalPromptV2):
+        # V2/V3 validation: check content exists
+        if isinstance(prompt, (UniversalPromptV2, UniversalPromptV3)):
             if not prompt.content or not prompt.content.strip():
                 errors.append(
                     ValidationError(
@@ -165,7 +166,7 @@ class TabnineAdapter(EditorAdapter):
 
     def parse_files(
         self, source_dir: Path
-    ) -> Union[UniversalPrompt, UniversalPromptV2]:
+    ) -> Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3]:
         """Parse Tabnine files back into a UniversalPrompt."""
         commands_file = source_dir / ".tabnine_commands"
 

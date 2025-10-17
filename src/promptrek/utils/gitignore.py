@@ -148,7 +148,7 @@ def remove_cached_files(patterns: List[str], project_dir: Path) -> List[str]:
     Returns:
         List of files that were successfully removed from cache
     """
-    removed_files = []
+    removed_files: List[str] = []
 
     # Check if we're in a git repository
     git_dir = project_dir / ".git"

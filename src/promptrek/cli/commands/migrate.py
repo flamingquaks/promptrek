@@ -43,18 +43,8 @@ def migrate_command(
 
     # Check schema version and determine migration path
     if isinstance(prompt, UniversalPromptV3):
-        # Already v3, check if using deprecated nested structure
-        if (
-            hasattr(prompt, "plugins")
-            and prompt.plugins
-            and isinstance(prompt.plugins, dict)
-        ):
-            click.echo(
-                f"ℹ️  {input_file} is v3.0 but uses deprecated nested plugins structure"
-            )
-            click.echo("   Migration not needed - parser auto-promotes fields")
-        else:
-            click.echo(f"ℹ️  {input_file} is already v3.0 format, no migration needed")
+        # Already v3, no migration needed
+        click.echo(f"ℹ️  {input_file} is already v3.0 format, no migration needed")
         return
     elif isinstance(prompt, UniversalPromptV2):
         # Check if v2.1

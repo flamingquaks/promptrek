@@ -12,7 +12,7 @@ from typing import Optional, Union
 import click
 
 from ...core.exceptions import CLIError, UPFParsingError
-from ...core.models import UniversalPrompt, UniversalPromptV2
+from ...core.models import UniversalPrompt, UniversalPromptV2, UniversalPromptV3
 from ...core.parser import UPFParser
 
 
@@ -99,7 +99,7 @@ def agents_command(
 
 
 def _generate_agent_files(
-    prompt: Union[UniversalPrompt, UniversalPromptV2],
+    prompt: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3],
     output_dir: Path,
     dry_run: bool,
     verbose: bool,
@@ -192,7 +192,9 @@ def _should_create_file(file_path: Path, force: bool, dry_run: bool) -> bool:
     return False
 
 
-def _build_agents_content(prompt: Union[UniversalPrompt, UniversalPromptV2]) -> str:
+def _build_agents_content(
+    prompt: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3],
+) -> str:
     """Build content for the general AGENTS.md file."""
     lines = []
 
@@ -264,7 +266,7 @@ def _build_agents_content(prompt: Union[UniversalPrompt, UniversalPromptV2]) -> 
 
 
 def _build_copilot_agent_content(
-    prompt: Union[UniversalPrompt, UniversalPromptV2],
+    prompt: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3],
 ) -> str:
     """Build content for GitHub Copilot Agent (.github/copilot-instructions.md)."""
     lines = []
@@ -319,7 +321,7 @@ def _build_copilot_agent_content(
 
 
 def _build_claude_agent_content(
-    prompt: Union[UniversalPrompt, UniversalPromptV2],
+    prompt: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3],
 ) -> str:
     """Build content for Claude agents (.claude/CLAUDE.md)."""
     lines = []
