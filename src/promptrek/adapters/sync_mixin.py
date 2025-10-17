@@ -378,8 +378,8 @@ class SingleFileMarkdownSyncMixin:
         metadata = PromptMetadata(
             title=title,
             description=(
-                frontmatter_data.get("description")
-                if frontmatter_data and "description" in frontmatter_data
+                frontmatter_data.get("description", f"Synced from {file_path}")
+                if frontmatter_data
                 else f"Synced from {file_path}"
             ),
             version=(
