@@ -19,6 +19,24 @@ PrompTrek supports **four schema versions**:
 
 `.promptrek.yaml`
 
+## JSON Schema Validation
+
+JSON Schemas are available for all versions to enable autocompletion and validation in your editor:
+
+- **v3.0**: [`https://flamingquaks.github.io/promptrek/schema/v3.0.json`](https://flamingquaks.github.io/promptrek/schema/v3.0.json)
+- **v2.1**: [`https://flamingquaks.github.io/promptrek/schema/v2.1.json`](https://flamingquaks.github.io/promptrek/schema/v2.1.json)
+- **v2.0**: [`https://flamingquaks.github.io/promptrek/schema/v2.0.json`](https://flamingquaks.github.io/promptrek/schema/v2.0.json)
+
+**Enable in your editor**: Add a schema reference at the top of your `.promptrek.yaml` file:
+
+```yaml
+# yaml-language-server: $schema=https://flamingquaks.github.io/promptrek/schema/v3.0.json
+schema_version: 3.0.0
+# ... rest of your configuration
+```
+
+See the [Schema Documentation]({{ site.baseurl }}/schema/) for more details.
+
 ## Schema Versions
 
 - **Stable**: `3.0.0` - [Jump to v3.0 Specification](#schema-v30-stable)

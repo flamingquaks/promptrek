@@ -179,6 +179,16 @@ Use `--strict` to treat warnings as errors:
 promptrek validate my-project.promptrek.yaml --strict
 ```
 
+**💡 Editor Integration:** Enable schema validation in your editor for instant feedback while editing `.promptrek.yaml` files. Add this comment at the top of your file:
+
+```yaml
+# yaml-language-server: $schema=https://flamingquaks.github.io/promptrek/schema/v3.0.json
+schema_version: 3.0.0
+# ... rest of your configuration
+```
+
+This provides autocompletion, inline documentation, and validation in editors like VS Code, IntelliJ IDEA, and others that support YAML language servers. See the [Schema Documentation](schema/) for more details.
+
 ### 4. Configure .gitignore (Optional)
 
 If you have existing editor files already committed to git, you can clean them up:
