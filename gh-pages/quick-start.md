@@ -187,7 +187,7 @@ schema_version: 3.0.0
 # ... rest of your configuration
 ```
 
-This provides autocompletion, inline documentation, and validation in editors like VS Code, IntelliJ IDEA, and others that support YAML language servers. See the [Schema Documentation](schema/) for more details.
+This provides autocompletion, inline documentation, and validation in editors like VS Code, IntelliJ IDEA, and others that support YAML language servers. See the [Schema Documentation](https://flamingquaks.github.io/promptrek/schema/) for more details.
 
 ### 4. Configure .gitignore (Optional)
 
