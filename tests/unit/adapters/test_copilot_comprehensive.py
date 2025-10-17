@@ -10,6 +10,7 @@ from promptrek.core.models import (
     PromptMetadata,
     UniversalPrompt,
     UniversalPromptV2,
+    UniversalPromptV3,
 )
 
 
@@ -370,7 +371,7 @@ class TestCopilotAdapterComprehensive:
 
         result = adapter.parse_files(tmp_path)
 
-        assert isinstance(result, UniversalPromptV2)
+        assert isinstance(result, UniversalPromptV3)
         assert "PEP 8" in result.content
         assert "type hints" in result.content
 

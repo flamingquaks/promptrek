@@ -75,16 +75,16 @@ class TestSyncIntegration:
             # Check output file was created
             assert output_file.exists()
 
-            # Validate content (V2 schema)
+            # Validate content (V3 schema)
             with open(output_file, "r") as f:
                 content = yaml.safe_load(f)
 
-            assert content["schema_version"] == "2.0.0"
+            assert content["schema_version"] == "3.0.0"
             assert (
                 content["metadata"]["title"] == "Continue AI Assistant"
-            )  # V2 uses default title
+            )  # V3 uses default title
 
-            # V2 uses documents instead of targets/instructions
+            # V3 uses documents instead of targets/instructions
             assert "documents" in content
             assert len(content["documents"]) >= 2  # general.md and testing.md
 

@@ -180,20 +180,20 @@ class TestContinueAdapter(TestAdapterBase):
 """
         )
 
-        # Test parsing (now returns V2 schema)
+        # Test parsing (now returns V3 schema)
         parsed = adapter.parse_files(tmp_path)
 
-        # Verify it's V2 schema
-        from promptrek.core.models import UniversalPromptV2
+        # Verify it's V3 schema
+        from promptrek.core.models import UniversalPromptV3
 
-        assert isinstance(parsed, UniversalPromptV2)
-        assert parsed.schema_version == "2.0.0"
+        assert isinstance(parsed, UniversalPromptV3)
+        assert parsed.schema_version == "3.0.0"
 
         # Verify metadata
-        assert parsed.metadata.title == "Continue AI Assistant"  # V2 uses default title
+        assert parsed.metadata.title == "Continue AI Assistant"  # V3 uses default title
         assert parsed.metadata.version == "1.0.0"  # Default version for parsed
 
-        # V2 uses documents instead of instructions
+        # V3 uses documents instead of instructions
         assert parsed.documents is not None
         assert len(parsed.documents) > 0
 
@@ -240,11 +240,11 @@ class TestContinueAdapter(TestAdapterBase):
         weird_md = rules_dir / "weird.md"
         weird_md.write_text("No bullet points here\njust random text")
 
-        # Should parse successfully into V2 schema with documents
+        # Should parse successfully into V3 schema with documents
         parsed = adapter.parse_files(tmp_path)
-        from promptrek.core.models import UniversalPromptV2
+        from promptrek.core.models import UniversalPromptV3
 
-        assert isinstance(parsed, UniversalPromptV2)
+        assert isinstance(parsed, UniversalPromptV3)
 
         # Check that both documents were parsed
         doc_names = [doc.name for doc in parsed.documents]

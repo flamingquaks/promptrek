@@ -226,12 +226,11 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
         """
         Parse Claude Code files back into a UniversalPrompt.
 
-        Uses v2 format by default for lossless sync (can be upgraded to v3).
+        Uses v3.0 format for lossless sync with clean top-level plugin structure.
         """
         file_path = ".claude/CLAUDE.md"
-        # Use v2 sync for lossless roundtrip
-        # Note: Parser will auto-upgrade to v3 if schema_version is 3.x.x
-        return self.parse_single_markdown_file_v2(
+        # Use v3 sync for lossless roundtrip with clean top-level plugins
+        return self.parse_single_markdown_file_v3(
             source_dir=source_dir,
             file_path=file_path,
             editor_name="Claude Code",

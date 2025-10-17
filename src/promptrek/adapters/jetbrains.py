@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Optional, Union
 import click
 
 from ..core.exceptions import ValidationError
-from ..core.models import UniversalPrompt, UniversalPromptV2
+from ..core.models import UniversalPrompt, UniversalPromptV2, UniversalPromptV3
 from .base import EditorAdapter
 from .sync_mixin import MarkdownSyncMixin
 
@@ -28,7 +28,7 @@ class JetBrainsAdapter(MarkdownSyncMixin, EditorAdapter):
 
     def generate(
         self,
-        prompt: Union[UniversalPrompt, UniversalPromptV2],
+        prompt: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3],
         output_dir: Path,
         dry_run: bool = False,
         verbose: bool = False,
@@ -37,8 +37,8 @@ class JetBrainsAdapter(MarkdownSyncMixin, EditorAdapter):
     ) -> List[Path]:
         """Generate JetBrains AI configuration files."""
 
-        # V2: Use documents field for multi-file rules or main content for single file
-        if isinstance(prompt, UniversalPromptV2):
+        # V2/V3: Use documents field for multi-file rules or main content for single file
+        if isinstance(prompt, (UniversalPromptV2, UniversalPromptV3)):
             return self._generate_v2(prompt, output_dir, dry_run, verbose, variables)
 
         # V1: Apply variable substitution if supported
@@ -59,13 +59,13 @@ class JetBrainsAdapter(MarkdownSyncMixin, EditorAdapter):
 
     def _generate_v2(
         self,
-        prompt: UniversalPromptV2,
+        prompt: Union[UniversalPromptV2, UniversalPromptV3],
         output_dir: Path,
         dry_run: bool,
         verbose: bool,
         variables: Optional[Dict[str, Any]] = None,
     ) -> List[Path]:
-        """Generate JetBrains files from v2 schema (using documents for rules or content for single file)."""
+        """Generate JetBrains files from v2/v3 schema (using documents for rules or content for single file)."""
         rules_dir = output_dir / ".assistant" / "rules"
         created_files = []
 
@@ -125,13 +125,13 @@ class JetBrainsAdapter(MarkdownSyncMixin, EditorAdapter):
         return created_files
 
     def validate(
-        self, prompt: Union[UniversalPrompt, UniversalPromptV2]
+        self, prompt: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3]
     ) -> List[ValidationError]:
         """Validate prompt for JetBrains AI."""
         errors = []
 
-        # V2 validation: check content exists
-        if isinstance(prompt, UniversalPromptV2):
+        # V2/V3 validation: check content exists
+        if isinstance(prompt, (UniversalPromptV2, UniversalPromptV3)):
             if not prompt.content or not prompt.content.strip():
                 errors.append(
                     ValidationError(
@@ -164,7 +164,7 @@ class JetBrainsAdapter(MarkdownSyncMixin, EditorAdapter):
 
     def parse_files(
         self, source_dir: Path
-    ) -> Union[UniversalPrompt, UniversalPromptV2]:
+    ) -> Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3]:
         """Parse JetBrains files back into a UniversalPrompt or UniversalPromptV2."""
         return self.parse_markdown_rules_files(
             source_dir=source_dir,

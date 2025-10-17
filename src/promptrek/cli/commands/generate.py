@@ -13,7 +13,7 @@ import click
 from ...adapters import registry
 from ...adapters.registry import AdapterCapability
 from ...core.exceptions import AdapterNotFoundError, CLIError, UPFParsingError
-from ...core.models import UniversalPrompt, UniversalPromptV2
+from ...core.models import UniversalPrompt, UniversalPromptV2, UniversalPromptV3
 from ...core.parser import UPFParser
 from ...core.validator import UPFValidator
 from ...utils.variables import VariableSubstitution
@@ -138,7 +138,8 @@ def generate_command(
 
     # Process each file and collect prompts by editor
     prompts_by_editor: dict[
-        str, list[tuple[Union[UniversalPrompt, UniversalPromptV2], Path]]
+        str,
+        list[tuple[Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3], Path]],
     ] = {}  # editor -> list of (prompt, source_file) tuples
     processing_errors = []
 
@@ -147,9 +148,9 @@ def generate_command(
             file_prompts = _parse_and_validate_file(ctx, file_path)
 
             # Determine target editors for this file
-            # V2 doesn't have targets field - works with any editor
-            if isinstance(file_prompts, UniversalPromptV2):
-                # V2: No targets, works with any editor
+            # V2/V3 doesn't have targets field - works with any editor
+            if isinstance(file_prompts, (UniversalPromptV2, UniversalPromptV3)):
+                # V2/V3: No targets, works with any editor
                 if all_editors:
                     target_editors = registry.get_project_file_adapters()
                 elif editor:
@@ -240,11 +241,11 @@ def generate_command(
 
 def _parse_and_validate_file(
     ctx: click.Context, file_path: Path
-) -> Union[UniversalPrompt, UniversalPromptV2]:
+) -> Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3]:
     """Parse and validate a single UPF file.
 
     Returns:
-        Union[UniversalPrompt, UniversalPromptV2]: Parsed prompt (v1 or v2)
+        Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3]: Parsed prompt (v1, v2, or v3)
     """
     verbose = ctx.obj.get("verbose", False)
 
@@ -267,7 +268,9 @@ def _parse_and_validate_file(
 
 
 def _generate_for_editor_multiple(
-    prompt_files: list[tuple[Union[UniversalPrompt, UniversalPromptV2], Path]],
+    prompt_files: list[
+        tuple[Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3], Path]
+    ],
     editor: str,
     output_dir: Path,
     dry_run: bool,
@@ -493,7 +496,7 @@ def _process_single_file(
 
 
 def _generate_for_editor(
-    prompt: Union[UniversalPrompt, UniversalPromptV2],
+    prompt: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3],
     editor: str,
     output_dir: Path,
     dry_run: bool,

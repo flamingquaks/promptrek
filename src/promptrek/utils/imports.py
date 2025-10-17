@@ -8,7 +8,12 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 
 from ..core.exceptions import UPFParsingError
-from ..core.models import ImportConfig, UniversalPrompt, UniversalPromptV2
+from ..core.models import (
+    ImportConfig,
+    UniversalPrompt,
+    UniversalPromptV2,
+    UniversalPromptV3,
+)
 from ..core.parser import UPFParser
 
 
@@ -27,13 +32,14 @@ class ImportProcessor:
         Process all import declarations in a prompt.
 
         Args:
-            prompt: The universal prompt with imports
+            prompt: The universal prompt with imports (v1 only)
             base_path: Base path for resolving relative imports
 
         Returns:
             Prompt with imported content merged
         """
-        if not prompt.imports:
+        # Only v1 prompts support imports
+        if not hasattr(prompt, "imports") or not prompt.imports:
             return prompt
 
         # Start with current prompt data
@@ -76,12 +82,12 @@ class ImportProcessor:
         try:
             imported_prompt = self.parser.parse_file(import_path)
 
-            # V2 prompts don't support imports
-            if isinstance(imported_prompt, UniversalPromptV2):
-                raise UPFParsingError(f"Cannot import v2 format file: {import_path}")
+            # V2/V3 prompts don't support imports
+            if isinstance(imported_prompt, (UniversalPromptV2, UniversalPromptV3)):
+                raise UPFParsingError(f"Cannot import v2/v3 format file: {import_path}")
 
-            # Recursively process imports in the imported file
-            if imported_prompt.imports:
+            # Recursively process imports in the imported file (v1 only)
+            if hasattr(imported_prompt, "imports") and imported_prompt.imports:
                 imported_prompt = self.process_imports(
                     imported_prompt, import_path.parent
                 )

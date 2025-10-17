@@ -10,7 +10,7 @@ from typing import Union
 import click
 
 from ...core.exceptions import UPFParsingError
-from ...core.models import UniversalPrompt, UniversalPromptV2
+from ...core.models import UniversalPrompt, UniversalPromptV2, UniversalPromptV3
 from ...core.parser import UPFParser
 from ...core.validator import UPFValidator
 
@@ -70,7 +70,9 @@ def validate_command(ctx: click.Context, file: Path, strict: bool) -> None:
         _show_summary(prompt)
 
 
-def _show_summary(prompt: Union[UniversalPrompt, UniversalPromptV2]) -> None:
+def _show_summary(
+    prompt: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3],
+) -> None:
     """Show a summary of the prompt configuration."""
     click.echo("\n📋 Summary:")
     click.echo(f"  Title: {prompt.metadata.title}")

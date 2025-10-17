@@ -672,15 +672,15 @@ class ContinueAdapter(MCPGenerationMixin, EditorAdapter):
         self, source_dir: Path
     ) -> Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3]:
         """
-        Parse Continue files back into a UniversalPromptV2 or UniversalPromptV3.
+        Parse Continue files back into UniversalPromptV3.
 
-        Uses v2 format with documents field for lossless multi-file sync.
+        Uses v3.0 format with documents field for lossless multi-file sync and clean top-level plugin structure.
 
         Args:
             source_dir: Directory containing Continue configuration files
 
         Returns:
-            UniversalPromptV2 object parsed from Continue files
+            UniversalPromptV3 object parsed from Continue files
         """
         # Parse markdown files from .continue/rules/
         rules_dir = source_dir / ".continue" / "rules"
@@ -689,7 +689,7 @@ class ContinueAdapter(MCPGenerationMixin, EditorAdapter):
             # Fallback to v1 parsing if no rules directory
             return self._parse_files_v1(source_dir)
 
-        # V2: Parse each markdown file as a document
+        # V3: Parse each markdown file as a document
         documents = []
         main_content_parts = []
 
@@ -733,8 +733,8 @@ class ContinueAdapter(MCPGenerationMixin, EditorAdapter):
             else "# Continue AI Assistant\n\nNo rules found."
         )
 
-        return UniversalPromptV2(
-            schema_version="2.0.0",
+        return UniversalPromptV3(
+            schema_version="3.0.0",
             metadata=metadata,
             content=main_content,
             documents=documents if documents else None,
