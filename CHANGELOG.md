@@ -1,3 +1,25 @@
+# [](https://github.com/flamingquaks/promptrek/compare/v0.3.0...v) (2025-10-17)
+
+
+### Features
+
+* Update documentation and configuration for v3.0.0 schema, including new .gitignore entries and migration instructions ([52a7157](https://github.com/flamingquaks/promptrek/commit/52a71572b062d12238a0a4af45bdef8115a1417f))
+* Upgrade adapters and sync command to support UniversalPromptV3 schema ([#73](https://github.com/flamingquaks/promptrek/issues/73)) ([5a70d22](https://github.com/flamingquaks/promptrek/commit/5a70d221fa4e5055f069417b0de84ecba3708258))
+
+
+
+# [0.3.0](https://github.com/flamingquaks/promptrek/compare/v0.2.0...v0.3.0) (2025-10-16)
+
+
+### Features
+
+* Add .gitignore configuration for editor-specific files ([#72](https://github.com/flamingquaks/promptrek/issues/72)) ([e1b2f04](https://github.com/flamingquaks/promptrek/commit/e1b2f046e183a005121ec62705a27f9fc329d3f3))
+* Add support for UniversalPromptV3 and enhance migration functionality ([#70](https://github.com/flamingquaks/promptrek/issues/70)) ([e3e4319](https://github.com/flamingquaks/promptrek/commit/e3e431924982c65822eb3f662ff8de80d308e9c6))
+* Update documentation for v3.0.0 schema, including migration guide and deprecation warnings ([bb393d4](https://github.com/flamingquaks/promptrek/commit/bb393d4f6b0f278e005163ebf0f042005cff927c))
+* Upgrade Project's promptrek config - schema version to 3.0.0 ([c53c2a5](https://github.com/flamingquaks/promptrek/commit/c53c2a5d80b1d21bb2c408b4b1fdfac7c4d3b4cd))
+
+
+
 # [](https://github.com/flamingquaks/promptrek/compare/v0.2.0...v) (2025-10-16)
 
 
