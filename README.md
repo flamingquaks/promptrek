@@ -140,7 +140,7 @@ For technical architecture and development planning, see the developer documenta
 - **Cursor** - `.cursor/rules/index.mdc`, `.cursor/rules/*.mdc`, `AGENTS.md`, `.cursorignore`, `.cursorindexingignore` - Modern 2025 rules system with Always/Auto Attached rule types and project overview
 - **Continue** - `.continue/rules/*.md` - Organized markdown rules directory with bidirectional sync support
 - **Kiro** - `.kiro/steering/*.md` - Comprehensive steering system with YAML frontmatter
-- **Cline** - `.clinerules/*.md` - Markdown-based rules configuration
+- **Cline** - `.clinerules/*.md`, `.vscode/settings.json` (MCP) - VSCode autonomous AI agent with markdown rules
 - **Claude Code** - `.claude/context.md` - Rich context format with detailed project information
 - **Windsurf** - `.windsurf/rules/*.md` - Organized markdown rule files for AI-powered coding assistance
 - **Tabnine** - `.tabnine_commands` - Basic context guidance (limited support - full config via IDE)

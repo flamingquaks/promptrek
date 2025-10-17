@@ -78,11 +78,11 @@ Continue adapter generates organized markdown rule files for enhanced AI-powered
 
 **Sync Support**: Continue adapter supports bidirectional sync - you can import existing Continue configurations back to PrompTrek format using `promptrek sync`.
 
-### ✅ Cline (Terminal-based AI)
-**Generated Files**: `.clinerules`  
-**Features**: Variable substitution, Conditional instructions
+### ✅ Cline (VSCode Extension)
+**Generated Files**: `.clinerules`, `.clinerules/*.md`, `.vscode/settings.json` (MCP)
+**Features**: Variable substitution, Conditional instructions, MCP server support, Bidirectional sync
 
-Cline adapter generates markdown-based rules file for terminal-based AI assistance with project context and coding guidelines.
+Cline adapter generates markdown-based rules for the Cline VSCode extension - an autonomous AI coding agent with file creation/editing, command execution, and browser automation capabilities.
 
 **Example Output (.clinerules)**:
 ```markdown
@@ -469,7 +469,7 @@ Each adapter optimizes content for its target editor:
 
 - **Claude**: Emphasizes detailed context and examples for better understanding
 - **Continue**: Focuses on system messages and completion hints
-- **Cline**: Includes safety settings and terminal-specific guidance
+- **Cline**: Autonomous VSCode agent with file operations and browser automation
 - **Windsurf**: Structures content as modular markdown rules
 - **Copilot**: Uses GitHub's instruction format and conventions
 - **Cursor**: Follows Cursor's rules file format
