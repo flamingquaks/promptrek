@@ -387,7 +387,7 @@ class SingleFileMarkdownSyncMixin:
         return UniversalPromptV3(
             schema_version="3.0.0",
             metadata=metadata,
-            content=content.strip(),  # Raw markdown content, lossless!
+            content=content,  # Raw markdown content, lossless!
             variables={},
         )
 
