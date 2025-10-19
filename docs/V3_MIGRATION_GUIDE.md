@@ -2,13 +2,13 @@
 
 ## Overview
 
-PrompTrek v3.0.0 introduces a cleaner, more intuitive plugin architecture by promoting plugin fields to the top level of your `.promptrek.yaml` files. This guide will help you migrate from v2.1 to v3.0.
+PrompTrek v3.0.0 introduces a cleaner, more intuitive architecture by promoting plugin fields (mcp_servers, commands, agents, hooks) to the top level of your `.promptrek.yaml` files. This guide will help you migrate from v2.1 to v3.0.
 
 ## What's New in v3.0.0
 
 ### Top-Level Plugin Fields
 
-In v3.0.0, plugin configurations are now top-level fields instead of being nested under `plugins`:
+In v3.0.0, plugin configurations (mcp_servers, commands, agents, hooks) are now top-level fields instead of being nested under `plugins`. The `plugins` wrapper field has been removed entirely.
 
 **Before (v2.1):**
 ```yaml
@@ -111,15 +111,17 @@ If you prefer manual migration:
 
 3. **Remove the `plugins` wrapper:**
    ```yaml
-   # Remove this:
+   # Remove the wrapper:
    plugins:
      mcp_servers: [...]
      commands: [...]
 
-   # Keep only this:
+   # Use top-level fields:
    mcp_servers: [...]
    commands: [...]
    ```
+
+   **Note**: The `plugins` field itself no longer exists in v3.0 - it has been completely removed, not repurposed.
 
 ## Backward Compatibility
 

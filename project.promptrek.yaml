@@ -5,7 +5,7 @@ metadata:
   version: 1.0.0
   author: PrompTrek Sync
   created: '2025-10-17T09:51:15.670275'
-  updated: '2025-10-17T09:51:15.670281'
+  updated: '2025-10-17T16:50:19.650011'
   tags:
   - claude-code
   - synced
@@ -15,7 +15,7 @@ content: |-
   PrompTrek is a universal AI editor prompt management tool that converts `project.promptrek.yaml` files into editor-specific configuration files for various AI coding assistants (GitHub Copilot, Cursor, Continue, Claude Code, Windsurf, Cline, Kiro, Amazon Q, JetBrains AI).
 
   **Key Features**:
-  - **Schema v3.0.0 (Stable)**: Top-level plugin fields for cleaner structure
+  - **Schema v3.0.0 (Stable)**: Top-level plugin fields (mcp_servers, commands, agents, hooks) for cleaner structure
   - **Schema v2.x (Legacy)**: Markdown-first with nested plugin support (superseded by v3.0)
   - **Lossless Bidirectional Sync**: Parse editor files back to `project.promptrek.yaml` without data loss
   - **Multi-Format Support**: Works with all major AI editors automatically (no `targets` field needed in v2+)
@@ -119,7 +119,7 @@ content: |-
 
   **2. Core Functionality** (`src/promptrek/core/`)
   - `models.py`: Pydantic models for v1 (`UniversalPrompt`), v2 (`UniversalPromptV2`), and v3 (`UniversalPromptV3`) schemas
-    - **v3 (3.0.0)**: Top-level plugin fields (`mcp_servers`, `commands`, `agents`, `hooks`), `plugins` repurposed for marketplace/discovery
+    - **v3 (3.0.0)**: Top-level plugin fields (`mcp_servers`, `commands`, `agents`, `hooks`)
     - **v2 (2.x.x)**: Markdown-first with nested plugin structure (`plugins.mcp_servers`, etc.) - deprecated nested structure in v3
     - **v1 (1.x.x)**: Structured approach with `targets`, categorized instructions
     - All schemas use `DocumentConfig` for multi-file editors
@@ -327,7 +327,7 @@ content: |-
   | **Lossless sync** | ❌ | ✅ | ✅ |
   | **Plugin support** | ❌ | ✅ (nested) | ✅ (top-level) |
   | **Plugin fields** | N/A | `plugins.mcp_servers` | `mcp_servers` (top-level) |
-  | **`plugins` field** | N/A | Plugin config wrapper | Reserved for marketplace |
+  | **`plugins` field** | N/A | Plugin config wrapper | Removed (not needed) |
   | **Backward compat** | v1 only | v1 + v2 | v1 + v2 + v3 |
   | **Migration** | → v2 → v3 | → v3 | Current (Stable) |
 

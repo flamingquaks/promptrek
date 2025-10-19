@@ -10,7 +10,7 @@ title: UPF Specification
 The Universal Prompt Format (UPF) is a standardized YAML-based format for defining AI assistant prompts that can be converted to various editor-specific formats.
 
 PrompTrek supports **four schema versions**:
-- **v3.0.0** (Stable): Top-level plugin fields, cleaner architecture (backward compatible with v2.x)
+- **v3.0.0** (Stable): Top-level plugin fields (mcp_servers, commands, agents, hooks), cleaner architecture (backward compatible with v2.x)
 - **v2.1.0** (Legacy): Markdown-first with nested plugin support (superseded by v3.0)
 - **v2.0.0** (Legacy): Markdown-first, simpler format with lossless bidirectional sync
 - **v1.0.0** (Legacy): Structured format with complex nested fields
@@ -30,11 +30,11 @@ PrompTrek supports **four schema versions**:
 
 ## Schema v3.0 (Stable)
 
-**v3.0.0**: Cleaner plugin architecture by promoting plugin fields to the top level.
+**v3.0.0**: Cleaner architecture by promoting plugin fields (mcp_servers, commands, agents, hooks) to the top level.
 
 ### What's New in v3.0
 
-- ✨ **Top-Level Plugin Fields** - No more `plugins` wrapper, cleaner YAML structure
+- ✨ **Top-Level Plugin Fields** - No `plugins` wrapper (removed entirely), cleaner YAML structure
 - ✅ **100% Backward Compatible** - v2.x files continue to work with automatic migration
 - 🔄 **Automatic Migration** - Built-in tools to convert v2.x → v3.0
 - 📋 **Production Ready** - Stable schema for all new projects
@@ -45,7 +45,7 @@ PrompTrek supports **four schema versions**:
 **Before (v2.1) - Nested structure:**
 ```yaml
 schema_version: "2.1.0"
-plugins:                    # ❌ Unnecessary wrapper
+plugins:                    # ❌ Wrapper (removed in v3.0)
   mcp_servers: [...]
   commands: [...]
   agents: [...]
@@ -55,6 +55,7 @@ plugins:                    # ❌ Unnecessary wrapper
 **After (v3.0) - Flat structure:**
 ```yaml
 schema_version: "3.0.0"
+# No plugins wrapper - fields are top-level
 mcp_servers: [...]          # ✅ Top-level
 commands: [...]             # ✅ Top-level
 agents: [...]               # ✅ Top-level

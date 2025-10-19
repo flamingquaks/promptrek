@@ -15,10 +15,10 @@ A universal configuration solution that takes your prompts, MCP servers, custom 
 
 AI coding assistants like GitHub Copilot, Cursor, Continue, and others all use different prompt formats and configuration methods. When working across teams or switching between editors, you have to maintain separate prompt configurations for each tool. PrompTrek solves this by:
 
-- **Universal Format**: Create prompts once in a standardized format (now with **v3.0.0 schema** - cleaner architecture with top-level plugins!)
+- **Universal Format**: Create prompts once in a standardized format (now with **v3.0.0 schema** - cleaner architecture!)
 - **Multi-Editor Support**: Generate prompts for any supported AI editor automatically (no `targets` field needed!)
 - **Bidirectional Sync**: Parse editor files back to `.promptrek.yaml` without data loss (lossless sync)
-- **Plugin Ecosystem**: Configure MCP servers, custom commands, autonomous agents, and event hooks with clean top-level fields
+- **Plugin Ecosystem**: Configure MCP servers, custom commands, autonomous agents, and event hooks with clean top-level fields (mcp_servers, commands, agents, hooks)
 - **Auto .gitignore Management**: Automatically exclude generated editor files from version control
 - **Team Consistency**: Share prompt configurations across team members regardless of their editor choice
 - **Easy Migration**: Switch between AI editors without losing your prompt configurations
@@ -214,10 +214,10 @@ ls .continue/rules/
 
 ### 🆕 Schema v3.0.0 (Stable)
 
-PrompTrek v3.0.0 introduces a **cleaner plugin architecture** by promoting plugin fields to the top level:
+PrompTrek v3.0.0 introduces a **cleaner architecture** by promoting plugin fields (mcp_servers, commands, agents, hooks) to the top level:
 
 **What's New:**
-- ✨ **Top-Level Plugin Fields** - Cleaner, flatter structure (no `plugins` wrapper)
+- ✨ **Top-Level Plugin Fields** - No `plugins` wrapper (removed entirely), cleaner structure
 - ✅ **100% Backward Compatible** - v2.x files continue to work with automatic migration
 - 🔄 **Automatic Migration** - Built-in tools to convert v2.x → v3.0
 - 📋 **Production Ready** - Stable schema for all new projects
@@ -226,12 +226,13 @@ PrompTrek v3.0.0 introduces a **cleaner plugin architecture** by promoting plugi
 ```yaml
 # v2.x - Nested structure (legacy)
 schema_version: "2.1.0"
-plugins:                    # ❌ Unnecessary wrapper
+plugins:                    # ❌ Wrapper (removed in v3.0)
   mcp_servers: [...]
   commands: [...]
 
 # v3.0 - Flat structure (recommended)
 schema_version: "3.0.0"
+# No plugins wrapper
 mcp_servers: [...]          # ✅ Top-level
 commands: [...]             # ✅ Top-level
 ```
@@ -329,12 +330,13 @@ documents:
 
 ####  🔌 Plugin Configuration (v3.0)
 
-PrompTrek v3.0 provides MCP server integration with a **clean top-level structure**:
+PrompTrek v3.0 provides MCP server integration with **clean top-level fields** (no `plugins` wrapper):
 
 **Supported Plugin Types:**
-- **MCP Servers** - Model Context Protocol servers for external tools (filesystem, GitHub, databases, etc.)
-- **Custom Commands** - Slash commands for AI editors
-- **Autonomous Agents** - AI agents with specific tools and permissions
+- **MCP Servers** (`mcp_servers`) - Model Context Protocol servers for external tools (filesystem, GitHub, databases, etc.)
+- **Custom Commands** (`commands`) - Slash commands for AI editors
+- **Autonomous Agents** (`agents`) - AI agents with specific tools and permissions
+- **Event Hooks** (`hooks`) - Event-driven automation workflows
 
 **Editor Support Matrix:**
 

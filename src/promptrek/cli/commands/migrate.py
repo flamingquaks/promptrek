@@ -150,7 +150,6 @@ def _convert_v21_to_v3(
         commands=commands,
         agents=agents,
         hooks=hooks,
-        plugins=None,  # Repurposed for marketplace entries in v3
     )
 
 
@@ -180,7 +179,6 @@ def _convert_v2_to_v3(
         commands=None,
         agents=None,
         hooks=None,
-        plugins=None,
     )
 
 
@@ -223,7 +221,6 @@ def _convert_v1_to_v3(
         commands=None,
         agents=None,
         hooks=None,
-        plugins=None,
     )
 
 
