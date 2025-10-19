@@ -5,7 +5,7 @@ Handles importing and merging content from other UPF files.
 """
 
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Set
 
 from ..core.exceptions import UPFParsingError
 from ..core.models import (
@@ -23,7 +23,7 @@ class ImportProcessor:
     def __init__(self) -> None:
         """Initialize import processor."""
         self.parser = UPFParser()
-        self._processed_files: set[Path] = set()  # Prevent circular imports
+        self._processed_files: Set[Path] = set()  # Prevent circular imports
 
     def process_imports(
         self, prompt: UniversalPrompt, base_path: Path
