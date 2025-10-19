@@ -267,151 +267,6 @@ class Hook(BaseModel):
     )
 
 
-class MarketplaceMetadata(BaseModel):
-    """Metadata for plugin marketplace listings (v2.1 - deprecated in v3.0)."""
-
-    plugin_id: Optional[str] = Field(
-        default=None, description="Unique plugin identifier"
-    )
-    marketplace_url: Optional[str] = Field(
-        default=None, description="URL to marketplace listing"
-    )
-    rating: Optional[float] = Field(default=None, description="User rating (0-5)")
-    downloads: Optional[int] = Field(default=None, description="Number of downloads")
-    last_updated: Optional[str] = Field(
-        default=None, description="Last update date (ISO 8601)"
-    )
-
-
-# V3 Models - Plugin Marketplace/Discovery (v3.0.0+)
-
-
-class PluginSourceGitHub(BaseModel):
-    """GitHub repository source for plugins."""
-
-    source: str = Field(default="github", description="Source type (must be 'github')")
-    repo: str = Field(..., description="GitHub repository in format 'owner/repo'")
-    ref: Optional[str] = Field(
-        default=None, description="Git ref (branch, tag, or commit SHA)"
-    )
-
-    @field_validator("source")
-    @classmethod
-    def validate_source(cls, v: str) -> str:
-        """Validate source is 'github'."""
-        if v != "github":
-            raise ValueError("GitHub source must have source='github'")
-        return v
-
-
-class PluginSourceURL(BaseModel):
-    """Git URL source for plugins."""
-
-    source: str = Field(default="url", description="Source type (must be 'url')")
-    url: str = Field(..., description="Git repository URL")
-    ref: Optional[str] = Field(
-        default=None, description="Git ref (branch, tag, or commit SHA)"
-    )
-
-    @field_validator("source")
-    @classmethod
-    def validate_source(cls, v: str) -> str:
-        """Validate source is 'url'."""
-        if v != "url":
-            raise ValueError("URL source must have source='url'")
-        return v
-
-
-class PluginAuthor(BaseModel):
-    """Author information for plugins."""
-
-    name: str = Field(..., description="Author name")
-    email: Optional[str] = Field(default=None, description="Author email")
-    url: Optional[str] = Field(default=None, description="Author website/profile URL")
-
-
-class PluginEntry(BaseModel):
-    """Plugin entry for marketplace configuration (v3.0+)."""
-
-    name: str = Field(..., description="Plugin identifier (kebab-case)")
-    source: Union[str, PluginSourceGitHub, PluginSourceURL] = Field(
-        ..., description="Plugin source (relative path, GitHub repo, or Git URL)"
-    )
-    description: Optional[str] = Field(default=None, description="Plugin description")
-    version: Optional[str] = Field(default=None, description="Plugin version")
-    author: Optional[Union[str, PluginAuthor]] = Field(
-        default=None, description="Plugin author"
-    )
-    homepage: Optional[str] = Field(
-        default=None, description="Plugin homepage/documentation URL"
-    )
-    repository: Optional[str] = Field(
-        default=None, description="Plugin source repository URL"
-    )
-    license: Optional[str] = Field(
-        default=None, description="SPDX license identifier (e.g., MIT, Apache-2.0)"
-    )
-    keywords: Optional[List[str]] = Field(
-        default=None, description="Keywords for plugin discovery"
-    )
-    tags: Optional[List[str]] = Field(
-        default=None, description="Tags for categorization (alias for keywords)"
-    )
-    strict: bool = Field(default=True, description="Require plugin.json manifest file")
-    commands: Optional[List[str]] = Field(
-        default=None, description="Custom command file paths"
-    )
-    agents: Optional[List[str]] = Field(
-        default=None, description="Custom agent file paths"
-    )
-    hooks: Optional[Dict[str, Any]] = Field(
-        default=None, description="Hook configuration"
-    )
-    mcp_servers: Optional[Dict[str, Any]] = Field(
-        default=None, description="MCP server configurations"
-    )
-
-    @field_validator("name")
-    @classmethod
-    def validate_name(cls, v: str) -> str:
-        """Validate plugin name is kebab-case."""
-        if not v or not all(c.islower() or c.isdigit() or c == "-" for c in v):
-            raise ValueError("Plugin name must be kebab-case (lowercase with hyphens)")
-        return v
-
-
-class MarketplaceOwner(BaseModel):
-    """Owner/maintainer information for marketplace."""
-
-    name: str = Field(..., description="Owner/maintainer name")
-    email: Optional[str] = Field(default=None, description="Contact email")
-    url: Optional[str] = Field(default=None, description="Website or profile URL")
-
-
-class MarketplaceConfig(BaseModel):
-    """Marketplace configuration for .claude-plugin/marketplace.json (v3.0+)."""
-
-    name: str = Field(..., description="Marketplace identifier (kebab-case)")
-    owner: MarketplaceOwner = Field(..., description="Marketplace owner information")
-    plugins: List[PluginEntry] = Field(
-        default_factory=list, description="Available plugins"
-    )
-    metadata: Optional[Dict[str, Any]] = Field(
-        default=None, description="Additional marketplace metadata"
-    )
-    plugin_root: Optional[str] = Field(
-        default=None, description="Base path for relative plugin sources"
-    )
-
-    @field_validator("name")
-    @classmethod
-    def validate_name(cls, v: str) -> str:
-        """Validate marketplace name is kebab-case."""
-        if not v or not all(c.islower() or c.isdigit() or c == "-" for c in v):
-            raise ValueError("Marketplace name must be kebab-case")
-        return v
-
-
 class PluginConfig(BaseModel):
     """Container for all plugin configurations (v2.1.0+)."""
 
@@ -425,9 +280,6 @@ class PluginConfig(BaseModel):
         default=None, description="Agent configurations"
     )
     hooks: Optional[List[Hook]] = Field(default=None, description="Hook configurations")
-    marketplace_metadata: Optional[MarketplaceMetadata] = Field(
-        default=None, description="Plugin marketplace metadata"
-    )
 
     model_config = ConfigDict(extra="forbid")
 
@@ -486,7 +338,6 @@ class UniversalPromptV3(BaseModel):
 
     Major changes from v2:
     - mcp_servers, commands, agents, hooks are now top-level fields
-    - plugins field repurposed for marketplace/plugin discovery (List[PluginEntry])
     - Full backward compatibility with v2.1 (parser auto-promotes nested fields)
     """
 
@@ -514,10 +365,6 @@ class UniversalPromptV3(BaseModel):
         default=None, description="Hook configurations (top-level in v3.0+)"
     )
 
-    # Repurposed plugins field for marketplace/discovery
-    plugins: Optional[List[PluginEntry]] = Field(
-        default=None, description="Plugin marketplace entries (v3.0+)"
-    )
     ignore_editor_files: Optional[bool] = Field(
         default=None,
         description="Automatically add editor-specific files to .gitignore (default: True)",

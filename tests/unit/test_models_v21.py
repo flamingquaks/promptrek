@@ -11,12 +11,12 @@ from promptrek.core.models import (
     Agent,
     Command,
     Hook,
-    MarketplaceMetadata,
     MCPServer,
     PluginConfig,
     PromptMetadata,
     TrustMetadata,
     UniversalPromptV2,
+    UniversalPromptV3,
 )
 
 
@@ -208,30 +208,6 @@ class TestHook:
         assert hook.requires_reapproval is False
 
 
-class TestMarketplaceMetadata:
-    """Tests for MarketplaceMetadata model."""
-
-    def test_marketplace_metadata_empty(self) -> None:
-        """Test MarketplaceMetadata with no fields."""
-        metadata = MarketplaceMetadata()
-        assert metadata.plugin_id is None
-        assert metadata.marketplace_url is None
-        assert metadata.rating is None
-
-    def test_marketplace_metadata_full(self) -> None:
-        """Test MarketplaceMetadata with all fields."""
-        metadata = MarketplaceMetadata(
-            plugin_id="promptrek-plugin-123",
-            marketplace_url="https://marketplace.com/plugins/123",
-            rating=4.5,
-            downloads=1000,
-            last_updated="2025-01-15",
-        )
-        assert metadata.plugin_id == "promptrek-plugin-123"
-        assert metadata.rating == 4.5
-        assert metadata.downloads == 1000
-
-
 class TestPluginConfig:
     """Tests for PluginConfig model."""
 
@@ -262,13 +238,11 @@ class TestPluginConfig:
                 Agent(name="agent", description="test", system_prompt="test prompt")
             ],
             hooks=[Hook(name="hook", event="pre-commit", command="test")],
-            marketplace_metadata=MarketplaceMetadata(plugin_id="test-123"),
         )
         assert len(config.mcp_servers) == 1
         assert len(config.commands) == 1
         assert len(config.agents) == 1
         assert len(config.hooks) == 1
-        assert config.marketplace_metadata.plugin_id == "test-123"
 
 
 class TestUniversalPromptV2WithPlugins:
@@ -331,3 +305,123 @@ class TestUniversalPromptV2WithPlugins:
                 content="# Test",
             )
         assert "UniversalPromptV2 requires schema version 2.x.x" in str(exc_info.value)
+
+    def test_v21_schema_version_format_validation(self) -> None:
+        """Test schema version format validation."""
+        # Invalid format (not x.y.z)
+        with pytest.raises(ValidationError) as exc_info:
+            UniversalPromptV2(
+                schema_version="2.1",
+                metadata=PromptMetadata(title="Test", description="Test"),
+                content="# Test",
+            )
+        assert "Schema version must be in format 'x.y.z'" in str(exc_info.value)
+
+    def test_v21_empty_content_validation(self) -> None:
+        """Test empty content validation."""
+        # Empty content
+        with pytest.raises(ValidationError) as exc_info:
+            UniversalPromptV2(
+                schema_version="2.1.0",
+                metadata=PromptMetadata(title="Test", description="Test"),
+                content="",
+            )
+        assert "Content cannot be empty" in str(exc_info.value)
+
+        # Whitespace-only content
+        with pytest.raises(ValidationError) as exc_info:
+            UniversalPromptV2(
+                schema_version="2.1.0",
+                metadata=PromptMetadata(title="Test", description="Test"),
+                content="   \n  \t  ",
+            )
+        assert "Content cannot be empty" in str(exc_info.value)
+
+
+class TestUniversalPromptV3:
+    """Tests for UniversalPromptV3 with top-level plugin fields."""
+
+    def test_v3_prompt_minimal(self) -> None:
+        """Test v3.0.0 prompt with minimal fields."""
+        prompt = UniversalPromptV3(
+            schema_version="3.0.0",
+            metadata=PromptMetadata(title="Test", description="Test prompt"),
+            content="# Test content",
+        )
+        assert prompt.schema_version == "3.0.0"
+        assert prompt.mcp_servers is None
+        assert prompt.commands is None
+        assert prompt.agents is None
+        assert prompt.hooks is None
+
+    def test_v3_prompt_with_top_level_plugins(self) -> None:
+        """Test v3.0.0 prompt with top-level plugin fields."""
+        prompt = UniversalPromptV3(
+            schema_version="3.0.0",
+            metadata=PromptMetadata(title="Test", description="Test"),
+            content="# Test",
+            mcp_servers=[MCPServer(name="test", command="npx")],
+            commands=[
+                Command(name="test-cmd", description="test", prompt="do something")
+            ],
+            agents=[
+                Agent(name="agent", description="test", system_prompt="test prompt")
+            ],
+            hooks=[Hook(name="hook", event="pre-commit", command="test")],
+        )
+        assert prompt.mcp_servers is not None
+        assert len(prompt.mcp_servers) == 1
+        assert len(prompt.commands) == 1
+        assert len(prompt.agents) == 1
+        assert len(prompt.hooks) == 1
+
+    def test_v3_schema_validation(self) -> None:
+        """Test v3.0.0 schema version validation."""
+        # Valid v3.x.x versions
+        for version in ["3.0.0", "3.0.1", "3.1.0"]:
+            prompt = UniversalPromptV3(
+                schema_version=version,
+                metadata=PromptMetadata(title="Test", description="Test"),
+                content="# Test",
+            )
+            assert prompt.schema_version == version
+
+        # Invalid version (not 3.x.x)
+        with pytest.raises(ValidationError) as exc_info:
+            UniversalPromptV3(
+                schema_version="2.1.0",
+                metadata=PromptMetadata(title="Test", description="Test"),
+                content="# Test",
+            )
+        assert "UniversalPromptV3 requires schema version 3.x.x" in str(exc_info.value)
+
+    def test_v3_schema_version_format_validation(self) -> None:
+        """Test schema version format validation."""
+        # Invalid format (not x.y.z)
+        with pytest.raises(ValidationError) as exc_info:
+            UniversalPromptV3(
+                schema_version="3.0",
+                metadata=PromptMetadata(title="Test", description="Test"),
+                content="# Test",
+            )
+        assert "Schema version must be in format 'x.y.z'" in str(exc_info.value)
+
+    def test_v3_empty_content_validation(self) -> None:
+        """Test empty content validation."""
+        # Empty content
+        with pytest.raises(ValidationError) as exc_info:
+            UniversalPromptV3(
+                schema_version="3.0.0",
+                metadata=PromptMetadata(title="Test", description="Test"),
+                content="",
+            )
+        assert "Content cannot be empty" in str(exc_info.value)
+
+        # Whitespace-only content
+        with pytest.raises(ValidationError) as exc_info:
+            UniversalPromptV3(
+                schema_version="3.0.0",
+                metadata=PromptMetadata(title="Test", description="Test"),
+                content="   \n  \t  ",
+            )
+        assert "Content cannot be empty" in str(exc_info.value)

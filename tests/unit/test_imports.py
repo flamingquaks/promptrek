@@ -379,3 +379,135 @@ instructions:
         assert len(result.instructions.general) == 1
         assert result.instructions.testing is not None
         assert len(result.instructions.testing) == 1
+
+    def test_circular_import_detection(self, processor, tmp_path):
+        """Test that circular imports are detected."""
+        # Create a simple file
+        simple_file = tmp_path / "simple.promptrek.yaml"
+        simple_file.write_text(
+            """schema_version: 1.0.0
+metadata:
+  title: Simple
+  description: Simple
+targets:
+  - claude
+instructions:
+  general:
+    - Simple instruction
+"""
+        )
+
+        from promptrek.core.exceptions import UPFParsingError
+
+        # Manually add the same file to _processed_files to simulate circular import
+        import_path = simple_file.resolve()
+        processor._processed_files.add(import_path)
+
+        # Now try to import it again - should detect circular import
+        import_config = ImportConfig(path="simple.promptrek.yaml")
+
+        with pytest.raises(UPFParsingError, match="Circular import"):
+            processor._process_single_import(import_config, tmp_path)
+
+    def test_import_new_instruction_category_when_base_has_no_category(
+        self, processor, tmp_path
+    ):
+        """Test importing new category when base instructions exist but category doesn't."""
+        # Create an imported file with security instructions
+        imported_file = tmp_path / "imported.promptrek.yaml"
+        imported_file.write_text(
+            """schema_version: 1.0.0
+metadata:
+  title: Imported
+  description: Imported prompt
+targets:
+  - claude
+instructions:
+  performance:
+    - Performance instruction
+"""
+        )
+
+        # Create main prompt with general but no performance
+        prompt = UniversalPrompt(
+            schema_version="1.0.0",
+            metadata=PromptMetadata(title="Main", description="Main"),
+            targets=["claude"],
+            instructions=Instructions(general=["Main"]),
+            imports=[ImportConfig(path="imported.promptrek.yaml")],
+        )
+
+        result = processor.process_imports(prompt, tmp_path)
+
+        # Should have both general and performance
+        assert result.instructions.general is not None
+        assert result.instructions.performance is not None
+        assert len(result.instructions.performance) == 1
+
+    def test_import_when_base_has_no_instructions_field(self, processor, tmp_path):
+        """Test importing instructions when base has no instructions field at all."""
+        # Create an imported file with instructions
+        imported_file = tmp_path / "imported.promptrek.yaml"
+        imported_file.write_text(
+            """schema_version: 1.0.0
+metadata:
+  title: Imported
+  description: Imported prompt
+targets:
+  - claude
+instructions:
+  general:
+    - Imported instruction
+"""
+        )
+
+        # Create main prompt without instructions (model_construct to avoid validation)
+        prompt = UniversalPrompt.model_construct(
+            schema_version="1.0.0",
+            metadata=PromptMetadata(title="Main", description="Main"),
+            targets=["claude"],
+            instructions=None,  # Explicitly None
+            imports=[ImportConfig(path="imported.promptrek.yaml")],
+        )
+
+        result = processor.process_imports(prompt, tmp_path)
+
+        # Should have instructions from import
+        assert result.instructions is not None
+        assert result.instructions.general is not None
+        assert len(result.instructions.general) == 1
+
+    def test_import_context_when_base_has_none(self, processor, tmp_path):
+        """Test importing context field when base has context=None."""
+        # Create an imported file with context
+        imported_file = tmp_path / "imported.promptrek.yaml"
+        imported_file.write_text(
+            """schema_version: 1.0.0
+metadata:
+  title: Imported
+  description: Imported prompt
+targets:
+  - claude
+context:
+  project_type: web_application
+  technologies:
+    - Python
+    - FastAPI
+"""
+        )
+
+        # Create main prompt without context
+        prompt = UniversalPrompt(
+            schema_version="1.0.0",
+            metadata=PromptMetadata(title="Main", description="Main"),
+            targets=["claude"],
+            instructions=Instructions(general=["Main"]),
+            imports=[ImportConfig(path="imported.promptrek.yaml")],
+        )
+
+        result = processor.process_imports(prompt, tmp_path)
+
+        # Should have context from import
+        assert result.context is not None
+        assert result.context.project_type == "web_application"
+        assert "Python" in result.context.technologies

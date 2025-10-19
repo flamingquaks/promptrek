@@ -11,7 +11,7 @@ import click
 
 from ...adapters.registry import registry
 from ...core.exceptions import CLIError, UPFParsingError
-from ...core.models import UniversalPromptV2
+from ...core.models import UniversalPromptV2, UniversalPromptV3
 from ...core.parser import UPFParser
 
 
@@ -56,13 +56,30 @@ def list_plugins_command(
     except UPFParsingError as e:
         raise CLIError(f"Failed to parse prompt file: {e}")
 
-    # Check if it's v2.1+ with plugins
-    if not isinstance(prompt, UniversalPromptV2):
+    # Check if it's v2.1+ or v3+ with plugins
+    if not isinstance(prompt, (UniversalPromptV2, UniversalPromptV3)):
         click.echo("⚠️  This file uses schema v1.x which doesn't support plugins.")
-        click.echo("   Run 'promptrek migrate' to upgrade to v2.1.0")
+        click.echo("   Run 'promptrek migrate' to upgrade to v2.1.0 or v3.0")
         return
 
-    if not prompt.plugins:
+    # Get plugin data from either v3 top-level fields or v2 nested structure
+    if isinstance(prompt, UniversalPromptV3):
+        mcp_servers = prompt.mcp_servers
+        commands = prompt.commands
+        agents = prompt.agents
+        hooks = prompt.hooks
+    else:  # v2
+        if not prompt.plugins:
+            click.echo("No plugins configured in this file.")
+            click.echo(f"Schema version: {prompt.schema_version}")
+            return
+        mcp_servers = prompt.plugins.mcp_servers
+        commands = prompt.plugins.commands
+        agents = prompt.plugins.agents
+        hooks = prompt.plugins.hooks
+
+    # Check if any plugins are configured
+    if not any([mcp_servers, commands, agents, hooks]):
         click.echo("No plugins configured in this file.")
         click.echo(f"Schema version: {prompt.schema_version}")
         return
@@ -71,27 +88,27 @@ def list_plugins_command(
     click.echo(f"\n📦 Plugins configured in {prompt_file.name}:")
     click.echo(f"Schema version: {prompt.schema_version}\n")
 
-    if prompt.plugins.mcp_servers:
-        click.echo(f"🔌 MCP Servers ({len(prompt.plugins.mcp_servers)}):")
-        for server in prompt.plugins.mcp_servers:
+    if mcp_servers:
+        click.echo(f"🔌 MCP Servers ({len(mcp_servers)}):")
+        for server in mcp_servers:
             click.echo(f"  • {server.name}: {server.command}")
             if server.description:
                 click.echo(f"    {server.description}")
 
-    if prompt.plugins.commands:
-        click.echo(f"\n⚡ Commands ({len(prompt.plugins.commands)}):")
-        for command in prompt.plugins.commands:
+    if commands:
+        click.echo(f"\n⚡ Commands ({len(commands)}):")
+        for command in commands:
             click.echo(f"  • {command.name}: {command.description}")
 
-    if prompt.plugins.agents:
-        click.echo(f"\n🤖 Agents ({len(prompt.plugins.agents)}):")
-        for agent in prompt.plugins.agents:
+    if agents:
+        click.echo(f"\n🤖 Agents ({len(agents)}):")
+        for agent in agents:
             click.echo(f"  • {agent.name}: {agent.description}")
             click.echo(f"    Trust Level: {agent.trust_level}")
 
-    if prompt.plugins.hooks:
-        click.echo(f"\n🪝 Hooks ({len(prompt.plugins.hooks)}):")
-        for hook in prompt.plugins.hooks:
+    if hooks:
+        click.echo(f"\n🪝 Hooks ({len(hooks)}):")
+        for hook in hooks:
             click.echo(f"  • {hook.name} (on {hook.event})")
 
 
@@ -148,9 +165,22 @@ def generate_plugins_command(
     except UPFParsingError as e:
         raise CLIError(f"Failed to parse prompt file: {e}")
 
-    # Check for v2.1+ with plugins
-    if not isinstance(prompt, UniversalPromptV2) or not prompt.plugins:
-        click.echo("⚠️  No plugins to generate (requires v2.1.0+ schema with plugins).")
+    # Check for v2.1+ or v3+ with plugins
+    if not isinstance(prompt, (UniversalPromptV2, UniversalPromptV3)):
+        click.echo("⚠️  No plugins to generate (requires v2.1.0+ or v3.0+ schema).")
+        return
+
+    # Check if any plugins are configured
+    has_plugins = False
+    if isinstance(prompt, UniversalPromptV3):
+        has_plugins = any(
+            [prompt.mcp_servers, prompt.commands, prompt.agents, prompt.hooks]
+        )
+    elif isinstance(prompt, UniversalPromptV2):
+        has_plugins = prompt.plugins is not None
+
+    if not has_plugins:
+        click.echo("⚠️  No plugins configured to generate.")
         return
 
     # Determine which editors to generate for
@@ -236,11 +266,27 @@ def validate_plugins_command(
         raise CLIError(f"Failed to parse prompt file: {e}")
 
     # Check schema version
-    if not isinstance(prompt, UniversalPromptV2):
+    if not isinstance(prompt, (UniversalPromptV2, UniversalPromptV3)):
         click.echo("⚠️  This file uses schema v1.x which doesn't support plugins.")
         return
 
-    if not prompt.plugins:
+    # Get plugin data from either v3 top-level fields or v2 nested structure
+    if isinstance(prompt, UniversalPromptV3):
+        mcp_servers = prompt.mcp_servers
+        commands = prompt.commands
+        agents = prompt.agents
+        hooks = prompt.hooks
+    else:  # v2
+        if not prompt.plugins:
+            click.echo("✅ No plugins to validate.")
+            return
+        mcp_servers = prompt.plugins.mcp_servers
+        commands = prompt.plugins.commands
+        agents = prompt.plugins.agents
+        hooks = prompt.plugins.hooks
+
+    # Check if any plugins are configured
+    if not any([mcp_servers, commands, agents, hooks]):
         click.echo("✅ No plugins to validate.")
         return
 
@@ -251,32 +297,32 @@ def validate_plugins_command(
     warnings = []
 
     # Validate MCP servers
-    if prompt.plugins.mcp_servers:
-        for server in prompt.plugins.mcp_servers:
+    if mcp_servers:
+        for server in mcp_servers:
             if not server.command:
                 errors.append(f"MCP server '{server.name}' missing command")
             if server.trust_metadata and not server.trust_metadata.trusted:
                 warnings.append(f"MCP server '{server.name}' is not marked as trusted")
 
     # Validate commands
-    if prompt.plugins.commands:
-        for command in prompt.plugins.commands:
+    if commands:
+        for command in commands:
             if not command.prompt:
                 errors.append(f"Command '{command.name}' missing prompt")
             if command.requires_approval and verbose:
                 click.echo(f"  ℹ️  Command '{command.name}' requires approval")
 
     # Validate agents
-    if prompt.plugins.agents:
-        for agent in prompt.plugins.agents:
+    if agents:
+        for agent in agents:
             if not agent.system_prompt:
                 errors.append(f"Agent '{agent.name}' missing system_prompt")
             if agent.trust_level == "untrusted":
                 warnings.append(f"Agent '{agent.name}' has untrusted access level")
 
     # Validate hooks
-    if prompt.plugins.hooks:
-        for hook in prompt.plugins.hooks:
+    if hooks:
+        for hook in hooks:
             if not hook.command:
                 errors.append(f"Hook '{hook.name}' missing command")
 

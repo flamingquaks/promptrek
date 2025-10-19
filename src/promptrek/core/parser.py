@@ -245,19 +245,9 @@ class UPFParser:
                 if "hooks" in old_plugins and "hooks" not in data_copy:
                     data_copy["hooks"] = old_plugins["hooks"]
 
-                # Remove plugins field or convert marketplace_metadata
-                # If plugins only had the promoted fields, remove it
-                remaining_plugins = {
-                    k: v
-                    for k, v in old_plugins.items()
-                    if k not in ["mcp_servers", "commands", "agents", "hooks"]
-                }
-                if remaining_plugins:
-                    # Keep remaining fields (like marketplace_metadata)
-                    data_copy["plugins"] = remaining_plugins
-                else:
-                    # Remove empty plugins field
-                    data_copy.pop("plugins", None)
+                # Remove plugins field entirely
+                # All supported fields have been promoted to top-level
+                data_copy.pop("plugins", None)
 
                 return data_copy
 
@@ -346,13 +336,13 @@ class UPFParser:
 
         # Merge metadata - additional takes precedence for most fields
         if additional_dict.get("metadata"):
-            if "metadata" not in base_dict:
+            if "metadata" not in base_dict or base_dict["metadata"] is None:
                 base_dict["metadata"] = {}
             base_dict["metadata"].update(additional_dict["metadata"])
 
         # Merge context - combine lists, additional takes precedence for simple fields
         if additional_dict.get("context"):
-            if "context" not in base_dict:
+            if "context" not in base_dict or base_dict["context"] is None:
                 base_dict["context"] = {}
 
             context = base_dict["context"]
@@ -373,7 +363,7 @@ class UPFParser:
 
         # Merge instructions - combine lists
         if additional_dict.get("instructions"):
-            if "instructions" not in base_dict:
+            if "instructions" not in base_dict or base_dict["instructions"] is None:
                 base_dict["instructions"] = {}
 
             instructions = base_dict["instructions"]
@@ -386,13 +376,13 @@ class UPFParser:
 
         # Merge examples - additional takes precedence for conflicts
         if additional_dict.get("examples"):
-            if "examples" not in base_dict:
+            if "examples" not in base_dict or base_dict["examples"] is None:
                 base_dict["examples"] = {}
             base_dict["examples"].update(additional_dict["examples"])
 
         # Merge variables - additional takes precedence for conflicts
         if additional_dict.get("variables"):
-            if "variables" not in base_dict:
+            if "variables" not in base_dict or base_dict["variables"] is None:
                 base_dict["variables"] = {}
             base_dict["variables"].update(additional_dict["variables"])
 
@@ -411,7 +401,10 @@ class UPFParser:
 
         # Merge editor_specific - additional takes precedence for conflicts
         if additional_dict.get("editor_specific"):
-            if "editor_specific" not in base_dict:
+            if (
+                "editor_specific" not in base_dict
+                or base_dict["editor_specific"] is None
+            ):
                 base_dict["editor_specific"] = {}
             base_dict["editor_specific"].update(additional_dict["editor_specific"])
 
