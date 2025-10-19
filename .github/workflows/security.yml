@@ -81,6 +81,23 @@ jobs:
           uv run pip-audit || true
         continue-on-error: true
 
+      - name: Check for known vulnerabilities with Safety (API scan for RC tags)
+        run: |
+          echo "Checking for known vulnerabilities in dependencies..."
+          set +e
+          uv run safety scan --output json --save-as safety-report.json
+          SAFETY_EXIT_CODE=$?
+          set -e
+          
+          # Show output regardless of exit code
+          uv run safety scan || true
+
+          # Check if we should fail on issues
+          if [ "${{ inputs.fail-on-issues }}" = "true" ] && [ $SAFETY_EXIT_CODE -ne 0 ]; then
+            exit 1
+          fi
+        continue-on-error: ${{ !inputs.fail-on-issues }}
+
       - name: Upload security reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -88,8 +105,29 @@ jobs:
           name: security-reports-rc-${{ github.run_id }}
           path: |
             bandit-report.json
+            safety-report.json
           retention-days: 30
           if-no-files-found: ignore
+
+      - name: Security scan summary
+        if: always()
+        run: |
+          echo "## Security Scan Summary"
+          echo ""
+
+          if [ -f bandit-report.json ]; then
+            BANDIT_ISSUES=$(python -c \
+              "import json; data = json.load(open('bandit-report.json')); print(len(data.get('results', [])))" \
+              2>/dev/null || echo "0")
+            echo "- Bandit: Found $BANDIT_ISSUES potential security issues"
+          fi
+
+          if [ -f safety-report.json ]; then
+            echo "- Safety: Vulnerability check completed"
+          fi
+
+          echo ""
+          echo "Security scan completed. Check artifacts for detailed reports."
 
   # Security scan for release tags (vx.x.x without suffix) - uses API
   security-scan-release:
@@ -152,13 +190,17 @@ jobs:
       - name: Check for known vulnerabilities with Safety (API scan for releases)
         run: |
           echo "Checking for known vulnerabilities in dependencies..."
-          uv run safety scan --output json --save-as safety-report.json || true
+          set +e
+          uv run safety scan --output json --save-as safety-report.json
+          SAFETY_EXIT_CODE=$?
+          set -e
+          
+          # Show output regardless of exit code
           uv run safety scan || true
 
           # Check if we should fail on issues
-          if [ "${{ inputs.fail-on-issues }}" = "true" ]; then
-            # Check exit code of safety scan
-            uv run safety scan || exit 1
+          if [ "${{ inputs.fail-on-issues }}" = "true" ] && [ $SAFETY_EXIT_CODE -ne 0 ]; then
+            exit 1
           fi
         continue-on-error: ${{ !inputs.fail-on-issues }}
 
@@ -193,9 +235,11 @@ jobs:
           echo ""
           echo "Security scan completed. Check artifacts for detailed reports."
 
-  # Security scan for CI/PRs and other tags (no API)
+  # Security scan for CI/PRs and other tags (beta, alpha, dev, etc.) - no API
   security-scan:
-    if: github.ref_type != 'tag' || (contains(github.ref_name, '-') && !contains(github.ref_name, '-rc'))
+    if: |
+      github.ref_type != 'tag' ||
+      (github.ref_type == 'tag' && contains(github.ref_name, '-') && !contains(github.ref_name, '-rc'))
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
