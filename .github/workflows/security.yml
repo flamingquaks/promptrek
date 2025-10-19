@@ -89,8 +89,11 @@ jobs:
           SAFETY_EXIT_CODE=$?
           set -e
           
-          # Show output regardless of exit code
-          uv run safety scan || true
+          # Display results from JSON output
+          if [ -f safety-report.json ]; then
+            echo "Safety scan completed. Results saved to safety-report.json"
+            cat safety-report.json | python -m json.tool || true
+          fi
 
           # Check if we should fail on issues
           if [ "${{ inputs.fail-on-issues }}" = "true" ] && [ $SAFETY_EXIT_CODE -ne 0 ]; then
@@ -195,8 +198,11 @@ jobs:
           SAFETY_EXIT_CODE=$?
           set -e
           
-          # Show output regardless of exit code
-          uv run safety scan || true
+          # Display results from JSON output
+          if [ -f safety-report.json ]; then
+            echo "Safety scan completed. Results saved to safety-report.json"
+            cat safety-report.json | python -m json.tool || true
+          fi
 
           # Check if we should fail on issues
           if [ "${{ inputs.fail-on-issues }}" = "true" ] && [ $SAFETY_EXIT_CODE -ne 0 ]; then
