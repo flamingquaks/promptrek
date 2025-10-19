@@ -91,11 +91,112 @@ jobs:
           retention-days: 30
           if-no-files-found: ignore
 
-  # Security scan for regular CI/PRs (no API)
-  security-scan:
-    if: github.ref_type != 'tag' || !contains(github.ref_name, '-rc')
+  # Security scan for release tags (vx.x.x without suffix) - uses API
+  security-scan-release:
+    if: github.ref_type == 'tag' && startsWith(github.ref_name, 'v') && !contains(github.ref_name, '-')
     runs-on: ubuntu-latest
     environment: safety
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+          enable-cache: true
+          cache-dependency-glob: "pyproject.toml"
+
+      - name: Set up Python ${{ inputs.python-version }}
+        run: uv python install ${{ inputs.python-version }}
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/uv
+            .venv
+          key: ${{ runner.os }}-uv-security-${{ inputs.python-version }}-${{ hashFiles('pyproject.toml', 'uv.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-uv-security-${{ inputs.python-version }}-
+            ${{ runner.os }}-uv-security-
+
+      - name: Install security tools
+        run: |
+          uv add --group dev bandit safety pip-audit
+          uv sync --group dev
+
+      - name: Run Bandit security linter
+        run: |
+          echo "Running Bandit security analysis..."
+
+          # Set severity level
+          if [ "${{ inputs.bandit-severity }}" = "high" ]; then
+            SEVERITY="-lll"
+          elif [ "${{ inputs.bandit-severity }}" = "medium" ]; then
+            SEVERITY="-ll"
+          else
+            SEVERITY="-l"
+          fi
+
+          # Run bandit and capture results
+          uv run bandit -r src/ ${SEVERITY} -f json -o bandit-report.json || true
+          uv run bandit -r src/ ${SEVERITY} || true
+
+      - name: Run pip-audit for dependency vulnerabilities
+        run: |
+          echo "Running pip-audit for dependency vulnerabilities..."
+          uv run pip-audit || true
+        continue-on-error: true
+
+      - name: Check for known vulnerabilities with Safety (API scan for releases)
+        run: |
+          echo "Checking for known vulnerabilities in dependencies..."
+          uv run safety scan --output json --save-as safety-report.json || true
+          uv run safety scan || true
+
+          # Check if we should fail on issues
+          if [ "${{ inputs.fail-on-issues }}" = "true" ]; then
+            # Check exit code of safety scan
+            uv run safety scan || exit 1
+          fi
+        continue-on-error: ${{ !inputs.fail-on-issues }}
+
+      - name: Upload security reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-reports-release-${{ github.run_id }}
+          path: |
+            bandit-report.json
+            safety-report.json
+          retention-days: 30
+          if-no-files-found: ignore
+
+      - name: Security scan summary
+        if: always()
+        run: |
+          echo "## Security Scan Summary"
+          echo ""
+
+          if [ -f bandit-report.json ]; then
+            BANDIT_ISSUES=$(python -c \
+              "import json; data = json.load(open('bandit-report.json')); print(len(data.get('results', [])))" \
+              2>/dev/null || echo "0")
+            echo "- Bandit: Found $BANDIT_ISSUES potential security issues"
+          fi
+
+          if [ -f safety-report.json ]; then
+            echo "- Safety: Vulnerability check completed"
+          fi
+
+          echo ""
+          echo "Security scan completed. Check artifacts for detailed reports."
+
+  # Security scan for CI/PRs and other tags (no API)
+  security-scan:
+    if: github.ref_type != 'tag' || (contains(github.ref_name, '-') && !contains(github.ref_name, '-rc'))
+    runs-on: ubuntu-latest
     continue-on-error: true
     steps:
       - uses: actions/checkout@v5
@@ -157,21 +258,6 @@ jobs:
             fi
           fi
 
-      - name: Check for known vulnerabilities with Safety (free scan)
-        if: github.ref_type == 'tag' && startsWith(github.ref_name, 'v') && !contains(github.ref_name, '-rc')
-        run: |
-          echo "Checking for known vulnerabilities in dependencies..."
-          # Use the new scan command
-          uv run safety scan --output json --save-as safety-report.json || true
-          uv run safety scan || true
-
-          # Check if we should fail on issues
-          if [ "${{ inputs.fail-on-issues }}" = "true" ]; then
-            # Check exit code of safety scan
-            uv run safety scan || exit 1
-          fi
-        continue-on-error: ${{ !inputs.fail-on-issues }}
-
       - name: Run pip-audit for dependency vulnerabilities
         run: |
           echo "Running pip-audit for dependency vulnerabilities..."
@@ -190,7 +276,6 @@ jobs:
           name: security-reports-${{ github.run_id }}
           path: |
             bandit-report.json
-            safety-report.json
           retention-days: 30
           if-no-files-found: ignore
 
@@ -205,10 +290,6 @@ jobs:
               "import json; data = json.load(open('bandit-report.json')); print(len(data.get('results', [])))" \
               2>/dev/null || echo "0")
             echo "- Bandit: Found $BANDIT_ISSUES potential security issues"
-          fi
-
-          if [ -f safety-report.json ]; then
-            echo "- Safety: Vulnerability check completed"
           fi
 
           echo ""
