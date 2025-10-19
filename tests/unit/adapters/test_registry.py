@@ -1,13 +1,13 @@
 """Unit tests for adapter registry."""
 
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 import pytest
 
 from promptrek.adapters.base import EditorAdapter
 from promptrek.adapters.registry import AdapterCapability, AdapterRegistry
-from promptrek.core.exceptions import AdapterNotFoundError
+from promptrek.core.exceptions import AdapterNotFoundError, ValidationError
 from promptrek.core.models import UniversalPrompt, UniversalPromptV2, UniversalPromptV3
 
 
@@ -19,18 +19,19 @@ class MockAdapter(EditorAdapter):
 
     def generate(
         self,
-        prompt: UniversalPrompt | UniversalPromptV2 | UniversalPromptV3,
+        prompt: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3],
         output_dir: Path,
         dry_run: bool = False,
         verbose: bool = False,
         variables: Optional[Dict[str, str]] = None,
+        headless: bool = False,
     ) -> List[Path]:
         """Mock generate method."""
         return []
 
     def validate(
-        self, prompt: UniversalPrompt | UniversalPromptV2 | UniversalPromptV3
-    ) -> List[str]:
+        self, prompt: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3]
+    ) -> List[ValidationError]:
         """Mock validate method."""
         return []
 
