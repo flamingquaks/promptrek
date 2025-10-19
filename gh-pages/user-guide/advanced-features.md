@@ -85,7 +85,6 @@ When `ignore_editor_files` is enabled (default), PrompTrek adds these patterns t
 - `.amazonq/rules/*.md`, `.amazonq/cli-agents/*.json`
 - `.assistant/rules/*.md`
 - `.kiro/steering/*.md`
-- `.tabnine_commands`
 - `.vscode/mcp.json`
 
 You can disable this with `ignore_editor_files: false` in your config.
@@ -422,7 +421,6 @@ When `ignore_editor_files` is enabled (default: true), these patterns are added 
 - **Amazon Q**: `.amazonq/rules/*.md`, `.amazonq/cli-agents/*.json`
 - **JetBrains**: `.assistant/rules/*.md`
 - **Kiro**: `.kiro/steering/*.md`
-- **Tabnine**: `.tabnine_commands`
 - **MCP Configs**: `.vscode/mcp.json`
 
 ### Sync Command Integration

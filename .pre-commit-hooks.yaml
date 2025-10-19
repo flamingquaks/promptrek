@@ -37,8 +37,6 @@
       ^\.cline-rules/.*$|
       # Kiro files
       ^\.kiro/.*$|
-      # Tabnine files
-      ^\.tabnine/.*$|
       # Amazon Q files
       ^\.amazonq/.*$|
       # JetBrains files

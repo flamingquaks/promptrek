@@ -282,3 +282,200 @@ content: |
             formatted = parser._format_validation_error(e, "test_source")
             assert "test_source" in formatted
             assert "Validation errors" in formatted
+
+    def test_v3_backward_compatibility_mcp_servers(self, tmp_path):
+        """Test v3 backward compatibility with nested plugins.mcp_servers."""
+        parser = UPFParser()
+
+        # Create v3 file with old nested structure
+        v3_old = tmp_path / "v3_old.promptrek.yaml"
+        v3_old.write_text(
+            """
+schema_version: "3.0.0"
+metadata:
+  title: "Test V3"
+  description: "Test with old nested plugins"
+  version: "1.0.0"
+content: |
+  # Test
+plugins:
+  mcp_servers:
+    - name: "test-server"
+      command: "npx test"
+"""
+        )
+
+        # Should parse and auto-promote mcp_servers to top-level
+        result = parser.parse_file(v3_old)
+        assert result.mcp_servers is not None
+        assert len(result.mcp_servers) == 1
+        assert result.mcp_servers[0].name == "test-server"
+
+    def test_merge_prompts_with_context(self, tmp_path):
+        """Test merging v1 prompts with context fields."""
+        parser = UPFParser()
+
+        file1 = tmp_path / "file1.promptrek.yaml"
+        file1.write_text(
+            """
+schema_version: "1.0.0"
+metadata:
+  title: "File 1"
+  description: "First file"
+  version: "1.0.0"
+targets:
+  - claude
+context:
+  project_type: "web_application"
+  technologies:
+    - "React"
+"""
+        )
+
+        file2 = tmp_path / "file2.promptrek.yaml"
+        file2.write_text(
+            """
+schema_version: "1.0.0"
+metadata:
+  title: "File 2"
+  description: "Second file"
+  version: "2.0.0"
+targets:
+  - cursor
+context:
+  project_type: "api"
+  technologies:
+    - "Node.js"
+    - "Express"
+"""
+        )
+
+        result = parser.parse_multiple_files([file1, file2])
+
+        # Context should be merged - project_type takes second, technologies combined
+        assert result.context.project_type == "api"
+        assert "React" in result.context.technologies
+        assert "Node.js" in result.context.technologies
+        assert "Express" in result.context.technologies
+
+    def test_merge_prompts_with_examples(self, tmp_path):
+        """Test merging v1 prompts with examples."""
+        parser = UPFParser()
+
+        file1 = tmp_path / "ex1.promptrek.yaml"
+        file1.write_text(
+            """
+schema_version: "1.0.0"
+metadata:
+  title: "File 1"
+  description: "First file"
+  version: "1.0.0"
+targets:
+  - claude
+examples:
+  example1: "const x = 1;"
+"""
+        )
+
+        file2 = tmp_path / "ex2.promptrek.yaml"
+        file2.write_text(
+            """
+schema_version: "1.0.0"
+metadata:
+  title: "File 2"
+  description: "Second file"
+  version: "1.0.0"
+targets:
+  - claude
+examples:
+  example2: "const y = 2;"
+"""
+        )
+
+        result = parser.parse_multiple_files([file1, file2])
+
+        # Examples should be merged
+        assert "example1" in result.examples
+        assert "example2" in result.examples
+
+    def test_merge_prompts_with_variables(self, tmp_path):
+        """Test merging v1 prompts with variables."""
+        parser = UPFParser()
+
+        file1 = tmp_path / "var1.promptrek.yaml"
+        file1.write_text(
+            """
+schema_version: "1.0.0"
+metadata:
+  title: "File 1"
+  description: "First file"
+  version: "1.0.0"
+targets:
+  - claude
+variables:
+  VAR1: "value1"
+"""
+        )
+
+        file2 = tmp_path / "var2.promptrek.yaml"
+        file2.write_text(
+            """
+schema_version: "1.0.0"
+metadata:
+  title: "File 2"
+  description: "Second file"
+  version: "1.0.0"
+targets:
+  - claude
+variables:
+  VAR2: "value2"
+"""
+        )
+
+        result = parser.parse_multiple_files([file1, file2])
+
+        # Variables should be merged
+        assert "VAR1" in result.variables
+        assert "VAR2" in result.variables
+
+    def test_merge_prompts_with_editor_specific(self, tmp_path):
+        """Test merging v1 prompts with editor_specific configs."""
+        parser = UPFParser()
+
+        file1 = tmp_path / "ed1.promptrek.yaml"
+        file1.write_text(
+            """
+schema_version: "1.0.0"
+metadata:
+  title: "File 1"
+  description: "First file"
+  version: "1.0.0"
+targets:
+  - claude
+editor_specific:
+  claude:
+    setting1: "value1"
+"""
+        )
+
+        file2 = tmp_path / "ed2.promptrek.yaml"
+        file2.write_text(
+            """
+schema_version: "1.0.0"
+metadata:
+  title: "File 2"
+  description: "Second file"
+  version: "1.0.0"
+targets:
+  - cursor
+editor_specific:
+  cursor:
+    setting2: "value2"
+"""
+        )
+
+        result = parser.parse_multiple_files([file1, file2])
+
+        # Editor-specific configs should be merged
+        assert "claude" in result.editor_specific
+        assert "cursor" in result.editor_specific

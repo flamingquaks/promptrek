@@ -48,7 +48,6 @@ class UPFValidator:
         "kiro",
         "cline",
         "windsurf",
-        "tabnine",
         "amazon-q",
         "jetbrains",
     }

@@ -9,7 +9,7 @@ from promptrek.cli.main import cli
 
 
 class TestAllAdaptersGenerate:
-    """Test generation for all 10 adapters."""
+    """Test generation for all 9 adapters."""
 
     @pytest.fixture
     def v2_prompt_file(self, tmp_path):
@@ -59,23 +59,6 @@ variables:
         result = runner.invoke(
             cli,
             ["generate", str(v2_prompt_file), "--editor", "kiro", "-o", str(tmp_path)],
-        )
-
-        assert result.exit_code == 0
-
-    def test_generate_tabnine(self, v2_prompt_file, tmp_path):
-        """Test Tabnine adapter generation."""
-        runner = CliRunner()
-        result = runner.invoke(
-            cli,
-            [
-                "generate",
-                str(v2_prompt_file),
-                "--editor",
-                "tabnine",
-                "-o",
-                str(tmp_path),
-            ],
         )
 
         assert result.exit_code == 0

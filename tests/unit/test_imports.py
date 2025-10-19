@@ -271,3 +271,111 @@ instructions:
         # Result should have security category
         assert result.instructions.security is not None
         assert len(result.instructions.security) == 1
+
+    def test_import_v2_file_error(self, processor, tmp_path):
+        """Test importing v2 file raises error."""
+        # Create a v2 format file
+        v2_file = tmp_path / "v2.promptrek.yaml"
+        v2_file.write_text(
+            """schema_version: 2.0.0
+metadata:
+  title: V2 File
+  description: V2 format
+content: |
+  # V2 Content
+  This is v2 format
+"""
+        )
+
+        # Create v1 file that tries to import v2
+        prompt = UniversalPrompt(
+            schema_version="1.0.0",
+            metadata=PromptMetadata(title="Main", description="Main"),
+            targets=["claude"],
+            imports=[ImportConfig(path="v2.promptrek.yaml")],
+        )
+
+        from promptrek.core.exceptions import UPFParsingError
+
+        with pytest.raises(UPFParsingError, match="Cannot import v2/v3"):
+            processor.process_imports(prompt, tmp_path)
+
+    def test_recursive_imports(self, processor, tmp_path):
+        """Test recursive import processing."""
+        # Create a chain: main -> level1 -> level2
+        level2 = tmp_path / "level2.promptrek.yaml"
+        level2.write_text(
+            """schema_version: 1.0.0
+metadata:
+  title: Level2
+  description: Level2
+targets:
+  - claude
+instructions:
+  general:
+    - Level2 instruction
+"""
+        )
+
+        level1 = tmp_path / "level1.promptrek.yaml"
+        level1.write_text(
+            """schema_version: 1.0.0
+metadata:
+  title: Level1
+  description: Level1
+targets:
+  - claude
+instructions:
+  general:
+    - Level1 instruction
+imports:
+  - path: level2.promptrek.yaml
+"""
+        )
+
+        # Main file imports level1
+        prompt = UniversalPrompt(
+            schema_version="1.0.0",
+            metadata=PromptMetadata(title="Main", description="Main"),
+            targets=["claude"],
+            instructions=Instructions(general=["Main instruction"]),
+            imports=[ImportConfig(path="level1.promptrek.yaml")],
+        )
+
+        result = processor.process_imports(prompt, tmp_path)
+
+        # Should have all three levels merged
+        assert len(result.instructions.general) == 3
+
+    def test_import_creates_empty_instruction_category(self, processor, tmp_path):
+        """Test that importing creates empty category when base has None."""
+        # Create an imported file
+        imported_file = tmp_path / "imported.promptrek.yaml"
+        imported_file.write_text(
+            """schema_version: 1.0.0
+metadata:
+  title: Imported
+  description: Imported prompt
+targets:
+  - claude
+instructions:
+  testing:
+    - Imported test instruction
+"""
+        )
+
+        # Create main prompt with instructions but testing = None
+        prompt = UniversalPrompt(
+            schema_version="1.0.0",
+            metadata=PromptMetadata(title="Main", description="Main"),
+            targets=["claude"],
+            instructions=Instructions(general=["Main"]),
+            imports=[ImportConfig(path="imported.promptrek.yaml")],
+        )
+
+        result = processor.process_imports(prompt, tmp_path)
+
+        # Should have both general and testing instructions
+        assert len(result.instructions.general) == 1
+        assert result.instructions.testing is not None
+        assert len(result.instructions.testing) == 1

@@ -557,3 +557,134 @@ class TestInstructionsEdgeCases:
         assert inst.general == ["Test"]
         assert inst.code_style is None
         assert inst.architecture == []
+
+
+class TestModelValidationErrors:
+    """Test model validation error paths for coverage."""
+
+    def test_v2_empty_content_validation(self):
+        """Test V2 empty content validation error."""
+        with pytest.raises(ValidationError, match="Content cannot be empty"):
+            UniversalPromptV2(
+                schema_version="2.0.0",
+                metadata=PromptMetadata(title="Test", description="Test"),
+                content="",  # Empty content
+            )
+
+    def test_v2_wrong_schema_version(self):
+        """Test V2 schema version validation."""
+        with pytest.raises(ValidationError, match="Schema version must be in format"):
+            UniversalPromptV2(
+                schema_version="invalid",  # Invalid format
+                metadata=PromptMetadata(title="Test", description="Test"),
+                content="# Test",
+            )
+
+    def test_v3_wrong_schema_version(self):
+        """Test V3 schema version validation."""
+        from promptrek.core.models import UniversalPromptV3
+
+        with pytest.raises(ValidationError, match="Schema version must be in format"):
+            UniversalPromptV3(
+                schema_version="invalid",  # Invalid format
+                metadata=PromptMetadata(title="Test", description="Test"),
+                content="# Test",
+            )
+
+    def test_v3_wrong_major_version(self):
+        """Test V3 requires 3.x.x version."""
+        from promptrek.core.models import UniversalPromptV3
+
+        with pytest.raises(
+            ValidationError, match="UniversalPromptV3 requires schema version 3"
+        ):
+            UniversalPromptV3(
+                schema_version="2.0.0",  # Wrong major version
+                metadata=PromptMetadata(title="Test", description="Test"),
+                content="# Test",
+            )
+
+    def test_v3_empty_content(self):
+        """Test V3 empty content validation."""
+        from promptrek.core.models import UniversalPromptV3
+
+        with pytest.raises(ValidationError, match="Content cannot be empty"):
+            UniversalPromptV3(
+                schema_version="3.0.0",
+                metadata=PromptMetadata(title="Test", description="Test"),
+                content="",  # Empty content
+            )
+
+    def test_plugin_source_github_wrong_source(self):
+        """Test GitHub plugin source with wrong source value."""
+        from promptrek.core.models import PluginSourceGitHub
+
+        with pytest.raises(ValidationError, match="GitHub source must have source"):
+            PluginSourceGitHub(
+                source="url",  # Wrong source type
+                repo="owner/repo",
+            )
+
+    def test_plugin_source_url_wrong_source(self):
+        """Test URL plugin source with wrong source value."""
+        from promptrek.core.models import PluginSourceURL
+
+        with pytest.raises(ValidationError, match="URL source must have source"):
+            PluginSourceURL(
+                source="github",  # Wrong source type
+                url="https://github.com/test/repo",
+            )
+
+    def test_plugin_entry_invalid_name(self):
+        """Test plugin entry with invalid kebab-case name."""
+        from promptrek.core.models import PluginEntry
+
+        with pytest.raises(ValidationError, match="Plugin name must be kebab-case"):
+            PluginEntry(
+                name="Invalid_Name",  # Not kebab-case
+                source="path/to/plugin",
+            )
+
+    def test_marketplace_config_invalid_name(self):
+        """Test marketplace config with invalid kebab-case name."""
+        from promptrek.core.models import MarketplaceConfig, MarketplaceOwner
+
+        with pytest.raises(
+            ValidationError, match="Marketplace name must be kebab-case"
+        ):
+            MarketplaceConfig(
+                name="Invalid_Name",  # Not kebab-case
+                owner=MarketplaceOwner(name="Test"),
+            )
+
+    def test_plugin_source_github_valid(self):
+        """Test valid GitHub plugin source."""
+        from promptrek.core.models import PluginSourceGitHub
+
+        source = PluginSourceGitHub(source="github", repo="owner/repo")
+        assert source.source == "github"
+        assert source.repo == "owner/repo"
+
+    def test_plugin_source_url_valid(self):
+        """Test valid URL plugin source."""
+        from promptrek.core.models import PluginSourceURL
+
+        source = PluginSourceURL(source="url", url="https://example.com/repo.git")
+        assert source.source == "url"
+        assert source.url == "https://example.com/repo.git"
+
+    def test_plugin_entry_valid_name(self):
+        """Test plugin entry with valid kebab-case name."""
+        from promptrek.core.models import PluginEntry
+
+        entry = PluginEntry(name="my-plugin", source="path/to/plugin")
+        assert entry.name == "my-plugin"
+
+    def test_marketplace_config_valid_name(self):
+        """Test marketplace config with valid kebab-case name."""
+        from promptrek.core.models import MarketplaceConfig, MarketplaceOwner
+
+        config = MarketplaceConfig(
+            name="my-marketplace", owner=MarketplaceOwner(name="Test")
+        )
+        assert config.name == "my-marketplace"
