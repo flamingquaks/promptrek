@@ -173,7 +173,9 @@ def generate_plugins_command(
     # Check if any plugins are configured
     has_plugins = False
     if isinstance(prompt, UniversalPromptV3):
-        has_plugins = any([prompt.mcp_servers, prompt.commands, prompt.agents, prompt.hooks])
+        has_plugins = any(
+            [prompt.mcp_servers, prompt.commands, prompt.agents, prompt.hooks]
+        )
     elif isinstance(prompt, UniversalPromptV2):
         has_plugins = prompt.plugins is not None
 

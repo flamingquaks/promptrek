@@ -245,19 +245,9 @@ class UPFParser:
                 if "hooks" in old_plugins and "hooks" not in data_copy:
                     data_copy["hooks"] = old_plugins["hooks"]
 
-                # Remove plugins field or convert marketplace_metadata
-                # If plugins only had the promoted fields, remove it
-                remaining_plugins = {
-                    k: v
-                    for k, v in old_plugins.items()
-                    if k not in ["mcp_servers", "commands", "agents", "hooks"]
-                }
-                if remaining_plugins:
-                    # Keep remaining fields (like marketplace_metadata)
-                    data_copy["plugins"] = remaining_plugins
-                else:
-                    # Remove empty plugins field
-                    data_copy.pop("plugins", None)
+                # Remove plugins field entirely
+                # All supported fields have been promoted to top-level
+                data_copy.pop("plugins", None)
 
                 return data_copy
 

@@ -413,14 +413,6 @@ plugins:
       requires_reapproval: boolean # Whether hook requires reapproval (optional)
       description: string          # Hook description (optional)
       trust_metadata: {}           # Trust metadata (optional)
-
-  # Marketplace metadata
-  marketplace_metadata:
-    plugin_id: string              # Unique plugin identifier (optional)
-    marketplace_url: string        # URL to marketplace listing (optional)
-    rating: number                 # User rating 0-5 (optional)
-    downloads: number              # Number of downloads (optional)
-    last_updated: string           # Last update date (optional)
 ```
 
 ### v2.1 Plugin Examples

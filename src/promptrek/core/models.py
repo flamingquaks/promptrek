@@ -267,22 +267,6 @@ class Hook(BaseModel):
     )
 
 
-class MarketplaceMetadata(BaseModel):
-    """Metadata for plugin marketplace listings (v2.1 - deprecated in v3.0)."""
-
-    plugin_id: Optional[str] = Field(
-        default=None, description="Unique plugin identifier"
-    )
-    marketplace_url: Optional[str] = Field(
-        default=None, description="URL to marketplace listing"
-    )
-    rating: Optional[float] = Field(default=None, description="User rating (0-5)")
-    downloads: Optional[int] = Field(default=None, description="Number of downloads")
-    last_updated: Optional[str] = Field(
-        default=None, description="Last update date (ISO 8601)"
-    )
-
-
 class PluginConfig(BaseModel):
     """Container for all plugin configurations (v2.1.0+)."""
 
@@ -296,9 +280,6 @@ class PluginConfig(BaseModel):
         default=None, description="Agent configurations"
     )
     hooks: Optional[List[Hook]] = Field(default=None, description="Hook configurations")
-    marketplace_metadata: Optional[MarketplaceMetadata] = Field(
-        default=None, description="Plugin marketplace metadata"
-    )
 
     model_config = ConfigDict(extra="forbid")
 
