@@ -353,78 +353,6 @@
       "title": "MCPServer",
       "type": "object"
     },
-    "MarketplaceMetadata": {
-      "description": "Metadata for plugin marketplace listings (v2.1 - deprecated in v3.0).",
-      "properties": {
-        "plugin_id": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Unique plugin identifier",
-          "title": "Plugin Id"
-        },
-        "marketplace_url": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "URL to marketplace listing",
-          "title": "Marketplace Url"
-        },
-        "rating": {
-          "anyOf": [
-            {
-              "type": "number"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "User rating (0-5)",
-          "title": "Rating"
-        },
-        "downloads": {
-          "anyOf": [
-            {
-              "type": "integer"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Number of downloads",
-          "title": "Downloads"
-        },
-        "last_updated": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Last update date (ISO 8601)",
-          "title": "Last Updated"
-        }
-      },
-      "title": "MarketplaceMetadata",
-      "type": "object"
-    },
     "PluginConfig": {
       "additionalProperties": false,
       "description": "Container for all plugin configurations (v2.1.0+).",
@@ -492,18 +420,6 @@
           "default": null,
           "description": "Hook configurations",
           "title": "Hooks"
-        },
-        "marketplace_metadata": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/MarketplaceMetadata"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Plugin marketplace metadata"
         }
       },
       "title": "PluginConfig",
