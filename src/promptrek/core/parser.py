@@ -336,13 +336,13 @@ class UPFParser:
 
         # Merge metadata - additional takes precedence for most fields
         if additional_dict.get("metadata"):
-            if "metadata" not in base_dict:
+            if "metadata" not in base_dict or base_dict["metadata"] is None:
                 base_dict["metadata"] = {}
             base_dict["metadata"].update(additional_dict["metadata"])
 
         # Merge context - combine lists, additional takes precedence for simple fields
         if additional_dict.get("context"):
-            if "context" not in base_dict:
+            if "context" not in base_dict or base_dict["context"] is None:
                 base_dict["context"] = {}
 
             context = base_dict["context"]
@@ -363,7 +363,7 @@ class UPFParser:
 
         # Merge instructions - combine lists
         if additional_dict.get("instructions"):
-            if "instructions" not in base_dict:
+            if "instructions" not in base_dict or base_dict["instructions"] is None:
                 base_dict["instructions"] = {}
 
             instructions = base_dict["instructions"]
@@ -376,13 +376,13 @@ class UPFParser:
 
         # Merge examples - additional takes precedence for conflicts
         if additional_dict.get("examples"):
-            if "examples" not in base_dict:
+            if "examples" not in base_dict or base_dict["examples"] is None:
                 base_dict["examples"] = {}
             base_dict["examples"].update(additional_dict["examples"])
 
         # Merge variables - additional takes precedence for conflicts
         if additional_dict.get("variables"):
-            if "variables" not in base_dict:
+            if "variables" not in base_dict or base_dict["variables"] is None:
                 base_dict["variables"] = {}
             base_dict["variables"].update(additional_dict["variables"])
 
@@ -401,7 +401,10 @@ class UPFParser:
 
         # Merge editor_specific - additional takes precedence for conflicts
         if additional_dict.get("editor_specific"):
-            if "editor_specific" not in base_dict:
+            if (
+                "editor_specific" not in base_dict
+                or base_dict["editor_specific"] is None
+            ):
                 base_dict["editor_specific"] = {}
             base_dict["editor_specific"].update(additional_dict["editor_specific"])
 

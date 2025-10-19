@@ -281,6 +281,349 @@ class TestUPFParser:
         assert "editor1" in merged.targets
         assert "editor2" in merged.targets
 
+    def test_merge_prompts_without_base_metadata(self):
+        """Test merging when base prompt has no metadata."""
+        from promptrek.core.models import UniversalPrompt
+
+        # Base with no metadata
+        base_data = {
+            "schema_version": "1.0.0",
+            "metadata": {
+                "title": "Base",
+                "description": "Base",
+                "version": "1.0",
+                "author": "Test",
+            },
+            "targets": ["editor1"],
+        }
+        base_prompt = UniversalPrompt(**base_data)
+
+        # Additional with metadata
+        additional_data = {
+            "schema_version": "1.0.0",
+            "metadata": {
+                "title": "Additional",
+                "description": "Additional",
+                "version": "1.0",
+                "author": "Test",
+            },
+            "targets": ["editor2"],
+        }
+        additional_prompt = UniversalPrompt(**additional_data)
+
+        parser = UPFParser()
+        merged = parser._merge_prompts(base_prompt, additional_prompt)
+
+        assert merged.metadata.title == "Additional"
+
+    def test_merge_prompts_with_instructions_null_fields(self):
+        """Test merging when instructions exist but some fields are None."""
+        from promptrek.core.models import UniversalPrompt
+
+        base_data = {
+            "schema_version": "1.0.0",
+            "metadata": {
+                "title": "Base",
+                "description": "Base",
+                "version": "1.0",
+                "author": "Test",
+            },
+            "instructions": {
+                "general": ["Base rule"],
+            },
+            "targets": ["editor1"],
+        }
+        base_prompt = UniversalPrompt(**base_data)
+
+        additional_data = {
+            "schema_version": "1.0.0",
+            "metadata": {
+                "title": "Additional",
+                "description": "Additional",
+                "version": "1.0",
+                "author": "Test",
+            },
+            "instructions": {
+                "general": ["Additional rule"],
+                "testing": ["Test rule"],
+            },
+            "targets": ["editor2"],
+        }
+        additional_prompt = UniversalPrompt(**additional_data)
+
+        parser = UPFParser()
+        merged = parser._merge_prompts(base_prompt, additional_prompt)
+
+        assert len(merged.instructions.general) == 2
+        assert "Base rule" in merged.instructions.general
+        assert "Additional rule" in merged.instructions.general
+        assert merged.instructions.testing == ["Test rule"]
+
+    def test_merge_prompts_with_variables_merge(self):
+        """Test merging variables when base has existing variables."""
+        from promptrek.core.models import UniversalPrompt
+
+        base_data = {
+            "schema_version": "1.0.0",
+            "metadata": {
+                "title": "Base",
+                "description": "Base",
+                "version": "1.0",
+                "author": "Test",
+            },
+            "variables": {
+                "VAR1": "value1",
+                "VAR2": "value2",
+            },
+            "targets": ["editor1"],
+        }
+        base_prompt = UniversalPrompt(**base_data)
+
+        additional_data = {
+            "schema_version": "1.0.0",
+            "metadata": {
+                "title": "Additional",
+                "description": "Additional",
+                "version": "1.0",
+                "author": "Test",
+            },
+            "variables": {
+                "VAR2": "updated2",  # Override
+                "VAR3": "value3",  # New
+            },
+            "targets": ["editor2"],
+        }
+        additional_prompt = UniversalPrompt(**additional_data)
+
+        parser = UPFParser()
+        merged = parser._merge_prompts(base_prompt, additional_prompt)
+
+        assert merged.variables is not None
+        assert merged.variables["VAR1"] == "value1"  # From base
+        assert merged.variables["VAR2"] == "updated2"  # Override from additional
+        assert merged.variables["VAR3"] == "value3"  # From additional
+
+    def test_merge_prompts_with_examples_merge(self):
+        """Test merging examples when base has existing examples."""
+        from promptrek.core.models import UniversalPrompt
+
+        base_data = {
+            "schema_version": "1.0.0",
+            "metadata": {
+                "title": "Base",
+                "description": "Base",
+                "version": "1.0",
+                "author": "Test",
+            },
+            "examples": {
+                "python": "def example(): pass",
+                "javascript": "function example() {}",
+            },
+            "targets": ["editor1"],
+        }
+        base_prompt = UniversalPrompt(**base_data)
+
+        additional_data = {
+            "schema_version": "1.0.0",
+            "metadata": {
+                "title": "Additional",
+                "description": "Additional",
+                "version": "1.0",
+                "author": "Test",
+            },
+            "examples": {
+                "javascript": "function updated() {}",  # Override
+                "typescript": "function example(): void {}",  # New
+            },
+            "targets": ["editor2"],
+        }
+        additional_prompt = UniversalPrompt(**additional_data)
+
+        parser = UPFParser()
+        merged = parser._merge_prompts(base_prompt, additional_prompt)
+
+        assert merged.examples is not None
+        assert merged.examples["python"] == "def example(): pass"  # From base
+        assert merged.examples["javascript"] == "function updated() {}"  # Override
+        assert merged.examples["typescript"] == "function example(): void {}"  # New
+
+    def test_merge_prompts_with_imports(self):
+        """Test merging imports lists."""
+        from promptrek.core.models import UniversalPrompt
+
+        base_data = {
+            "schema_version": "1.0.0",
+            "metadata": {
+                "title": "Base",
+                "description": "Base",
+                "version": "1.0",
+                "author": "Test",
+            },
+            "imports": [{"path": "base.promptrek.yaml"}],
+            "targets": ["editor1"],
+        }
+        base_prompt = UniversalPrompt(**base_data)
+
+        additional_data = {
+            "schema_version": "1.0.0",
+            "metadata": {
+                "title": "Additional",
+                "description": "Additional",
+                "version": "1.0",
+                "author": "Test",
+            },
+            "imports": [{"path": "additional.promptrek.yaml"}],
+            "targets": ["editor2"],
+        }
+        additional_prompt = UniversalPrompt(**additional_data)
+
+        parser = UPFParser()
+        merged = parser._merge_prompts(base_prompt, additional_prompt)
+
+        assert merged.imports is not None
+        assert len(merged.imports) == 2
+
+    def test_merge_prompts_with_editor_specific(self):
+        """Test merging editor_specific configurations."""
+        from promptrek.core.models import UniversalPrompt
+
+        base_data = {
+            "schema_version": "1.0.0",
+            "metadata": {
+                "title": "Base",
+                "description": "Base",
+                "version": "1.0",
+                "author": "Test",
+            },
+            "editor_specific": {
+                "claude": {"additional_instructions": ["Claude rule 1"]},
+            },
+            "targets": ["editor1"],
+        }
+        base_prompt = UniversalPrompt(**base_data)
+
+        additional_data = {
+            "schema_version": "1.0.0",
+            "metadata": {
+                "title": "Additional",
+                "description": "Additional",
+                "version": "1.0",
+                "author": "Test",
+            },
+            "editor_specific": {
+                "cursor": {"additional_instructions": ["Cursor rule 1"]},
+                "claude": {"additional_instructions": ["Claude rule 2"]},  # Override
+            },
+            "targets": ["editor2"],
+        }
+        additional_prompt = UniversalPrompt(**additional_data)
+
+        parser = UPFParser()
+        merged = parser._merge_prompts(base_prompt, additional_prompt)
+
+        assert merged.editor_specific is not None
+        assert "cursor" in merged.editor_specific
+        assert "claude" in merged.editor_specific
+        # Additional should override
+        assert merged.editor_specific["claude"].additional_instructions == [
+            "Claude rule 2"
+        ]
+
+    def test_merge_prompts_context_technologies_combine(self):
+        """Test merging when both have context with technologies."""
+        from promptrek.core.models import UniversalPrompt
+
+        base_data = {
+            "schema_version": "1.0.0",
+            "metadata": {
+                "title": "Base",
+                "description": "Base",
+                "version": "1.0",
+                "author": "Test",
+            },
+            "context": {
+                "project_type": "web",
+                "technologies": ["python", "javascript"],
+            },
+            "targets": ["editor1"],
+        }
+        base_prompt = UniversalPrompt(**base_data)
+
+        additional_data = {
+            "schema_version": "1.0.0",
+            "metadata": {
+                "title": "Additional",
+                "description": "Additional",
+                "version": "1.0",
+                "author": "Test",
+            },
+            "context": {
+                "description": "Full stack web app",
+                "technologies": ["javascript", "typescript"],  # Overlap + new
+            },
+            "targets": ["editor2"],
+        }
+        additional_prompt = UniversalPrompt(**additional_data)
+
+        parser = UPFParser()
+        merged = parser._merge_prompts(base_prompt, additional_prompt)
+
+        assert merged.context is not None
+        assert merged.context.project_type == "web"  # From base
+        assert merged.context.description == "Full stack web app"  # From additional
+        # Technologies should be combined and deduplicated
+        assert "python" in merged.context.technologies
+        assert "javascript" in merged.context.technologies
+        assert "typescript" in merged.context.technologies
+        # Check deduplication (javascript appears in both)
+        assert merged.context.technologies.count("javascript") == 1
+
+    def test_merge_prompts_instructions_all_categories(self):
+        """Test merging instructions with all categories."""
+        from promptrek.core.models import UniversalPrompt
+
+        base_data = {
+            "schema_version": "1.0.0",
+            "metadata": {
+                "title": "Base",
+                "description": "Base",
+                "version": "1.0",
+                "author": "Test",
+            },
+            "instructions": {
+                "general": ["General 1"],
+                "code_style": ["Style 1"],
+            },
+            "targets": ["editor1"],
+        }
+        base_prompt = UniversalPrompt(**base_data)
+
+        additional_data = {
+            "schema_version": "1.0.0",
+            "metadata": {
+                "title": "Additional",
+                "description": "Additional",
+                "version": "1.0",
+                "author": "Test",
+            },
+            "instructions": {
+                "general": ["General 2"],
+                "testing": ["Test 1"],
+            },
+            "targets": ["editor2"],
+        }
+        additional_prompt = UniversalPrompt(**additional_data)
+
+        parser = UPFParser()
+        merged = parser._merge_prompts(base_prompt, additional_prompt)
+
+        assert merged.instructions is not None
+        assert len(merged.instructions.general) == 2
+        assert "General 1" in merged.instructions.general
+        assert "General 2" in merged.instructions.general
+        assert merged.instructions.code_style == ["Style 1"]
+        assert merged.instructions.testing == ["Test 1"]
+
 
 class TestUPFParserV2:
     """Test UPFParser functionality for v2 schema."""
@@ -929,9 +1272,7 @@ class TestUPFParserV3:
                         "system_prompt": "Test",
                     }
                 ],
-                "hooks": [
-                    {"name": "hook1", "event": "pre-commit", "command": "test"}
-                ],
+                "hooks": [{"name": "hook1", "event": "pre-commit", "command": "test"}],
             },
         }
         file_path = tmp_path / "v3-partial.promptrek.yaml"
@@ -951,3 +1292,181 @@ class TestUPFParserV3:
         assert len(prompt.hooks) == 1
         assert prompt.mcp_servers is None  # Not provided
         assert prompt.commands is None  # Not provided
+
+    def test_merge_prompts_with_none_metadata(self):
+        """Test merging when base has metadata=None."""
+        from promptrek.core.models import PromptMetadata, UniversalPrompt
+
+        # Base with metadata=None
+        base = UniversalPrompt.model_construct(
+            schema_version="1.0.0",
+            metadata=None,
+            targets=["claude"],
+        )
+
+        # Additional with metadata
+        additional = UniversalPrompt(
+            schema_version="1.0.0",
+            metadata=PromptMetadata(
+                title="Additional", description="Additional", version="1.0.0"
+            ),
+            targets=["claude"],
+        )
+
+        parser = UPFParser()
+        merged = parser._merge_prompts(base, additional)
+
+        assert merged.metadata is not None
+        assert merged.metadata.title == "Additional"
+
+    def test_merge_prompts_with_none_context(self):
+        """Test merging when base has context=None."""
+        from promptrek.core.models import (
+            ProjectContext,
+            PromptMetadata,
+            UniversalPrompt,
+        )
+
+        # Base without context
+        base = UniversalPrompt(
+            schema_version="1.0.0",
+            metadata=PromptMetadata(title="Base", description="Base", version="1.0.0"),
+            targets=["claude"],
+        )
+
+        # Additional with context
+        additional = UniversalPrompt(
+            schema_version="1.0.0",
+            metadata=PromptMetadata(
+                title="Additional", description="Additional", version="1.0.0"
+            ),
+            targets=["claude"],
+            context=ProjectContext(project_type="web_application"),
+        )
+
+        parser = UPFParser()
+        merged = parser._merge_prompts(base, additional)
+
+        assert merged.context is not None
+        assert merged.context.project_type == "web_application"
+
+    def test_merge_prompts_with_none_instructions(self):
+        """Test merging when base has instructions=None."""
+        from promptrek.core.models import (
+            Instructions,
+            PromptMetadata,
+            UniversalPrompt,
+        )
+
+        # Base without instructions
+        base = UniversalPrompt(
+            schema_version="1.0.0",
+            metadata=PromptMetadata(title="Base", description="Base", version="1.0.0"),
+            targets=["claude"],
+        )
+
+        # Additional with instructions
+        additional = UniversalPrompt(
+            schema_version="1.0.0",
+            metadata=PromptMetadata(
+                title="Additional", description="Additional", version="1.0.0"
+            ),
+            targets=["claude"],
+            instructions=Instructions(general=["Test instruction"]),
+        )
+
+        parser = UPFParser()
+        merged = parser._merge_prompts(base, additional)
+
+        assert merged.instructions is not None
+        assert merged.instructions.general is not None
+        assert len(merged.instructions.general) == 1
+
+    def test_merge_prompts_with_none_examples(self):
+        """Test merging when base has examples=None."""
+        from promptrek.core.models import PromptMetadata, UniversalPrompt
+
+        # Base without examples
+        base = UniversalPrompt(
+            schema_version="1.0.0",
+            metadata=PromptMetadata(title="Base", description="Base", version="1.0.0"),
+            targets=["claude"],
+        )
+
+        # Additional with examples
+        additional = UniversalPrompt(
+            schema_version="1.0.0",
+            metadata=PromptMetadata(
+                title="Additional", description="Additional", version="1.0.0"
+            ),
+            targets=["claude"],
+            examples={"example1": "code example"},
+        )
+
+        parser = UPFParser()
+        merged = parser._merge_prompts(base, additional)
+
+        assert merged.examples is not None
+        assert "example1" in merged.examples
+
+    def test_merge_prompts_with_none_variables(self):
+        """Test merging when base has variables=None."""
+        from promptrek.core.models import PromptMetadata, UniversalPrompt
+
+        # Base without variables
+        base = UniversalPrompt(
+            schema_version="1.0.0",
+            metadata=PromptMetadata(title="Base", description="Base", version="1.0.0"),
+            targets=["claude"],
+        )
+
+        # Additional with variables
+        additional = UniversalPrompt(
+            schema_version="1.0.0",
+            metadata=PromptMetadata(
+                title="Additional", description="Additional", version="1.0.0"
+            ),
+            targets=["claude"],
+            variables={"VAR1": "value1"},
+        )
+
+        parser = UPFParser()
+        merged = parser._merge_prompts(base, additional)
+
+        assert merged.variables is not None
+        assert "VAR1" in merged.variables
+
+    def test_merge_prompts_with_none_editor_specific(self):
+        """Test merging when base has editor_specific=None."""
+        from promptrek.core.models import (
+            EditorSpecificConfig,
+            PromptMetadata,
+            UniversalPrompt,
+        )
+
+        # Base without editor_specific
+        base = UniversalPrompt(
+            schema_version="1.0.0",
+            metadata=PromptMetadata(title="Base", description="Base", version="1.0.0"),
+            targets=["claude"],
+        )
+
+        # Additional with editor_specific
+        additional = UniversalPrompt(
+            schema_version="1.0.0",
+            metadata=PromptMetadata(
+                title="Additional", description="Additional", version="1.0.0"
+            ),
+            targets=["claude"],
+            editor_specific={
+                "claude": EditorSpecificConfig(
+                    additional_instructions=["Claude-specific"]
+                )
+            },
+        )
+
+        parser = UPFParser()
+        merged = parser._merge_prompts(base, additional)
+
+        assert merged.editor_specific is not None
+        assert "claude" in merged.editor_specific
