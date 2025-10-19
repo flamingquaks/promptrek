@@ -58,12 +58,12 @@ def write_promptrek_yaml(data: Dict[str, Any], output_path: Path) -> None:
         schema_url = "https://promptrek.ai/schema/v2.0.json"
     else:
         schema_url = None  # v1.x or unknown versions don't have schema
-    
+
     with open(output_path, "w", encoding="utf-8") as f:
         # Write schema comment if applicable
         if schema_url:
             f.write(f"# yaml-language-server: $schema={schema_url}\n")
-        
+
         yaml.dump(
             data,
             f,
