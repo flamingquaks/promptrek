@@ -17,7 +17,7 @@ This page provides JSON Schema files for the Universal Prompt Format (UPF) used 
 
 Latest stable schema with top-level plugin fields and plugin marketplace support.
 
-- **Schema URL**: [`https://flamingquaks.github.io/promptrek/schema/v3.0.json`](v3.0.json)
+- **Schema URL**: [`https://promptrek.ai/schema/v3.0.json`](v3.0.json)
 - **Features**:
   - Top-level plugin fields: `mcp_servers`, `commands`, `agents`, `hooks`
   - Plugin marketplace support via `plugins` field
@@ -35,7 +35,7 @@ Latest stable schema with top-level plugin fields and plugin marketplace support
 
 Legacy schema with nested plugin structure.
 
-- **Schema URL**: [`https://flamingquaks.github.io/promptrek/schema/v2.1.json`](v2.1.json)
+- **Schema URL**: [`https://promptrek.ai/schema/v2.1.json`](v2.1.json)
 - **Features**:
   - Nested plugin structure: `plugins.mcp_servers`, `plugins.commands`, etc.
   - Markdown-first content approach
@@ -52,7 +52,7 @@ Legacy schema with nested plugin structure.
 
 Simplified markdown-first schema without plugin support.
 
-- **Schema URL**: [`https://flamingquaks.github.io/promptrek/schema/v2.0.json`](v2.0.json)
+- **Schema URL**: [`https://promptrek.ai/schema/v2.0.json`](v2.0.json)
 - **Features**:
   - Markdown-first content approach
   - No plugin support
@@ -69,7 +69,7 @@ Simplified markdown-first schema without plugin support.
 Add a schema reference at the top of your `project.promptrek.yaml`:
 
 ```yaml
-# yaml-language-server: $schema=https://flamingquaks.github.io/promptrek/schema/v3.0.json
+# yaml-language-server: $schema=https://promptrek.ai/schema/v3.0.json
 schema_version: 3.0.0
 metadata:
   title: My Project
@@ -83,7 +83,7 @@ content: |
 1. Go to **Settings** → **Languages & Frameworks** → **Schemas and DTDs** → **JSON Schema Mappings**
 2. Add a new mapping:
    - **Name**: PrompTrek UPF v3.0
-   - **Schema file or URL**: `https://flamingquaks.github.io/promptrek/schema/v3.0.json`
+   - **Schema file or URL**: `https://promptrek.ai/schema/v3.0.json`
    - **File path pattern**: `*.promptrek.yaml`
 
 ## Programmatic Validation
