@@ -848,3 +848,106 @@ class TestUPFParserV3:
             assert len(prompt.commands) == 1
         finally:
             sys.stderr = old_stderr
+
+    def test_parse_v3_with_all_nested_plugins_backward_compat(self, tmp_path):
+        """Test parsing v3 with all plugin types in nested structure."""
+        import sys
+        from io import StringIO
+
+        import yaml
+
+        v3_data = {
+            "schema_version": "3.0.0",
+            "metadata": {
+                "title": "V3 Full Legacy",
+                "description": "Test",
+                "version": "1.0.0",
+            },
+            "content": "# Content",
+            "plugins": {
+                "mcp_servers": [{"name": "test-mcp", "command": "node"}],
+                "commands": [
+                    {"name": "test-cmd", "description": "Test", "prompt": "Test"}
+                ],
+                "agents": [
+                    {
+                        "name": "test-agent",
+                        "description": "Test Agent",
+                        "system_prompt": "You are a test",
+                    }
+                ],
+                "hooks": [
+                    {"name": "test-hook", "event": "pre-commit", "command": "pytest"}
+                ],
+            },
+        }
+        file_path = tmp_path / "v3-full-legacy.promptrek.yaml"
+        file_path.write_text(yaml.dump(v3_data))
+
+        from promptrek.core.models import UniversalPromptV3
+        from promptrek.core.parser import UPFParser
+
+        # Capture stderr to check for deprecation warning
+        old_stderr = sys.stderr
+        sys.stderr = StringIO()
+
+        try:
+            parser = UPFParser()
+            prompt = parser.parse_file(file_path)
+
+            # Check that all fields were auto-promoted
+            assert isinstance(prompt, UniversalPromptV3)
+            assert prompt.mcp_servers is not None
+            assert len(prompt.mcp_servers) == 1
+            assert prompt.commands is not None
+            assert len(prompt.commands) == 1
+            assert prompt.agents is not None
+            assert len(prompt.agents) == 1
+            assert prompt.hooks is not None
+            assert len(prompt.hooks) == 1
+        finally:
+            sys.stderr = old_stderr
+
+    def test_parse_v3_with_partial_nested_plugins(self, tmp_path):
+        """Test parsing v3 with only some nested plugin fields."""
+        import yaml
+
+        # Test case where only agents and hooks are nested
+        v3_data = {
+            "schema_version": "3.0.0",
+            "metadata": {
+                "title": "Partial",
+                "description": "Test",
+                "version": "1.0.0",
+            },
+            "content": "# Content",
+            "plugins": {
+                "agents": [
+                    {
+                        "name": "agent1",
+                        "description": "Test",
+                        "system_prompt": "Test",
+                    }
+                ],
+                "hooks": [
+                    {"name": "hook1", "event": "pre-commit", "command": "test"}
+                ],
+            },
+        }
+        file_path = tmp_path / "v3-partial.promptrek.yaml"
+        file_path.write_text(yaml.dump(v3_data))
+
+        from promptrek.core.models import UniversalPromptV3
+        from promptrek.core.parser import UPFParser
+
+        parser = UPFParser()
+        prompt = parser.parse_file(file_path)
+
+        # Check that partial fields were promoted
+        assert isinstance(prompt, UniversalPromptV3)
+        assert prompt.agents is not None
+        assert len(prompt.agents) == 1
+        assert prompt.hooks is not None
+        assert len(prompt.hooks) == 1
+        assert prompt.mcp_servers is None  # Not provided
+        assert prompt.commands is None  # Not provided

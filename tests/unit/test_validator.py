@@ -245,3 +245,4 @@ class TestUPFValidatorV3:
 
         assert result.is_valid is False
         assert any("Document 1 has empty name" in error for error in result.errors)
+
