@@ -2402,13 +2402,22 @@ section:not(.hero-section):not(.editors-section):not(.benefits-section):not(.cta
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 clamp(1rem, 3vw, 2rem);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .benefits-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: clamp(2rem, 4vw, 3rem);
   margin-top: clamp(3rem, 5vh, 4rem);
+  justify-items: stretch;
+}
+
+@media (max-width: 1024px) {
+  .benefits-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .benefit-card {
@@ -2536,33 +2545,37 @@ section:not(.hero-section):not(.editors-section):not(.benefits-section):not(.cta
   overflow: hidden;
 }
 
-.btn-cta.primary {
-  background: white;
-  color: var(--primary-color);
-  border: 2px solid white;
+.cta-final-section .btn-cta.primary {
+  background: white !important;
+  background-color: white !important;
+  color: #1e293b !important;
+  border: 2px solid white !important;
 }
 
-.btn-cta.primary:hover {
-  background: rgba(255, 255, 255, 0.9);
-  transform: translateY(-3px);
-  box-shadow: 0 15px 35px rgba(255, 255, 255, 0.3);
-  text-decoration: none;
-  color: var(--primary-color);
+.cta-final-section .btn-cta.primary:hover {
+  background: rgba(255, 255, 255, 0.9) !important;
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  transform: translateY(-3px) !important;
+  box-shadow: 0 15px 35px rgba(255, 255, 255, 0.3) !important;
+  text-decoration: none !important;
+  color: #0f172a !important;
 }
 
-.btn-cta.secondary {
-  background: transparent;
-  color: white;
-  border: 2px solid rgba(255, 255, 255, 0.8);
+.cta-final-section .btn-cta.secondary {
+  background: transparent !important;
+  background-color: transparent !important;
+  color: white !important;
+  border: 2px solid rgba(255, 255, 255, 0.8) !important;
 }
 
-.btn-cta.secondary:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: white;
-  transform: translateY(-3px);
-  box-shadow: 0 15px 35px rgba(255, 255, 255, 0.2);
-  text-decoration: none;
-  color: white;
+.cta-final-section .btn-cta.secondary:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  border-color: white !important;
+  transform: translateY(-3px) !important;
+  box-shadow: 0 15px 35px rgba(255, 255, 255, 0.2) !important;
+  text-decoration: none !important;
+  color: white !important;
 }
 
 /* Responsive Design for New Sections */

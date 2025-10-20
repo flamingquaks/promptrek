@@ -3,6 +3,79 @@ layout: default
 title: Home
 ---
 
+<style>
+/* Fix horizontal overflow on entire page */
+html, body {
+  overflow-x: hidden !important;
+  width: 100% !important;
+  max-width: 100vw !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+body.home-page {
+  overflow-x: hidden !important;
+}
+.home-page .wrapper {
+  max-width: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow-x: hidden !important;
+}
+.home-page .page-content {
+  padding: 0 !important;
+}
+
+/* Force button fixes with maximum specificity */
+.cta-final-section .btn-cta.primary {
+  background: white !important;
+  color: #0f172a !important;
+  border: 2px solid white !important;
+}
+.cta-final-section .btn-cta.secondary {
+  background: transparent !important;
+  color: white !important;
+  border: 2px solid white !important;
+}
+
+/* Fix benefits section - full width, no wrapper constraints */
+.benefits-section {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 4rem 0 !important;
+  box-sizing: border-box !important;
+}
+.benefits-section .container {
+  max-width: 1200px !important;
+  margin: 0 auto !important;
+  padding: 0 2rem !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+.benefits-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 2rem !important;
+  width: 100% !important;
+  margin: 0 !important;
+}
+
+/* Fix CTA section - full width, no wrapper constraints */
+.cta-final-section {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 4rem 0 !important;
+  box-sizing: border-box !important;
+}
+
+@media (max-width: 1024px) {
+  .benefits-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+</style>
+
 <section class="intro-section">
   <div class="container">
     <div class="intro-content">
