@@ -9,7 +9,7 @@ title: UPF Specification
 
 The Universal Prompt Format (UPF) is a standardized YAML-based format for defining AI assistant prompts that can be converted to various editor-specific formats.
 
-PrompTrek supports **four schema versions**:
+PrompTrek supports **three schema versions**:
 - **v3.0.0** (Stable): Top-level plugin fields (mcp_servers, commands, agents, hooks), cleaner architecture (backward compatible with v2.x)
 - **v2.1.0** (Legacy): Markdown-first with nested plugin support (superseded by v3.0)
 - **v2.0.0** (Legacy): Markdown-first, simpler format with lossless bidirectional sync
@@ -851,22 +851,23 @@ documents:
 
 #### variables (optional)
 
-Template variables using `{{{ VARIABLE_NAME }}}` syntax (triple braces to distinguish from Jinja2).
+Template variables using `{``{``{``VARIABLE_NAME``}``}``}` syntax (triple braces to distinguish from Jinja2).
 
 **Example**:
 ```yaml
 content: |
-  # {{{ PROJECT_NAME }}}
+  # { { { PROJECT_NAME } } }
 
-  Project for {{{ COMPANY }}}.
+  Project for { { { COMPANY } } }.
 
-  Technologies: {{{ TECH_STACK }}}
+  Technologies: { { { TECH_STACK } } }
 
 variables:
   PROJECT_NAME: "My App"
   COMPANY: "Acme Corp"
   TECH_STACK: "Python, React"
 ```
+*Note: due to a rendering bug in the example, spaces are added between each curly bracket for variables. Don't actually add spaces in real usage.*
 
 ### Complete v2 Example
 
@@ -966,10 +967,8 @@ variables:
 - ✅ Works with ALL editors without `targets`
 - ✅ Matches how AI editors use markdown natively
 
-### Complete Migration Guide
+---
 
-For detailed migration instructions, see:
-- 🎯 [Schema v3.0 Specification](#schema-v30-stable) (above)
-- 📋 [Complete v3.0 Examples](../../examples/) in the repository
+📋 [Complete v3.0 Examples](../../examples/) in the repository
 
 

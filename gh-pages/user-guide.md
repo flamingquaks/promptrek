@@ -19,7 +19,7 @@ Explore the following sections to learn everything about PrompTrek:
 Learn about the Universal Prompt Format (UPF) - the standardized YAML-based format at the heart of PrompTrek. Understand the schema, structure, and how to create your own universal prompts.
 
 ### ⚡ [Advanced Features](user-guide/advanced-features.html)
-Discover powerful features like variable substitution, conditional instructions, import systems, and multi-file configurations to create sophisticated prompt setups.
+Discover powerful features like variable substitution and multi-document configurations to create sophisticated prompt setups.
 
 ### 🔌 [Editor Adapters](user-guide/adapters.html)
 Comprehensive guide to all supported AI editors. Learn how PrompTrek generates editor-specific configurations for GitHub Copilot, Cursor, Continue, Kiro, and more.

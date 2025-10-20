@@ -5,7 +5,6 @@ title: Quick Start Guide
 
 # Quick Start Guide
 
-Get up and running with PrompTrek in just a few minutes!
 
 ## Prerequisites
 
@@ -115,7 +114,7 @@ content: |
   def hello_world():
       """Example function with docstring."""
       return "Hello, World!"
-  ```
+  `` `
 
 variables:
   PROJECT_NAME: "my-project"

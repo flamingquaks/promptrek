@@ -100,7 +100,7 @@ ignore_editor_files: false
 - **[JSON Schema Files](https://promptrek.ai/schema/)** - Published schemas for v2.0, v2.1, and v3.0 with editor autocompletion support
 - **[User Guide](https://flamingquaks.github.io/promptrek/user-guide.html)** - Comprehensive documentation covering:
   - UPF Specification - Universal Prompt Format details
-  - Advanced Features - Variables, conditionals, and imports
+  - Advanced Features - Variables and multi-document support
   - Editor Adapters - All supported AI editors
   - Adapter Capabilities - Feature comparison matrix
   - Sync Feature - Bidirectional synchronization
@@ -528,7 +528,7 @@ For contribution guidelines, see [CONTRIBUTING.md](./.github/CONTRIBUTING.md).
 
 ### Core Documentation
 - **[Getting Started Guide](./GETTING_STARTED.md)** - Comprehensive setup and usage guide
-- **[Advanced Template Features](https://flamingquaks.github.io/promptrek/user-guide/advanced-features.html)** - Variables, conditionals, and imports
+- **[Advanced Template Features](https://flamingquaks.github.io/promptrek/user-guide/advanced-features.html)** - Variables and multi-document support
 - **[Editor Adapters](https://flamingquaks.github.io/promptrek/user-guide/adapters.html)** - Detailed guide to all supported AI editors
 
 ### Key Features
@@ -551,36 +551,6 @@ Override variables from CLI:
 promptrek generate --editor claude project.promptrek.yaml \
   -V PROJECT_NAME="CustomProject" \
   -V AUTHOR_EMAIL="custom@example.com"
-```
-
-#### 🎯 Conditional Instructions
-Provide editor-specific instructions:
-
-```yaml
-conditions:
-  - if: "EDITOR == \"claude\""
-    then:
-      instructions:
-        general:
-          - "Claude: Provide detailed explanations"
-  - if: "EDITOR == \"continue\""
-    then:
-      instructions:
-        general:
-          - "Continue: Generate comprehensive completions"
-```
-
-#### 📦 Import System
-Share common configurations across projects:
-
-```yaml
-imports:
-  - path: "shared/base-config.promptrek.yaml"
-    prefix: "shared"
-
-# Imported instructions get prefixed: [shared] Follow coding standards
-# Imported examples get prefixed: shared_example_name
-# Imported variables get prefixed: shared_VARIABLE_NAME
 ```
 
 #### 🎨 Multiple Editor Support

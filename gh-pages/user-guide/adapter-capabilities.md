@@ -9,8 +9,8 @@ This document provides a comprehensive comparison of features supported by each 
 
 ## Quick Reference Table
 
-| Editor | Variable Substitution | Conditional Instructions | Bidirectional Sync | Project Files | v3.0 Schema |
-|--------|:--------------------:|:-----------------------:|:------------------:|:-------------:|:-------------:|
+| Editor | Variable Substitution | Multi-Document Support | Bidirectional Sync | Project Files | v3.0 Schema |
+|--------|:--------------------:|:----------------------:|:------------------:|:-------------:|:-------------:|
 | **GitHub Copilot** | ✅ | ✅ | ✅ | ✅  | ✅ |
 | **Cursor** | ✅ | ✅ | ✅ | ✅  | ✅ |
 | **Continue** | ✅ | ✅ | ✅ | ✅  | ✅ |
@@ -38,19 +38,24 @@ variables:
 ```
 {% endraw %}
 
-### Conditional Instructions
-Ability to provide editor-specific instructions using conditional logic.
+### Multi-Document Support
+Ability to organize content across multiple documents using the `documents` field.
 
 **Supported by**: All adapters
 
 **Example**:
 ```yaml
-conditions:
-  - if: "EDITOR == \"copilot\""
-    then:
-      instructions:
-        general:
-          - "Copilot-specific instruction"
+schema_version: "3.0.0"
+content: |
+  # Main guidelines
+  - General project rules
+
+documents:
+  - name: "testing"
+    content: |
+      # Testing Standards
+      - Use Jest for unit tests
+      - Maintain 80% coverage
 ```
 
 ### Bidirectional Sync
@@ -293,28 +298,9 @@ promptrek migrate project.promptrek.yaml -o project-v3.promptrek.yaml
 promptrek generate project-v2.promptrek.yaml --all
 ```
 
-## Capability Planning
-
-### Recent Enhancements (v0.3.0)
-
-✅ **Completed**:
-- **v3.0 Schema (Stable)**: All adapters support top-level plugin fields
-- **Extended Bidirectional Sync**: Now supported by all 9 editors
-- **Production Ready**: v3.0 is now the recommended stable schema
-- **MCP Integration**: Project-first strategy with system-wide fallback
-
-### Future Enhancements (v0.3.0+)
-
-Planned capability improvements:
-- **Plugin System**: Allow custom adapters with configurable capabilities
-- **Capability Discovery**: Runtime capability detection for installed editors
-- **Auto-detection**: Detect installed editors and generate accordingly
-
 ## Related Documentation
 
 - [UPF Specification](./upf-specification.html) - Schema documentation
-- [v3.0 Migration Guide](../../docs/V3_MIGRATION_GUIDE.md) - Upgrading to v3.0
-- [Deprecation Warnings](../../docs/DEPRECATION_WARNINGS.md) - Understanding warnings
-- [Advanced Features](./advanced-features.html) - Variables and conditionals
+- [Advanced Features](./advanced-features.html) - Variables and multi-document support
 - [Sync Feature](./sync.html) - Bidirectional sync guide
 - [Getting Started](../quick-start.html) - Quick start guide

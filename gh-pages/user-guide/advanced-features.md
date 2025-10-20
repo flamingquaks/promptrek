@@ -17,17 +17,20 @@ Use triple braces to define variable placeholders in your UPF files:
 
 {% raw %}
 ```yaml
+# v3.0 format (recommended)
+schema_version: "3.0.0"
 metadata:
   title: "{{{ PROJECT_NAME }}} Assistant"
   description: "AI assistant for {{{ PROJECT_NAME }}}"
 
-instructions:
-  general:
-    - "Follow {{{ PROJECT_NAME }}} coding standards"
-    - "Contact {{{ AUTHOR_EMAIL }}} for questions"
+content: |
+  # {{{ PROJECT_NAME }}} Development Guide
+
+  Follow {{{ PROJECT_NAME }}} coding standards.
+  Contact {{{ AUTHOR_EMAIL }}} for questions.
 
 variables:
-  PROJECT_NAME: "MyProject" 
+  PROJECT_NAME: "MyProject"
   AUTHOR_EMAIL: "team@example.com"
 ```
 {% endraw %}
@@ -37,12 +40,14 @@ variables:
 You can also reference environment variables using `${}` syntax:
 
 ```yaml
+schema_version: "3.0.0"
 metadata:
   author: "${AUTHOR_NAME}"
-  
-instructions:
-  general:
-    - "Deploy to ${ENVIRONMENT} environment"
+
+content: |
+  # Project Guidelines
+
+  Deploy to ${ENVIRONMENT} environment.
 ```
 
 ### Local Variables File
@@ -100,13 +105,20 @@ You can disable this with `ignore_editor_files: false` in your config.
 {% raw %}
 ```yaml
 # project.promptrek.yaml (committed to git)
+schema_version: "3.0.0"
 metadata:
   title: "{{{ PROJECT_NAME }}} Assistant"
   author: "{{{ AUTHOR_NAME }}}"
 
+content: |
+  # {{{ PROJECT_NAME }}} Development Guide
+
+  Maintained by {{{ AUTHOR_NAME }}} ({{{ AUTHOR_EMAIL }}}).
+
 variables:
   PROJECT_NAME: "MyProject"
   AUTHOR_NAME: "Team"  # Default fallback
+  AUTHOR_EMAIL: "team@example.com"  # Default fallback
 ```
 {% endraw %}
 
@@ -130,220 +142,50 @@ promptrek generate --editor claude --output ./output project.promptrek.yaml \
 
 CLI overrides have the highest precedence and will override both local variables and prompt file variables.
 
-## Conditional Instructions
+## Combining Features with v3.0
 
-Conditional instructions allow you to provide different instructions based on the target editor or other conditions.
-
-### Basic Conditionals
-
-```yaml
-conditions:
-  - if: "EDITOR == \"claude\""
-    then:
-      instructions:
-        general:
-          - "Claude-specific: Provide detailed explanations"
-          - "Claude-specific: Focus on code clarity"
-      examples:
-        claude_example: "// Example optimized for Claude"
-
-  - if: "EDITOR == \"continue\""
-    then:
-      instructions:
-        general:
-          - "Continue-specific: Generate comprehensive completions"
-```
-
-### Supported Conditions
-
-- **Equality**: `EDITOR == "claude"`
-- **Inequality**: `EDITOR != "copilot"`  
-- **List membership**: `EDITOR in ["claude", "cursor"]`
-- **Boolean variables**: `DEBUG_MODE` (checks if variable is truthy)
-
-### Conditional Examples and Variables
-
-Conditionals can modify any part of your configuration:
-
-```yaml
-conditions:
-  - if: "PROJECT_TYPE == \"mobile\""
-    then:
-      examples:
-        mobile_component: "const Screen = () => <View><Text>Hello</Text></View>;"
-      variables:
-        PLATFORM: "React Native"
-
-  - if: "ENVIRONMENT == \"production\""
-    then:
-      instructions:
-        general:
-          - "Use production-safe coding practices"
-          - "Include comprehensive error handling"
-```
-
-## Import System
-
-The import system allows you to share common configurations across multiple projects.
-
-### Basic Import
-
-Create a base configuration file:
-
-```yaml
-# base-config.promptrek.yaml
-schema_version: "1.0.0"
-
-metadata:
-  title: "Base Configuration"
-  description: "Shared configuration"
-  version: "1.0.0"
-  author: "team@company.com"
-  created: "2024-01-01"
-  updated: "2024-01-01"
-
-targets:
-  - claude
-
-instructions:
-  general:
-    - "Follow clean code principles"
-    - "Use meaningful variable names"
-  code_style:
-    - "Use 2-space indentation"
-    - "Prefer const over let"
-
-examples:
-  util_function: "const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);"
-
-variables:
-  STYLE_GUIDE: "Company Standard"
-  INDENT_SIZE: "2"
-```
-
-Then import it in your main file:
-
-```yaml
-# project.promptrek.yaml
-schema_version: "1.0.0"
-
-metadata:
-  title: "My Project"
-  description: "Project with shared configuration"
-  # ... other metadata
-
-targets:
-  - claude
-
-imports:
-  - path: "base-config.promptrek.yaml"
-    prefix: "shared"
-
-instructions:
-  general:
-    - "Project-specific instruction"
-  testing:
-    - "Write comprehensive tests"
-```
-
-### Import with Prefix
-
-The `prefix` option namespaces imported content to avoid conflicts:
-
-- Instructions get prefixed: `[shared] Follow clean code principles`
-- Examples get prefixed: `shared_util_function`  
-- Variables get prefixed: `shared_STYLE_GUIDE`
-
-### Import Behavior
-
-- **Instructions**: Imported instructions are merged with existing ones
-- **Examples**: Imported examples are added with prefixed names
-- **Variables**: Imported variables are added with prefixed names (unless already present)
-- **Metadata**: Metadata from imported files is ignored (only the main file's metadata is used)
-
-### Relative Paths
-
-Import paths are relative to the importing file:
-
-```
-project/
-├── config/
-│   └── base.promptrek.yaml
-├── frontend/
-│   └── frontend.promptrek.yaml  # imports: path: "../config/base.promptrek.yaml"
-└── backend/
-    └── backend.promptrek.yaml   # imports: path: "../config/base.promptrek.yaml"
-```
-
-### Circular Import Protection
-
-The import system automatically detects and prevents circular imports:
-
-```yaml
-# file-a.promptrek.yaml
-imports:
-  - path: "file-b.promptrek.yaml"
-
-# file-b.promptrek.yaml  
-imports:
-  - path: "file-a.promptrek.yaml"  # This will cause an error
-```
-
-## Combining Features
-
-All advanced features work together seamlessly:
+In v3.0, you can combine variable substitution with multiple documents:
 
 {% raw %}
 ```yaml
-# base.promptrek.yaml
-instructions:
-  general:
-    - "Use {{{ CODING_STYLE }}} coding style"
+schema_version: "3.0.0"
+metadata:
+  title: "{{{ PROJECT_NAME }}} Assistant"
 
-conditions:
-  - if: "EDITOR == \"claude\""
-    then:
-      instructions:
-        general:
-          - "Claude: Use {{{ AI_APPROACH }}} approach"
+content: |
+  # {{{ PROJECT_NAME }}} Development Guide
 
-variables:
-  CODING_STYLE: "clean"
-  AI_APPROACH: "detailed"
+  Follow {{{ CODING_STYLE }}} coding standards.
 
-# main.promptrek.yaml
-imports:
-  - path: "base.promptrek.yaml"
-    prefix: "base"
-
-conditions:
-  - if: "EDITOR == \"claude\""
-    then:
-      instructions:
-        general:
-          - "Main: Use {{{ MAIN_APPROACH }}} methodology"
+documents:
+  - name: "testing"
+    content: |
+      # Testing Standards
+      - Use {{{ TEST_FRAMEWORK }}}
+      - Aim for {{{ COVERAGE_TARGET }}}% coverage
 
 variables:
   PROJECT_NAME: "AdvancedProject"
-  MAIN_APPROACH: "comprehensive"
+  CODING_STYLE: "clean"
+  TEST_FRAMEWORK: "Jest"
+  COVERAGE_TARGET: "80"
 ```
 {% endraw %}
 
-Generate with overrides:
+Generate with CLI overrides:
 
 ```bash
-promptrek generate --editor claude --output ./output main.promptrek.yaml \
+promptrek generate --editor claude --output ./output project.promptrek.yaml \
   -V PROJECT_NAME="CustomProject" \
-  -V base_CODING_STYLE="strict" \
-  -V base_AI_APPROACH="concise"
+  -V CODING_STYLE="strict" \
+  -V COVERAGE_TARGET="90"
 ```
 
-This will:
-1. Import base configuration with "base" prefix
-2. Apply variable substitution to both files
-3. Process conditionals for Claude editor
-4. Override variables via CLI
-5. Merge all instructions and content
+This provides:
+1. Variable substitution across all content
+2. CLI overrides for customization
+3. Multiple document support for organization
+4. Clean, maintainable v3.0 format
 
 ## .gitignore Management
 
@@ -440,16 +282,10 @@ promptrek sync --editor continue --output project.promptrek.yaml
 - Provide sensible defaults in the `variables` section
 - Use descriptive variable names: `PROJECT_NAME` not `PN`
 
-### Conditionals  
-- Keep conditions simple and readable
-- Use editor-specific instructions sparingly - most instructions should be universal
-- Test your conditionals with different editors
-
-### Imports
-- Use prefixes to avoid naming conflicts
-- Keep shared configurations focused and minimal
-- Document your import structure in README files
-- Use relative paths for portability
+### Multi-Document Organization
+- Use the `documents` field for organizing content by category or technology
+- Keep document names descriptive and focused
+- Separate general guidelines from technology-specific rules
 
 ### Organization
 ```

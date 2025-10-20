@@ -8,14 +8,6 @@ title: Home
     <div class="intro-content">
       <h2 class="section-title">One Configuration.<br>Every AI Editor.<br>Prompts, Plugins & Beyond.</h2>
       <p class="intro-description">Define your complete AI editor setup once - prompts, MCP servers, custom commands, autonomous agents, and event hooks - then let PrompTrek take it on a journey across every platform. Stop recreating configurations for GitHub Copilot, Cursor, Continue, Claude Code, and more.</p>
-      <div class="v2-badge">
-        <span class="badge-new">STABLE</span>
-        <span class="badge-text">Schema v3.0.0: Top-level plugin fields, cleaner architecture. <a href="user-guide/upf-specification.html#schema-v30-stable" style="color: #4CAF50; text-decoration: underline;">Learn more →</a></span>
-      </div>
-      <div class="v2-badge" style="margin-top: 10px;">
-        <span class="badge-new" style="background-color: #FF9800;">LEGACY</span>
-        <span class="badge-text">Schema v2.x: Nested plugin structure (deprecated, migration available)</span>
-      </div>
     </div>
   </div>
 </section>
@@ -40,7 +32,7 @@ title: Home
         <h3>The Solution</h3>
         <p>PrompTrek provides a universal format for creating comprehensive coding prompts once, then automatically generates editor-specific configurations for your entire team.</p>
         <ul class="solution-list">
-          <li>Universal format for all prompt configurations</li>
+          <li>Universal format for all prompt, MCP, agent, & hook configurations</li>
           <li>Multi-editor support with one-click generation</li>
           <li>Team consistency across different editor preferences</li>
           <li>Easy migration between AI coding tools</li>
@@ -81,7 +73,7 @@ title: Home
         <div class="feature-badges">
           <span class="feature-badge">📁 Project</span>
           <span class="feature-badge">🔄 Variables</span>
-          <span class="feature-badge">🎯 Conditionals</span>
+          <span class="feature-badge">📚 Multi-Doc</span>
         </div>
       </div>
 
@@ -109,7 +101,7 @@ title: Home
         <div class="feature-badges">
           <span class="feature-badge">📁 Project</span>
           <span class="feature-badge">🔄 Variables</span>
-          <span class="feature-badge">🎯 Conditionals</span>
+          <span class="feature-badge">📚 Multi-Doc</span>
         </div>
       </div>
 
@@ -123,7 +115,7 @@ title: Home
         <div class="feature-badges">
           <span class="feature-badge">📁 Project</span>
           <span class="feature-badge">🔄 Variables</span>
-          <span class="feature-badge">🎯 Conditionals</span>
+          <span class="feature-badge">📚 Multi-Doc</span>
         </div>
       </div>
 
@@ -137,7 +129,7 @@ title: Home
         <div class="feature-badges">
           <span class="feature-badge">📁 Project</span>
           <span class="feature-badge">🔄 Variables</span>
-          <span class="feature-badge">🎯 Conditionals</span>
+          <span class="feature-badge">📚 Multi-Doc</span>
         </div>
       </div>
 
@@ -151,7 +143,7 @@ title: Home
         <div class="feature-badges">
           <span class="feature-badge">📁 Project</span>
           <span class="feature-badge">🔄 Variables</span>
-          <span class="feature-badge">🎯 Conditionals</span>
+          <span class="feature-badge">📚 Multi-Doc</span>
         </div>
       </div>
 
@@ -179,7 +171,7 @@ title: Home
         <div class="feature-badges">
           <span class="feature-badge">📁 Project</span>
           <span class="feature-badge">🔄 Variables</span>
-          <span class="feature-badge">🎯 Conditionals</span>
+          <span class="feature-badge">📚 Multi-Doc</span>
         </div>
       </div>
     </div>
@@ -324,12 +316,6 @@ variables:
       </div>
 
       <div class="feature-card-modern">
-        <div class="feature-icon">🎯</div>
-        <h3>Conditional Instructions</h3>
-        <p>Apply different instructions based on project context or target editor. Smart prompts that adapt to your environment.</p>
-      </div>
-
-      <div class="feature-card-modern">
         <div class="feature-icon">🔄</div>
         <h3>Bidirectional Sync</h3>
         <p>Sync editor configurations back to PrompTrek format. All 9 supported editors now support seamless two-way updates.</p>
@@ -339,12 +325,6 @@ variables:
         <div class="feature-icon">👁️</div>
         <h3>Preview Mode</h3>
         <p>Preview generated output before creating files. Test configurations with variable overrides without making changes.</p>
-      </div>
-
-      <div class="feature-card-modern">
-        <div class="feature-icon">📦</div>
-        <h3>Import System</h3>
-        <p>Organize and reuse prompt components across multiple configurations. Build a library of reusable prompt templates.</p>
       </div>
 
       <div class="feature-card-modern">

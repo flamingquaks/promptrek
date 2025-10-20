@@ -9,7 +9,8 @@ This page provides JSON Schema files for the Universal Prompt Format (UPF) used 
 
 ## Available Schemas
 
-<div class="schema-list">
+<!-- <div class="schema-list"> -->
+
 
 ### v3.0 (Current Stable) ✨
 
@@ -60,7 +61,7 @@ Simplified markdown-first schema without plugin support.
 
 [Download v2.0 Schema](v2.0.json){: .btn}
 
-</div>
+<!-- </div> -->
 
 ## Usage in Your Editor
 

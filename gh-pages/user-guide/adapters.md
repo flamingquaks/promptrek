@@ -9,8 +9,6 @@ PrompTrek supports 9 AI-powered code editors and assistants. Each adapter genera
 
 > **📊 Looking for a detailed feature comparison?** See the [Adapter Capabilities Matrix](adapter-capabilities.html) for a comprehensive breakdown of features supported by each adapter.
 
-For detailed capability comparison, see [ADAPTER_CAPABILITIES.md](./ADAPTER_CAPABILITIES.md).
-
 ## Supported Editors
 
 ### ✅ Claude Code
