@@ -1,164 +1,339 @@
-schema_version: "1.0.0"
+schema_version: 3.0.0
 metadata:
-  title: "Rust CLI Tool Assistant"
-  description: "AI assistant for building command-line tools in Rust"
-  version: "1.0.0"
-  author: "Systems Team"
-  tags: ["rust", "cli", "systems-programming"]
+  title: Rust CLI Application
+  description: Production-grade Rust command-line tool development
+  version: 1.0.0
+  author: PrompTrek
+  tags:
+    - rust
+    - cli
+    - systems
 
-targets:
-  - copilot
-  - cursor
-  - continue
-  - claude
+content: |
+  # Rust CLI Development Guide
 
-context:
-  project_type: "cli_tool"
-  technologies:
-    - "rust"
-    - "clap"
-    - "tokio"
-    - "serde"
-    - "anyhow"
-    - "cargo"
-  description: |
-    High-performance command-line tool written in Rust with proper error handling,
-    async support, and cross-platform compatibility.
+  ## Project Setup
 
-instructions:
-  general:
-    - "Follow Rust idioms and best practices"
-    - "Use Result<T, E> for error handling, never panic in library code"
-    - "Leverage the type system for correctness guarantees"
-    - "Write comprehensive documentation comments (///)"
-    - "Keep functions small and focused on single responsibility"
+  **Tech Stack:**
+  - Rust 1.70+ (latest stable)
+  - clap for CLI argument parsing
+  - tokio for async runtime
+  - serde for serialization
+  - anyhow for error handling
+  - tracing for logging
 
-  code_style:
-    - "Use rustfmt for consistent code formatting"
-    - "Run clippy and fix all warnings before committing"
-    - "Follow Rust naming conventions (snake_case for variables/functions)"
-    - "Use meaningful error messages with context"
-    - "Prefer borrowing over cloning when possible"
+  **Project Structure:**
+  ```
+  src/
+    main.rs          # Entry point
+    cli.rs           # CLI definition
+    commands/        # Command implementations
+    config.rs        # Configuration
+    error.rs         # Error types
+    utils/           # Utilities
+  tests/             # Integration tests
+  Cargo.toml
+  ```
 
-  architecture:
-    - "Structure: main.rs, lib.rs, and domain modules"
-    - "Use clap for CLI argument parsing with derive API"
-    - "Implement error handling with thiserror or anyhow"
-    - "Use tokio for async runtime if needed"
-    - "Keep business logic separate from CLI interface"
+  ## CLI Framework (clap)
 
-  testing:
-    - "Write unit tests for all public functions"
-    - "Use property-based testing with proptest for complex logic"
-    - "Test error paths explicitly"
-    - "Use criterion for benchmark tests"
-    - "Aim for >80% code coverage"
+  ```rust
+  // src/cli.rs
+  use clap::{Parser, Subcommand};
 
-  performance:
-    - "Profile with cargo flamegraph before optimizing"
-    - "Use appropriate collection types (Vec vs HashMap)"
-    - "Consider using rayon for parallelizable workloads"
-    - "Avoid unnecessary allocations and clones"
-    - "Use release builds for benchmarking"
+  #[derive(Parser)]
+  #[command(name = "myapp")]
+  #[command(about = "A powerful CLI tool", long_about = None)]
+  #[command(version)]
+  pub struct Cli {
+      /// Enable verbose output
+      #[arg(short, long, global = true)]
+      pub verbose: bool,
 
-  security:
-    - "Validate all user inputs thoroughly"
-    - "Use cargo-audit to check for vulnerable dependencies"
-    - "Avoid unsafe code unless absolutely necessary"
-    - "Handle file I/O errors gracefully"
-    - "Never expose sensitive data in error messages"
+      /// Configuration file path
+      #[arg(short, long, value_name = "FILE")]
+      pub config: Option<PathBuf>,
 
-examples:
-  main_cli: |
-    ```rust
-    use clap::Parser;
-    use anyhow::Result;
+      #[command(subcommand)]
+      pub command: Commands,
+  }
 
-    #[derive(Parser)]
-    #[command(name = "mytool")]
-    #[command(about = "A CLI tool for doing things", long_about = None)]
-    struct Cli {
-        /// Input file path
-        #[arg(short, long)]
-        input: String,
+  #[derive(Subcommand)]
+  pub enum Commands {
+      /// Process input files
+      Process {
+          /// Input file paths
+          #[arg(required = true)]
+          files: Vec<PathBuf>,
 
-        /// Output file path
-        #[arg(short, long)]
-        output: Option<String>,
+          /// Output directory
+          #[arg(short, long)]
+          output: Option<PathBuf>,
 
-        /// Enable verbose output
-        #[arg(short, long)]
-        verbose: bool,
-    }
+          /// Number of parallel jobs
+          #[arg(short = 'j', long, default_value = "4")]
+          jobs: usize,
+      },
 
-    fn main() -> Result<()> {
-        let cli = Cli::parse();
+      /// Initialize a new project
+      Init {
+          /// Project name
+          name: String,
 
-        if cli.verbose {
-            println!("Processing {}...", cli.input);
-        }
+          /// Use template
+          #[arg(short, long)]
+          template: Option<String>,
+      },
+  }
+  ```
 
-        // Business logic here
-        mytool::process(&cli.input, cli.output.as_deref())?;
+  ## Main Entry Point
 
-        Ok(())
-    }
-    ```
+  ```rust
+  // src/main.rs
+  use anyhow::Result;
+  use clap::Parser;
+  use tracing::{info, Level};
+  use tracing_subscriber::FmtSubscriber;
 
-  error_handling: |
-    ```rust
-    use thiserror::Error;
+  mod cli;
+  mod commands;
+  mod config;
+  mod error;
 
-    #[derive(Error, Debug)]
-    pub enum ToolError {
-        #[error("Failed to read file: {0}")]
-        FileRead(#[from] std::io::Error),
+  #[tokio::main]
+  async fn main() -> Result<()> {
+      let cli = cli::Cli::parse();
 
-        #[error("Invalid input format at line {line}")]
-        InvalidFormat { line: usize },
+      // Set up logging
+      let level = if cli.verbose { Level::DEBUG } else { Level::INFO };
+      let subscriber = FmtSubscriber::builder()
+          .with_max_level(level)
+          .finish();
+      tracing::subscriber::set_global_default(subscriber)?;
 
-        #[error("Processing failed: {0}")]
-        ProcessingError(String),
-    }
+      // Execute command
+      match cli.command {
+          cli::Commands::Process { files, output, jobs } => {
+              commands::process::run(files, output, jobs).await?;
+          }
+          cli::Commands::Init { name, template } => {
+              commands::init::run(name, template).await?;
+          }
+      }
 
-    pub type Result<T> = std::result::Result<T, ToolError>;
+      Ok(())
+  }
+  ```
 
-    pub fn process_file(path: &str) -> Result<Vec<String>> {
-        let contents = std::fs::read_to_string(path)?;
+  ## Command Implementation
 
-        if contents.is_empty() {
-            return Err(ToolError::InvalidFormat { line: 0 });
-        }
+  ```rust
+  // src/commands/process.rs
+  use anyhow::{Context, Result};
+  use std::path::PathBuf;
+  use tokio::fs;
+  use tracing::{info, warn};
 
-        Ok(contents.lines().map(String::from).collect())
-    }
-    ```
+  pub async fn run(
+      files: Vec<PathBuf>,
+      output: Option<PathBuf>,
+      jobs: usize,
+  ) -> Result<()> {
+      info!("Processing {} files with {} jobs", files.len(), jobs);
 
-  async_example: |
-    ```rust
-    use tokio::fs::File;
-    use tokio::io::{AsyncReadExt, AsyncWriteExt};
-    use anyhow::Result;
+      let output_dir = output.unwrap_or_else(|| PathBuf::from("."));
+      fs::create_dir_all(&output_dir)
+          .await
+          .context("Failed to create output directory")?;
 
-    #[tokio::main]
-    async fn main() -> Result<()> {
-        let mut file = File::open("input.txt").await?;
-        let mut contents = String::new();
-        file.read_to_string(&mut contents).await?;
+      // Process files in parallel
+      let handles: Vec<_> = files
+          .into_iter()
+          .map(|file| {
+              let output_dir = output_dir.clone();
+              tokio::spawn(async move {
+                  process_file(file, output_dir).await
+              })
+          })
+          .collect();
 
-        let processed = process_data(&contents);
+      // Wait for all tasks
+      for handle in handles {
+          if let Err(e) = handle.await? {
+              warn!("Failed to process file: {}", e);
+          }
+      }
 
-        let mut output = File::create("output.txt").await?;
-        output.write_all(processed.as_bytes()).await?;
+      info!("Processing complete!");
+      Ok(())
+  }
 
-        Ok(())
-    }
+  async fn process_file(file: PathBuf, output_dir: PathBuf) -> Result<()> {
+      let content = fs::read_to_string(&file)
+          .await
+          .with_context(|| format!("Failed to read file: {:?}", file))?;
 
-    fn process_data(data: &str) -> String {
-        data.to_uppercase()
-    }
-    ```
+      // Process content...
+      let processed = content.to_uppercase();
+
+      let output_file = output_dir.join(file.file_name().unwrap());
+      fs::write(&output_file, processed)
+          .await
+          .with_context(|| format!("Failed to write to: {:?}", output_file))?;
+
+      Ok(())
+  }
+  ```
+
+  ## Error Handling
+
+  ```rust
+  // src/error.rs
+  use thiserror::Error;
+
+  #[derive(Error, Debug)]
+  pub enum AppError {
+      #[error("Configuration error: {0}")]
+      Config(String),
+
+      #[error("File not found: {path}")]
+      FileNotFound { path: String },
+
+      #[error("Invalid input: {0}")]
+      InvalidInput(String),
+
+      #[error(transparent)]
+      Io(#[from] std::io::Error),
+
+      #[error(transparent)]
+      Other(#[from] anyhow::Error),
+  }
+
+  pub type Result<T> = std::result::Result<T, AppError>;
+  ```
+
+  ## Configuration
+
+  ```rust
+  // src/config.rs
+  use serde::{Deserialize, Serialize};
+  use std::path::PathBuf;
+  use anyhow::Result;
+
+  #[derive(Debug, Serialize, Deserialize)]
+  pub struct Config {
+      pub default_jobs: usize,
+      pub output_dir: PathBuf,
+      pub templates: Vec<String>,
+  }
+
+  impl Config {
+      pub fn load(path: &PathBuf) -> Result<Self> {
+          let content = std::fs::read_to_string(path)?;
+          let config: Config = toml::from_str(&content)?;
+          Ok(config)
+      }
+
+      pub fn default() -> Self {
+          Config {
+              default_jobs: 4,
+              output_dir: PathBuf::from("."),
+              templates: vec![],
+          }
+      }
+  }
+  ```
+
+  ## Testing
+
+  ```rust
+  // tests/integration_test.rs
+  use assert_cmd::Command;
+  use predicates::prelude::*;
+  use tempfile::TempDir;
+
+  #[test]
+  fn test_process_command() {
+      let temp_dir = TempDir::new().unwrap();
+      let input_file = temp_dir.path().join("input.txt");
+      std::fs::write(&input_file, "test content").unwrap();
+
+      let mut cmd = Command::cargo_bin("myapp").unwrap();
+      cmd.arg("process")
+          .arg(input_file)
+          .arg("--output")
+          .arg(temp_dir.path())
+          .assert()
+          .success()
+          .stdout(predicate::str::contains("Processing complete"));
+  }
+
+  #[test]
+  fn test_init_command() {
+      let mut cmd = Command::cargo_bin("myapp").unwrap();
+      cmd.arg("init")
+          .arg("my-project")
+          .assert()
+          .success();
+  }
+  ```
+
+  ## Best Practices
+
+  ### Ownership & Borrowing
+  - Prefer borrowing (`&T`) over cloning when possible
+  - Use `.clone()` explicitly when needed
+  - Leverage `Cow<str>` for flexible string handling
+  - Use `Arc<T>` for shared ownership across threads
+
+  ### Error Handling
+  - Use `anyhow` for application errors
+  - Use `thiserror` for library errors
+  - Provide context with `.context()` and `.with_context()`
+  - Don't use `.unwrap()` in production code
+
+  ### Performance
+  - Use `cargo build --release` for benchmarking
+  - Profile with `cargo flamegraph`
+  - Use `rayon` for CPU-bound parallelism
+  - Use `tokio` for I/O-bound concurrency
+
+  ### Code Quality
+  - Run `cargo clippy` regularly
+  - Format with `cargo fmt`
+  - Check with `cargo check` before building
+  - Use `cargo test` for all tests
+
+  ## Cargo.toml Configuration
+
+  ```toml
+  [package]
+  name = "myapp"
+  version = "0.1.0"
+  edition = "2021"
+
+  [dependencies]
+  clap = { version = "4.4", features = ["derive"] }
+  tokio = { version = "1.35", features = ["full"] }
+  anyhow = "1.0"
+  thiserror = "1.0"
+  serde = { version = "1.0", features = ["derive"] }
+  toml = "0.8"
+  tracing = "0.1"
+  tracing-subscriber = "0.3"
+
+  [dev-dependencies]
+  assert_cmd = "2.0"
+  predicates = "3.0"
+  tempfile = "3.8"
+
+  [profile.release]
+  opt-level = 3
+  lto = true
+  codegen-units = 1
+  ```
 
 variables:
-  TOOL_NAME: "mytool"
-  MIN_RUST_VERSION: "1.70"
+  APP_NAME: myapp
+  DEFAULT_JOBS: "4"
