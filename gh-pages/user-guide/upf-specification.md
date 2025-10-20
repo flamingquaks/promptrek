@@ -13,7 +13,6 @@ PrompTrek supports **four schema versions**:
 - **v3.0.0** (Stable): Top-level plugin fields (mcp_servers, commands, agents, hooks), cleaner architecture (backward compatible with v2.x)
 - **v2.1.0** (Legacy): Markdown-first with nested plugin support (superseded by v3.0)
 - **v2.0.0** (Legacy): Markdown-first, simpler format with lossless bidirectional sync
-- **v1.0.0** (Legacy): Structured format with complex nested fields
 
 ## File Extension
 
@@ -42,7 +41,6 @@ See the [Schema Documentation](https://promptrek.ai/schema/) for more details.
 - **Stable**: `3.0.0` - [Jump to v3.0 Specification](#schema-v30-stable)
 - **Legacy**: `2.1.0` - [Jump to v2.1 Specification](#schema-v21-legacy)
 - **Legacy**: `2.0.0` - [Jump to v2.0 Specification](#schema-v20-legacy)
-- **Legacy**: `1.0.0` - [Jump to v1 Specification](#schema-v10-legacy)
 
 ---
 
@@ -777,7 +775,6 @@ ignore_editor_files: boolean       # Auto-exclude generated editor files (defaul
 
 #### metadata (required)
 
-Same as v1 - contains information about the prompt file.
 
 **Example**:
 ```yaml
@@ -822,7 +819,8 @@ content: |
   def calculate_total(items: list[float]) -> float:
       """Calculate the total sum of items."""
       return sum(items)
-  ```
+  `` `
+  
 ```
 
 #### documents (optional)
@@ -939,7 +937,7 @@ content: |
       </button>
     );
   };
-  ```
+  `` `
 
   ### Hook Example
   ```typescript
@@ -950,55 +948,16 @@ content: |
       staleTime: 5 * 60 * 1000,
     });
   };
-  ```
+  `` `
 
 variables:
   PROJECT_NAME: "react-app"
   TEAM_EMAIL: "dev-team@company.com"
 ```
 
-### Migration from v1 to v2
 
-Use the `promptrek migrate` command to convert v1 files to v2:
-
-```bash
-promptrek migrate old.promptrek.yaml -o new.promptrek.yaml
-```
-
-The migration tool:
-- ✅ Converts structured `instructions` to markdown `content`
-- ✅ Converts `examples` to markdown code blocks
-- ✅ Preserves `metadata` and `variables`
-- ✅ Removes `targets` field (no longer needed in v2)
-- ✅ Optionally splits into `documents` for multi-file editors
-
----
-
-## Schema v1.0 (Legacy - Deprecated)
-
-**v1.0.0** is deprecated and has been superseded by v2.0 (which introduces simpler markdown-first format) and v3.0 (which adds cleaner plugin architecture).
-
-### Migration Required
-
-```bash
-# Auto-migrate v1 files to v3.0
-promptrek migrate old-v1.promptrek.yaml -o new-v3.promptrek.yaml
-
-# Migration handles:
-# ✅ Converts structured instructions → markdown content
-# ✅ Converts examples → markdown code blocks
-# ✅ Removes deprecated `targets` field (not needed in v3.0)
-# ✅ Preserves metadata and variables
-# ✅ Updates schema version to 3.0.0
-```
 
 ### Why Migrate to v3.0?
-
-**v1 schema is deprecated** because:
-- ❌ Complex nested structure (`instructions`, `workflows`, `examples`)
-- ❌ Required `targets` field (v3.0 works with all editors automatically)
-- ❌ No lossless bidirectional sync
-- ❌ Doesn't align with how modern AI editors work (markdown-first)
 
 **v3.0 offers:**
 - ✅ Simple markdown-first format
@@ -1010,30 +969,7 @@ promptrek migrate old-v1.promptrek.yaml -o new-v3.promptrek.yaml
 ### Complete Migration Guide
 
 For detailed migration instructions, see:
-- 📖 [V3 Migration Guide](../../docs/V3_MIGRATION_GUIDE.md)
 - 🎯 [Schema v3.0 Specification](#schema-v30-stable) (above)
 - 📋 [Complete v3.0 Examples](../../examples/) in the repository
 
-### Brief v1 Schema Overview (For Reference Only)
 
-The v1 schema used a structured approach with these key fields:
-
-```yaml
-schema_version: "1.0.0"
-metadata: {...}
-targets: [copilot, cursor, continue]  # Required
-context: {...}                         # Project context
-instructions:                          # Categorized instructions
-  general: [...]
-  code_style: [...]
-  architecture: [...]
-  testing: [...]
-workflows: {...}                       # Development workflows
-examples: {...}                        # Code examples
-variables: {...}                       # Template variables
-editor_specific: {...}                 # Editor-specific config
-conditions: [...]                      # Conditional logic
-imports: [...]                         # Import system
-```
-
-**Do not use v1 for new projects.** Use v3.0 schema instead.
