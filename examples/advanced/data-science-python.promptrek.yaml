@@ -1,0 +1,442 @@
+schema_version: 3.0.0
+metadata:
+  title: Data Science with Python
+  description: Data analysis and machine learning project configuration
+  version: 1.0.0
+  author: PrompTrek
+  tags:
+    - python
+    - data-science
+    - machine-learning
+    - jupyter
+
+content: |
+  # Data Science with Python Guide
+
+  ## Project Setup
+
+  **Tech Stack:**
+  - Python 3.10+
+  - Pandas for data manipulation
+  - NumPy for numerical computing
+  - Scikit-learn for ML
+  - Matplotlib/Seaborn for visualization
+  - Jupyter notebooks for exploration
+  - DVC for data version control
+
+  **Project Structure:**
+  ```
+  notebooks/         # Jupyter notebooks
+  src/
+    data/            # Data processing
+    features/        # Feature engineering
+    models/          # ML models
+    visualization/   # Plotting utilities
+  data/
+    raw/             # Raw data (not in git)
+    processed/       # Processed data (not in git)
+  models/            # Trained models (not in git)
+  tests/             # Unit tests
+  ```
+
+  ## Data Processing
+
+  ```python
+  # src/data/loader.py
+  import pandas as pd
+  from pathlib import Path
+  from typing import Tuple
+
+  class DataLoader:
+      def __init__(self, data_dir: Path):
+          self.data_dir = data_dir
+
+      def load_raw_data(self, filename: str) -> pd.DataFrame:
+          """Load raw data from CSV file."""
+          filepath = self.data_dir / "raw" / filename
+          return pd.read_csv(filepath)
+
+      def load_processed_data(self, filename: str) -> pd.DataFrame:
+          """Load processed data from parquet file."""
+          filepath = self.data_dir / "processed" / filename
+          return pd.read_parquet(filepath)
+
+      def save_processed_data(self, df: pd.DataFrame, filename: str) -> None:
+          """Save processed data to parquet format."""
+          filepath = self.data_dir / "processed" / filename
+          filepath.parent.mkdir(parents=True, exist_ok=True)
+          df.to_parquet(filepath, index=False, compression="snappy")
+  ```
+
+  ## Data Preprocessing
+
+  ```python
+  # src/data/preprocessing.py
+  import pandas as pd
+  import numpy as np
+  from sklearn.preprocessing import StandardScaler, LabelEncoder
+  from sklearn.model_selection import train_test_split
+
+  class DataPreprocessor:
+      def __init__(self):
+          self.scaler = StandardScaler()
+          self.label_encoders = {}
+
+      def handle_missing_values(self, df: pd.DataFrame) -> pd.DataFrame:
+          """Handle missing values in the dataset."""
+          # Numerical columns: fill with median
+          numerical_cols = df.select_dtypes(include=[np.number]).columns
+          df[numerical_cols] = df[numerical_cols].fillna(
+              df[numerical_cols].median()
+          )
+
+          # Categorical columns: fill with mode
+          categorical_cols = df.select_dtypes(include=['object']).columns
+          for col in categorical_cols:
+              df[col] = df[col].fillna(df[col].mode()[0])
+
+          return df
+
+      def encode_categorical(self, df: pd.DataFrame, columns: list) -> pd.DataFrame:
+          """Encode categorical variables."""
+          df = df.copy()
+          for col in columns:
+              if col not in self.label_encoders:
+                  self.label_encoders[col] = LabelEncoder()
+                  df[col] = self.label_encoders[col].fit_transform(df[col])
+              else:
+                  df[col] = self.label_encoders[col].transform(df[col])
+          return df
+
+      def scale_features(
+          self,
+          X_train: pd.DataFrame,
+          X_test: pd.DataFrame
+      ) -> Tuple[pd.DataFrame, pd.DataFrame]:
+          """Scale numerical features."""
+          X_train_scaled = self.scaler.fit_transform(X_train)
+          X_test_scaled = self.scaler.transform(X_test)
+
+          return (
+              pd.DataFrame(X_train_scaled, columns=X_train.columns),
+              pd.DataFrame(X_test_scaled, columns=X_test.columns)
+          )
+  ```
+
+  ## Feature Engineering
+
+  ```python
+  # src/features/engineer.py
+  import pandas as pd
+  import numpy as np
+
+  class FeatureEngineer:
+      @staticmethod
+      def create_date_features(df: pd.DataFrame, date_col: str) -> pd.DataFrame:
+          """Extract features from date column."""
+          df = df.copy()
+          df[date_col] = pd.to_datetime(df[date_col])
+
+          df[f'{date_col}_year'] = df[date_col].dt.year
+          df[f'{date_col}_month'] = df[date_col].dt.month
+          df[f'{date_col}_day'] = df[date_col].dt.day
+          df[f'{date_col}_dayofweek'] = df[date_col].dt.dayofweek
+          df[f'{date_col}_quarter'] = df[date_col].dt.quarter
+
+          return df
+
+      @staticmethod
+      def create_interaction_features(
+          df: pd.DataFrame,
+          col1: str,
+          col2: str
+      ) -> pd.DataFrame:
+          """Create interaction features between two columns."""
+          df = df.copy()
+          df[f'{col1}_x_{col2}'] = df[col1] * df[col2]
+          df[f'{col1}_div_{col2}'] = df[col1] / (df[col2] + 1e-8)
+          return df
+
+      @staticmethod
+      def create_polynomial_features(
+          df: pd.DataFrame,
+          columns: list,
+          degree: int = 2
+      ) -> pd.DataFrame:
+          """Create polynomial features."""
+          from sklearn.preprocessing import PolynomialFeatures
+
+          poly = PolynomialFeatures(degree=degree, include_bias=False)
+          poly_features = poly.fit_transform(df[columns])
+
+          feature_names = poly.get_feature_names_out(columns)
+          poly_df = pd.DataFrame(poly_features, columns=feature_names)
+
+          return pd.concat([df, poly_df], axis=1)
+  ```
+
+  ## Model Training
+
+  ```python
+  # src/models/train.py
+  import pandas as pd
+  import numpy as np
+  from sklearn.ensemble import RandomForestClassifier
+  from sklearn.model_selection import cross_val_score
+  from sklearn.metrics import accuracy_score, classification_report
+  import joblib
+  from pathlib import Path
+
+  class ModelTrainer:
+      def __init__(self, model_dir: Path):
+          self.model_dir = model_dir
+          self.model = None
+
+      def train_random_forest(
+          self,
+          X_train: pd.DataFrame,
+          y_train: pd.Series,
+          **kwargs
+      ) -> RandomForestClassifier:
+          """Train a Random Forest classifier."""
+          default_params = {
+              'n_estimators': 100,
+              'max_depth': 10,
+              'min_samples_split': 5,
+              'min_samples_leaf': 2,
+              'random_state': 42,
+              'n_jobs': -1
+          }
+          params = {**default_params, **kwargs}
+
+          self.model = RandomForestClassifier(**params)
+          self.model.fit(X_train, y_train)
+
+          return self.model
+
+      def cross_validate(
+          self,
+          X: pd.DataFrame,
+          y: pd.Series,
+          cv: int = 5
+      ) -> dict:
+          """Perform cross-validation."""
+          scores = cross_val_score(
+              self.model,
+              X,
+              y,
+              cv=cv,
+              scoring='accuracy'
+          )
+
+          return {
+              'mean_score': scores.mean(),
+              'std_score': scores.std(),
+              'scores': scores
+          }
+
+      def evaluate(self, X_test: pd.DataFrame, y_test: pd.Series) -> dict:
+          """Evaluate model on test set."""
+          y_pred = self.model.predict(X_test)
+
+          return {
+              'accuracy': accuracy_score(y_test, y_pred),
+              'report': classification_report(y_test, y_pred)
+          }
+
+      def save_model(self, filename: str) -> None:
+          """Save trained model to disk."""
+          filepath = self.model_dir / filename
+          filepath.parent.mkdir(parents=True, exist_ok=True)
+          joblib.dump(self.model, filepath)
+
+      def load_model(self, filename: str) -> None:
+          """Load trained model from disk."""
+          filepath = self.model_dir / filename
+          self.model = joblib.load(filepath)
+  ```
+
+  ## Model Evaluation
+
+  ```python
+  # src/models/evaluate.py
+  import pandas as pd
+  import matplotlib.pyplot as plt
+  import seaborn as sns
+  from sklearn.metrics import confusion_matrix, roc_curve, auc
+  from sklearn.metrics import precision_recall_curve
+
+  class ModelEvaluator:
+      @staticmethod
+      def plot_confusion_matrix(y_true, y_pred, labels=None):
+          """Plot confusion matrix."""
+          cm = confusion_matrix(y_true, y_pred)
+
+          plt.figure(figsize=(8, 6))
+          sns.heatmap(
+              cm,
+              annot=True,
+              fmt='d',
+              cmap='Blues',
+              xticklabels=labels,
+              yticklabels=labels
+          )
+          plt.ylabel('True Label')
+          plt.xlabel('Predicted Label')
+          plt.title('Confusion Matrix')
+          plt.show()
+
+      @staticmethod
+      def plot_roc_curve(y_true, y_proba):
+          """Plot ROC curve."""
+          fpr, tpr, _ = roc_curve(y_true, y_proba)
+          roc_auc = auc(fpr, tpr)
+
+          plt.figure(figsize=(8, 6))
+          plt.plot(fpr, tpr, label=f'ROC curve (AUC = {roc_auc:.2f})')
+          plt.plot([0, 1], [0, 1], 'k--', label='Random')
+          plt.xlim([0.0, 1.0])
+          plt.ylim([0.0, 1.05])
+          plt.xlabel('False Positive Rate')
+          plt.ylabel('True Positive Rate')
+          plt.title('ROC Curve')
+          plt.legend(loc='lower right')
+          plt.show()
+
+      @staticmethod
+      def plot_feature_importance(model, feature_names, top_n=20):
+          """Plot feature importance."""
+          importances = pd.DataFrame({
+              'feature': feature_names,
+              'importance': model.feature_importances_
+          }).sort_values('importance', ascending=False).head(top_n)
+
+          plt.figure(figsize=(10, 8))
+          sns.barplot(data=importances, x='importance', y='feature')
+          plt.title(f'Top {top_n} Feature Importances')
+          plt.tight_layout()
+          plt.show()
+  ```
+
+  ## Jupyter Notebook Best Practices
+
+  ```python
+  # Notebook cell organization
+  # Cell 1: Imports
+  import pandas as pd
+  import numpy as np
+  import matplotlib.pyplot as plt
+  import seaborn as sns
+  from pathlib import Path
+
+  %matplotlib inline
+  plt.style.use('seaborn-v0_8')
+  sns.set_palette("husl")
+
+  # Cell 2: Configuration
+  DATA_DIR = Path('../data')
+  RANDOM_STATE = 42
+  TEST_SIZE = 0.2
+
+  # Cell 3: Load data
+  loader = DataLoader(DATA_DIR)
+  df = loader.load_raw_data('dataset.csv')
+
+  # Cell 4: Exploratory Data Analysis
+  print(df.info())
+  print(df.describe())
+  df.head()
+
+  # Cell 5: Visualizations
+  fig, axes = plt.subplots(2, 2, figsize=(15, 10))
+  # ... plotting code
+  ```
+
+  ## Testing
+
+  ```python
+  # tests/test_preprocessing.py
+  import pytest
+  import pandas as pd
+  import numpy as np
+  from src.data.preprocessing import DataPreprocessor
+
+  @pytest.fixture
+  def sample_data():
+      return pd.DataFrame({
+          'age': [25, 30, np.nan, 40],
+          'salary': [50000, np.nan, 70000, 80000],
+          'category': ['A', 'B', np.nan, 'A']
+      })
+
+  def test_handle_missing_values(sample_data):
+      preprocessor = DataPreprocessor()
+      result = preprocessor.handle_missing_values(sample_data)
+
+      assert result.isna().sum().sum() == 0
+
+  def test_encode_categorical(sample_data):
+      preprocessor = DataPreprocessor()
+      result = preprocessor.encode_categorical(
+          sample_data.fillna('Unknown'),
+          ['category']
+      )
+
+      assert result['category'].dtype == np.int64
+  ```
+
+  ## DVC for Data Version Control
+
+  ```yaml
+  # dvc.yaml
+  stages:
+    prepare:
+      cmd: python src/data/prepare.py
+      deps:
+      - data/raw/dataset.csv
+      - src/data/prepare.py
+      outs:
+      - data/processed/train.parquet
+      - data/processed/test.parquet
+
+    train:
+      cmd: python src/models/train.py
+      deps:
+      - data/processed/train.parquet
+      - src/models/train.py
+      params:
+      - train.n_estimators
+      - train.max_depth
+      outs:
+      - models/model.pkl
+      metrics:
+      - metrics/train.json
+  ```
+
+  ## Best Practices
+
+  ### Code Quality
+  - Use type hints for function parameters
+  - Write docstrings for all functions
+  - Follow PEP 8 style guide
+  - Use meaningful variable names
+  - Keep functions small and focused
+
+  ### Data Handling
+  - Use parquet format for processed data
+  - Version control data with DVC
+  - Never commit large data files to git
+  - Document data sources and transformations
+  - Validate data quality
+
+  ### Reproducibility
+  - Set random seeds for reproducibility
+  - Use virtual environments (venv, conda)
+  - Pin package versions in requirements.txt
+  - Document all preprocessing steps
+  - Save model artifacts and metadata
+
+variables:
+  DATA_DIR: ./data
+  MODEL_DIR: ./models
+  RANDOM_STATE: "42"

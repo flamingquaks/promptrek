@@ -1,0 +1,312 @@
+schema_version: 3.0.0
+metadata:
+  title: Nx Monorepo
+  description: Large-scale monorepo development with Nx
+  version: 1.0.0
+  author: PrompTrek
+  tags:
+    - nx
+    - monorepo
+    - typescript
+    - react
+
+content: |
+  # Nx Monorepo Development Guide
+
+  ## Monorepo Architecture
+
+  **Tech Stack:**
+  - Nx 18+
+  - TypeScript
+  - React for frontend apps
+  - NestJS for backend apps
+  - Shared libraries
+  - Jest for testing
+  - ESLint + Prettier
+
+  **Workspace Structure:**
+  ```
+  apps/
+    web/             # React web application
+    mobile/          # React Native app
+    api/             # NestJS API
+  libs/
+    shared/
+      ui/            # Shared UI components
+      utils/         # Shared utilities
+      types/         # Shared TypeScript types
+    feature/
+      auth/          # Authentication feature
+      users/         # Users feature
+  tools/             # Custom scripts and tools
+  ```
+
+  ## Nx Commands
+
+  ```bash
+  # Generate new application
+  nx g @nx/react:app web
+  nx g @nx/nest:app api
+
+  # Generate library
+  nx g @nx/react:lib ui --directory=shared
+  nx g @nx/js:lib utils --directory=shared
+
+  # Run application
+  nx serve web
+  nx serve api
+
+  # Build application
+  nx build web --prod
+  nx build api --prod
+
+  # Test
+  nx test web
+  nx test shared-ui
+  nx affected:test  # Test only affected projects
+
+  # Lint
+  nx lint web
+  nx affected:lint
+
+  # Run all targets for affected projects
+  nx affected --target=build
+  ```
+
+  ## Shared Library Example
+
+  ```typescript
+  // libs/shared/ui/src/lib/Button/Button.tsx
+  export interface ButtonProps {
+    variant?: 'primary' | 'secondary';
+    size?: 'sm' | 'md' | 'lg';
+    children: React.ReactNode;
+    onClick?: () => void;
+  }
+
+  export function Button({
+    variant = 'primary',
+    size = 'md',
+    children,
+    onClick,
+  }: ButtonProps) {
+    return (
+      <button
+        className={`btn btn-${variant} btn-${size}`}
+        onClick={onClick}
+      >
+        {children}
+      </button>
+    );
+  }
+  ```
+
+  ```typescript
+  // libs/shared/ui/src/index.ts
+  export * from './lib/Button/Button';
+  export * from './lib/Input/Input';
+  export * from './lib/Modal/Modal';
+  ```
+
+  ## Using Shared Libraries
+
+  ```typescript
+  // apps/web/src/app/app.tsx
+  import { Button } from '@myorg/shared/ui';
+  import { formatDate } from '@myorg/shared/utils';
+
+  export function App() {
+    return (
+      <div>
+        <h1>Welcome</h1>
+        <Button variant="primary" onClick={() => console.log('clicked')}>
+          Click Me
+        </Button>
+        <p>Today is {formatDate(new Date())}</p>
+      </div>
+    );
+  }
+  ```
+
+  ## Project Configuration
+
+  ```json
+  // apps/web/project.json
+  {
+    "name": "web",
+    "sourceRoot": "apps/web/src",
+    "projectType": "application",
+    "targets": {
+      "build": {
+        "executor": "@nx/webpack:webpack",
+        "options": {
+          "outputPath": "dist/apps/web"
+        },
+        "configurations": {
+          "production": {
+            "optimization": true,
+            "sourceMap": false
+          }
+        }
+      },
+      "serve": {
+        "executor": "@nx/webpack:dev-server",
+        "options": {
+          "buildTarget": "web:build",
+          "port": 4200
+        }
+      },
+      "test": {
+        "executor": "@nx/jest:jest",
+        "options": {
+          "jestConfig": "apps/web/jest.config.ts"
+        }
+      }
+    }
+  }
+  ```
+
+  ## Dependency Graph Management
+
+  ### Enforce Module Boundaries
+  ```json
+  // .eslintrc.json
+  {
+    "overrides": [
+      {
+        "files": ["*.ts", "*.tsx"],
+        "rules": {
+          "@nx/enforce-module-boundaries": [
+            "error",
+            {
+              "allow": [],
+              "depConstraints": [
+                {
+                  "sourceTag": "type:app",
+                  "onlyDependOnLibsWithTags": ["type:feature", "type:ui", "type:util"]
+                },
+                {
+                  "sourceTag": "type:feature",
+                  "onlyDependOnLibsWithTags": ["type:ui", "type:util"]
+                },
+                {
+                  "sourceTag": "type:ui",
+                  "onlyDependOnLibsWithTags": ["type:util"]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  }
+  ```
+
+  ## Tagging Projects
+
+  ```json
+  // libs/shared/ui/project.json
+  {
+    "name": "shared-ui",
+    "tags": ["type:ui", "scope:shared"]
+  }
+  ```
+
+  ```json
+  // apps/web/project.json
+  {
+    "name": "web",
+    "tags": ["type:app", "scope:web"]
+  }
+  ```
+
+  ## Code Generation
+
+  ```typescript
+  // tools/generators/feature/index.ts
+  import { Tree, generateFiles, joinPathFragments } from '@nx/devkit';
+
+  export async function featureGenerator(tree: Tree, options: { name: string }) {
+    const templatePath = joinPathFragments(__dirname, './files');
+    const targetPath = `libs/feature/${options.name}`;
+
+    generateFiles(tree, templatePath, targetPath, {
+      name: options.name,
+      tmpl: '',
+    });
+  }
+  ```
+
+  ## Testing Strategy
+
+  ### Unit Tests
+  ```typescript
+  // libs/shared/utils/src/lib/format.spec.ts
+  import { formatDate } from './format';
+
+  describe('formatDate', () => {
+    it('should format date correctly', () => {
+      const date = new Date('2024-01-15');
+      expect(formatDate(date)).toBe('January 15, 2024');
+    });
+  });
+  ```
+
+  ### Integration Tests
+  ```typescript
+  // apps/web/src/app/app.spec.tsx
+  import { render } from '@testing-library/react';
+  import App from './app';
+
+  describe('App', () => {
+    it('should render successfully', () => {
+      const { baseElement } = render(<App />);
+      expect(baseElement).toBeTruthy();
+    });
+  });
+  ```
+
+  ## CI/CD with Nx
+
+  ```yaml
+  # .github/workflows/ci.yml
+  name: CI
+  on: [push, pull_request]
+
+  jobs:
+    main:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v3
+          with:
+            fetch-depth: 0
+        - uses: actions/setup-node@v3
+        - run: npm ci
+        - run: npx nx affected --target=lint --base=origin/main
+        - run: npx nx affected --target=test --base=origin/main
+        - run: npx nx affected --target=build --base=origin/main
+  ```
+
+  ## Best Practices
+
+  ### Library Organization
+  - Keep libraries small and focused
+  - Use tags to enforce boundaries
+  - Create buildable libraries for faster builds
+  - Use path mappings in tsconfig.json
+
+  ### Performance
+  - Enable Nx Cloud for distributed caching
+  - Use `affected` commands in CI
+  - Configure task dependencies properly
+  - Enable parallel execution
+
+  ### Code Sharing
+  - Share types through dedicated library
+  - Extract common utilities early
+  - Create feature libraries for domains
+  - Use generator for consistency
+
+variables:
+  NX_CLOUD_TOKEN: your-cloud-token
+  ORG_NAME: myorg

@@ -1,0 +1,385 @@
+schema_version: 3.0.0
+metadata:
+  title: Go Backend Service
+  description: Production-grade Go backend service with clean architecture
+  version: 1.0.0
+  author: PrompTrek
+  tags:
+    - golang
+    - backend
+    - microservices
+    - api
+
+content: |
+  # Go Backend Development Guide
+
+  ## Project Architecture
+
+  **Tech Stack:**
+  - Go 1.21+
+  - Gin for HTTP framework
+  - GORM for ORM
+  - PostgreSQL database
+  - Redis for caching
+  - Wire for dependency injection
+  - Testify for testing
+
+  **Clean Architecture Structure:**
+  ```
+  cmd/
+    server/          # Application entry point
+  internal/
+    domain/          # Business entities
+    usecase/         # Business logic
+    repository/      # Data access layer
+    delivery/
+      http/          # HTTP handlers
+      grpc/          # gRPC handlers
+    middleware/      # HTTP middleware
+  pkg/
+    database/        # Database setup
+    logger/          # Logging utilities
+    validator/       # Input validation
+  config/            # Configuration
+  ```
+
+  ## Domain Layer
+
+  ```go
+  // internal/domain/user.go
+  package domain
+
+  import (
+      "context"
+      "time"
+  )
+
+  type User struct {
+      ID        uint      `json:"id"`
+      Email     string    `json:"email"`
+      Name      string    `json:"name"`
+      CreatedAt time.Time `json:"created_at"`
+      UpdatedAt time.Time `json:"updated_at"`
+  }
+
+  type UserRepository interface {
+      Create(ctx context.Context, user *User) error
+      GetByID(ctx context.Context, id uint) (*User, error)
+      GetByEmail(ctx context.Context, email string) (*User, error)
+      Update(ctx context.Context, user *User) error
+      Delete(ctx context.Context, id uint) error
+  }
+
+  type UserUsecase interface {
+      Register(ctx context.Context, req *RegisterRequest) (*User, error)
+      GetProfile(ctx context.Context, userID uint) (*User, error)
+      UpdateProfile(ctx context.Context, userID uint, req *UpdateRequest) (*User, error)
+  }
+  ```
+
+  ## Repository Layer
+
+  ```go
+  // internal/repository/user_repository.go
+  package repository
+
+  import (
+      "context"
+      "myapp/internal/domain"
+      "gorm.io/gorm"
+  )
+
+  type userRepository struct {
+      db *gorm.DB
+  }
+
+  func NewUserRepository(db *gorm.DB) domain.UserRepository {
+      return &userRepository{db: db}
+  }
+
+  func (r *userRepository) Create(ctx context.Context, user *domain.User) error {
+      return r.db.WithContext(ctx).Create(user).Error
+  }
+
+  func (r *userRepository) GetByID(ctx context.Context, id uint) (*domain.User, error) {
+      var user domain.User
+      err := r.db.WithContext(ctx).First(&user, id).Error
+      if err != nil {
+          return nil, err
+      }
+      return &user, nil
+  }
+
+  func (r *userRepository) GetByEmail(ctx context.Context, email string) (*domain.User, error) {
+      var user domain.User
+      err := r.db.WithContext(ctx).Where("email = ?", email).First(&user).Error
+      if err != nil {
+          return nil, err
+      }
+      return &user, nil
+  }
+  ```
+
+  ## Usecase Layer
+
+  ```go
+  // internal/usecase/user_usecase.go
+  package usecase
+
+  import (
+      "context"
+      "errors"
+      "myapp/internal/domain"
+      "golang.org/x/crypto/bcrypt"
+  )
+
+  type userUsecase struct {
+      userRepo domain.UserRepository
+  }
+
+  func NewUserUsecase(userRepo domain.UserRepository) domain.UserUsecase {
+      return &userUsecase{
+          userRepo: userRepo,
+      }
+  }
+
+  func (u *userUsecase) Register(ctx context.Context, req *domain.RegisterRequest) (*domain.User, error) {
+      // Check if user exists
+      existing, _ := u.userRepo.GetByEmail(ctx, req.Email)
+      if existing != nil {
+          return nil, errors.New("email already registered")
+      }
+
+      // Hash password
+      hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+      if err != nil {
+          return nil, err
+      }
+
+      // Create user
+      user := &domain.User{
+          Email:    req.Email,
+          Name:     req.Name,
+          Password: string(hashedPassword),
+      }
+
+      if err := u.userRepo.Create(ctx, user); err != nil {
+          return nil, err
+      }
+
+      return user, nil
+  }
+  ```
+
+  ## HTTP Delivery Layer
+
+  ```go
+  // internal/delivery/http/user_handler.go
+  package http
+
+  import (
+      "net/http"
+      "strconv"
+      "myapp/internal/domain"
+      "github.com/gin-gonic/gin"
+  )
+
+  type UserHandler struct {
+      userUsecase domain.UserUsecase
+  }
+
+  func NewUserHandler(r *gin.RouterGroup, uc domain.UserUsecase) {
+      handler := &UserHandler{
+          userUsecase: uc,
+      }
+
+      r.POST("/register", handler.Register)
+      r.GET("/profile/:id", handler.GetProfile)
+      r.PUT("/profile/:id", handler.UpdateProfile)
+  }
+
+  func (h *UserHandler) Register(c *gin.Context) {
+      var req domain.RegisterRequest
+      if err := c.ShouldBindJSON(&req); err != nil {
+          c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+          return
+      }
+
+      user, err := h.userUsecase.Register(c.Request.Context(), &req)
+      if err != nil {
+          c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+          return
+      }
+
+      c.JSON(http.StatusCreated, user)
+  }
+
+  func (h *UserHandler) GetProfile(c *gin.Context) {
+      id, err := strconv.ParseUint(c.Param("id"), 10, 32)
+      if err != nil {
+          c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+          return
+      }
+
+      user, err := h.userUsecase.GetProfile(c.Request.Context(), uint(id))
+      if err != nil {
+          c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+          return
+      }
+
+      c.JSON(http.StatusOK, user)
+  }
+  ```
+
+  ## Middleware
+
+  ```go
+  // internal/middleware/auth.go
+  package middleware
+
+  import (
+      "net/http"
+      "strings"
+      "github.com/gin-gonic/gin"
+      "github.com/golang-jwt/jwt/v5"
+  )
+
+  func AuthMiddleware(secret string) gin.HandlerFunc {
+      return func(c *gin.Context) {
+          authHeader := c.GetHeader("Authorization")
+          if authHeader == "" {
+              c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "missing token"})
+              return
+          }
+
+          tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+          token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+              return []byte(secret), nil
+          })
+
+          if err != nil || !token.Valid {
+              c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
+              return
+          }
+
+          claims := token.Claims.(jwt.MapClaims)
+          c.Set("user_id", claims["user_id"])
+          c.Next()
+      }
+  }
+  ```
+
+  ## Main Application
+
+  ```go
+  // cmd/server/main.go
+  package main
+
+  import (
+      "log"
+      "myapp/config"
+      "myapp/internal/delivery/http"
+      "myapp/pkg/database"
+      "github.com/gin-gonic/gin"
+  )
+
+  func main() {
+      // Load config
+      cfg := config.Load()
+
+      // Initialize database
+      db, err := database.NewPostgresDB(cfg.DatabaseURL)
+      if err != nil {
+          log.Fatal("Failed to connect to database:", err)
+      }
+
+      // Initialize dependencies (using Wire or manual)
+      userRepo := repository.NewUserRepository(db)
+      userUsecase := usecase.NewUserUsecase(userRepo)
+
+      // Setup Gin router
+      r := gin.Default()
+      r.Use(middleware.Logger())
+      r.Use(middleware.Recovery())
+
+      // API routes
+      api := r.Group("/api/v1")
+      {
+          http.NewUserHandler(api.Group("/users"), userUsecase)
+      }
+
+      // Start server
+      if err := r.Run(cfg.ServerAddress); err != nil {
+          log.Fatal("Failed to start server:", err)
+      }
+  }
+  ```
+
+  ## Testing
+
+  ```go
+  // internal/usecase/user_usecase_test.go
+  package usecase_test
+
+  import (
+      "context"
+      "testing"
+      "myapp/internal/domain"
+      "myapp/internal/domain/mocks"
+      "github.com/stretchr/testify/assert"
+      "github.com/stretchr/testify/mock"
+  )
+
+  func TestRegister(t *testing.T) {
+      mockRepo := new(mocks.UserRepository)
+      usecase := usecase.NewUserUsecase(mockRepo)
+
+      req := &domain.RegisterRequest{
+          Email:    "test@example.com",
+          Name:     "Test User",
+          Password: "password123",
+      }
+
+      mockRepo.On("GetByEmail", mock.Anything, req.Email).Return(nil, nil)
+      mockRepo.On("Create", mock.Anything, mock.AnythingOfType("*domain.User")).Return(nil)
+
+      user, err := usecase.Register(context.Background(), req)
+
+      assert.NoError(t, err)
+      assert.NotNil(t, user)
+      assert.Equal(t, req.Email, user.Email)
+      mockRepo.AssertExpectations(t)
+  }
+  ```
+
+  ## Best Practices
+
+  ### Code Organization
+  - Follow clean architecture principles
+  - Keep domain layer free of external dependencies
+  - Use interfaces for dependency inversion
+  - Separate concerns clearly
+
+  ### Error Handling
+  - Define custom error types
+  - Use errors.Is() and errors.As() for error checking
+  - Wrap errors with context using fmt.Errorf()
+  - Return errors, don't panic
+
+  ### Concurrency
+  - Use goroutines for concurrent operations
+  - Use channels for communication
+  - Always handle context cancellation
+  - Avoid shared mutable state
+
+  ### Performance
+  - Use connection pooling for database
+  - Implement caching with Redis
+  - Use prepared statements
+  - Profile with pprof
+
+variables:
+  DATABASE_URL: postgres://user:pass@localhost:5432/mydb
+  REDIS_URL: redis://localhost:6379
+  JWT_SECRET: your-secret-key
+  SERVER_PORT: "8080"

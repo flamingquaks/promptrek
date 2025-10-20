@@ -53,24 +53,6 @@ variables:
   PROJECT_NAME: "my-react-app"
 ```
 
-<details>
-<summary>📚 Click to see v1 format (legacy)</summary>
-
-```yaml
-schema_version: "1.0.0"
-metadata:
-  title: "My Project Assistant"
-  description: "AI assistant for React TypeScript project"
-targets: [copilot, cursor, continue]
-instructions:
-  general:
-    - "Use TypeScript for all new files"
-    - "Follow React functional component patterns"
-    - "Write comprehensive tests"
-```
-
-</details>
-
 2. Generate editor-specific prompts:
 ```bash
 # Generate for GitHub Copilot
