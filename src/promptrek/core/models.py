@@ -136,16 +136,15 @@ class DocumentConfig(BaseModel):
 
     # Metadata fields (reusable across editors)
     description: Optional[str] = Field(
-        default=None,
-        description="Human-readable description (used by Cursor, etc.)"
+        default=None, description="Human-readable description (used by Cursor, etc.)"
     )
     file_globs: Optional[str] = Field(
         default=None,
-        description="File patterns where this applies (e.g., '**/*.{ts,tsx}'). Used by Cursor, Copilot path-specific rules."
+        description="File patterns where this applies (e.g., '**/*.{ts,tsx}'). Used by Cursor, Copilot path-specific rules.",
     )
     always_apply: Optional[bool] = Field(
         default=None,
-        description="Whether to always apply this rule (Cursor alwaysApply). If false with file_globs, auto-attaches to matching files."
+        description="Whether to always apply this rule (Cursor alwaysApply). If false with file_globs, auto-attaches to matching files.",
     )
 
 
@@ -309,11 +308,10 @@ class UniversalPromptV2(BaseModel):
     content: str = Field(..., description="Main markdown content")
     content_description: Optional[str] = Field(
         default=None,
-        description="Description for main content (used in editor frontmatter)"
+        description="Description for main content (used in editor frontmatter)",
     )
     content_always_apply: Optional[bool] = Field(
-        default=None,
-        description="Whether main content always applies (default: True)"
+        default=None, description="Whether main content always applies (default: True)"
     )
     documents: Optional[List[DocumentConfig]] = Field(
         default=None, description="Additional documents for multi-file editors"
@@ -365,11 +363,10 @@ class UniversalPromptV3(BaseModel):
     content: str = Field(..., description="Main markdown content")
     content_description: Optional[str] = Field(
         default=None,
-        description="Description for main content (used in editor frontmatter)"
+        description="Description for main content (used in editor frontmatter)",
     )
     content_always_apply: Optional[bool] = Field(
-        default=None,
-        description="Whether main content always applies (default: True)"
+        default=None, description="Whether main content always applies (default: True)"
     )
     documents: Optional[List[DocumentConfig]] = Field(
         default=None, description="Additional documents for multi-file editors"

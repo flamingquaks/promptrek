@@ -336,7 +336,10 @@ class TestCursorAdapter(TestAdapterBase):
         assert adapter._infer_globs_from_name("typescript") == "**/*.{ts,tsx}"
         assert adapter._infer_globs_from_name("python") == "**/*.{py,pyi}"
         assert adapter._infer_globs_from_name("testing") == "**/*.{test,spec}.*"
-        assert adapter._infer_globs_from_name("code-style") == "**/*.{py,js,ts,tsx,jsx,go,rs,java,cpp,c,h}"
+        assert (
+            adapter._infer_globs_from_name("code-style")
+            == "**/*.{py,js,ts,tsx,jsx,go,rs,java,cpp,c,h}"
+        )
         assert adapter._infer_globs_from_name("unknown") is None
 
     def test_generate_v2_default_metadata(self, adapter):

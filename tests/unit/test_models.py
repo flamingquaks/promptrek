@@ -433,19 +433,22 @@ class TestModelsAdditional:
         assert import_config.path == "../shared.promptrek.yaml"
         assert import_config.prefix == "shared"
 
-    def test_document_config_with_frontmatter(self):
-        """Test DocumentConfig with frontmatter."""
+    def test_document_config_with_metadata(self):
+        """Test DocumentConfig with metadata fields."""
         from promptrek.core.models import DocumentConfig
 
         doc = DocumentConfig(
             name="test-doc",
             content="# Test content",
-            frontmatter={"key": "value", "nested": {"data": "test"}},
+            description="Test document guidelines",
+            file_globs="**/*.{ts,tsx}",
+            always_apply=False,
         )
 
         assert doc.name == "test-doc"
-        assert doc.frontmatter["key"] == "value"
-        assert doc.frontmatter["nested"]["data"] == "test"
+        assert doc.description == "Test document guidelines"
+        assert doc.file_globs == "**/*.{ts,tsx}"
+        assert doc.always_apply is False
 
     def test_universal_prompt_full_v1(self):
         """Test UniversalPrompt v1 with all fields."""
@@ -526,12 +529,18 @@ class TestDocumentConfigEdgeCases:
         """Test document with minimal fields."""
         doc = DocumentConfig(name="test", content="# Content")
         assert doc.name == "test"
-        assert doc.frontmatter is None
+        assert doc.description is None
+        assert doc.file_globs is None
+        assert doc.always_apply is None
 
-    def test_document_with_empty_frontmatter(self):
-        """Test document with empty frontmatter dict."""
-        doc = DocumentConfig(name="test", content="# Content", frontmatter={})
-        assert doc.frontmatter == {}
+    def test_document_with_partial_metadata(self):
+        """Test document with partial metadata fields."""
+        doc = DocumentConfig(
+            name="test", content="# Content", description="Test guidelines"
+        )
+        assert doc.description == "Test guidelines"
+        assert doc.file_globs is None
+        assert doc.always_apply is None
 
 
 class TestInstructionsEdgeCases:

@@ -180,7 +180,9 @@ class TestCursorAdapterComprehensive:
 
         files = adapter.generate(prompt, tmp_path)
 
-        assert len(files) == 2
+        # Should generate index.mdc + doc1.mdc + doc2.mdc = 3 files
+        assert len(files) == 3
+        assert any("index.mdc" in str(f) for f in files)
         assert any("doc1" in str(f) for f in files)
         assert any("doc2" in str(f) for f in files)
 

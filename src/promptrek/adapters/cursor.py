@@ -86,19 +86,23 @@ class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
         created_files = []
 
         # Generate main index.mdc from content field
-        main_description = prompt.content_description or "Project overview and core guidelines"
-        main_always_apply = prompt.content_always_apply if prompt.content_always_apply is not None else True
+        main_description = (
+            prompt.content_description or "Project overview and core guidelines"
+        )
+        main_always_apply = (
+            prompt.content_always_apply
+            if prompt.content_always_apply is not None
+            else True
+        )
 
         main_frontmatter = self._build_cursor_frontmatter(
             description=main_description,
             always_apply=main_always_apply,
-            file_globs=None  # Main content doesn't use globs
+            file_globs=None,  # Main content doesn't use globs
         )
 
         main_content = self._build_mdc_file(
-            frontmatter=main_frontmatter,
-            content=prompt.content,
-            variables=variables
+            frontmatter=main_frontmatter, content=prompt.content, variables=variables
         )
 
         index_file = rules_dir / "index.mdc"
@@ -106,7 +110,11 @@ class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
         if dry_run:
             click.echo(f"  📁 Would create: {index_file}")
             if verbose:
-                preview = main_content[:200] + "..." if len(main_content) > 200 else main_content
+                preview = (
+                    main_content[:200] + "..."
+                    if len(main_content) > 200
+                    else main_content
+                )
                 click.echo(f"    {preview}")
             created_files.append(index_file)
         else:
@@ -121,7 +129,9 @@ class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
             for doc in prompt.documents:
                 # Build frontmatter with metadata-driven defaults
                 doc_description = doc.description or f"{doc.name} guidelines"
-                doc_always_apply = doc.always_apply if doc.always_apply is not None else False
+                doc_always_apply = (
+                    doc.always_apply if doc.always_apply is not None else False
+                )
 
                 # Use explicit file_globs or infer from name
                 doc_globs = doc.file_globs or self._infer_globs_from_name(doc.name)
@@ -129,23 +139,29 @@ class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
                 doc_frontmatter = self._build_cursor_frontmatter(
                     description=doc_description,
                     always_apply=doc_always_apply,
-                    file_globs=doc_globs
+                    file_globs=doc_globs,
                 )
 
                 doc_content = self._build_mdc_file(
                     frontmatter=doc_frontmatter,
                     content=doc.content,
-                    variables=variables
+                    variables=variables,
                 )
 
                 # Generate filename from document name
-                filename = f"{doc.name}.mdc" if not doc.name.endswith(".mdc") else doc.name
+                filename = (
+                    f"{doc.name}.mdc" if not doc.name.endswith(".mdc") else doc.name
+                )
                 output_file = rules_dir / filename
 
                 if dry_run:
                     click.echo(f"  📁 Would create: {output_file}")
                     if verbose:
-                        preview = doc_content[:200] + "..." if len(doc_content) > 200 else doc_content
+                        preview = (
+                            doc_content[:200] + "..."
+                            if len(doc_content) > 200
+                            else doc_content
+                        )
                         click.echo(f"    {preview}")
                     created_files.append(output_file)
                 else:
@@ -597,16 +613,16 @@ class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
         self, description: str, always_apply: bool, file_globs: Optional[str]
     ) -> Dict[str, Any]:
         """Build Cursor MDC frontmatter from metadata fields."""
-        fm = {
-            "description": description,
-            "alwaysApply": always_apply
-        }
+        fm = {"description": description, "alwaysApply": always_apply}
         if file_globs:
             fm["globs"] = file_globs
         return fm
 
     def _build_mdc_file(
-        self, frontmatter: Dict[str, Any], content: str, variables: Optional[Dict[str, Any]]
+        self,
+        frontmatter: Dict[str, Any],
+        content: str,
+        variables: Optional[Dict[str, Any]],
     ) -> str:
         """Build complete .mdc file with YAML frontmatter and content."""
         lines = ["---"]
@@ -614,9 +630,9 @@ class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
             if isinstance(value, str):
                 lines.append(f'{key}: "{value}"')
             elif isinstance(value, bool):
-                lines.append(f'{key}: {str(value).lower()}')
+                lines.append(f"{key}: {str(value).lower()}")
             else:
-                lines.append(f'{key}: {value}')
+                lines.append(f"{key}: {value}")
         lines.append("---")
         lines.append("")
 
