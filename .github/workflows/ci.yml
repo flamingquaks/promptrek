@@ -275,4 +275,15 @@ jobs:
             exit 0
           fi
 
-          echo "CI completed successfully"
+          # Verify both critical jobs succeeded
+          if [ "${{ needs.build.result }}" = "success" ] && \
+             [ "${{ needs.test-primary.result }}" = "success" ]; then
+            echo "CI completed successfully"
+            exit 0
+          fi
+
+          # Handle unexpected statuses
+          echo "CI completed with unexpected status"
+          echo "Build: ${{ needs.build.result }}"
+          echo "Primary Tests: ${{ needs.test-primary.result }}"
+          exit 1
