@@ -562,3 +562,4 @@ promptrek generate --editor claude --output ./output project.promptrek.yaml
 
 # Incorrect  
 - if: "EDITOR = \"claude\""  # Single = instead of ==
+```

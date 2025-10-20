@@ -85,15 +85,68 @@ class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
         rules_dir = output_dir / ".cursor" / "rules"
         created_files = []
 
+        # Generate main index.mdc from content field
+        main_description = (
+            prompt.content_description or "Project overview and core guidelines"
+        )
+        main_always_apply = (
+            prompt.content_always_apply
+            if prompt.content_always_apply is not None
+            else True
+        )
+
+        main_frontmatter = self._build_cursor_frontmatter(
+            description=main_description,
+            always_apply=main_always_apply,
+            file_globs=None,  # Main content doesn't use globs
+        )
+
+        main_content = self._build_mdc_file(
+            frontmatter=main_frontmatter, content=prompt.content, variables=variables
+        )
+
+        index_file = rules_dir / "index.mdc"
+
+        if dry_run:
+            click.echo(f"  📁 Would create: {index_file}")
+            if verbose:
+                preview = (
+                    main_content[:200] + "..."
+                    if len(main_content) > 200
+                    else main_content
+                )
+                click.echo(f"    {preview}")
+            created_files.append(index_file)
+        else:
+            rules_dir.mkdir(parents=True, exist_ok=True)
+            with open(index_file, "w", encoding="utf-8") as f:
+                f.write(main_content)
+            click.echo(f"✅ Generated: {index_file}")
+            created_files.append(index_file)
+
         # If documents field is present, generate separate rule files
         if prompt.documents:
             for doc in prompt.documents:
-                # Apply variable substitution
-                content = doc.content
-                if variables:
-                    for var_name, var_value in variables.items():
-                        placeholder = "{{{ " + var_name + " }}}"
-                        content = content.replace(placeholder, var_value)
+                # Build frontmatter with metadata-driven defaults
+                doc_description = doc.description or f"{doc.name} guidelines"
+                doc_always_apply = (
+                    doc.always_apply if doc.always_apply is not None else False
+                )
+
+                # Use explicit file_globs or infer from name
+                doc_globs = doc.file_globs or self._infer_globs_from_name(doc.name)
+
+                doc_frontmatter = self._build_cursor_frontmatter(
+                    description=doc_description,
+                    always_apply=doc_always_apply,
+                    file_globs=doc_globs,
+                )
+
+                doc_content = self._build_mdc_file(
+                    frontmatter=doc_frontmatter,
+                    content=doc.content,
+                    variables=variables,
+                )
 
                 # Generate filename from document name
                 filename = (
@@ -105,38 +158,18 @@ class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
                     click.echo(f"  📁 Would create: {output_file}")
                     if verbose:
                         preview = (
-                            content[:200] + "..." if len(content) > 200 else content
+                            doc_content[:200] + "..."
+                            if len(doc_content) > 200
+                            else doc_content
                         )
                         click.echo(f"    {preview}")
                     created_files.append(output_file)
                 else:
                     rules_dir.mkdir(parents=True, exist_ok=True)
                     with open(output_file, "w", encoding="utf-8") as f:
-                        f.write(content)
+                        f.write(doc_content)
                     click.echo(f"✅ Generated: {output_file}")
                     created_files.append(output_file)
-        else:
-            # No documents, use main content as index.mdc
-            content = prompt.content
-            if variables:
-                for var_name, var_value in variables.items():
-                    placeholder = "{{{ " + var_name + " }}}"
-                    content = content.replace(placeholder, var_value)
-
-            output_file = rules_dir / "index.mdc"
-
-            if dry_run:
-                click.echo(f"  📁 Would create: {output_file}")
-                if verbose:
-                    preview = content[:200] + "..." if len(content) > 200 else content
-                    click.echo(f"    {preview}")
-                created_files.append(output_file)
-            else:
-                rules_dir.mkdir(parents=True, exist_ok=True)
-                with open(output_file, "w", encoding="utf-8") as f:
-                    f.write(content)
-                click.echo(f"✅ Generated: {output_file}")
-                created_files.append(output_file)
 
         # Generate plugin files for v2.1/v3.0
         if isinstance(prompt, (UniversalPromptV2, UniversalPromptV3)):
@@ -575,6 +608,55 @@ class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
     def supports_conditionals(self) -> bool:
         """Cursor supports conditional instructions."""
         return True
+
+    def _build_cursor_frontmatter(
+        self, description: str, always_apply: bool, file_globs: Optional[str]
+    ) -> Dict[str, Any]:
+        """Build Cursor MDC frontmatter from metadata fields."""
+        fm = {"description": description, "alwaysApply": always_apply}
+        if file_globs:
+            fm["globs"] = file_globs
+        return fm
+
+    def _build_mdc_file(
+        self,
+        frontmatter: Dict[str, Any],
+        content: str,
+        variables: Optional[Dict[str, Any]],
+    ) -> str:
+        """Build complete .mdc file with YAML frontmatter and content."""
+        lines = ["---"]
+        for key, value in frontmatter.items():
+            if isinstance(value, str):
+                lines.append(f'{key}: "{value}"')
+            elif isinstance(value, bool):
+                lines.append(f"{key}: {str(value).lower()}")
+            else:
+                lines.append(f"{key}: {value}")
+        lines.append("---")
+        lines.append("")
+
+        # Apply variable substitution to content
+        if variables:
+            for var_name, var_value in variables.items():
+                placeholder = "{{{ " + var_name + " }}}"
+                content = content.replace(placeholder, var_value)
+
+        lines.append(content)
+        return "\n".join(lines)
+
+    def _infer_globs_from_name(self, name: str) -> Optional[str]:
+        """Infer file globs from document name."""
+        patterns = {
+            "typescript": "**/*.{ts,tsx}",
+            "javascript": "**/*.{js,jsx}",
+            "python": "**/*.{py,pyi}",
+            "testing": "**/*.{test,spec}.*",
+            "code-style": "**/*.{py,js,ts,tsx,jsx,go,rs,java,cpp,c,h}",
+            "security": "**/*.{py,js,ts,tsx,jsx,go,rs,java,cpp,c,h}",
+            "performance": "**/*.{py,js,ts,tsx,jsx,go,rs,java,cpp,c,h}",
+        }
+        return patterns.get(name.lower())
 
     def _build_mdc_content(
         self, title: str, instructions: List[str], globs: str, description: str
