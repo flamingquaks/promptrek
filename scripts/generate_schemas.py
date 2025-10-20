@@ -53,7 +53,7 @@ def main():
         UniversalPromptV3,
         schema_dir / "v3.0.json",
         "Universal Prompt Format v3.0",
-        "JSON Schema for Universal Prompt Format version 3.0 - Top-level plugin fields and plugin marketplace support",
+        "JSON Schema for Universal Prompt Format version 3.0 - Top-level plugin fields (mcp_servers, commands, agents, hooks)",
     )
     
     print(f"\nAll schemas generated in: {schema_dir}")
