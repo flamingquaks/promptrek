@@ -515,7 +515,7 @@
     }
   },
   "additionalProperties": false,
-  "description": "JSON Schema for Universal Prompt Format version 3.0 - Top-level plugin fields and plugin marketplace support",
+  "description": "JSON Schema for Universal Prompt Format version 3.0 - Top-level plugin fields (mcp_servers, commands, agents, hooks)",
   "properties": {
     "schema_version": {
       "description": "UPF schema version (3.x.x)",
