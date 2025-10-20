@@ -110,7 +110,6 @@ ignore_editor_files: false
 ### Developer Resources
 For technical architecture and development planning, see the developer documentation on our website:
 - [System Architecture](https://flamingquaks.github.io/promptrek/developer/architecture.html) - Technical design and structure
-- [Implementation Roadmap](https://flamingquaks.github.io/promptrek/developer/roadmap.html) - Development status and future plans
 - [Project Structure](https://flamingquaks.github.io/promptrek/developer/project-structure.html) - Repository organization
 - [Changelog Process](https://flamingquaks.github.io/promptrek/developer/changelog-process.html) - Contribution guidelines
 - [Pre-commit Implementation](https://flamingquaks.github.io/promptrek/developer/pre-commit-implementation.html) - Technical implementation details
@@ -458,8 +457,6 @@ docs(readme): update installation instructions
 
 All commit messages are validated in CI. See [Changelog Process](https://flamingquaks.github.io/promptrek/developer/changelog-process.html) for detailed guidelines.
 
-See the [Implementation Roadmap](https://flamingquaks.github.io/promptrek/developer/roadmap.html) for planned features and current progress.
-
 ## 🧪 Testing and Quality Assurance
 
 PrompTrek maintains high quality standards with comprehensive testing:
@@ -533,7 +530,6 @@ For contribution guidelines, see [CONTRIBUTING.md](./.github/CONTRIBUTING.md).
 - **[Getting Started Guide](./GETTING_STARTED.md)** - Comprehensive setup and usage guide
 - **[Advanced Template Features](https://flamingquaks.github.io/promptrek/user-guide/advanced-features.html)** - Variables, conditionals, and imports
 - **[Editor Adapters](https://flamingquaks.github.io/promptrek/user-guide/adapters.html)** - Detailed guide to all supported AI editors
-- **[Implementation Roadmap](https://flamingquaks.github.io/promptrek/developer/roadmap.html)** - Development progress and plans
 
 ### Key Features
 

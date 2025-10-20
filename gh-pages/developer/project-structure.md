@@ -36,7 +36,6 @@ promptrek/
 │   ├── EDITOR_RESEARCH.md       # Editor research and findings
 │   ├── ARCHITECTURE.md          # System architecture
 │   ├── UPF_SPECIFICATION.md     # Universal Prompt Format spec
-│   ├── IMPLEMENTATION_ROADMAP.md # Development roadmap
 │   ├── USER_GUIDE.md            # User documentation
 │   ├── DEVELOPER_GUIDE.md       # Developer documentation
 │   ├── EDITOR_GUIDES/           # Editor-specific guides
@@ -234,7 +233,6 @@ docs/
 │   ├── EDITOR_RESEARCH.md
 │   ├── ARCHITECTURE.md
 │   ├── UPF_SPECIFICATION.md
-│   └── IMPLEMENTATION_ROADMAP.md
 ├── user/                    # User documentation
 │   ├── USER_GUIDE.md
 │   ├── QUICK_START.md

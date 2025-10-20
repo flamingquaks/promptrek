@@ -391,6 +391,3 @@ For comprehensive development workflows using uv, see [UV Workflows Guide](./doc
 - Path-specific configurations with glob patterns
 - Technology detection and best practices integration
 
-## Contributing
-
-This project is in active development. See the planning documents in `docs/` for roadmap and architecture details.

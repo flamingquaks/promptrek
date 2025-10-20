@@ -69,7 +69,6 @@ Found a bug? Help us fix it!
 
 Have an idea for a new feature?
 
-1. **Check the roadmap** in our [Implementation Roadmap](https://flamingquaks.github.io/promptrek/developer/roadmap.html)
 2. **Search existing issues** for similar requests
 3. **Create a feature request** using our template
 4. **Describe the use case** and expected benefits
@@ -338,7 +337,6 @@ Contributors are recognized in:
 
 ## 🔗 Useful Resources
 
-- [Implementation Roadmap](https://flamingquaks.github.io/promptrek/developer/roadmap.html)
 - [System Architecture](https://flamingquaks.github.io/promptrek/developer/architecture.html)
 - [UPF Specification](https://flamingquaks.github.io/promptrek/user-guide/upf-specification.html)
 - [Project Structure](https://flamingquaks.github.io/promptrek/developer/project-structure.html)
