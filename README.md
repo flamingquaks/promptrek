@@ -119,7 +119,7 @@ For technical architecture and development planning, see the developer documenta
 
 ### ✅ All Implemented
 - **GitHub Copilot** - `.github/copilot-instructions.md`, `.github/instructions/*.instructions.md`, `.github/prompts/*.prompt.md` - Repository-wide and path-specific instructions with bidirectional sync
-- **Cursor** - `.cursor/rules/index.mdc`, `.cursor/rules/*.mdc`, `AGENTS.md`, `.cursorignore`, `.cursorindexingignore` - Modern 2025 rules system with Always/Auto Attached rule types and project overview
+- **Cursor** - `.cursor/rules/index.mdc`, `.cursor/rules/*.mdc`, `AGENTS.md`, `.cursorignore`, `.cursorindexingignore` - Modern 2025 rules system with metadata-driven configuration (Always/Auto Attached rule types) and project overview
 - **Continue** - `.continue/rules/*.md` - Organized markdown rules directory with bidirectional sync support
 - **Kiro** - `.kiro/steering/*.md` - Comprehensive steering system with YAML frontmatter
 - **Cline** - `.clinerules/*.md`, `.vscode/settings.json` (MCP) - VSCode autonomous AI agent with markdown rules
@@ -301,13 +301,23 @@ agents:
       trust_level: partial
       requires_approval: true
 
-# Optional: For multi-file editors
+# Optional: For multi-file editors with metadata support
 documents:
-  - name: "general-rules"
+  - name: "typescript"
     content: |
-      # General Rules
-      - Rule 1
-      - Rule 2
+      # TypeScript Guidelines
+      - Use strict TypeScript settings
+      - Prefer interfaces over types
+    description: "TypeScript coding guidelines"
+    file_globs: "**/*.{ts,tsx}"
+    always_apply: false  # Auto-attached to TypeScript files only
+
+  - name: "testing"
+    content: |
+      # Testing Standards
+      - Write unit tests for all functions
+      - Aim for 80% coverage
+    # Metadata fields are optional - smart defaults will be used
 ```
 
 ####  🔌 Plugin Configuration (v3.0)
@@ -557,7 +567,7 @@ promptrek generate --editor claude project.promptrek.yaml \
 Generate optimized configurations for all major AI coding assistants:
 
 - **GitHub Copilot** → `.github/copilot-instructions.md` + path-specific instructions + bidirectional sync
-- **Cursor** → `.cursor/rules/index.mdc` + `.cursor/rules/*.mdc` + `AGENTS.md` with modern rule types
+- **Cursor** → `.cursor/rules/index.mdc` + `.cursor/rules/*.mdc` + `AGENTS.md` with metadata-driven rules (Always/Auto Attached)
 - **Continue** → `.continue/rules/*.md` with organized rules + bidirectional sync
 - **Kiro** → `.kiro/steering/*.md` with YAML frontmatter
 - **Cline** → `.clinerules/*.md` with project-specific rules

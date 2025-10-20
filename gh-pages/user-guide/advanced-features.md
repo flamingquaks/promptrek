@@ -172,6 +172,64 @@ variables:
 ```
 {% endraw %}
 
+## Document Metadata
+
+Documents in v2.0+ and v3.0 support metadata fields that control how editors like Cursor apply rules:
+
+{% raw %}
+```yaml
+schema_version: "3.0.0"
+metadata:
+  title: "{{{ PROJECT_NAME }}} Assistant"
+
+# Main content metadata (optional)
+content_description: "Project overview and core guidelines"  # Default if not specified
+content_always_apply: true  # Default: Always Applied rule
+
+content: |
+  # {{{ PROJECT_NAME }}} Development Guide
+
+  Follow project coding standards.
+
+documents:
+  - name: "typescript"
+    content: |
+      # TypeScript Guidelines
+      - Use strict TypeScript settings
+      - Prefer interfaces over types
+    description: "TypeScript coding guidelines"  # Shown in Cursor UI
+    file_globs: "**/*.{ts,tsx}"  # Files where rule applies
+    always_apply: false  # Auto-attached (applies only to matching files)
+
+  - name: "testing"
+    content: |
+      # Testing Standards
+      - Write unit tests for all functions
+      - Aim for 80% coverage
+    # Omit metadata for smart defaults:
+    # - description: "testing guidelines" (inferred from name)
+    # - file_globs: "**/*.{test,spec}.*" (inferred for Cursor)
+    # - always_apply: false (default for documents)
+
+variables:
+  PROJECT_NAME: "AdvancedProject"
+```
+{% endraw %}
+
+**Metadata Fields**:
+- `description`: Human-readable description (used by Cursor, Copilot, etc.)
+- `file_globs`: File patterns where rule applies (e.g., `**/*.{ts,tsx}`)
+- `always_apply`: `true` = Always Applied, `false` = Auto Attached (file-specific)
+
+**Smart Defaults**:
+- Main content: `description="Project overview and core guidelines"`, `always_apply=true`
+- Documents: `description="{name} guidelines"`, `always_apply=false`, auto-infer globs from name
+
+**Editor Support**:
+- **Cursor**: Maps to MDC frontmatter (`description`, `globs`, `alwaysApply`)
+- **Copilot**: Can map `file_globs` to path-specific instructions
+- **Other Editors**: Gracefully ignored if not supported
+
 Generate with CLI overrides:
 
 ```bash

@@ -51,11 +51,21 @@ content: |
   - General project rules
 
 documents:
+  - name: "typescript"
+    content: |
+      # TypeScript Guidelines
+      - Use strict TypeScript settings
+      - Prefer interfaces over types
+    description: "TypeScript coding guidelines"
+    file_globs: "**/*.{ts,tsx}"
+    always_apply: false
+
   - name: "testing"
     content: |
       # Testing Standards
       - Use Jest for unit tests
       - Maintain 80% coverage
+    # Metadata fields optional - smart defaults used
 ```
 
 ### Bidirectional Sync
@@ -104,7 +114,7 @@ Full support for PrompTrek v3.0 schema with top-level plugin fields.
 - `.vscode/mcp.json` (MCP server configuration)
 
 **Unique Features**:
-- ✅ Path-specific instructions with YAML frontmatter
+- ✅ Path-specific instructions with YAML frontmatter (applyTo field)
 - ✅ Bidirectional sync (v2 lossless format)
 - ✅ Advanced glob pattern matching
 - ✅ MCP server integration
@@ -125,9 +135,9 @@ Full support for PrompTrek v3.0 schema with top-level plugin fields.
 - `.cursor/mcp.json` (MCP server configuration)
 
 **Unique Features**:
-- ✅ Modern `.mdc` rules system
-- ✅ Always/Auto Attached rule types
-- ✅ Technology-specific rule generation
+- ✅ Modern `.mdc` rules system with metadata (description, file_globs, always_apply)
+- ✅ Always/Auto Attached rule types via metadata
+- ✅ Technology-specific rule generation with smart defaults
 - ✅ Advanced ignore file support
 - ✅ Bidirectional sync
 - ✅ MCP server, commands, and agents support

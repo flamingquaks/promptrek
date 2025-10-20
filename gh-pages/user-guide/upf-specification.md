@@ -97,10 +97,17 @@ metadata:
 # Main markdown content (required)
 content: string                    # Raw markdown content
 
-# Optional: Multi-file support for editors like Continue, Windsurf, Kiro
+# Optional: Main content metadata
+content_description: string        # Description for main content (used in editor frontmatter)
+content_always_apply: boolean      # Whether main content always applies (default: True)
+
+# Optional: Multi-file support for editors like Continue, Windsurf, Kiro, Cursor
 documents:
   - name: string                   # Document name (becomes filename)
     content: string                # Raw markdown content for this document
+    description: string            # Human-readable description (optional)
+    file_globs: string             # File patterns where this applies (optional)
+    always_apply: boolean          # Whether to always apply this rule (optional)
 
 # Template variables (optional)
 variables:
@@ -368,10 +375,17 @@ metadata:
 # Main markdown content (required)
 content: string                    # Raw markdown content
 
-# Optional: Multi-file support for editors like Continue, Windsurf, Kiro
+# Optional: Main content metadata
+content_description: string        # Description for main content (used in editor frontmatter)
+content_always_apply: boolean      # Whether main content always applies (default: True)
+
+# Optional: Multi-file support for editors like Continue, Windsurf, Kiro, Cursor
 documents:
   - name: string                   # Document name (becomes filename)
     content: string                # Raw markdown content for this document
+    description: string            # Human-readable description (optional)
+    file_globs: string             # File patterns where this applies (optional)
+    always_apply: boolean          # Whether to always apply this rule (optional)
 
 # Template variables (optional)
 variables:
@@ -758,10 +772,17 @@ metadata:
 # Main markdown content (required)
 content: string                    # Raw markdown content
 
-# Optional: Multi-file support for editors like Continue, Windsurf, Kiro
+# Optional: Main content metadata
+content_description: string        # Description for main content (used in editor frontmatter)
+content_always_apply: boolean      # Whether main content always applies (default: True)
+
+# Optional: Multi-file support for editors like Continue, Windsurf, Kiro, Cursor
 documents:
   - name: string                   # Document name (becomes filename)
     content: string                # Raw markdown content for this document
+    description: string            # Human-readable description (optional)
+    file_globs: string             # File patterns where this applies (optional)
+    always_apply: boolean          # Whether to always apply this rule (optional)
 
 # Template variables (optional)
 variables:
@@ -825,7 +846,12 @@ content: |
 
 #### documents (optional)
 
-For multi-file editors like Continue, Windsurf, and Kiro, you can split content into separate documents.
+For multi-file editors like Continue, Windsurf, Kiro, and Cursor, you can split content into separate documents with metadata.
+
+**Metadata Fields**:
+- `description` (optional): Human-readable description (used by Cursor, etc.)
+- `file_globs` (optional): File patterns where this applies (e.g., `**/*.{ts,tsx}`)
+- `always_apply` (optional): Whether to always apply this rule (Cursor alwaysApply)
 
 **Example**:
 ```yaml
@@ -835,18 +861,27 @@ documents:
       # General Coding Rules
       - Write clean code
       - Follow best practices
+    description: "General coding guidelines"
+    always_apply: true
 
-  - name: "code-style"
+  - name: "typescript"
     content: |
-      # Code Style Guidelines
-      - Use meaningful variable names
-      - Follow PEP 8 for Python
+      # TypeScript Guidelines
+      - Use strict TypeScript settings
+      - Prefer interfaces over types
+    description: "TypeScript coding guidelines"
+    file_globs: "**/*.{ts,tsx}"
+    always_apply: false  # Auto-attached to TypeScript files only
 
   - name: "testing"
     content: |
       # Testing Standards
       - Write unit tests for all functions
       - Aim for 80% coverage
+    # Omit metadata for smart defaults:
+    # - description: "testing guidelines" (inferred from name)
+    # - file_globs: "**/*.{test,spec}.*" (inferred for Cursor)
+    # - always_apply: false (default for documents)
 ```
 
 #### variables (optional)

@@ -197,6 +197,31 @@ The sync system provides:
 
 Cursor adapter generates modern MDC rules system following Cursor IDE's 2025 best practices with intelligent rule types, project overview, and enhanced file organization.
 
+**Metadata-Driven Configuration**:
+
+The Cursor adapter uses meaningful metadata fields to control rule behavior:
+
+```yaml
+# Main content metadata (top-level)
+content_description: "Project overview and core guidelines"  # Default if not specified
+content_always_apply: true  # Default: Always Applied rule
+
+# Document metadata (per-document)
+documents:
+  - name: typescript
+    content: "# TypeScript Guidelines..."
+    description: "TypeScript coding guidelines"  # Shown in Cursor UI
+    file_globs: "**/*.{ts,tsx}"  # Files where rule applies
+    always_apply: false  # Auto Attached (applies only to matching files)
+
+  - name: testing
+    content: "# Testing Standards..."
+    # Omit metadata for smart defaults:
+    # - description: "testing guidelines" (inferred from name)
+    # - file_globs: "**/*.{test,spec}.*" (inferred from name)
+    # - always_apply: false (default for documents)
+```
+
 **Main Project Overview (.cursor/rules/index.mdc)**:
 ```yaml
 ---
@@ -237,6 +262,15 @@ alwaysApply: false
 - Add appropriate comments
 - Follow project conventions
 ```
+
+**Metadata Fields**:
+- `description`: Human-readable description shown in Cursor UI (required)
+- `file_globs`: File patterns where rule applies (e.g., `**/*.{ts,tsx}`)
+- `always_apply`: `true` = Always Applied, `false` = Auto Attached (file-specific)
+
+**Smart Defaults**:
+- Main content: `description="Project overview and core guidelines"`, `always_apply=true`
+- Documents: `description="{name} guidelines"`, `always_apply=false`, auto-infer globs from name
 
 **Technology-Specific Rules**:
 - `typescript-guidelines.mdc` - TypeScript patterns (Auto Attached to `**/*.{ts,tsx}`)

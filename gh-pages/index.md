@@ -69,11 +69,11 @@ title: Home
           <span style="display:none;">🎯</span>
         </div>
         <h4>Cursor</h4>
-        <p>Modern .mdc rules system with Always/Auto Attached</p>
+        <p>Metadata-driven .mdc rules with Always/Auto Attached</p>
         <div class="feature-badges">
           <span class="feature-badge">📁 Project</span>
           <span class="feature-badge">🔄 Variables</span>
-          <span class="feature-badge">📚 Multi-Doc</span>
+          <span class="feature-badge">📊 Metadata</span>
         </div>
       </div>
 

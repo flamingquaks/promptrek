@@ -237,11 +237,12 @@ PrompTrek generates sophisticated configuration files for each editor:
 - **Bidirectional sync support**: Changes can be synced back to PrompTrek configuration
 
 ### Cursor
-- `.cursor/rules/index.mdc` - Main project overview (Always rule)
-- `.cursor/rules/*.mdc` - Category-specific rules (Auto Attached)
+- `.cursor/rules/index.mdc` - Main project overview with metadata (Always rule)
+- `.cursor/rules/*.mdc` - Category-specific rules with metadata (Auto Attached)
 - `AGENTS.md` - Simple agent instructions
 - `.cursorignore` - Enhanced exclusion patterns
 - `.cursorindexingignore` - Intelligent indexing control
+- **Metadata support**: Rules use `description`, `file_globs`, and `always_apply` fields
 
 ### Continue
 - `config.yaml` - Main configuration in modern YAML format
