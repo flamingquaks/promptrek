@@ -1,0 +1,115 @@
+# yaml-language-server: $schema=https://promptrek.ai/schema/v3.0.json
+schema_version: 3.0.0
+metadata:
+  title: React TypeScript Project
+  description: AI coding assistant configuration for React TypeScript projects
+  version: 1.0.0
+  author: PrompTrek
+  tags:
+    - react
+    - typescript
+    - frontend
+    - web
+
+content: |
+  # React TypeScript Development Guide
+
+  ## Project Overview
+  This is a React TypeScript project using modern best practices and tools.
+
+  **Tech Stack:**
+  - React 18+ with TypeScript
+  - Vite for build tooling
+  - React Router for navigation
+  - TanStack Query for data fetching
+  - Tailwind CSS for styling
+
+  ## Code Style Guidelines
+
+  ### Component Structure
+  - Use functional components with hooks
+  - Prefer named exports over default exports
+  - Keep components small and focused (< 200 lines)
+  - Extract complex logic into custom hooks
+
+  ### TypeScript Best Practices
+  - Enable strict mode in tsconfig.json
+  - Avoid `any` type - use `unknown` or proper types
+  - Use interface for object shapes, type for unions/intersections
+  - Leverage type inference where possible
+
+  ### File Organization
+  ```
+  src/
+    components/     # Reusable UI components
+    features/       # Feature-specific code
+    hooks/          # Custom React hooks
+    utils/          # Pure utility functions
+    types/          # Shared TypeScript types
+  ```
+
+  ## Component Example
+
+  ```tsx
+  // components/UserCard.tsx
+  interface UserCardProps {
+    userId: string;
+    onSelect?: (userId: string) => void;
+  }
+
+  export function UserCard({ userId, onSelect }: UserCardProps) {
+    const { data: user, isLoading } = useUser(userId);
+
+    if (isLoading) return <Skeleton />;
+    if (!user) return null;
+
+    return (
+      <div className="p-4 border rounded-lg">
+        <h3 className="text-lg font-semibold">{user.name}</h3>
+        <p className="text-gray-600">{user.email}</p>
+        {onSelect && (
+          <button onClick={() => onSelect(userId)}>
+            Select User
+          </button>
+        )}
+      </div>
+    );
+  }
+  ```
+
+  ## Custom Hook Example
+
+  ```tsx
+  // hooks/useUser.ts
+  import { useQuery } from '@tanstack/react-query';
+
+  export function useUser(userId: string) {
+    return useQuery({
+      queryKey: ['user', userId],
+      queryFn: () => fetchUser(userId),
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    });
+  }
+  ```
+
+  ## Testing
+  - Use Vitest for unit tests
+  - Use React Testing Library for component tests
+  - Test user interactions, not implementation details
+  - Aim for meaningful test coverage (focus on critical paths)
+
+  ## Performance
+  - Use React.memo() for expensive components
+  - Implement code splitting with lazy() and Suspense
+  - Optimize images with proper formats and lazy loading
+  - Monitor bundle size with Vite's build analyzer
+
+  ## Accessibility
+  - Use semantic HTML elements
+  - Include ARIA labels for interactive elements
+  - Ensure keyboard navigation works
+  - Test with screen readers
+
+variables:
+  PROJECT_NAME: my-react-app
+  API_URL: https://api.example.com

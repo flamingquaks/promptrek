@@ -1,0 +1,672 @@
+{
+  "$defs": {
+    "Agent": {
+      "description": "Autonomous agent configuration.",
+      "properties": {
+        "name": {
+          "description": "Agent name/identifier",
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "description": "Agent description and purpose",
+          "title": "Description",
+          "type": "string"
+        },
+        "system_prompt": {
+          "description": "System prompt for the agent",
+          "title": "System Prompt",
+          "type": "string"
+        },
+        "tools": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Available tools for the agent",
+          "title": "Tools"
+        },
+        "trust_level": {
+          "default": "untrusted",
+          "description": "Trust level for agent actions",
+          "title": "Trust Level",
+          "type": "string"
+        },
+        "requires_approval": {
+          "default": true,
+          "description": "Whether agent actions require approval",
+          "title": "Requires Approval",
+          "type": "boolean"
+        },
+        "context": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Additional context for the agent",
+          "title": "Context"
+        },
+        "trust_metadata": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TrustMetadata"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Trust and security metadata"
+        }
+      },
+      "required": [
+        "name",
+        "description",
+        "system_prompt"
+      ],
+      "title": "Agent",
+      "type": "object"
+    },
+    "Command": {
+      "description": "Slash command configuration for AI editors.",
+      "properties": {
+        "name": {
+          "description": "Command name (e.g., 'review-code')",
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "description": "Command description",
+          "title": "Description",
+          "type": "string"
+        },
+        "prompt": {
+          "description": "Prompt template for the command",
+          "title": "Prompt",
+          "type": "string"
+        },
+        "output_format": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Expected output format (e.g., 'markdown', 'json')",
+          "title": "Output Format"
+        },
+        "requires_approval": {
+          "default": false,
+          "description": "Whether command execution requires approval",
+          "title": "Requires Approval",
+          "type": "boolean"
+        },
+        "system_message": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional system message for the command",
+          "title": "System Message"
+        },
+        "examples": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Example usage of the command",
+          "title": "Examples"
+        },
+        "trust_metadata": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TrustMetadata"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Trust and security metadata"
+        }
+      },
+      "required": [
+        "name",
+        "description",
+        "prompt"
+      ],
+      "title": "Command",
+      "type": "object"
+    },
+    "DocumentConfig": {
+      "description": "A single document for multi-file editors (v2 schema).",
+      "properties": {
+        "name": {
+          "description": "Document name (used for filename)",
+          "title": "Name",
+          "type": "string"
+        },
+        "frontmatter": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional YAML frontmatter for the document",
+          "title": "Frontmatter"
+        },
+        "content": {
+          "description": "Raw markdown content",
+          "title": "Content",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "content"
+      ],
+      "title": "DocumentConfig",
+      "type": "object"
+    },
+    "Hook": {
+      "description": "Event-driven automation hook configuration.",
+      "properties": {
+        "name": {
+          "description": "Hook name/identifier",
+          "title": "Name",
+          "type": "string"
+        },
+        "event": {
+          "description": "Event that triggers the hook (e.g., 'pre-commit', 'post-save')",
+          "title": "Event",
+          "type": "string"
+        },
+        "command": {
+          "description": "Command to execute",
+          "title": "Command",
+          "type": "string"
+        },
+        "conditions": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Conditions for hook execution",
+          "title": "Conditions"
+        },
+        "requires_reapproval": {
+          "default": true,
+          "description": "Whether hook requires reapproval after changes",
+          "title": "Requires Reapproval",
+          "type": "boolean"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Hook description",
+          "title": "Description"
+        },
+        "trust_metadata": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TrustMetadata"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Trust and security metadata"
+        }
+      },
+      "required": [
+        "name",
+        "event",
+        "command"
+      ],
+      "title": "Hook",
+      "type": "object"
+    },
+    "MCPServer": {
+      "description": "Model Context Protocol (MCP) server configuration.",
+      "properties": {
+        "name": {
+          "description": "Server name/identifier",
+          "title": "Name",
+          "type": "string"
+        },
+        "command": {
+          "description": "Command to start the server",
+          "title": "Command",
+          "type": "string"
+        },
+        "args": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Command line arguments",
+          "title": "Args"
+        },
+        "env": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Environment variables",
+          "title": "Env"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Human-readable description",
+          "title": "Description"
+        },
+        "trust_metadata": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TrustMetadata"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Trust and security metadata"
+        }
+      },
+      "required": [
+        "name",
+        "command"
+      ],
+      "title": "MCPServer",
+      "type": "object"
+    },
+    "PluginConfig": {
+      "additionalProperties": false,
+      "description": "Container for all plugin configurations (v2.1.0+).",
+      "properties": {
+        "mcp_servers": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/MCPServer"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "MCP server configurations",
+          "title": "Mcp Servers"
+        },
+        "commands": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/Command"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Slash command configurations",
+          "title": "Commands"
+        },
+        "agents": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/Agent"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Agent configurations",
+          "title": "Agents"
+        },
+        "hooks": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/Hook"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Hook configurations",
+          "title": "Hooks"
+        }
+      },
+      "title": "PluginConfig",
+      "type": "object"
+    },
+    "PromptMetadata": {
+      "description": "Metadata about the prompt file.",
+      "properties": {
+        "title": {
+          "description": "Human-readable title",
+          "title": "Title",
+          "type": "string"
+        },
+        "description": {
+          "description": "Brief description of purpose",
+          "title": "Description",
+          "type": "string"
+        },
+        "version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Semantic version of this prompt",
+          "title": "Version"
+        },
+        "author": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Author name or email",
+          "title": "Author"
+        },
+        "created": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "ISO 8601 date (YYYY-MM-DD)",
+          "title": "Created"
+        },
+        "updated": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "ISO 8601 date (YYYY-MM-DD)",
+          "title": "Updated"
+        },
+        "tags": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional tags for categorization",
+          "title": "Tags"
+        }
+      },
+      "required": [
+        "title",
+        "description"
+      ],
+      "title": "PromptMetadata",
+      "type": "object"
+    },
+    "TrustMetadata": {
+      "description": "Security and trust metadata for plugins.",
+      "properties": {
+        "trusted": {
+          "default": false,
+          "description": "Whether this plugin/config is trusted",
+          "title": "Trusted",
+          "type": "boolean"
+        },
+        "trust_level": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Trust level: 'full', 'partial', 'untrusted'",
+          "title": "Trust Level"
+        },
+        "requires_approval": {
+          "default": true,
+          "description": "Whether actions require explicit approval",
+          "title": "Requires Approval",
+          "type": "boolean"
+        },
+        "source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Source of the plugin (e.g., 'official', 'community', 'local')",
+          "title": "Source"
+        },
+        "verified_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Who verified this plugin",
+          "title": "Verified By"
+        },
+        "verified_date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "When this plugin was verified (ISO 8601)",
+          "title": "Verified Date"
+        }
+      },
+      "title": "TrustMetadata",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "JSON Schema for Universal Prompt Format version 2.1 - Adds plugin support (MCP servers, commands, agents, hooks)",
+  "properties": {
+    "schema_version": {
+      "description": "UPF schema version (2.x.x)",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "metadata": {
+      "$ref": "#/$defs/PromptMetadata",
+      "description": "Prompt metadata"
+    },
+    "content": {
+      "description": "Main markdown content",
+      "title": "Content",
+      "type": "string"
+    },
+    "documents": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/DocumentConfig"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Additional documents for multi-file editors",
+      "title": "Documents"
+    },
+    "variables": {
+      "anyOf": [
+        {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Template variables",
+      "title": "Variables"
+    },
+    "plugins": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PluginConfig"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Plugin configurations (v2.1.0+ - deprecated in v3.0)"
+    },
+    "ignore_editor_files": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Automatically add editor-specific files to .gitignore (default: True)",
+      "title": "Ignore Editor Files"
+    }
+  },
+  "required": [
+    "schema_version",
+    "metadata",
+    "content"
+  ],
+  "title": "Universal Prompt Format v2.1",
+  "type": "object",
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

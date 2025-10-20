@@ -1,158 +1,447 @@
-schema_version: "1.0.0"
+# yaml-language-server: $schema=https://promptrek.ai/schema/v3.0.json
+schema_version: 3.0.0
 metadata:
-  title: "Microservices with Kubernetes Assistant"
-  description: "AI assistant for microservices architecture deployed on Kubernetes"
-  version: "1.0.0"
-  author: "Platform Team"
-  tags: ["microservices", "kubernetes", "docker", "cloud-native"]
+  title: Microservices with Kubernetes
+  description: Cloud-native microservices architecture with Kubernetes deployment
+  version: 1.0.0
+  author: PrompTrek
+  tags:
+    - microservices
+    - kubernetes
+    - docker
+    - cloud-native
 
-targets:
-  - copilot
-  - cursor
-  - continue
-  - claude
+content: |
+  # Microservices with Kubernetes Guide
 
-context:
-  project_type: "microservices"
-  technologies:
-    - "kubernetes"
-    - "docker"
-    - "node.js"
-    - "python"
-    - "golang"
-    - "helm"
-    - "prometheus"
-    - "grpc"
-  description: |
-    Cloud-native microservices architecture running on Kubernetes with
-    service mesh, observability, and CI/CD automation.
+  ## Architecture Overview
 
-instructions:
-  general:
-    - "Design services following the single responsibility principle"
-    - "Use asynchronous communication between services where possible"
-    - "Implement proper health checks (liveness and readiness probes)"
-    - "Follow 12-factor app principles for cloud-native development"
-    - "Design for failure - implement circuit breakers and retry logic"
+  **Services:**
+  - API Gateway (Node.js + Express)
+  - User Service (Go)
+  - Product Service (Python + FastAPI)
+  - Order Service (Node.js + NestJS)
+  - Message Queue (RabbitMQ)
+  - Service Mesh (Istio)
 
-  code_style:
-    - "Use structured logging with correlation IDs for distributed tracing"
-    - "Include OpenTelemetry instrumentation for observability"
-    - "Follow consistent API versioning across all services (e.g., /api/v1/)"
-    - "Use Protocol Buffers for service-to-service communication"
-    - "Implement graceful shutdown handlers for all services"
+  **Infrastructure:**
+  - Kubernetes cluster
+  - PostgreSQL databases
+  - Redis cache
+  - Prometheus + Grafana monitoring
 
-  architecture:
-    - "Keep services small and focused on specific business domains"
-    - "Use API Gateway pattern for external-facing endpoints"
-    - "Implement service discovery using Kubernetes DNS"
-    - "Store configuration in ConfigMaps and secrets in Secrets"
-    - "Use StatefulSets for stateful services, Deployments for stateless"
+  ## Service Structure
 
-  testing:
-    - "Write contract tests for service interfaces"
-    - "Implement integration tests using testcontainers"
-    - "Test Kubernetes manifests with kubeval or kube-score"
-    - "Include chaos engineering tests for resilience"
-    - "Load test services to determine resource requirements"
+  ```
+  services/
+    api-gateway/
+      src/
+      Dockerfile
+      k8s/
+    user-service/
+      cmd/
+      internal/
+      Dockerfile
+      k8s/
+    product-service/
+      app/
+      Dockerfile
+      k8s/
+  k8s/
+    base/            # Common configs
+    overlays/
+      dev/
+      staging/
+      production/
+  ```
 
-  security:
-    - "Never commit secrets - use Kubernetes Secrets or external vaults"
-    - "Implement mutual TLS between services using service mesh"
-    - "Use RBAC for Kubernetes access control"
-    - "Scan container images for vulnerabilities in CI pipeline"
-    - "Implement network policies to restrict pod-to-pod communication"
+  ## Dockerfile Best Practices
 
-  workflows:
-    - "Build Docker images with multi-stage builds for size optimization"
-    - "Use Helm charts for templated Kubernetes deployments"
-    - "Implement blue-green or canary deployments for zero-downtime updates"
-    - "Monitor service metrics with Prometheus and Grafana"
-    - "Set up alerting for critical service health indicators"
+  ```dockerfile
+  # Multi-stage build for Node.js service
+  FROM node:20-alpine AS builder
+  WORKDIR /app
+  COPY package*.json ./
+  RUN npm ci
+  COPY . .
+  RUN npm run build
 
-examples:
-  dockerfile: |
-    ```dockerfile
-    # Multi-stage build for production
-    FROM node:18-alpine AS builder
-    WORKDIR /app
-    COPY package*.json ./
-    RUN npm ci --only=production
-    COPY . .
-    RUN npm run build
+  FROM node:20-alpine
+  WORKDIR /app
+  COPY --from=builder /app/dist ./dist
+  COPY --from=builder /app/node_modules ./node_modules
+  COPY package*.json ./
 
-    FROM node:18-alpine
-    WORKDIR /app
-    COPY --from=builder /app/dist ./dist
-    COPY --from=builder /app/node_modules ./node_modules
-    USER node
-    EXPOSE 3000
-    CMD ["node", "dist/main.js"]
-    ```
+  USER node
+  EXPOSE 3000
+  CMD ["node", "dist/main.js"]
+  ```
 
-  k8s_deployment: |
-    ```yaml
-    apiVersion: apps/v1
-    kind: Deployment
-    metadata:
-      name: user-service
-    spec:
-      replicas: 3
-      selector:
-        matchLabels:
-          app: user-service
-      template:
-        metadata:
-          labels:
-            app: user-service
-        spec:
-          containers:
-          - name: user-service
-            image: myregistry/user-service:1.0.0
-            ports:
-            - containerPort: 3000
-            env:
-            - name: DATABASE_URL
-              valueFrom:
-                secretKeyRef:
-                  name: db-credentials
-                  key: url
-            livenessProbe:
-              httpGet:
-                path: /health/live
-                port: 3000
-              initialDelaySeconds: 30
-              periodSeconds: 10
-            readinessProbe:
-              httpGet:
-                path: /health/ready
-                port: 3000
-              initialDelaySeconds: 5
-              periodSeconds: 5
-            resources:
-              requests:
-                memory: "128Mi"
-                cpu: "100m"
-              limits:
-                memory: "256Mi"
-                cpu: "500m"
-    ```
+  ## Kubernetes Deployment
 
-  service_mesh_config: |
-    ```yaml
-    apiVersion: v1
-    kind: Service
-    metadata:
-      name: user-service
-    spec:
-      selector:
+  ```yaml
+  # k8s/user-service/deployment.yaml
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: user-service
+    labels:
+      app: user-service
+  spec:
+    replicas: 3
+    selector:
+      matchLabels:
         app: user-service
-      ports:
-      - protocol: TCP
-        port: 80
-        targetPort: 3000
-    ```
+    template:
+      metadata:
+        labels:
+          app: user-service
+          version: v1
+      spec:
+        containers:
+        - name: user-service
+          image: myregistry/user-service:v1.0.0
+          ports:
+          - containerPort: 8080
+          env:
+          - name: DATABASE_URL
+            valueFrom:
+              secretKeyRef:
+                name: user-service-secrets
+                key: database-url
+          - name: REDIS_URL
+            valueFrom:
+              configMapKeyRef:
+                name: user-service-config
+                key: redis-url
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
+  ```
+
+  ## Kubernetes Service
+
+  ```yaml
+  # k8s/user-service/service.yaml
+  apiVersion: v1
+  kind: Service
+  metadata:
+    name: user-service
+  spec:
+    selector:
+      app: user-service
+    ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+    type: ClusterIP
+  ```
+
+  ## ConfigMap & Secrets
+
+  ```yaml
+  # k8s/user-service/configmap.yaml
+  apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: user-service-config
+  data:
+    redis-url: "redis://redis-service:6379"
+    log-level: "info"
+  ---
+  apiVersion: v1
+  kind: Secret
+  metadata:
+    name: user-service-secrets
+  type: Opaque
+  data:
+    database-url: <base64-encoded-url>
+    jwt-secret: <base64-encoded-secret>
+  ```
+
+  ## Ingress Configuration
+
+  ```yaml
+  # k8s/base/ingress.yaml
+  apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    name: api-ingress
+    annotations:
+      nginx.ingress.kubernetes.io/rewrite-target: /$2
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+  spec:
+    ingressClassName: nginx
+    tls:
+    - hosts:
+      - api.example.com
+      secretName: api-tls
+    rules:
+    - host: api.example.com
+      http:
+        paths:
+        - path: /users(/|$)(.*)
+          pathType: Prefix
+          backend:
+            service:
+              name: user-service
+              port:
+                number: 80
+        - path: /products(/|$)(.*)
+          pathType: Prefix
+          backend:
+            service:
+              name: product-service
+              port:
+                number: 80
+  ```
+
+  ## Service Mesh (Istio)
+
+  ```yaml
+  # k8s/istio/virtual-service.yaml
+  apiVersion: networking.istio.io/v1beta1
+  kind: VirtualService
+  metadata:
+    name: user-service
+  spec:
+    hosts:
+    - user-service
+    http:
+    - match:
+      - headers:
+          x-api-version:
+            exact: v2
+      route:
+      - destination:
+          host: user-service
+          subset: v2
+    - route:
+      - destination:
+          host: user-service
+          subset: v1
+  ---
+  apiVersion: networking.istio.io/v1beta1
+  kind: DestinationRule
+  metadata:
+    name: user-service
+  spec:
+    host: user-service
+    subsets:
+    - name: v1
+      labels:
+        version: v1
+    - name: v2
+      labels:
+        version: v2
+  ```
+
+  ## Health Checks
+
+  ```typescript
+  // src/health/health.controller.ts
+  import { Controller, Get } from '@nestjs/common';
+  import { HealthCheck, HealthCheckService, TypeOrmHealthIndicator } from '@nestjs/terminus';
+
+  @Controller('health')
+  export class HealthController {
+    constructor(
+      private health: HealthCheckService,
+      private db: TypeOrmHealthIndicator,
+    ) {}
+
+    @Get()
+    @HealthCheck()
+    check() {
+      return this.health.check([
+        () => this.db.pingCheck('database'),
+      ]);
+    }
+
+    @Get('ready')
+    ready() {
+      return { status: 'ok' };
+    }
+  }
+  ```
+
+  ## Inter-Service Communication
+
+  ### gRPC Example
+  ```protobuf
+  // protos/user.proto
+  syntax = "proto3";
+
+  package user;
+
+  service UserService {
+    rpc GetUser (GetUserRequest) returns (User);
+    rpc CreateUser (CreateUserRequest) returns (User);
+  }
+
+  message GetUserRequest {
+    string id = 1;
+  }
+
+  message CreateUserRequest {
+    string email = 1;
+    string name = 2;
+  }
+
+  message User {
+    string id = 1;
+    string email = 2;
+    string name = 3;
+  }
+  ```
+
+  ### REST API Gateway
+  ```typescript
+  // api-gateway/src/routes/users.ts
+  import express from 'express';
+  import axios from 'axios';
+
+  const router = express.Router();
+  const USER_SERVICE_URL = process.env.USER_SERVICE_URL;
+
+  router.get('/:id', async (req, res) => {
+    try {
+      const response = await axios.get(
+        `${USER_SERVICE_URL}/users/${req.params.id}`
+      );
+      res.json(response.data);
+    } catch (error) {
+      res.status(error.response?.status || 500).json({
+        error: error.message,
+      });
+    }
+  });
+  ```
+
+  ## Monitoring & Observability
+
+  ### Prometheus Metrics
+  ```typescript
+  import { register, Counter, Histogram } from 'prom-client';
+
+  const httpRequestCounter = new Counter({
+    name: 'http_requests_total',
+    help: 'Total HTTP requests',
+    labelNames: ['method', 'route', 'status'],
+  });
+
+  const httpRequestDuration = new Histogram({
+    name: 'http_request_duration_seconds',
+    help: 'HTTP request duration',
+    labelNames: ['method', 'route'],
+  });
+
+  // Middleware
+  app.use((req, res, next) => {
+    const start = Date.now();
+    res.on('finish', () => {
+      const duration = (Date.now() - start) / 1000;
+      httpRequestCounter.inc({
+        method: req.method,
+        route: req.route?.path,
+        status: res.statusCode,
+      });
+      httpRequestDuration.observe(
+        { method: req.method, route: req.route?.path },
+        duration
+      );
+    });
+    next();
+  });
+
+  app.get('/metrics', (req, res) => {
+    res.set('Content-Type', register.contentType);
+    res.end(register.metrics());
+  });
+  ```
+
+  ## CI/CD Pipeline
+
+  ```yaml
+  # .github/workflows/deploy.yaml
+  name: Deploy to Kubernetes
+  on:
+    push:
+      branches: [main]
+
+  jobs:
+    build-and-deploy:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v3
+
+        - name: Build Docker image
+          run: |
+            docker build -t ${{ secrets.REGISTRY }}/user-service:${{ github.sha }} .
+
+        - name: Push to registry
+          run: |
+            echo ${{ secrets.REGISTRY_PASSWORD }} | docker login -u ${{ secrets.REGISTRY_USER }} --password-stdin
+            docker push ${{ secrets.REGISTRY }}/user-service:${{ github.sha }}
+
+        - name: Deploy to Kubernetes
+          uses: azure/k8s-deploy@v1
+          with:
+            manifests: |
+              k8s/user-service/deployment.yaml
+              k8s/user-service/service.yaml
+            images: |
+              ${{ secrets.REGISTRY }}/user-service:${{ github.sha }}
+            kubectl-version: 'latest'
+  ```
+
+  ## Best Practices
+
+  ### Service Design
+  - Keep services small and focused (single responsibility)
+  - Design for failure (circuit breakers, retries, timeouts)
+  - Use async communication where possible
+  - Implement proper health checks
+  - Version your APIs
+
+  ### Security
+  - Use service mesh for mTLS
+  - Implement RBAC in Kubernetes
+  - Store secrets in Kubernetes Secrets or external vaults
+  - Scan container images for vulnerabilities
+  - Use network policies to restrict traffic
+
+  ### Performance
+  - Implement caching strategically
+  - Use horizontal pod autoscaling
+  - Optimize container images (multi-stage builds)
+  - Monitor resource usage
+  - Use connection pooling
+
+  ### Reliability
+  - Set proper resource limits and requests
+  - Implement circuit breakers
+  - Use readiness and liveness probes
+  - Configure pod disruption budgets
+  - Deploy across multiple availability zones
 
 variables:
-  NAMESPACE: "production"
-  REGISTRY_URL: "myregistry.io"
+  REGISTRY: myregistry.azurecr.io
+  CLUSTER_NAME: production-cluster
+  NAMESPACE: default

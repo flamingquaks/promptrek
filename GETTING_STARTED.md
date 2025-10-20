@@ -234,40 +234,45 @@ promptrek generate my-project.promptrek.yaml --all
 
 ## Universal Prompt Format (UPF)
 
-The `.promptrek.yaml` files use a standardized format. Here's a minimal example:
+The `.promptrek.yaml` files use a standardized format. Here's a minimal v3.0 example (recommended):
 
 ```yaml
-schema_version: "1.0.0"
+schema_version: "3.0.0"
 
 metadata:
   title: "My Project Assistant"
   description: "AI assistant for my project"
   version: "1.0.0"
   author: "Your Name <your.email@example.com>"
-  created: "2024-01-01"
-  updated: "2024-01-01"
+  tags: [python, javascript, react]
 
-targets: ["copilot", "cursor", "continue"]
+content: |
+  # My Project Assistant
 
-context:
-  project_type: "web_application"
-  technologies: ["python", "javascript", "react"]
+  ## Project Overview
+  Web application built with Python and React.
 
-instructions:
-  general:
-    - "Write clean, readable code"
-    - "Follow existing patterns"
-  code_style:
-    - "Use meaningful variable names"
-    - "Add appropriate comments"
+  ## Development Guidelines
 
-examples:
-  function: |
-    ```python
-    def hello_world():
-        return "Hello, World!"
-    ```
+  ### General Principles
+  - Write clean, readable code
+  - Follow existing patterns
+
+  ### Code Style
+  - Use meaningful variable names
+  - Add appropriate comments
+
+  ### Example Function
+  ```python
+  def hello_world():
+      return "Hello, World!"
+  ```
+
+variables:
+  PROJECT_NAME: "my-project"
 ```
+
+For complete examples using v3.0 schema, see the [`examples/`](./examples/) directory.
 
 ## Development
 

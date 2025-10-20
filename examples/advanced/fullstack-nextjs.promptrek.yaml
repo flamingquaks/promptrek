@@ -1,163 +1,246 @@
-schema_version: "1.0.0"
+# yaml-language-server: $schema=https://promptrek.ai/schema/v3.0.json
+schema_version: 3.0.0
 metadata:
-  title: "Next.js Full-Stack App Assistant"
-  description: "AI assistant for modern Next.js full-stack web applications"
-  version: "1.0.0"
-  author: "Web Team"
-  tags: ["nextjs", "react", "typescript", "fullstack", "ssr"]
+  title: Full-Stack Next.js Application
+  description: Comprehensive AI assistant configuration for Next.js full-stack projects
+  version: 1.0.0
+  author: PrompTrek
+  tags:
+    - nextjs
+    - react
+    - typescript
+    - fullstack
+    - vercel
 
-targets:
-  - copilot
-  - cursor
-  - continue
-  - claude
+content: |
+  # Next.js Full-Stack Development Guide
 
-context:
-  project_type: "web_application"
-  technologies:
-    - "next.js"
-    - "react"
-    - "typescript"
-    - "tailwindcss"
-    - "prisma"
-    - "trpc"
-    - "nextauth"
-  description: |
-    Modern full-stack web application using Next.js with App Router,
-    server and client components, and end-to-end type safety.
+  ## Project Architecture
 
-instructions:
-  general:
-    - "Use App Router for all new pages (not Pages Router)"
-    - "Leverage Server Components by default, use Client Components only when needed"
-    - "Implement proper SEO with metadata exports"
-    - "Use tRPC for end-to-end type-safe API calls"
-    - "Follow Next.js best practices for performance and caching"
+  **Tech Stack:**
+  - Next.js 14+ with App Router
+  - TypeScript (strict mode)
+  - tRPC for type-safe APIs
+  - Prisma ORM with PostgreSQL
+  - NextAuth.js for authentication
+  - Tailwind CSS + shadcn/ui
+  - React Query for state management
+  - Zod for validation
 
-  code_style:
-    - "Use TypeScript strictly - no 'any' types"
-    - "Follow functional component patterns with hooks"
-    - "Use Tailwind CSS utility classes for styling"
-    - "Keep components in separate files (one component per file)"
-    - "Use named exports for components and utilities"
+  **Project Structure:**
+  ```
+  app/
+    (auth)/          # Auth-protected routes
+    (public)/        # Public routes
+    api/             # API routes
+    _components/     # Shared components
+  components/        # Reusable UI components
+  server/
+    api/             # tRPC routers
+    db/              # Prisma client
+  lib/               # Shared utilities
+  ```
 
-  architecture:
-    - "Organize by feature: app/[feature]/page.tsx structure"
-    - "Use Server Components for data fetching"
-    - "Implement API routes under app/api/"
-    - "Store shared components in components/ directory"
-    - "Use server actions for mutations when appropriate"
+  ## Next.js Best Practices
 
-  testing:
-    - "Write unit tests for utilities and business logic"
-    - "Test React components with Testing Library"
-    - "Use Playwright for E2E tests of critical user flows"
-    - "Test API routes independently"
-    - "Include accessibility tests with jest-axe"
+  ### Server Components by Default
+  - Use Server Components for data fetching
+  - Use Client Components only when needed (interactivity, hooks)
+  - Mark Client Components with `'use client'`
+  - Minimize client-side JavaScript bundle
 
-  performance:
-    - "Optimize images with next/image component"
-    - "Implement proper code splitting and lazy loading"
-    - "Use dynamic imports for heavy client-side components"
-    - "Enable static generation where possible (generateStaticParams)"
-    - "Implement proper caching strategies (force-cache, no-store)"
+  ### Data Fetching Patterns
+  ```tsx
+  // app/posts/page.tsx - Server Component
+  import { db } from '@/server/db';
 
-  security:
-    - "Use NextAuth.js for authentication"
-    - "Implement CSRF protection for forms"
-    - "Validate all inputs on both client and server"
-    - "Use environment variables for sensitive configuration"
-    - "Set secure headers in next.config.js"
-
-examples:
-  server_component: |
-    ```typescript
-    // app/dashboard/page.tsx (Server Component)
-    import { getServerSession } from 'next-auth';
-    import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-    import { prisma } from '@/lib/prisma';
-
-    export default async function DashboardPage() {
-      const session = await getServerSession(authOptions);
-
-      if (!session) {
-        redirect('/login');
-      }
-
-      const user = await prisma.user.findUnique({
-        where: { id: session.user.id },
-      });
-
-      return (
-        <div>
-          <h1>Welcome, {user.name}</h1>
-        </div>
-      );
-    }
-    ```
-
-  client_component: |
-    ```typescript
-    'use client';
-
-    import { useState } from 'react';
-    import { Button } from '@/components/ui/button';
-
-    export function Counter() {
-      const [count, setCount] = useState(0);
-
-      return (
-        <div className="flex items-center gap-4">
-          <Button onClick={() => setCount(count - 1)}>-</Button>
-          <span className="text-2xl font-bold">{count}</span>
-          <Button onClick={() => setCount(count + 1)}>+</Button>
-        </div>
-      );
-    }
-    ```
-
-  trpc_router: |
-    ```typescript
-    import { z } from 'zod';
-    import { router, publicProcedure } from '../trpc';
-
-    export const userRouter = router({
-      getById: publicProcedure
-        .input(z.object({ id: z.string() }))
-        .query(async ({ input }) => {
-          return await prisma.user.findUnique({
-            where: { id: input.id },
-          });
-        }),
-
-      create: publicProcedure
-        .input(z.object({
-          email: z.string().email(),
-          name: z.string(),
-        }))
-        .mutation(async ({ input }) => {
-          return await prisma.user.create({
-            data: input,
-          });
-        }),
+  export default async function PostsPage() {
+    const posts = await db.post.findMany({
+      orderBy: { createdAt: 'desc' },
     });
-    ```
 
-  metadata_export: |
-    ```typescript
-    import type { Metadata } from 'next';
+    return (
+      <div>
+        {posts.map(post => (
+          <PostCard key={post.id} post={post} />
+        ))}
+      </div>
+    );
+  }
+  ```
 
-    export const metadata: Metadata = {
-      title: 'Dashboard | MyApp',
-      description: 'User dashboard for managing your account',
-      openGraph: {
-        title: 'Dashboard',
-        description: 'User dashboard',
-        images: ['/og-image.jpg'],
+  ### tRPC Router Example
+  ```typescript
+  // server/api/routers/post.ts
+  import { z } from 'zod';
+  import { createTRPCRouter, protectedProcedure, publicProcedure } from '../trpc';
+
+  export const postRouter = createTRPCRouter({
+    list: publicProcedure
+      .input(z.object({ limit: z.number().min(1).max(100).default(10) }))
+      .query(async ({ ctx, input }) => {
+        return ctx.db.post.findMany({
+          take: input.limit,
+          orderBy: { createdAt: 'desc' },
+        });
+      }),
+
+    create: protectedProcedure
+      .input(z.object({
+        title: z.string().min(1).max(200),
+        content: z.string().min(1),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        return ctx.db.post.create({
+          data: {
+            ...input,
+            authorId: ctx.session.user.id,
+          },
+        });
+      }),
+  });
+  ```
+
+  ### Client Component Example
+  ```tsx
+  // components/PostForm.tsx
+  'use client';
+
+  import { useState } from 'react';
+  import { api } from '@/lib/api';
+  import { toast } from 'sonner';
+
+  export function PostForm() {
+    const [title, setTitle] = useState('');
+    const [content, setContent] = useState('');
+
+    const createPost = api.post.create.useMutation({
+      onSuccess: () => {
+        toast.success('Post created!');
+        setTitle('');
+        setContent('');
       },
-    };
-    ```
+    });
+
+    return (
+      <form onSubmit={(e) => {
+        e.preventDefault();
+        createPost.mutate({ title, content });
+      }}>
+        {/* Form fields */}
+      </form>
+    );
+  }
+  ```
+
+  ## Authentication
+
+  ### NextAuth.js Setup
+  - Use database sessions for production
+  - Implement OAuth providers (Google, GitHub)
+  - Add JWT for API authentication
+  - Protect routes with middleware
+
+  ### Protected Page Example
+  ```tsx
+  // app/(auth)/dashboard/page.tsx
+  import { getServerAuthSession } from '@/server/auth';
+  import { redirect } from 'next/navigation';
+
+  export default async function DashboardPage() {
+    const session = await getServerAuthSession();
+    if (!session) redirect('/login');
+
+    return <DashboardContent user={session.user} />;
+  }
+  ```
+
+  ## Database Schema (Prisma)
+
+  ```prisma
+  model User {
+    id            String    @id @default(cuid())
+    name          String?
+    email         String    @unique
+    emailVerified DateTime?
+    image         String?
+    accounts      Account[]
+    sessions      Session[]
+    posts         Post[]
+    createdAt     DateTime  @default(now())
+    updatedAt     DateTime  @updatedAt
+  }
+
+  model Post {
+    id        String   @id @default(cuid())
+    title     String
+    content   String
+    published Boolean  @default(false)
+    authorId  String
+    author    User     @relation(fields: [authorId], references: [id])
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([authorId])
+  }
+  ```
+
+  ## Performance Optimization
+
+  ### Image Optimization
+  ```tsx
+  import Image from 'next/image';
+
+  <Image
+    src="/hero.jpg"
+    alt="Hero"
+    width={1200}
+    height={600}
+    priority
+    placeholder="blur"
+  />
+  ```
+
+  ### Caching Strategies
+  - Use `revalidate` for ISR (Incremental Static Regeneration)
+  - Implement route segment config for cache control
+  - Use React Query for client-side caching
+
+  ### Code Splitting
+  ```tsx
+  import dynamic from 'next/dynamic';
+
+  const HeavyComponent = dynamic(() => import('@/components/HeavyComponent'), {
+    loading: () => <Skeleton />,
+    ssr: false,
+  });
+  ```
+
+  ## Testing Strategy
+
+  - **Unit Tests:** Jest + React Testing Library
+  - **Integration Tests:** Playwright for E2E
+  - **API Tests:** tRPC testing utilities
+  - **Type Safety:** TypeScript strict mode + tRPC
+
+  ## Deployment (Vercel)
+
+  - Enable Edge Runtime where possible
+  - Use environment variables for secrets
+  - Configure build cache for faster deploys
+  - Set up preview deployments for PRs
+  - Monitor with Vercel Analytics
+
+  ## Security Checklist
+
+  - ✅ Validate all inputs with Zod
+  - ✅ Use tRPC protected procedures for authenticated routes
+  - ✅ Implement CSRF protection
+  - ✅ Sanitize user-generated content
+  - ✅ Use environment variables for secrets
+  - ✅ Enable Content Security Policy headers
 
 variables:
-  APP_NAME: "MyNextApp"
-  APP_URL: "https://myapp.com"
+  DATABASE_URL: postgresql://localhost:5432/nextjs_db
+  NEXTAUTH_SECRET: your-secret-key
+  NEXTAUTH_URL: http://localhost:3000

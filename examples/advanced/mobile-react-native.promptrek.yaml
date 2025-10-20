@@ -1,157 +1,419 @@
-schema_version: "1.0.0"
+# yaml-language-server: $schema=https://promptrek.ai/schema/v3.0.json
+schema_version: 3.0.0
 metadata:
-  title: "React Native Mobile App Assistant"
-  description: "AI assistant for cross-platform React Native mobile development"
-  version: "1.0.0"
-  author: "Mobile Team"
-  tags: ["react-native", "mobile", "ios", "android", "typescript"]
+  title: React Native Mobile App
+  description: Cross-platform mobile development with React Native
+  version: 1.0.0
+  author: PrompTrek
+  tags:
+    - react-native
+    - mobile
+    - typescript
+    - ios
+    - android
 
-targets:
-  - copilot
-  - cursor
-  - continue
-  - claude
+content: |
+  # React Native Development Guide
 
-context:
-  project_type: "mobile_application"
-  technologies:
-    - "react-native"
-    - "typescript"
-    - "expo"
-    - "redux"
-    - "react-navigation"
-    - "jest"
-    - "detox"
-  description: |
-    Cross-platform mobile application built with React Native targeting
-    both iOS and Android platforms with shared codebase.
+  ## Project Setup
 
-instructions:
-  general:
-    - "Write platform-agnostic code whenever possible"
-    - "Use Platform-specific code only when necessary (Platform.select)"
-    - "Optimize for mobile performance - avoid unnecessary re-renders"
-    - "Follow React Native best practices for navigation and state management"
-    - "Test on both iOS and Android simulators regularly"
+  **Tech Stack:**
+  - React Native 0.73+
+  - TypeScript
+  - React Navigation for routing
+  - React Query for data fetching
+  - Zustand for state management
+  - React Native Paper for UI
+  - Jest + React Native Testing Library
 
-  code_style:
-    - "Use functional components with hooks exclusively"
-    - "Follow React Native's StyleSheet for styling (no inline styles)"
-    - "Use TypeScript for type safety across the codebase"
-    - "Keep components small and focused (max 200 lines)"
-    - "Use absolute imports with path mapping (@screens, @components)"
+  **Project Structure:**
+  ```
+  src/
+    screens/         # Screen components
+    components/      # Reusable components
+    navigation/      # Navigation configuration
+    hooks/           # Custom hooks
+    services/        # API services
+    store/           # State management
+    utils/           # Utilities
+    types/           # TypeScript types
+  ios/               # iOS native code
+  android/           # Android native code
+  ```
 
-  architecture:
-    - "Organize code by feature, not by type"
-    - "Use React Navigation for routing and deep linking"
-    - "Implement Redux or Context API for global state management"
-    - "Keep business logic separate from UI components"
-    - "Use custom hooks for reusable logic and API calls"
+  ## Navigation Setup
 
-  testing:
-    - "Write unit tests for all business logic and custom hooks"
-    - "Use React Native Testing Library for component tests"
-    - "Implement E2E tests with Detox for critical user flows"
-    - "Test on real devices before releases, not just simulators"
-    - "Include snapshot tests for complex UI components"
+  ```typescript
+  // src/navigation/RootNavigator.tsx
+  import { NavigationContainer } from '@react-navigation/native';
+  import { createNativeStackNavigator } from '@react-navigation/native-stack';
+  import { HomeScreen } from '../screens/HomeScreen';
+  import { ProfileScreen } from '../screens/ProfileScreen';
 
-  performance:
-    - "Use FlatList or SectionList for large lists (never ScrollView)"
-    - "Implement proper list item memoization with React.memo"
-    - "Optimize images with appropriate resolutions and formats"
-    - "Use Hermes engine for improved startup time"
-    - "Profile with React DevTools and Flipper for performance bottlenecks"
+  export type RootStackParamList = {
+    Home: undefined;
+    Profile: { userId: string };
+  };
 
-  security:
-    - "Never store sensitive data in AsyncStorage - use secure storage"
-    - "Implement certificate pinning for API calls"
-    - "Obfuscate source code in production builds"
-    - "Use biometric authentication for sensitive operations"
-    - "Validate all user inputs on both client and server"
+  const Stack = createNativeStackNavigator<RootStackParamList>();
 
-examples:
-  screen_component: |
-    ```typescript
-    import React from 'react';
-    import { View, Text, StyleSheet } from 'react-native';
-    import { useNavigation } from '@react-navigation/native';
+  export function RootNavigator() {
+    return (
+      <NavigationContainer>
+        <Stack.Navigator>
+          <Stack.Screen
+            name="Home"
+            component={HomeScreen}
+            options={{ title: 'Home' }}
+          />
+          <Stack.Screen
+            name="Profile"
+            component={ProfileScreen}
+            options={{ title: 'Profile' }}
+          />
+        </Stack.Navigator>
+      </NavigationContainer>
+    );
+  }
+  ```
 
-    interface Props {
-      userId: string;
-    }
+  ## Screen Component
 
-    export const ProfileScreen: React.FC<Props> = ({ userId }) => {
-      const navigation = useNavigation();
+  ```typescript
+  // src/screens/HomeScreen.tsx
+  import { StyleSheet, View, FlatList } from 'react-native';
+  import { Text, Button, ActivityIndicator } from 'react-native-paper';
+  import { NativeStackScreenProps } from '@react-navigation/native-stack';
+  import { RootStackParamList } from '../navigation/RootNavigator';
+  import { useUsers } from '../hooks/useUsers';
 
+  type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
+
+  export function HomeScreen({ navigation }: Props) {
+    const { data: users, isLoading } = useUsers();
+
+    if (isLoading) {
       return (
-        <View style={styles.container}>
-          <Text style={styles.title}>Profile</Text>
+        <View style={styles.centered}>
+          <ActivityIndicator size="large" />
         </View>
       );
-    };
+    }
 
-    const styles = StyleSheet.create({
-      container: {
-        flex: 1,
-        padding: 16,
-        backgroundColor: '#ffffff',
-      },
-      title: {
-        fontSize: 24,
-        fontWeight: 'bold',
-      },
+    return (
+      <View style={styles.container}>
+        <Text variant="headlineMedium" style={styles.title}>
+          Users
+        </Text>
+        <FlatList
+          data={users}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <Button
+              mode="outlined"
+              onPress={() => navigation.navigate('Profile', { userId: item.id })}
+              style={styles.userItem}
+            >
+              {item.name}
+            </Button>
+          )}
+        />
+      </View>
+    );
+  }
+
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      padding: 16,
+    },
+    centered: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    title: {
+      marginBottom: 16,
+    },
+    userItem: {
+      marginBottom: 8,
+    },
+  });
+  ```
+
+  ## Custom Hook with React Query
+
+  ```typescript
+  // src/hooks/useUsers.ts
+  import { useQuery } from '@tanstack/react-query';
+  import { userService } from '../services/userService';
+
+  export function useUsers() {
+    return useQuery({
+      queryKey: ['users'],
+      queryFn: userService.getAll,
+      staleTime: 5 * 60 * 1000, // 5 minutes
     });
-    ```
+  }
 
-  custom_hook: |
-    ```typescript
-    import { useState, useEffect } from 'react';
-    import { fetchUserData } from '@api/users';
+  export function useUser(userId: string) {
+    return useQuery({
+      queryKey: ['user', userId],
+      queryFn: () => userService.getById(userId),
+      enabled: !!userId,
+    });
+  }
+  ```
 
-    export const useUser = (userId: string) => {
-      const [user, setUser] = useState(null);
-      const [loading, setLoading] = useState(true);
-      const [error, setError] = useState(null);
+  ## API Service
 
-      useEffect(() => {
-        const loadUser = async () => {
-          try {
-            setLoading(true);
-            const data = await fetchUserData(userId);
-            setUser(data);
-          } catch (err) {
-            setError(err);
-          } finally {
-            setLoading(false);
-          }
-        };
+  ```typescript
+  // src/services/userService.ts
+  import axios from 'axios';
+  import { API_BASE_URL } from '../config';
 
-        loadUser();
-      }, [userId]);
+  export interface User {
+    id: string;
+    name: string;
+    email: string;
+    avatar?: string;
+  }
 
-      return { user, loading, error };
-    };
-    ```
+  const api = axios.create({
+    baseURL: API_BASE_URL,
+    timeout: 10000,
+  });
 
-  navigation_setup: |
-    ```typescript
-    import { NavigationContainer } from '@react-navigation/native';
-    import { createNativeStackNavigator } from '@react-navigation/native-stack';
+  export const userService = {
+    async getAll(): Promise<User[]> {
+      const response = await api.get<User[]>('/users');
+      return response.data;
+    },
 
-    const Stack = createNativeStackNavigator();
+    async getById(id: string): Promise<User> {
+      const response = await api.get<User>(`/users/${id}`);
+      return response.data;
+    },
 
-    export const AppNavigator = () => {
-      return (
-        <NavigationContainer>
-          <Stack.Navigator>
-            <Stack.Screen name="Home" component={HomeScreen} />
-            <Stack.Screen name="Profile" component={ProfileScreen} />
-          </Stack.Navigator>
-        </NavigationContainer>
+    async create(user: Omit<User, 'id'>): Promise<User> {
+      const response = await api.post<User>('/users', user);
+      return response.data;
+    },
+  };
+  ```
+
+  ## State Management with Zustand
+
+  ```typescript
+  // src/store/authStore.ts
+  import { create } from 'zustand';
+  import { persist } from 'zustand/middleware';
+  import AsyncStorage from '@react-native-async-storage/async-storage';
+
+  interface AuthState {
+    token: string | null;
+    user: User | null;
+    setAuth: (token: string, user: User) => void;
+    clearAuth: () => void;
+  }
+
+  export const useAuthStore = create<AuthState>()(
+    persist(
+      (set) => ({
+        token: null,
+        user: null,
+        setAuth: (token, user) => set({ token, user }),
+        clearAuth: () => set({ token: null, user: null }),
+      }),
+      {
+        name: 'auth-storage',
+        storage: {
+          getItem: async (name) => {
+            const value = await AsyncStorage.getItem(name);
+            return value ? JSON.parse(value) : null;
+          },
+          setItem: async (name, value) => {
+            await AsyncStorage.setItem(name, JSON.stringify(value));
+          },
+          removeItem: async (name) => {
+            await AsyncStorage.removeItem(name);
+          },
+        },
+      }
+    )
+  );
+  ```
+
+  ## Styling Best Practices
+
+  ```typescript
+  // Use StyleSheet.create for performance
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      padding: 16,
+      backgroundColor: '#fff',
+    },
+    text: {
+      fontSize: 16,
+      color: '#333',
+    },
+  });
+
+  // Use theme for consistency
+  import { useTheme } from 'react-native-paper';
+
+  function MyComponent() {
+    const theme = useTheme();
+
+    return (
+      <View style={{ backgroundColor: theme.colors.background }}>
+        <Text style={{ color: theme.colors.primary }}>Hello</Text>
+      </View>
+    );
+  }
+  ```
+
+  ## Platform-Specific Code
+
+  ```typescript
+  import { Platform, StyleSheet } from 'react-native';
+
+  const styles = StyleSheet.create({
+    container: {
+      padding: Platform.select({
+        ios: 20,
+        android: 16,
+        default: 16,
+      }),
+      ...Platform.select({
+        ios: {
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 4,
+        },
+        android: {
+          elevation: 4,
+        },
+      }),
+    },
+  });
+
+  // Or use Platform-specific files
+  // MyComponent.ios.tsx
+  // MyComponent.android.tsx
+  ```
+
+  ## Testing
+
+  ```typescript
+  // src/screens/HomeScreen.test.tsx
+  import { render, screen } from '@testing-library/react-native';
+  import { NavigationContainer } from '@react-navigation/native';
+  import { HomeScreen } from './HomeScreen';
+  import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+  const queryClient = new QueryClient();
+
+  describe('HomeScreen', () => {
+    it('renders user list', async () => {
+      render(
+        <QueryClientProvider client={queryClient}>
+          <NavigationContainer>
+            <HomeScreen />
+          </NavigationContainer>
+        </QueryClientProvider>
       );
-    };
-    ```
+
+      expect(await screen.findByText('Users')).toBeTruthy();
+    });
+  });
+  ```
+
+  ## Performance Optimization
+
+  ### Use React.memo for Components
+  ```typescript
+  import React from 'react';
+
+  interface UserCardProps {
+    user: User;
+    onPress: (id: string) => void;
+  }
+
+  export const UserCard = React.memo<UserCardProps>(({ user, onPress }) => {
+    return (
+      <Button onPress={() => onPress(user.id)}>
+        {user.name}
+      </Button>
+    );
+  });
+  ```
+
+  ### FlatList Optimization
+  ```typescript
+  <FlatList
+    data={items}
+    keyExtractor={(item) => item.id}
+    renderItem={({ item }) => <ItemComponent item={item} />}
+    windowSize={10}
+    maxToRenderPerBatch={10}
+    updateCellsBatchingPeriod={50}
+    removeClippedSubviews={true}
+    initialNumToRender={10}
+  />
+  ```
+
+  ### Image Optimization
+  ```typescript
+  import FastImage from 'react-native-fast-image';
+
+  <FastImage
+    source={{
+      uri: imageUrl,
+      priority: FastImage.priority.normal,
+    }}
+    resizeMode={FastImage.resizeMode.cover}
+    style={{ width: 200, height: 200 }}
+  />
+  ```
+
+  ## Native Modules
+
+  ```typescript
+  // Using native modules
+  import { NativeModules } from 'react-native';
+  const { MyNativeModule } = NativeModules;
+
+  // Call native method
+  const result = await MyNativeModule.someMethod(params);
+  ```
+
+  ## Build & Deployment
+
+  ### iOS
+  ```bash
+  # Install pods
+  cd ios && pod install
+
+  # Build
+  npx react-native run-ios --configuration Release
+
+  # Archive for App Store
+  xcodebuild -workspace ios/MyApp.xcworkspace \
+    -scheme MyApp -archivePath build/MyApp.xcarchive archive
+  ```
+
+  ### Android
+  ```bash
+  # Build APK
+  cd android && ./gradlew assembleRelease
+
+  # Build AAB for Play Store
+  ./gradlew bundleRelease
+  ```
 
 variables:
-  APP_NAME: "MyMobileApp"
-  BUNDLE_ID: "com.company.myapp"
+  API_BASE_URL: https://api.example.com
+  APP_NAME: MyApp

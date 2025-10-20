@@ -53,24 +53,6 @@ variables:
   PROJECT_NAME: "my-react-app"
 ```
 
-<details>
-<summary>📚 Click to see v1 format (legacy)</summary>
-
-```yaml
-schema_version: "1.0.0"
-metadata:
-  title: "My Project Assistant"
-  description: "AI assistant for React TypeScript project"
-targets: [copilot, cursor, continue]
-instructions:
-  general:
-    - "Use TypeScript for all new files"
-    - "Follow React functional component patterns"
-    - "Write comprehensive tests"
-```
-
-</details>
-
 2. Generate editor-specific prompts:
 ```bash
 # Generate for GitHub Copilot
@@ -115,6 +97,7 @@ ignore_editor_files: false
 **📚 Complete documentation is available on our [GitHub Pages site](https://flamingquaks.github.io/promptrek):**
 
 - **[Quick Start Guide](https://flamingquaks.github.io/promptrek/quick-start.html)** - Get up and running in minutes
+- **[JSON Schema Files](https://promptrek.ai/schema/)** - Published schemas for v2.0, v2.1, and v3.0 with editor autocompletion support
 - **[User Guide](https://flamingquaks.github.io/promptrek/user-guide.html)** - Comprehensive documentation covering:
   - UPF Specification - Universal Prompt Format details
   - Advanced Features - Variables, conditionals, and imports

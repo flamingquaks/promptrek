@@ -129,42 +129,6 @@ variables:
 - ✅ **Editor-friendly** - Matches how AI editors use markdown
 - ✅ **Top-level plugins** - MCP servers, commands, agents, and hooks at the top level (cleaner than v2.x)
 
-<details>
-<summary>📚 Click to see v1 format (legacy)</summary>
-
-```yaml
-schema_version: "1.0.0"
-
-metadata:
-  title: "My Project Assistant"
-  description: "AI assistant for my project"
-
-targets: ["copilot", "cursor", "continue"]
-
-context:
-  project_type: "web_application"
-  technologies: ["python", "javascript", "react"]
-
-instructions:
-  general:
-    - "Write clean, readable code"
-    - "Follow existing patterns"
-  code_style:
-    - "Use meaningful variable names"
-    - "Add appropriate comments"
-
-examples:
-  function: |
-    ```python
-    def hello_world():
-        return "Hello, World!"
-    ```
-```
-
-To create v1 files, use: `promptrek init --v1`
-
-</details>
-
 ### 3. Validate Your Configuration
 
 Before generating prompts, validate your configuration:
@@ -178,6 +142,16 @@ Use `--strict` to treat warnings as errors:
 ```bash
 promptrek validate my-project.promptrek.yaml --strict
 ```
+
+**💡 Editor Integration:** Enable schema validation in your editor for instant feedback while editing `.promptrek.yaml` files. Add this comment at the top of your file:
+
+```yaml
+# yaml-language-server: $schema=https://promptrek.ai/schema/v3.0.json
+schema_version: 3.0.0
+# ... rest of your configuration
+```
+
+This provides autocompletion, inline documentation, and validation in editors like VS Code, IntelliJ IDEA, and others that support YAML language servers. See the [Schema Documentation](https://promptrek.ai/schema/) for more details.
 
 ### 4. Configure .gitignore (Optional)
 
