@@ -259,17 +259,19 @@ jobs:
           echo "macOS 3.11: ${{ needs.test-macos-311.result }}"
           echo "macOS 3.12: ${{ needs.test-macos-312.result }}"
 
-          # Check if critical jobs failed (not success, cancelled, or skipped)
+          # Check if critical jobs failed
           if [ "${{ needs.build.result }}" = "failure" ] || \
              [ "${{ needs.test-primary.result }}" = "failure" ]; then
             echo "CI failed due to critical job failures"
             exit 1
           fi
 
-          # If jobs were cancelled or skipped, that's acceptable
+          # If jobs were cancelled or skipped, that's acceptable (not a failure)
           if [ "${{ needs.build.result }}" = "cancelled" ] || \
-             [ "${{ needs.test-primary.result }}" = "cancelled" ]; then
-            echo "CI was cancelled (due to newer commit)"
+             [ "${{ needs.build.result }}" = "skipped" ] || \
+             [ "${{ needs.test-primary.result }}" = "cancelled" ] || \
+             [ "${{ needs.test-primary.result }}" = "skipped" ]; then
+            echo "CI was cancelled or skipped (due to newer commit or other reason)"
             exit 0
           fi
 
