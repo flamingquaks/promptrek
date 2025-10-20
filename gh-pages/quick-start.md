@@ -236,7 +236,6 @@ PrompTrek generates sophisticated configuration files for each editor:
 - `.github/instructions/*.instructions.md` - Path-specific instructions with YAML frontmatter
 - `.github/prompts/*.prompt.md` - Reusable prompt templates
 - **Bidirectional sync support**: Changes can be synced back to PrompTrek configuration
-- **Headless agent instructions**: Autonomous regeneration capability for background tasks
 
 ### Cursor
 - `.cursor/rules/index.mdc` - Main project overview (Always rule)
@@ -361,7 +360,6 @@ promptrek validate <file> --strict  # Strict validation
 promptrek generate --editor <editor> --input <file>     # Single editor
 promptrek generate --all --input <file>                 # All editors
 promptrek generate --all --input <file> --output <dir>  # Custom output
-promptrek generate --editor copilot --headless <file>   # Generate with headless instructions
 ```
 
 ### Synchronization

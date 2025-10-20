@@ -9,17 +9,17 @@ This document provides a comprehensive comparison of features supported by each 
 
 ## Quick Reference Table
 
-| Editor | Variable Substitution | Conditional Instructions | Bidirectional Sync | Headless Mode | Project Files | Global Config | v3.0 Schema |
-|--------|:--------------------:|:-----------------------:|:------------------:|:-------------:|:-------------:|:-------------:|:-----------:|
-| **GitHub Copilot** | ✅ | ✅ | ✅ | ✅ | ✅ | - | ✅ |
-| **Cursor** | ✅ | ✅ | ✅ | - | ✅ | - | ✅ |
-| **Continue** | ✅ | ✅ | ✅ | - | ✅ | - | ✅ |
-| **Kiro** | ✅ | ✅ | ✅ | - | ✅ | - | ✅ |
-| **Cline** | ✅ | ✅ | ✅ | - | ✅ | - | ✅ |
-| **Claude Code** | ✅ | ✅ | ✅ | - | ✅ | - | ✅ |
-| **Windsurf** | ✅ | ✅ | ✅ | - | ✅ | - | ✅ |
-| **Amazon Q** | ✅ | ✅ | ✅ | - | ✅ | - | ✅ |
-| **JetBrains AI** | ✅ | ✅ | ✅ | - | ✅ | - | ✅ |
+| Editor | Variable Substitution | Conditional Instructions | Bidirectional Sync | Project Files | v3.0 Schema |
+|--------|:--------------------:|:-----------------------:|:------------------:|:-------------:|:-------------:|
+| **GitHub Copilot** | ✅ | ✅ | ✅ | ✅  | ✅ |
+| **Cursor** | ✅ | ✅ | ✅ | ✅  | ✅ |
+| **Continue** | ✅ | ✅ | ✅ | ✅  | ✅ |
+| **Kiro** | ✅ | ✅ | ✅ | ✅  | ✅ |
+| **Cline** | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Claude Code** | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Windsurf** | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Amazon Q** | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **JetBrains AI** | ✅ | ✅ | ✅ | ✅ | ✅ |
 
 ## Feature Descriptions
 
@@ -65,16 +65,6 @@ promptrek sync --editor claude --output project.promptrek.yaml
 promptrek sync --editor cursor --output project.promptrek.yaml
 ```
 
-### Headless Mode
-Support for generating agent-specific instructions for headless/autonomous AI assistants.
-
-**Supported by**: GitHub Copilot
-
-**Command**:
-```bash
-promptrek generate project.promptrek.yaml --editor copilot --headless
-```
-
 ### Project Files
 Generates project-level configuration files that can be committed to version control.
 
@@ -110,7 +100,6 @@ Full support for PrompTrek v3.0 schema with top-level plugin fields.
 
 **Unique Features**:
 - ✅ Path-specific instructions with YAML frontmatter
-- ✅ Headless agent file generation
 - ✅ Bidirectional sync (v2 lossless format)
 - ✅ Advanced glob pattern matching
 - ✅ MCP server integration
@@ -317,7 +306,6 @@ promptrek generate project-v2.promptrek.yaml --all
 ### Future Enhancements (v0.3.0+)
 
 Planned capability improvements:
-- **Enhanced Headless Mode**: Add headless support for more editors
 - **Plugin System**: Allow custom adapters with configurable capabilities
 - **Capability Discovery**: Runtime capability detection for installed editors
 - **Auto-detection**: Detect installed editors and generate accordingly

@@ -67,7 +67,7 @@ title: Home
           <span class="feature-badge">📁 Project</span>
           <span class="feature-badge">🔄 Variables</span>
           <span class="feature-badge">↔️ Sync</span>
-          <span class="feature-badge">🤖 Headless</span>
+        
         </div>
       </div>
 

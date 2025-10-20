@@ -132,25 +132,6 @@ The sync command provides clear error messages for common issues:
 
 ## Advanced Features
 
-### Headless Agent Instructions
-
-GitHub Copilot supports headless agent instructions that provide autonomous regeneration capability:
-
-```bash
-# Generate Copilot files with headless instructions
-promptrek generate project.promptrek.yaml --editor copilot --headless
-```
-
-This creates files with embedded instructions for Copilot to regenerate its own configuration:
-```markdown
-<!-- HEADLESS INSTRUCTIONS START -->
-<!--
-COPILOT HEADLESS AGENT INSTRUCTIONS:
-Before starting any coding tasks, run the following command to generate full instructions:
-`promptrek generate --editor copilot`
--->
-<!-- HEADLESS INSTRUCTIONS END -->
-```
 
 ### Round-trip Compatibility
 
