@@ -176,24 +176,49 @@
           "title": "Name",
           "type": "string"
         },
-        "frontmatter": {
+        "content": {
+          "description": "Raw markdown content",
+          "title": "Content",
+          "type": "string"
+        },
+        "description": {
           "anyOf": [
             {
-              "additionalProperties": true,
-              "type": "object"
+              "type": "string"
             },
             {
               "type": "null"
             }
           ],
           "default": null,
-          "description": "Optional YAML frontmatter for the document",
-          "title": "Frontmatter"
+          "description": "Human-readable description (used by Cursor, etc.)",
+          "title": "Description"
         },
-        "content": {
-          "description": "Raw markdown content",
-          "title": "Content",
-          "type": "string"
+        "file_globs": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "File patterns where this applies (e.g., '**/*.{ts,tsx}'). Used by Cursor, Copilot path-specific rules.",
+          "title": "File Globs"
+        },
+        "always_apply": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Whether to always apply this rule (Cursor alwaysApply). If false with file_globs, auto-attaches to matching files.",
+          "title": "Always Apply"
         }
       },
       "required": [
@@ -602,6 +627,32 @@
       "description": "Main markdown content",
       "title": "Content",
       "type": "string"
+    },
+    "content_description": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Description for main content (used in editor frontmatter)",
+      "title": "Content Description"
+    },
+    "content_always_apply": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Whether main content always applies (default: True)",
+      "title": "Content Always Apply"
     },
     "documents": {
       "anyOf": [
