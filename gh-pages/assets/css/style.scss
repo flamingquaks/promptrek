@@ -2952,16 +2952,36 @@ a.btn.btn-secondary:hover {
 }
 
 /* User Guide Layout with Sidebar */
-.guide-page {
-  padding-top: 0; /* Remove padding as layout handles spacing */
+/* Guide page overrides - ensure consistent layout */
+body.guide-page,
+body.guide-page.content-page {
+  padding-top: 0 !important;
+  overflow-x: hidden !important;
+}
+
+body.guide-page .page-content,
+body.guide-page.content-page .page-content {
+  padding: 0 !important;
+  max-width: none !important;
+}
+
+body.guide-page .wrapper,
+body.guide-page.content-page .wrapper,
+.content-page.guide-page .wrapper {
+  max-width: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
 }
 
 .guide-layout {
   display: flex;
-  max-width: 1400px;
-  margin: 0 auto;
+  width: 100%;
+  margin: 0 !important;
   gap: 0;
-  padding-top: 80px; /* Add padding to entire layout */
+  padding-top: 80px;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  box-sizing: border-box;
 }
 
 .guide-sidebar {
@@ -3096,13 +3116,15 @@ a.btn.btn-secondary:hover {
 .guide-content {
   flex: 1;
   min-width: 0;
-  padding: 2rem clamp(1rem, 3vw, 3rem);
+  padding: 2rem 3rem !important;
   background: var(--bg-primary);
+  box-sizing: border-box;
 }
 
 .guide-article {
   max-width: 900px;
   margin: 0 auto;
+  width: 100%;
 }
 
 .guide-article h1 {
@@ -3171,13 +3193,15 @@ a.btn.btn-secondary:hover {
 }
 
 .guide-article table {
-  width: 100%;
+  width: auto;
+  max-width: 100%;
   border-collapse: collapse;
-  margin: 2rem 0;
+  margin: 2rem auto;
   background: white;
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  table-layout: auto;
 }
 
 .guide-article th {
@@ -3197,16 +3221,14 @@ a.btn.btn-secondary:hover {
   background: rgba(102, 126, 234, 0.04);
 }
 
-/* Table wrapper for mobile scrolling */
-.guide-article table {
-  display: block;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
+/* Responsive table handling */
 @media (max-width: 768px) {
+  .guide-article {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
   .guide-article table {
-    width: 100%;
     min-width: 600px;
   }
 }
@@ -3332,7 +3354,7 @@ a.btn.btn-secondary:hover {
   }
 
   .guide-content {
-    padding: 1.5rem 1.25rem;
+    padding: 1.5rem 1.5rem !important;
   }
 }
 
@@ -3375,7 +3397,7 @@ a.btn.btn-secondary:hover {
   }
 
   .guide-content {
-    padding: 1.25rem 1rem;
+    padding: 1.25rem 1.25rem !important;
   }
 
   .guide-article h1 {
