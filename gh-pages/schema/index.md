@@ -70,7 +70,7 @@ Simplified markdown-first schema without plugin support.
 Add a schema reference at the top of your `project.promptrek.yaml`:
 
 ```yaml
-# yaml-language-server: $schema=https://promptrek.ai/schema/v3.0.json
+# yaml-language-server: $schema=https://promptrek.ai/schema/v3.0.0.json
 schema_version: 3.0.0
 metadata:
   title: My Project

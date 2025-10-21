@@ -51,11 +51,11 @@ def write_promptrek_yaml(data: Dict[str, Any], output_path: Path) -> None:
     # Determine schema version and URL
     schema_version = data.get("schema_version", "3.0.0")
     if schema_version.startswith("3."):
-        schema_url = "https://promptrek.ai/schema/v3.0.json"
+        schema_url = "https://promptrek.ai/schema/v3.0.0.json"
     elif schema_version.startswith("2.1"):
-        schema_url = "https://promptrek.ai/schema/v2.1.json"
+        schema_url = "https://promptrek.ai/schema/v2.1.0.json"
     elif schema_version.startswith("2."):
-        schema_url = "https://promptrek.ai/schema/v2.0.json"
+        schema_url = "https://promptrek.ai/schema/v2.0.0.json"
     else:
         schema_url = None  # v1.x or unknown versions don't have schema
 

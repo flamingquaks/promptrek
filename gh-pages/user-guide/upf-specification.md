@@ -29,7 +29,7 @@ JSON Schemas are available for all versions to enable autocompletion and validat
 **Enable in your editor**: Add a schema reference at the top of your `.promptrek.yaml` file:
 
 ```yaml
-# yaml-language-server: $schema=https://promptrek.ai/schema/v3.0.json
+# yaml-language-server: $schema=https://promptrek.ai/schema/v3.0.0.json
 schema_version: 3.0.0
 # ... rest of your configuration
 ```

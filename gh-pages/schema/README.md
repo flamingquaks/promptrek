@@ -33,7 +33,7 @@ Many editors support JSON Schema for YAML files. You can reference these schemas
 Add this to your `project.promptrek.yaml` file at the top:
 
 ```yaml
-# yaml-language-server: $schema=https://promptrek.ai/schema/v3.0.json
+# yaml-language-server: $schema=https://promptrek.ai/schema/v3.0.0.json
 schema_version: 3.0.0
 metadata:
   title: My Project
