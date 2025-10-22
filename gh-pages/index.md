@@ -386,7 +386,7 @@ variables:
       <div class="feature-card-modern">
         <div class="feature-icon">🔄</div>
         <h3>Variable Substitution</h3>
-        <p>Dynamic variables with local file support. Keep sensitive values like API keys in variables.promptrek.yaml (automatically gitignored).</p>
+        <p>Dynamic variables with local file support. Keep sensitive values like API keys in .promptrek/variables.promptrek.yaml (automatically gitignored via .promptrek/ directory).</p>
       </div>
 
       <div class="feature-card-modern">

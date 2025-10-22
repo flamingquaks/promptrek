@@ -540,12 +540,12 @@ CMD ["gunicorn", "--bind", "0.0.0.0:8000", "project.wsgi:application"]
         assert result.exit_code == 0
         assert output_file.exists()
 
-        # Validate the created file (V2 schema)
+        # Validate the created file (V3 schema - default)
         with open(output_file) as f:
             content = yaml.safe_load(f)
-            assert content["schema_version"] == "2.0.0"  # V2 schema
+            assert content["schema_version"] == "3.0.0"  # V3 schema (default)
             assert "metadata" in content
-            assert "content" in content  # V2 uses content instead of targets
+            assert "content" in content  # V3 uses content field
 
     def test_init_command_with_templates(self, runner, temp_dir):
         """Test init command with different templates."""

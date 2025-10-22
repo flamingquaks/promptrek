@@ -72,7 +72,7 @@ Available templates:
 
 **Note:** When you run `promptrek init`, it automatically:
 - Creates `.gitignore` if it doesn't exist
-- Adds `variables.promptrek.yaml` to `.gitignore`
+- Adds `.promptrek/` directory to `.gitignore` (contains user-specific config like `variables.promptrek.yaml`)
 - Adds all editor-specific file patterns to `.gitignore` (18 patterns including `.github/copilot-instructions.md`, `.cursor/rules/*.mdc`, etc.)
 
 ### 2. Configure .gitignore Management (Optional)

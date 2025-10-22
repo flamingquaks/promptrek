@@ -18,7 +18,7 @@ from ..core.models import UniversalPrompt
 class VariableSubstitution:
     """Handles variable substitution in templates and content."""
 
-    LOCAL_VARIABLES_FILE = "variables.promptrek.yaml"
+    LOCAL_VARIABLES_FILE = ".promptrek/variables.promptrek.yaml"
 
     def __init__(self) -> None:
         """Initialize variable substitution system."""
@@ -190,10 +190,13 @@ class VariableSubstitution:
 
     def load_local_variables(self, search_dir: Optional[Path] = None) -> Dict[str, Any]:
         """
-        Load variables from local variables.promptrek.yaml file.
+        Load variables from local .promptrek/variables.promptrek.yaml file.
 
-        Searches for variables.promptrek.yaml starting from search_dir
+        Searches for .promptrek/variables.promptrek.yaml starting from search_dir
         (or current directory) and walking up parent directories.
+
+        Also checks for deprecated location (variables.promptrek.yaml in root) and
+        offers to migrate it to the new location.
 
         Args:
             search_dir: Directory to start search from (defaults to current dir)
@@ -206,10 +209,18 @@ class VariableSubstitution:
         # Search current directory and parents
         current = start_dir.resolve()
         while True:
-            var_file = current / self.LOCAL_VARIABLES_FILE
-            if var_file.exists():
+            # Check for old location (deprecated)
+            old_var_file = current / "variables.promptrek.yaml"
+            new_var_file = current / self.LOCAL_VARIABLES_FILE
+
+            # Handle migration from old location
+            if old_var_file.exists() and not new_var_file.exists():
+                self._migrate_variables_file(old_var_file, new_var_file)
+
+            # Load from new location
+            if new_var_file.exists():
                 try:
-                    with open(var_file, "r", encoding="utf-8") as f:
+                    with open(new_var_file, "r", encoding="utf-8") as f:
                         data = yaml.safe_load(f)
                         if isinstance(data, dict):
                             return data
@@ -226,3 +237,54 @@ class VariableSubstitution:
             current = parent
 
         return {}
+
+    def _migrate_variables_file(self, old_path: Path, new_path: Path) -> None:
+        """
+        Migrate variables.promptrek.yaml from old location to new location.
+
+        Args:
+            old_path: Old file location (variables.promptrek.yaml in root)
+            new_path: New file location (.promptrek/variables.promptrek.yaml)
+        """
+        try:
+            import sys
+
+            # Only show interactive prompt if running in an interactive terminal
+            if sys.stdout.isatty():
+                print(
+                    f"\n⚠️  DEPRECATION: Found variables file at old location: {old_path.name}"
+                )
+                print(f"   New location: {new_path}")
+                print(
+                    "   The old location is deprecated and will be removed in a future version."
+                )
+                response = (
+                    input("\n   Migrate file to new location? [Y/n]: ").strip().lower()
+                )
+
+                if response in ("", "y", "yes"):
+                    # Create .promptrek directory if it doesn't exist
+                    new_path.parent.mkdir(parents=True, exist_ok=True)
+
+                    # Move the file
+                    import shutil
+
+                    shutil.move(str(old_path), str(new_path))
+                    print(f"   ✅ Migrated {old_path.name} to {new_path}")
+                    print(
+                        "   💡 The file has been moved and is already gitignored via .promptrek/"
+                    )
+                else:
+                    print(
+                        "   ⏭️  Skipped migration. File will be loaded from old location."
+                    )
+            else:
+                # Non-interactive: auto-migrate silently
+                new_path.parent.mkdir(parents=True, exist_ok=True)
+                import shutil
+
+                shutil.move(str(old_path), str(new_path))
+
+        except Exception:
+            # If migration fails, silently continue - file will be loaded from old location
+            pass

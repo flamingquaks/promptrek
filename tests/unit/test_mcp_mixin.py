@@ -455,3 +455,183 @@ class TestEdgecases:
             config["mcpServers"]["test"]["env"]["KEY"]
             == "value-with-$pecial/chars\\and:more"
         )
+
+
+class TestUserLevelMCPHelpers:
+    """Test user-level MCP configuration helper methods."""
+
+    @pytest.fixture
+    def adapter(self):
+        """Create test adapter."""
+        return MockMCPAdapter()
+
+    def test_compare_mcp_servers_identical(self, adapter):
+        """Test comparing identical MCP servers."""
+        server1 = {
+            "command": "npx",
+            "args": ["-y", "server"],
+            "env": {"KEY": "value"},
+        }
+        server2 = {
+            "command": "npx",
+            "args": ["-y", "server"],
+            "env": {"KEY": "value"},
+        }
+
+        assert adapter.compare_mcp_servers(server1, server2) is False
+
+    def test_compare_mcp_servers_different_command(self, adapter):
+        """Test comparing servers with different commands."""
+        server1 = {"command": "npx", "args": ["arg"]}
+        server2 = {"command": "node", "args": ["arg"]}
+
+        assert adapter.compare_mcp_servers(server1, server2) is True
+
+    def test_compare_mcp_servers_different_args(self, adapter):
+        """Test comparing servers with different arguments."""
+        server1 = {"command": "npx", "args": ["arg1"]}
+        server2 = {"command": "npx", "args": ["arg2"]}
+
+        assert adapter.compare_mcp_servers(server1, server2) is True
+
+    def test_compare_mcp_servers_different_env(self, adapter):
+        """Test comparing servers with different environment variables."""
+        server1 = {"command": "npx", "env": {"KEY": "value1"}}
+        server2 = {"command": "npx", "env": {"KEY": "value2"}}
+
+        assert adapter.compare_mcp_servers(server1, server2) is True
+
+    def test_compare_mcp_servers_missing_fields(self, adapter):
+        """Test comparing servers with missing optional fields."""
+        server1 = {"command": "npx"}
+        server2 = {"command": "npx", "args": ["arg"]}
+
+        assert adapter.compare_mcp_servers(server1, server2) is True
+
+    def test_detect_conflicting_servers_no_conflicts(self, adapter):
+        """Test conflict detection with no conflicts."""
+        new_servers = {
+            "server1": {"command": "cmd1"},
+            "server2": {"command": "cmd2"},
+        }
+        existing_config = {
+            "mcpServers": {
+                "server3": {"command": "cmd3"},
+            }
+        }
+
+        conflicts = adapter.detect_conflicting_servers(new_servers, existing_config)
+        assert len(conflicts) == 0
+
+    def test_detect_conflicting_servers_with_conflicts(self, adapter):
+        """Test conflict detection with conflicts."""
+        new_servers = {
+            "filesystem": {"command": "new-cmd", "args": ["new"]},
+            "github": {"command": "cmd2"},
+        }
+        existing_config = {
+            "mcpServers": {
+                "filesystem": {"command": "old-cmd", "args": ["old"]},
+                "other": {"command": "cmd3"},
+            }
+        }
+
+        conflicts = adapter.detect_conflicting_servers(new_servers, existing_config)
+        assert len(conflicts) == 1
+        assert "filesystem" in conflicts
+
+    def test_detect_conflicting_servers_same_config(self, adapter):
+        """Test conflict detection with same configuration."""
+        new_servers = {
+            "filesystem": {"command": "cmd", "args": ["arg"]},
+        }
+        existing_config = {
+            "mcpServers": {
+                "filesystem": {"command": "cmd", "args": ["arg"]},
+            }
+        }
+
+        # Same config should NOT be a conflict
+        conflicts = adapter.detect_conflicting_servers(new_servers, existing_config)
+        assert len(conflicts) == 0
+
+    @patch("promptrek.adapters.mcp_mixin.click.confirm")
+    def test_prompt_mcp_server_overwrite_accepts(self, mock_confirm, adapter):
+        """Test prompting for server overwrite when user accepts."""
+        mock_confirm.return_value = True
+
+        server_name = "filesystem"
+        existing = {"command": "old"}
+        new = {"command": "new"}
+
+        result = adapter.prompt_mcp_server_overwrite(
+            server_name, existing, new, dry_run=False
+        )
+
+        assert result is True
+        mock_confirm.assert_called_once()
+
+    @patch("promptrek.adapters.mcp_mixin.click.confirm")
+    def test_prompt_mcp_server_overwrite_declines(self, mock_confirm, adapter):
+        """Test prompting for server overwrite when user declines."""
+        mock_confirm.return_value = False
+
+        server_name = "filesystem"
+        existing = {"command": "old"}
+        new = {"command": "new"}
+
+        result = adapter.prompt_mcp_server_overwrite(
+            server_name, existing, new, dry_run=False
+        )
+
+        assert result is False
+        mock_confirm.assert_called_once()
+
+    def test_prompt_mcp_server_overwrite_dry_run(self, adapter):
+        """Test prompting for server overwrite in dry run mode."""
+        server_name = "filesystem"
+        existing = {"command": "old"}
+        new = {"command": "new"}
+
+        result = adapter.prompt_mcp_server_overwrite(
+            server_name, existing, new, dry_run=True
+        )
+
+        # Should return True in dry run without prompting
+        assert result is True
+
+    @patch("promptrek.adapters.mcp_mixin.click.confirm")
+    def test_warn_user_level_operations_accepts(self, mock_confirm, adapter):
+        """Test user-level operations warning when user accepts."""
+        mock_confirm.return_value = True
+
+        config_path = Path("/path/to/config.json")
+        result = adapter.warn_user_level_operations(
+            "TestEditor", config_path, 3, dry_run=False
+        )
+
+        assert result is True
+        mock_confirm.assert_called_once()
+
+    @patch("promptrek.adapters.mcp_mixin.click.confirm")
+    def test_warn_user_level_operations_declines(self, mock_confirm, adapter):
+        """Test user-level operations warning when user declines."""
+        mock_confirm.return_value = False
+
+        config_path = Path("/path/to/config.json")
+        result = adapter.warn_user_level_operations(
+            "TestEditor", config_path, 3, dry_run=False
+        )
+
+        assert result is False
+        mock_confirm.assert_called_once()
+
+    def test_warn_user_level_operations_dry_run(self, adapter):
+        """Test user-level operations warning in dry run mode."""
+        config_path = Path("/path/to/config.json")
+        result = adapter.warn_user_level_operations(
+            "TestEditor", config_path, 3, dry_run=True
+        )
+
+        # Should return True in dry run without prompting
+        assert result is True

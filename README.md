@@ -84,7 +84,7 @@ promptrek config-ignores --remove-cached
 
 **What gets ignored:**
 - Generated editor configurations (`.github/copilot-instructions.md`, `.cursor/rules/*.mdc`, etc.)
-- Local variables file (`variables.promptrek.yaml`)
+- User-specific configuration directory (`.promptrek/`) containing `variables.promptrek.yaml` and `user-config.promptrek.yaml`
 
 **Configuration option:**
 ```yaml

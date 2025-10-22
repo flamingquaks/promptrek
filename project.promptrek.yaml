@@ -223,7 +223,7 @@ content: |-
   **Hook Types** (defined in `.pre-commit-hooks.yaml`):
   1. `promptrek-validate`: Validates `project.promptrek.yaml` files
   2. `promptrek-prevent-generated`: Blocks commits of generated editor files
-  3. `promptrek-check-local-vars`: Prevents committing user-specific `variables.promptrek.yaml`
+  3. `promptrek-check-local-vars`: Prevents committing user-specific files in `.promptrek/` directory (like `variables.promptrek.yaml` and `user-config.promptrek.yaml`)
 
   **Implementation**: Hooks are implemented via CLI commands in `src/promptrek/cli/commands/hooks.py`
 
@@ -399,8 +399,8 @@ content: |-
   - ❌ **Not recommended**: Migrate to v3.0 for better maintainability
 variables: {}
 
-mcp_servers: 
-  - name: Git
-    command: uvx
-    args: ["mcp-server-git"]
-    description: Provides an MCP Server for basic Git Operations
+mcp_servers:
+- name: git
+  command: uvx
+  args: [mcp-server-git]
+  description: Provides an MCP Server for basic Git Operations

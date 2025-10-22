@@ -22,7 +22,7 @@ def check_generated_command(ctx: click.Context, files: List[str]) -> None:
         ctx: Click context
         files: List of file paths to check
     """
-    # Check for local variables file first
+    # Check for local variables file first (both old and new locations)
     local_vars_files = [f for f in files if "variables.promptrek" in f]
     if local_vars_files:
         click.echo("❌ ERROR: Attempting to commit local variables file!", err=True)
@@ -38,15 +38,14 @@ def check_generated_command(ctx: click.Context, files: List[str]) -> None:
             "\n💡 This file should be:",
             err=True,
         )
+        click.echo("   • Located in .promptrek/ directory (new location)", err=True)
         click.echo("   • Added to .gitignore (should already be there)", err=True)
         click.echo("   • Kept local to your machine", err=True)
         click.echo("   • Not shared in version control", err=True)
 
         click.echo("\nTo fix this:", err=True)
-        click.echo(
-            "1. Remove from staging: git reset HEAD variables.promptrek.yaml", err=True
-        )
-        click.echo("2. Ensure it's in .gitignore", err=True)
+        click.echo("1. Remove from staging: git reset HEAD <file>", err=True)
+        click.echo("2. Ensure .promptrek/ is in .gitignore", err=True)
         click.echo("3. Only commit .promptrek.yaml source files", err=True)
 
         ctx.exit(1)
@@ -263,7 +262,7 @@ def install_hooks_command(
                 "name": "Prevent committing local variables",
                 "entry": f"{entry_prefix}promptrek check-generated",
                 "language": "system",
-                "files": r"variables\.promptrek\.ya?ml$",
+                "files": r"(^variables\.promptrek\.ya?ml$|\.promptrek/variables\.promptrek\.ya?ml$)",
                 "stages": ["pre-commit"],
                 "always_run": False,
                 "pass_filenames": True,

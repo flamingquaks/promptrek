@@ -44,7 +44,7 @@ def migrate_command(
     # Check schema version and determine migration path
     if isinstance(prompt, UniversalPromptV3):
         # Already v3, no migration needed
-        click.echo(f"ℹ️  {input_file} is already v3.0 format, no migration needed")
+        click.echo(f"ℹ️  {input_file} is already v3.x format, no migration needed")
         return
     elif isinstance(prompt, UniversalPromptV2):
         # Check if v2.1

@@ -149,3 +149,6 @@ test-project/
 .claude/agents/*.md
 .claude/hooks.yaml
 .mcp.json
+
+# PrompTrek user-specific config (not committed)
+.promptrek/

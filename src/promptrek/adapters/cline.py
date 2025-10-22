@@ -2,13 +2,19 @@
 Cline (VSCode AI coding assistant extension) adapter implementation.
 """
 
+import platform
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
 import click
 
 from ..core.exceptions import DeprecationWarnings, ValidationError
-from ..core.models import UniversalPrompt, UniversalPromptV2, UniversalPromptV3
+from ..core.models import (
+    UniversalPrompt,
+    UniversalPromptV2,
+    UniversalPromptV3,
+    UserConfig,
+)
 from .base import EditorAdapter
 from .mcp_mixin import MCPGenerationMixin
 from .sync_mixin import MarkdownSyncMixin
@@ -27,13 +33,297 @@ class ClineAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
             file_patterns=self._file_patterns,
         )
 
+    @staticmethod
+    def get_default_config_paths() -> List[Path]:
+        """
+        Get list of default paths to search for cline_mcp_settings.json.
+
+        Returns:
+            List of possible paths to check
+        """
+        system = platform.system()
+        paths = []
+
+        if system == "Darwin":  # macOS
+            base_path = Path.home() / "Library" / "Application Support"
+        elif system == "Windows":
+            base_path = Path.home() / "AppData" / "Roaming"
+        else:  # Linux and others
+            base_path = Path.home() / ".config"
+
+        # VS Code
+        paths.append(
+            base_path
+            / "Code"
+            / "User"
+            / "globalStorage"
+            / "saoudrizwan.claude-dev"
+            / "settings"
+            / "cline_mcp_settings.json"
+        )
+
+        # VS Code Insiders
+        paths.append(
+            base_path
+            / "Code - Insiders"
+            / "User"
+            / "globalStorage"
+            / "saoudrizwan.claude-dev"
+            / "settings"
+            / "cline_mcp_settings.json"
+        )
+
+        # Cursor (uses same extension ID)
+        paths.append(
+            base_path
+            / "Cursor"
+            / "User"
+            / "globalStorage"
+            / "saoudrizwan.claude-dev"
+            / "settings"
+            / "cline_mcp_settings.json"
+        )
+
+        return paths
+
+    @staticmethod
+    def find_mcp_config_file() -> Optional[Path]:
+        """
+        Try to find the cline_mcp_settings.json file in common locations.
+
+        Returns:
+            Path if found, None otherwise
+        """
+        for path in ClineAdapter.get_default_config_paths():
+            if path.exists():
+                return path
+        return None
+
+    @staticmethod
+    def prompt_for_mcp_config_path() -> Optional[Path]:
+        """
+        Prompt user to provide the path to cline_mcp_settings.json.
+
+        Returns:
+            Path provided by user, or None if skipped
+        """
+        click.echo("\n❌ Could not find Cline MCP configuration file")
+        click.echo("\nTo find your Cline MCP configuration file:")
+        click.echo("  1. Open VS Code with Cline extension")
+        click.echo("  2. Open Cline chat window")
+        click.echo("  3. At the bottom, click the stacked servers icon (MCP)")
+        click.echo("  4. Click the settings cog icon")
+        click.echo('  5. Click "Configure MCP Servers"')
+        click.echo("  6. Right-click on the file tab at the top")
+        click.echo('  7. Click "Copy Path"')
+        click.echo("  8. Paste the path below")
+        click.echo("")
+
+        path_str = click.prompt(
+            "Enter path to cline_mcp_settings.json (or press Enter to skip)",
+            default="",
+            show_default=False,
+        )
+
+        if not path_str:
+            return None
+
+        path = Path(path_str).expanduser()
+        if not path.exists():
+            click.echo(f"⚠️  Warning: File does not exist: {path}")
+            if not click.confirm("Use this path anyway?", default=False):
+                return None
+
+        return path
+
+    @staticmethod
+    def _find_user_config(output_dir: Path) -> Path:
+        """
+        Find or determine location for user-config.promptrek.yaml in .promptrek/ directory.
+
+        Searches in order:
+        1. .promptrek/user-config.promptrek.yaml in output_dir
+        2. .promptrek/user-config.promptrek.yaml in current working directory
+        3. Returns path in output_dir/.promptrek/ (even if it doesn't exist yet)
+
+        Args:
+            output_dir: Directory where files are being generated
+
+        Returns:
+            Path to .promptrek/user-config.promptrek.yaml file
+        """
+        # Try output_dir/.promptrek/ first
+        user_config = output_dir / ".promptrek" / "user-config.promptrek.yaml"
+        if user_config.exists():
+            return user_config
+
+        # Try current working directory/.promptrek/
+        cwd = Path.cwd()
+        user_config_cwd = cwd / ".promptrek" / "user-config.promptrek.yaml"
+        if user_config_cwd.exists():
+            return user_config_cwd
+
+        # Default to output_dir/.promptrek/ (even if doesn't exist yet)
+        return output_dir / ".promptrek" / "user-config.promptrek.yaml"
+
+    @staticmethod
+    def _read_user_config(user_config_path: Path) -> Optional[UserConfig]:
+        """
+        Read user config from user-config.promptrek.yaml.
+
+        Args:
+            user_config_path: Path to user-config.promptrek.yaml
+
+        Returns:
+            UserConfig object or None if file doesn't exist
+        """
+        if not user_config_path.exists():
+            return None
+
+        try:
+            import yaml
+
+            with open(user_config_path, "r", encoding="utf-8") as f:
+                data = yaml.safe_load(f)
+
+            if not data:
+                return None
+
+            return UserConfig(**data)
+        except Exception:
+            return None
+
+    @staticmethod
+    def _write_user_config(
+        user_config_path: Path, mcp_config_path: Path, verbose: bool = False
+    ) -> bool:
+        """
+        Write or update user config with Cline MCP path.
+
+        Args:
+            user_config_path: Path to user-config.promptrek.yaml
+            mcp_config_path: Path to cline_mcp_settings.json
+            verbose: Enable verbose output
+
+        Returns:
+            True if write was successful, False otherwise
+        """
+        try:
+            # Read existing config or create new one
+            user_config = ClineAdapter._read_user_config(user_config_path)
+
+            if not user_config:
+                user_config = UserConfig(
+                    schema_version="1.0.0",
+                    editor_paths={"cline_mcp_path": str(mcp_config_path)},
+                )
+            else:
+                # Update existing config
+                if not user_config.editor_paths:
+                    user_config.editor_paths = {}
+                user_config.editor_paths["cline_mcp_path"] = str(mcp_config_path)
+
+            # Write to file with warning comments
+            user_config_path.parent.mkdir(parents=True, exist_ok=True)
+
+            import yaml
+
+            with open(user_config_path, "w", encoding="utf-8") as f:
+                # Add YAML language server directive for schema validation
+                f.write(
+                    "# yaml-language-server: $schema=https://promptrek.ai/schema/user-config/v1.0.0.json\n"
+                )
+                f.write("#\n")
+                # Add warning comments
+                f.write("# WARNING: This file contains user-specific configuration\n")
+                f.write(
+                    "# DO NOT commit this file to version control (it should be in .gitignore)\n"
+                )
+                f.write("#\n")
+                f.write(
+                    "# This file is automatically generated and contains paths specific to your machine.\n"
+                )
+                f.write(
+                    "# Other developers will have different paths on their machines.\n"
+                )
+                f.write("\n")
+
+                # Write YAML data
+                yaml.safe_dump(
+                    user_config.model_dump(exclude_none=True),
+                    f,
+                    default_flow_style=False,
+                    sort_keys=False,
+                )
+
+            # Add .promptrek/ directory to .gitignore
+            ClineAdapter._add_to_gitignore(
+                user_config_path.parent.parent, ".promptrek/"
+            )
+
+            click.echo(
+                f"  💾 Saved Cline MCP path to: .promptrek/{user_config_path.name}"
+            )
+            if verbose:
+                click.echo(f"     Path: {mcp_config_path}")
+
+            return True
+
+        except Exception as e:
+            if verbose:
+                click.echo(f"  ⚠️  Could not update user config: {e}")
+            return False
+
+    @staticmethod
+    def _add_to_gitignore(project_dir: Path, pattern: str) -> None:
+        """
+        Add pattern to .gitignore if not already present.
+
+        Args:
+            project_dir: Project directory containing or to contain .gitignore
+            pattern: Pattern to add to .gitignore
+        """
+        gitignore_path = project_dir / ".gitignore"
+
+        # Check if .gitignore exists
+        if gitignore_path.exists():
+            # Read existing content
+            try:
+                with open(gitignore_path, "r", encoding="utf-8") as f:
+                    content = f.read()
+
+                # Check if pattern already exists
+                if pattern in content:
+                    return
+
+                # Add pattern to existing file
+                with open(gitignore_path, "a", encoding="utf-8") as f:
+                    # Ensure file ends with newline before adding
+                    if content and not content.endswith("\n"):
+                        f.write("\n")
+                    f.write("\n# PrompTrek user-specific config (not committed)\n")
+                    f.write(f"{pattern}\n")
+
+                click.echo(f"  📝 Added {pattern} to .gitignore")
+            except Exception as e:
+                click.echo(f"  ⚠️  Could not update .gitignore: {e}", err=True)
+        else:
+            # Create new .gitignore with pattern
+            try:
+                with open(gitignore_path, "w", encoding="utf-8") as f:
+                    f.write("# PrompTrek user-specific config (not committed)\n")
+                    f.write(f"{pattern}\n")
+                click.echo(f"  📝 Created .gitignore and added {pattern}")
+            except Exception as e:
+                click.echo(f"  ⚠️  Could not create .gitignore: {e}", err=True)
+
     def get_mcp_config_strategy(self) -> Dict[str, Any]:
         """Get MCP configuration strategy for Cline adapter."""
         return {
-            "supports_project": True,
-            "project_path": ".vscode/settings.json",
-            "system_path": None,
-            "requires_confirmation": False,
+            "supports_project": False,  # Cline only supports user-level MCP config
+            "project_path": None,
+            "system_path": None,  # Will be determined at runtime
+            "requires_confirmation": True,  # Always confirm user-level changes
             "config_format": "json",
         }
 
@@ -193,6 +483,7 @@ class ClineAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
                 dry_run,
                 verbose,
                 variables,
+                prompt,
             )
             created_files.extend(mcp_files)
 
@@ -205,40 +496,127 @@ class ClineAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
         dry_run: bool,
         verbose: bool,
         variables: Optional[Dict[str, Any]] = None,
+        prompt: Optional[Union[UniversalPromptV2, UniversalPromptV3]] = None,
     ) -> List[Path]:
-        """Generate MCP configuration for Cline in .vscode/settings.json."""
-        strategy = self.get_mcp_config_strategy()
-        created_files = []
+        """Generate MCP configuration for Cline at user-level."""
+        created_files: List[Path] = []
 
-        # Cline only supports project-level via VS Code settings
-        if strategy["supports_project"] and strategy["project_path"]:
-            settings_path = output_dir / strategy["project_path"]
+        # Step 1: Determine MCP config file location
+        mcp_config_path: Optional[Path] = None
+        path_was_discovered = False  # Track if we discovered (not configured) the path
 
-            # Build MCP servers config (uses standard MCP format)
-            mcp_config = self.build_mcp_servers_config(
-                mcp_servers, variables, format_style="standard"
-            )
+        # Check if path is stored in user config
+        user_config_file = self._find_user_config(output_dir)
+        user_config = self._read_user_config(user_config_file)
 
-            # Read existing VS Code settings
-            existing_settings = self.read_existing_mcp_config(settings_path)
+        if (
+            user_config
+            and user_config.editor_paths
+            and "cline_mcp_path" in user_config.editor_paths
+        ):
+            mcp_config_path = Path(
+                user_config.editor_paths["cline_mcp_path"]
+            ).expanduser()
+            if verbose:
+                click.echo(f"  ℹ️  Using configured Cline MCP path: {mcp_config_path}")
 
-            if existing_settings:
-                # Merge with existing settings
+        # Try to find it automatically
+        if not mcp_config_path:
+            mcp_config_path = self.find_mcp_config_file()
+            if mcp_config_path:
+                path_was_discovered = True
                 if verbose:
-                    click.echo(
-                        "  ℹ️  Merging MCP servers with existing VS Code settings"
-                    )
-                merged_settings = existing_settings.copy()
-                # Add/update mcpServers section
-                merged_settings.update(mcp_config)
-            else:
-                merged_settings = mcp_config
+                    click.echo(f"  ✅ Found Cline MCP config: {mcp_config_path}")
 
-            # Write the settings file
+        # Prompt user if not found
+        if not mcp_config_path and not dry_run:
+            mcp_config_path = self.prompt_for_mcp_config_path()
+            if not mcp_config_path:
+                click.echo("  ⏭️  Skipped Cline MCP configuration (no path provided)")
+                return created_files
+            path_was_discovered = True
+
+        # If still no path (dry run mode), use a placeholder
+        if not mcp_config_path:
+            click.echo("  ⏭️  Skipped Cline MCP configuration (no path available)")
+            return created_files
+
+        # Save discovered path to user-config.promptrek.yaml (if it was auto-detected or user-provided)
+        if path_was_discovered and not dry_run:
+            self._write_user_config(user_config_file, mcp_config_path, verbose)
+
+        # Build MCP servers config (uses standard MCP format)
+        mcp_config = self.build_mcp_servers_config(
+            mcp_servers, variables, format_style="standard"
+        )
+        new_servers = mcp_config.get("mcpServers", {})
+
+        # Step 1: Show warning about user-level operations
+        if not self.warn_user_level_operations(
+            editor_name="Cline",
+            config_path=mcp_config_path,
+            server_count=len(new_servers),
+            dry_run=dry_run,
+        ):
+            click.echo("  ⏭️  Skipped Cline MCP configuration")
+            return created_files
+
+        # Step 2: Read existing user-level config
+        existing_config = self.read_existing_mcp_config(mcp_config_path)
+
+        if existing_config:
+            # Step 3: Detect conflicts (same name, different config)
+            conflicts = self.detect_conflicting_servers(new_servers, existing_config)
+
+            if conflicts:
+                if verbose:
+                    click.echo(f"  ⚠️  Found {len(conflicts)} conflicting MCP server(s)")
+
+                # Step 4: Prompt for each conflict
+                servers_to_skip = []
+                existing_servers = existing_config.get("mcpServers", {})
+
+                for server_name in conflicts:
+                    if not self.prompt_mcp_server_overwrite(
+                        server_name=server_name,
+                        existing_config=existing_servers[server_name],
+                        new_config=new_servers[server_name],
+                        dry_run=dry_run,
+                    ):
+                        servers_to_skip.append(server_name)
+                        if verbose:
+                            click.echo(
+                                f"  ⏭️  Skipping MCP server '{server_name}' (keeping existing)"
+                            )
+
+                # Remove servers user chose to skip
+                for server_name in servers_to_skip:
+                    del new_servers[server_name]
+
+            # Step 5: Merge with existing config (add/update only)
+            if verbose:
+                click.echo("  ℹ️  Merging MCP servers with existing user-level config")
+
+            merged_config = existing_config.copy()
+            if "mcpServers" not in merged_config:
+                merged_config["mcpServers"] = {}
+            merged_config["mcpServers"].update(new_servers)
+        else:
+            # No existing config, create new
+            merged_config = mcp_config
+
+        # Step 6: Write the config file
+        if new_servers:  # Only write if we have servers to add
             if self.write_mcp_config_file(
-                merged_settings, settings_path, dry_run, verbose
+                merged_config, mcp_config_path, dry_run, verbose
             ):
-                created_files.append(settings_path)
+                created_files.append(mcp_config_path)
+                if not dry_run:
+                    click.echo(
+                        f"  ✅ Updated {len(new_servers)} MCP server(s) at user-level"
+                    )
+        else:
+            click.echo("  ℹ️  No MCP servers to add (all skipped)")
 
         return created_files
 

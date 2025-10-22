@@ -52,14 +52,14 @@ content: |
 
 ### Local Variables File
 
-PrompTrek supports a `variables.promptrek.yaml` file for user-specific variables that should not be committed to version control. This is perfect for storing local paths, API keys, personal information, or any variable that varies between team members.
+PrompTrek supports a `.promptrek/variables.promptrek.yaml` file for user-specific variables that should not be committed to version control. This is perfect for storing local paths, API keys, personal information, or any variable that varies between team members.
 
 **Creating a local variables file:**
 
 ```yaml
-# variables.promptrek.yaml
+# .promptrek/variables.promptrek.yaml
 # This file contains local variables that should NOT be committed
-# Add this file to .gitignore
+# The .promptrek/ directory is automatically added to .gitignore
 
 # User-specific variables
 AUTHOR_NAME: "Your Name"
@@ -72,11 +72,11 @@ ENVIRONMENT: "development"
 **How it works:**
 
 1. When you run `promptrek init`, it automatically:
-   - Adds `variables.promptrek.yaml` to `.gitignore`
+   - Adds `.promptrek/` directory to `.gitignore` (contains user-specific config like `variables.promptrek.yaml` and `user-config.promptrek.yaml`)
    - Adds 18 editor-specific file patterns to `.gitignore`
-2. Create your local variables file manually with user-specific values
+2. Create your local variables file manually in the `.promptrek/` directory with user-specific values
 3. PrompTrek automatically loads variables from this file when generating
-4. Pre-commit hooks prevent accidental commits of this file
+4. Pre-commit hooks prevent accidental commits of files in the `.promptrek/` directory
 
 **Editor files automatically excluded:**
 
@@ -97,7 +97,7 @@ You can disable this with `ignore_editor_files: false` in your config.
 **Variable Precedence (highest to lowest):**
 
 1. CLI overrides (`-V KEY=value`)
-2. Local variables file (`variables.promptrek.yaml`)
+2. Local variables file (`.promptrek/variables.promptrek.yaml`)
 3. Prompt file variables section
 
 **Example usage:**
@@ -123,10 +123,12 @@ variables:
 {% endraw %}
 
 ```yaml
-# variables.promptrek.yaml (local, in .gitignore)
+# .promptrek/variables.promptrek.yaml (local, gitignored via .promptrek/ directory)
 AUTHOR_NAME: "John Doe"
 AUTHOR_EMAIL: "john@example.com"
 ```
+
+**Note:** If you have an old `variables.promptrek.yaml` file in your project root, PrompTrek will automatically offer to migrate it to the new `.promptrek/` directory location when you run any command.
 
 When generating, `AUTHOR_NAME` will be "John Doe" from the local file, overriding the default in the prompt file.
 
@@ -253,7 +255,7 @@ PrompTrek automatically manages `.gitignore` to prevent committing generated edi
 
 When you run `promptrek init`, it automatically:
 - Creates `.gitignore` if it doesn't exist
-- Adds `variables.promptrek.yaml` to `.gitignore`
+- Adds `.promptrek/` directory to `.gitignore` (contains user-specific config like `variables.promptrek.yaml` and `user-config.promptrek.yaml`)
 - Adds 18 editor-specific file patterns to `.gitignore`
 
 ### Configuration Option
