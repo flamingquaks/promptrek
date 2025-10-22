@@ -562,7 +562,8 @@ class TestClineUserLevelMCPConfiguration:
 
         # Should use the configured path from user config
         assert len(created_files) == 1
-        assert str(created_files[0]) == "/custom/path/cline_mcp_settings.json"
+        # Use as_posix() for cross-platform compatibility (Windows uses backslashes)
+        assert created_files[0].as_posix() == "/custom/path/cline_mcp_settings.json"
 
         # Should have written config
         mock_write.assert_called_once()
@@ -612,6 +613,7 @@ def test_read_user_config_valid_file(tmp_path):
     config = ClineAdapter._read_user_config(user_config_file)
     assert config is not None
     assert config.schema_version == "1.0.0"
+    assert config.editor_paths is not None
     assert config.editor_paths["cline_mcp_path"] == "/test/path.json"
 
 
@@ -629,6 +631,7 @@ def test_write_user_config_new_file(tmp_path):
     # Verify content
     config = ClineAdapter._read_user_config(user_config_file)
     assert config is not None
+    assert config.editor_paths is not None
     assert config.editor_paths["cline_mcp_path"] == str(mcp_path)
 
     # Verify warning comments exist
@@ -656,6 +659,7 @@ def test_write_user_config_update_existing(tmp_path):
     # Verify updated content
     config = ClineAdapter._read_user_config(user_config_file)
     assert config is not None
+    assert config.editor_paths is not None
     assert config.editor_paths["cline_mcp_path"] == str(new_path)
 
 
