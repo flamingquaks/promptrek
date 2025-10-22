@@ -153,13 +153,15 @@ A modern web application built with React and TypeScript.
 
 Windsurf adapter generates organized markdown rule files for AI-powered coding assistance.
 
-**Rule Files (.windsurf/rules/)**:
-- `general.md` - General coding guidelines
-- `code-style.md` - Code style rules
-- `testing.md` - Testing guidelines
-- `{technology}-rules.md` - Technology-specific rules (e.g., `python-rules.md`, `javascript-rules.md`)
+**File Generation Behavior**:
+- **With `documents` field**: Generates one `.md` file per document using the document's `name` field
+- **Without `documents` field**: Generates a single `general.md` file containing the main `content`
 
-**Example Rule File (code-style.md)**:
+**Example Generated Files (.windsurf/rules/)**:
+- With `documents`: Files named according to document `name` field (e.g., `typescript-guidelines.md`, `testing-standards.md`)
+- Without `documents`: `general.md` only
+
+**Example Rule File**:
 ```markdown
 # Code Style Rules
 
@@ -179,11 +181,13 @@ Windsurf adapter generates organized markdown rule files for AI-powered coding a
 
 JetBrains AI adapter generates markdown rules for AI assistance integrated into JetBrains IDEs (IntelliJ IDEA, PyCharm, WebStorm, etc.).
 
-**Rule Files (.assistant/rules/)**:
-- `general.md` - General coding guidelines
-- `code-style.md` - Code style rules
-- `testing.md` - Testing guidelines
-- `{technology}-rules.md` - Technology-specific rules (e.g., `java-rules.md`, `kotlin-rules.md`)
+**File Generation Behavior**:
+- **With `documents` field**: Generates one `.md` file per document using the document's `name` field
+- **Without `documents` field**: Generates a single `general.md` file containing the main `content`
+
+**Example Generated Files (.assistant/rules/)**:
+- With `documents`: Files named according to document `name` field (e.g., `java-guidelines.md`, `kotlin-patterns.md`)
+- Without `documents`: `general.md` only
 
 **Note**: Prompts and MCP configurations for JetBrains AI are only configurable through the IDE UI, not via project files.
 
@@ -336,7 +340,15 @@ alwaysApply: false
 
 Kiro adapter generates steering documents that guide AI-powered coding assistants with context-aware instructions.
 
-**Steering System (.kiro/steering/)**:
+**File Generation Behavior**:
+- **With `documents` field**: Generates one `.md` file per document using the document's `name` field
+- **Without `documents` field**: Generates a single `project.md` file containing the main `content`
+
+**Example Generated Files (.kiro/steering/)**:
+- With `documents`: Files named according to document `name` field (e.g., `architecture.md`, `api-conventions.md`)
+- Without `documents`: `project.md` only
+
+**Example Steering Document**:
 ```markdown
 ---
 inclusion: always
@@ -355,14 +367,6 @@ AI assistant configuration for developing PrompTrek
 - Follow established patterns and conventions
 ```
 
-**Generated Steering Files**:
-- `project.md` - Main project overview and core guidelines
-- `general.md` - General coding instructions
-- `code-style.md` - Code style guidelines
-- `testing.md` - Testing standards
-- `architecture.md` - Architecture patterns (if defined)
-- `{category}.md` - Additional instruction category files
-
 Each steering document includes YAML frontmatter with `inclusion: always` to ensure it's always loaded by Kiro.
 
 ### ✅ Amazon Q
@@ -371,12 +375,13 @@ Each steering document includes YAML frontmatter with `inclusion: always` to ens
 
 Amazon Q adapter generates markdown rules for AI assistance and JSON-based CLI agents for AWS development.
 
-**Rule Files (.amazonq/rules/)**:
-- `general.md` - General coding guidelines
-- `code-style.md` - Code style rules
-- `testing.md` - Testing guidelines
-- `security.md` - Security best practices (if defined)
-- `{technology}-rules.md` - Technology-specific rules (e.g., `python-rules.md`, `java-rules.md`)
+**File Generation Behavior**:
+- **With `documents` field**: Generates one `.md` file per document using the document's `name` field
+- **Without `documents` field**: Generates a single `general.md` file containing the main `content`
+
+**Example Generated Files (.amazonq/rules/)**:
+- With `documents`: Files named according to document `name` field (e.g., `python-guidelines.md`, `security-standards.md`)
+- Without `documents`: `general.md` only
 
 **CLI Agents (.amazonq/cli-agents/)**:
 CLI agents are JSON files that define custom Amazon Q agents for code review, security analysis, and test generation. These are local development tools, not managed cloud agents.
