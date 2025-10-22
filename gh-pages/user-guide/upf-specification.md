@@ -903,7 +903,6 @@ variables:
   COMPANY: "Acme Corp"
   TECH_STACK: "Python, React"
 ```
-*Note: due to a rendering bug in the example, spaces are added between each curly bracket for variables. Don't actually add spaces in real usage.*
 
 ### Complete v2 Example
 
