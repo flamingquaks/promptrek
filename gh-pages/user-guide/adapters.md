@@ -50,29 +50,73 @@ When working on this project:
 
 ### ✅ Continue
 **Generated Files**: `.continue/rules/*.md`
-**Features**: ✅ Project Files, ✅ Variables, ✅ Conditionals, ✅ Sync
+**Features**: ✅ Project Files, ✅ Variables, ✅ Conditionals, ✅ Sync, ✅ Frontmatter Metadata
 
-Continue adapter generates organized markdown rule files for enhanced AI-powered code completion and chat.
+Continue adapter generates organized markdown rule files with YAML frontmatter for enhanced AI-powered code completion and chat.
 
-**Rule Files (.continue/rules/)**:
-- `general.md` - General coding guidelines
-- `code-style.md` - Code style rules
-- `testing.md` - Testing guidelines
-- `{technology}-rules.md` - Technology-specific rules (e.g., `python-rules.md`, `typescript-rules.md`)
+**File Generation Behavior**:
 
-**Example Rule File (general.md)**:
+- **With `documents` field**: Generates one `.md` file per document using the document's `name` field
+- **Without `documents` field**: Generates a single `general.md` file containing the main `content`
+
+**Metadata-Driven Configuration**:
+
+The Continue adapter uses meaningful metadata fields to control rule behavior:
+
+```yaml
+# Main content metadata (top-level)
+content_description: "General coding guidelines"  # Default if not specified
+content_always_apply: true  # Default for main content
+
+# Document metadata (per-document)
+documents:
+  - name: documentation-standards
+    content: "# Documentation Standards..."
+    description: "Standards for writing and maintaining Continue Docs"
+    file_globs: "docs/**/*.{md,mdx}"  # Files where rule applies
+    always_apply: false  # Only applies to matching files
+```
+
+**Example Generated Files (.continue/rules/)**:
+- With `documents`: Files named according to document `name` field (e.g., `documentation-standards.md`, `typescript-guidelines.md`)
+- Without `documents`: `general.md` only
+
+**Example Rule File with Frontmatter (general.md)**:
 ```markdown
+---
+name: "General"
+alwaysApply: true
+description: "General coding guidelines"
+---
+
 # General Coding Rules
 
 - Write clean, maintainable code with proper error handling
 - Follow SOLID principles and design patterns
 - Include comprehensive documentation
-
-## Additional Guidelines
-- Follow project-specific patterns and conventions
-- Maintain consistency with existing codebase
-- Consider performance and security implications
 ```
+
+**Example Document with File Patterns (documentation-standards.md)**:
+```markdown
+---
+name: "documentation-standards"
+globs: "docs/**/*.{md,mdx}"
+alwaysApply: false
+description: "Standards for writing and maintaining Continue Docs"
+---
+
+# Documentation Standards
+
+- Use clear, concise language
+- Include code examples where appropriate
+- Keep documentation up-to-date with code changes
+```
+
+**Frontmatter Fields**:
+- `name`: Display name for the rule (required)
+- `description`: Human-readable description (optional)
+- `globs`: File patterns where rule applies (optional, e.g., `**/*.{ts,tsx}`)
+- `alwaysApply`: `true` = always applies, `false` = applies only to matching files (default: false for documents, true for main content)
 
 **Sync Support**: Continue adapter supports bidirectional sync - you can import existing Continue configurations back to PrompTrek format using `promptrek sync`.
 
@@ -109,13 +153,15 @@ A modern web application built with React and TypeScript.
 
 Windsurf adapter generates organized markdown rule files for AI-powered coding assistance.
 
-**Rule Files (.windsurf/rules/)**:
-- `general.md` - General coding guidelines
-- `code-style.md` - Code style rules
-- `testing.md` - Testing guidelines
-- `{technology}-rules.md` - Technology-specific rules (e.g., `python-rules.md`, `javascript-rules.md`)
+**File Generation Behavior**:
+- **With `documents` field**: Generates one `.md` file per document using the document's `name` field
+- **Without `documents` field**: Generates a single `general.md` file containing the main `content`
 
-**Example Rule File (code-style.md)**:
+**Example Generated Files (.windsurf/rules/)**:
+- With `documents`: Files named according to document `name` field (e.g., `typescript-guidelines.md`, `testing-standards.md`)
+- Without `documents`: `general.md` only
+
+**Example Rule File**:
 ```markdown
 # Code Style Rules
 
@@ -135,11 +181,13 @@ Windsurf adapter generates organized markdown rule files for AI-powered coding a
 
 JetBrains AI adapter generates markdown rules for AI assistance integrated into JetBrains IDEs (IntelliJ IDEA, PyCharm, WebStorm, etc.).
 
-**Rule Files (.assistant/rules/)**:
-- `general.md` - General coding guidelines
-- `code-style.md` - Code style rules
-- `testing.md` - Testing guidelines
-- `{technology}-rules.md` - Technology-specific rules (e.g., `java-rules.md`, `kotlin-rules.md`)
+**File Generation Behavior**:
+- **With `documents` field**: Generates one `.md` file per document using the document's `name` field
+- **Without `documents` field**: Generates a single `general.md` file containing the main `content`
+
+**Example Generated Files (.assistant/rules/)**:
+- With `documents`: Files named according to document `name` field (e.g., `java-guidelines.md`, `kotlin-patterns.md`)
+- Without `documents`: `general.md` only
 
 **Note**: Prompts and MCP configurations for JetBrains AI are only configurable through the IDE UI, not via project files.
 
@@ -292,7 +340,15 @@ alwaysApply: false
 
 Kiro adapter generates steering documents that guide AI-powered coding assistants with context-aware instructions.
 
-**Steering System (.kiro/steering/)**:
+**File Generation Behavior**:
+- **With `documents` field**: Generates one `.md` file per document using the document's `name` field
+- **Without `documents` field**: Generates a single `project.md` file containing the main `content`
+
+**Example Generated Files (.kiro/steering/)**:
+- With `documents`: Files named according to document `name` field (e.g., `architecture.md`, `api-conventions.md`)
+- Without `documents`: `project.md` only
+
+**Example Steering Document**:
 ```markdown
 ---
 inclusion: always
@@ -311,14 +367,6 @@ AI assistant configuration for developing PrompTrek
 - Follow established patterns and conventions
 ```
 
-**Generated Steering Files**:
-- `project.md` - Main project overview and core guidelines
-- `general.md` - General coding instructions
-- `code-style.md` - Code style guidelines
-- `testing.md` - Testing standards
-- `architecture.md` - Architecture patterns (if defined)
-- `{category}.md` - Additional instruction category files
-
 Each steering document includes YAML frontmatter with `inclusion: always` to ensure it's always loaded by Kiro.
 
 ### ✅ Amazon Q
@@ -327,12 +375,13 @@ Each steering document includes YAML frontmatter with `inclusion: always` to ens
 
 Amazon Q adapter generates markdown rules for AI assistance and JSON-based CLI agents for AWS development.
 
-**Rule Files (.amazonq/rules/)**:
-- `general.md` - General coding guidelines
-- `code-style.md` - Code style rules
-- `testing.md` - Testing guidelines
-- `security.md` - Security best practices (if defined)
-- `{technology}-rules.md` - Technology-specific rules (e.g., `python-rules.md`, `java-rules.md`)
+**File Generation Behavior**:
+- **With `documents` field**: Generates one `.md` file per document using the document's `name` field
+- **Without `documents` field**: Generates a single `general.md` file containing the main `content`
+
+**Example Generated Files (.amazonq/rules/)**:
+- With `documents`: Files named according to document `name` field (e.g., `python-guidelines.md`, `security-standards.md`)
+- Without `documents`: `general.md` only
 
 **CLI Agents (.amazonq/cli-agents/)**:
 CLI agents are JSON files that define custom Amazon Q agents for code review, security analysis, and test generation. These are local development tools, not managed cloud agents.
@@ -419,6 +468,7 @@ conditions:
 
 All adapters support variable substitution in their generated content:
 
+{% raw %}
 ```yaml
 metadata:
   title: "{{{ PROJECT_NAME }}} Assistant"
@@ -433,6 +483,7 @@ variables:
   PROJECT_NAME: "MyProject"
   AUTHOR_EMAIL: "team@example.com"
 ```
+{% endraw %}
 
 ## Adapter Architecture
 

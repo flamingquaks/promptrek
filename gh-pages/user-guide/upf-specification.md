@@ -164,6 +164,7 @@ hooks:
 
 ### Complete v3.0.0 Example
 
+{% raw %}
 ```yaml
 schema_version: "3.0.0"
 
@@ -175,7 +176,7 @@ metadata:
   tags: ["typescript", "fullstack", "ai-enhanced"]
 
 content: |
-  # Full Stack TypeScript Project
+  # {{{ PROJECT_NAME }}}
 
   ## Project Overview
   Modern full-stack application with TypeScript, React, and Node.js.
@@ -190,7 +191,7 @@ content: |
   ## Development Guidelines
 
   ### General Principles
-  - Write type-safe code with strict TypeScript
+  - Write type-safe code with strict TypeScript for {{{ PROJECT_NAME }}}
   - Use functional programming patterns
   - Add comprehensive tests for all features
   - Document complex business logic
@@ -255,6 +256,7 @@ hooks:
     description: "Run linting and tests before commit"
     requires_reapproval: true
 ```
+{% endraw %}
 
 ### Migration from v2.1.0 to v3.0.0
 
@@ -445,6 +447,7 @@ plugins:
 
 Configure Model Context Protocol servers for external integrations:
 
+{% raw %}
 ```yaml
 schema_version: "2.1.0"
 metadata:
@@ -485,6 +488,7 @@ plugins:
         trust_level: full
         source: official
 ```
+{% endraw %}
 
 #### Custom Commands
 
@@ -613,6 +617,7 @@ plugins:
 
 ### Complete v2.1.0 Example
 
+{% raw %}
 ```yaml
 schema_version: "2.1.0"
 
@@ -624,7 +629,7 @@ metadata:
   tags: ["typescript", "fullstack", "ai-enhanced"]
 
 content: |
-  # Full Stack TypeScript Project
+  # {{{ PROJECT_NAME }}}
 
   ## Project Overview
   Modern full-stack application with TypeScript, React, and Node.js.
@@ -639,7 +644,7 @@ content: |
   ## Development Guidelines
 
   ### General Principles
-  - Write type-safe code with strict TypeScript
+  - Write type-safe code with strict TypeScript for {{{ PROJECT_NAME }}}
   - Use functional programming patterns
   - Add comprehensive tests for all features
   - Document complex business logic
@@ -704,6 +709,7 @@ plugins:
       description: "Run linting and tests before commit"
       requires_reapproval: true
 ```
+{% endraw %}
 
 ### CLI Commands for Plugins
 
@@ -880,23 +886,23 @@ documents:
 
 #### variables (optional)
 
-Template variables using {{{VARIABLE_NAME}}} syntax (triple braces to distinguish from Jinja2).
+Template variables using {% raw %}`{{{VARIABLE_NAME}}}`{% endraw %} syntax (triple braces to distinguish from Jinja2).
 
 **Example**:
+{% raw %}
 ```yaml
 content: |
-  # { { { PROJECT_NAME } } }
+  # {{{ PROJECT_NAME }}}
 
-  Project for { { { COMPANY } } }.
+  Project for {{{ COMPANY }}}.
 
-  Technologies: { { { TECH_STACK } } }
+  Technologies: {{{ TECH_STACK }}}
 
 variables:
   PROJECT_NAME: "My App"
   COMPANY: "Acme Corp"
   TECH_STACK: "Python, React"
 ```
-*Note: due to a rendering bug in the example, spaces are added between each curly bracket for variables. Don't actually add spaces in real usage.*
 
 ### Complete v2 Example
 
@@ -984,7 +990,7 @@ variables:
   PROJECT_NAME: "react-app"
   TEAM_EMAIL: "dev-team@company.com"
 ```
-
+{% endraw %}
 
 
 ### Why Migrate to v3.0?

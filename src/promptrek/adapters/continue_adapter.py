@@ -2,6 +2,7 @@
 Continue editor adapter implementation.
 """
 
+import re
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
@@ -104,12 +105,29 @@ class ContinueAdapter(MCPGenerationMixin, EditorAdapter):
         # If documents field is present, generate separate files
         if prompt.documents:
             for doc in prompt.documents:
-                # Apply variable substitution
-                content = doc.content
-                if variables:
-                    for var_name, var_value in variables.items():
-                        placeholder = "{{{ " + var_name + " }}}"
-                        content = content.replace(placeholder, var_value)
+                # Build frontmatter with metadata-driven defaults
+                # Convert kebab-case and snake_case to Title Case for human-readable name
+                doc_name_display = re.sub(r"[-_]", " ", doc.name).title()
+                doc_description = (
+                    doc.description
+                )  # Use explicit description if provided
+                doc_always_apply = (
+                    doc.always_apply if doc.always_apply is not None else False
+                )
+                doc_globs = doc.file_globs  # Use explicit file_globs if provided
+
+                doc_frontmatter = self._build_continue_frontmatter(
+                    name=doc_name_display,  # Human-readable title case
+                    description=doc_description,
+                    globs=doc_globs,
+                    always_apply=doc_always_apply,
+                )
+
+                doc_content = self._build_md_file_with_frontmatter(
+                    frontmatter=doc_frontmatter,
+                    content=doc.content,
+                    variables=variables,
+                )
 
                 # Generate filename from document name
                 filename = (
@@ -121,36 +139,60 @@ class ContinueAdapter(MCPGenerationMixin, EditorAdapter):
                     click.echo(f"  📁 Would create: {output_file}")
                     if verbose:
                         preview = (
-                            content[:200] + "..." if len(content) > 200 else content
+                            doc_content[:200] + "..."
+                            if len(doc_content) > 200
+                            else doc_content
                         )
                         click.echo(f"    {preview}")
                     created_files.append(output_file)
                 else:
                     rules_dir.mkdir(parents=True, exist_ok=True)
                     with open(output_file, "w", encoding="utf-8") as f:
-                        f.write(content)
+                        f.write(doc_content)
                     click.echo(f"✅ Generated: {output_file}")
                     created_files.append(output_file)
         else:
             # No documents, use main content as general rules
-            content = prompt.content
-            if variables:
-                for var_name, var_value in variables.items():
-                    placeholder = "{{{ " + var_name + " }}}"
-                    content = content.replace(placeholder, var_value)
+            main_name = (
+                prompt.metadata.title
+                if hasattr(prompt, "metadata") and prompt.metadata.title
+                else "General"
+            )
+            main_description = prompt.content_description or "General coding guidelines"
+            main_always_apply = (
+                prompt.content_always_apply
+                if prompt.content_always_apply is not None
+                else True  # Default to always apply for main content
+            )
+
+            main_frontmatter = self._build_continue_frontmatter(
+                name=main_name,
+                description=main_description,
+                always_apply=main_always_apply,
+            )
+
+            main_content = self._build_md_file_with_frontmatter(
+                frontmatter=main_frontmatter,
+                content=prompt.content,
+                variables=variables,
+            )
 
             output_file = rules_dir / "general.md"
 
             if dry_run:
                 click.echo(f"  📁 Would create: {output_file}")
                 if verbose:
-                    preview = content[:200] + "..." if len(content) > 200 else content
+                    preview = (
+                        main_content[:200] + "..."
+                        if len(main_content) > 200
+                        else main_content
+                    )
                     click.echo(f"    {preview}")
                 created_files.append(output_file)
             else:
                 rules_dir.mkdir(parents=True, exist_ok=True)
                 with open(output_file, "w", encoding="utf-8") as f:
-                    f.write(content)
+                    f.write(main_content)
                 click.echo(f"✅ Generated: {output_file}")
                 created_files.append(output_file)
 
@@ -528,6 +570,47 @@ class ContinueAdapter(MCPGenerationMixin, EditorAdapter):
     def supports_conditionals(self) -> bool:
         """Continue supports conditional configuration."""
         return True
+
+    def _build_continue_frontmatter(
+        self,
+        name: str,
+        description: Optional[str] = None,
+        globs: Optional[str] = None,
+        always_apply: bool = False,
+    ) -> Dict[str, Any]:
+        """Build Continue frontmatter from metadata fields."""
+        fm: Dict[str, Any] = {"name": name}
+        if description:
+            fm["description"] = description
+        if globs:
+            fm["globs"] = globs
+        fm["alwaysApply"] = always_apply
+        return fm
+
+    def _build_md_file_with_frontmatter(
+        self,
+        frontmatter: Dict[str, Any],
+        content: str,
+        variables: Optional[Dict[str, Any]],
+    ) -> str:
+        """Build complete markdown file with YAML frontmatter and content."""
+        lines = ["---"]
+        # Use yaml.safe_dump to serialize frontmatter correctly
+        yaml_frontmatter = yaml.safe_dump(
+            frontmatter, default_flow_style=False, sort_keys=False
+        ).strip()
+        lines.append(yaml_frontmatter)
+        lines.append("---")
+        lines.append("")
+
+        # Apply variable substitution to content
+        if variables:
+            for var_name, var_value in variables.items():
+                placeholder = "{{{ " + var_name + " }}}"
+                content = content.replace(placeholder, var_value)
+
+        lines.append(content)
+        return "\n".join(lines)
 
     def _build_rules_content(self, title: str, instructions: List[str]) -> str:
         """Build markdown rules content for .continue/rules/ files."""
