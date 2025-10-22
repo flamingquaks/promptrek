@@ -54,6 +54,11 @@ When working on this project:
 
 Continue adapter generates organized markdown rule files with YAML frontmatter for enhanced AI-powered code completion and chat.
 
+**File Generation Behavior**:
+
+- **With `documents` field**: Generates one `.md` file per document using the document's `name` field
+- **Without `documents` field**: Generates a single `general.md` file containing the main `content`
+
 **Metadata-Driven Configuration**:
 
 The Continue adapter uses meaningful metadata fields to control rule behavior:
@@ -72,11 +77,9 @@ documents:
     always_apply: false  # Only applies to matching files
 ```
 
-**Rule Files (.continue/rules/)**:
-- `general.md` - General coding guidelines
-- `code-style.md` - Code style rules
-- `testing.md` - Testing guidelines
-- `{technology}-rules.md` - Technology-specific rules (e.g., `python-rules.md`, `typescript-rules.md`)
+**Example Generated Files (.continue/rules/)**:
+- With `documents`: Files named according to document `name` field (e.g., `documentation-standards.md`, `typescript-guidelines.md`)
+- Without `documents`: `general.md` only
 
 **Example Rule File with Frontmatter (general.md)**:
 ```markdown
