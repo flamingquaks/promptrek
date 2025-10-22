@@ -302,7 +302,7 @@ body.home-page {
         <h3>Universal Configuration (v3.0.0)</h3>
         <p>Write your prompt once in PrompTrek format:</p>
         <div class="code-example">
-<pre><code>schema_version: "3.0.0"
+{% raw %}<pre><code>schema_version: "3.0.0"
 metadata:
   title: "Full-Stack Development Assistant"
   description: "Production-ready coding standards"
@@ -316,6 +316,7 @@ content: |
   - Use TypeScript with strict mode for all new code
   - Follow SOLID principles and design patterns
   - Include comprehensive JSDoc comments
+  - Contact {{{ TEAM_NAME }}} for code review assistance
 
   ## Frontend Development
   - Use React functional components with hooks
@@ -330,7 +331,7 @@ content: |
   - Write integration tests for all endpoints
 
 variables:
-  TEAM_NAME: "Engineering Team"</code></pre>
+  TEAM_NAME: "Engineering Team"</code></pre>{% endraw %}
         </div>
         <p class="schema-note">✨ <strong>v3.0.0 Schema</strong>: Markdown-first with clean top-level plugins. No <code>targets</code> field needed - works with ALL editors! MCP servers, commands, agents, and hooks at the top level.</p>
       </div>

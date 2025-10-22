@@ -468,6 +468,7 @@ conditions:
 
 All adapters support variable substitution in their generated content:
 
+{% raw %}
 ```yaml
 metadata:
   title: "{{{ PROJECT_NAME }}} Assistant"
@@ -482,6 +483,7 @@ variables:
   PROJECT_NAME: "MyProject"
   AUTHOR_EMAIL: "team@example.com"
 ```
+{% endraw %}
 
 ## Adapter Architecture
 

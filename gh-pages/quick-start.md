@@ -78,6 +78,7 @@ Edit the generated `.promptrek.yaml` file to match your project needs.
 
 **Using v3.0 Format (Recommended - Default)**:
 
+{% raw %}
 ```yaml
 schema_version: "3.0.0"
 
@@ -89,7 +90,7 @@ metadata:
   tags: [web, python, react]
 
 content: |
-  # My Project Assistant
+  # {{{ PROJECT_NAME }}} Assistant
 
   ## Project Details
   **Project Type:** web_application
@@ -98,9 +99,10 @@ content: |
   ## Development Guidelines
 
   ### General Principles
-  - Write clean, readable code
+  - Write clean, readable code for {{{ PROJECT_NAME }}}
   - Follow existing patterns
   - Add comprehensive documentation
+  - Contact {{{ AUTHOR_EMAIL }}} for questions
 
   ### Code Style
   - Use meaningful variable names
@@ -120,6 +122,7 @@ variables:
   PROJECT_NAME: "my-project"
   AUTHOR_EMAIL: "your.email@example.com"
 ```
+{% endraw %}
 
 **Benefits of v3.0**:
 - ✅ **No `targets` field** - Works with ALL editors automatically
