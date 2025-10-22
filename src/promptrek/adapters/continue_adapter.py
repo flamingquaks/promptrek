@@ -2,6 +2,7 @@
 Continue editor adapter implementation.
 """
 
+import re
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
@@ -105,8 +106,8 @@ class ContinueAdapter(MCPGenerationMixin, EditorAdapter):
         if prompt.documents:
             for doc in prompt.documents:
                 # Build frontmatter with metadata-driven defaults
-                # Convert kebab-case to Title Case for human-readable name
-                doc_name_display = doc.name.replace("-", " ").replace("_", " ").title()
+                # Convert kebab-case and snake_case to Title Case for human-readable name
+                doc_name_display = re.sub(r'[-_]', ' ', doc.name).title()
                 doc_description = doc.description  # Use explicit description if provided
                 doc_always_apply = (
                     doc.always_apply if doc.always_apply is not None else False
