@@ -37,6 +37,18 @@ class TestGetEditorFilePatterns:
         assert ".windsurf/rules/*.md" in patterns
         assert ".clinerules" in patterns
 
+    def test_includes_claude_patterns(self):
+        """Should include all Claude-specific patterns."""
+        patterns = get_editor_file_patterns()
+
+        # Check for Claude patterns
+        assert ".claude/CLAUDE.md" in patterns
+        assert ".claude-context.md" in patterns
+        assert ".claude/commands/*.md" in patterns
+        assert ".claude/agents/*.md" in patterns
+        assert ".claude/hooks.yaml" in patterns
+        assert ".mcp.json" in patterns
+
 
 class TestReadGitignore:
     """Tests for read_gitignore function."""
