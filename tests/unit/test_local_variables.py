@@ -2,7 +2,9 @@
 Test local variables file support.
 """
 
+import sys
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 import yaml
@@ -193,8 +195,6 @@ class TestLocalVariables:
 
         vs = VariableSubstitution()
         # Don't trigger migration in test - we need non-interactive mode
-        import sys
-        from unittest.mock import patch
 
         with patch.object(sys.stdout, "isatty", return_value=False):
             variables = vs.load_local_variables(tmp_path)
