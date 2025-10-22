@@ -579,14 +579,12 @@ class ContinueAdapter(MCPGenerationMixin, EditorAdapter):
         always_apply: bool = False,
     ) -> Dict[str, Any]:
         """Build Continue frontmatter from metadata fields."""
-        fm = {
-            "name": name,
-            "alwaysApply": always_apply,
-        }
+        fm: Dict[str, Any] = {"name": name}
         if description:
             fm["description"] = description
         if globs:
             fm["globs"] = globs
+        fm["alwaysApply"] = always_apply
         return fm
 
     def _build_md_file_with_frontmatter(
