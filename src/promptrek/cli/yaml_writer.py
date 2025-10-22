@@ -33,8 +33,29 @@ def _str_representer(dumper: yaml.SafeDumper, data: str) -> yaml.ScalarNode:
     return dumper.represent_scalar("tag:yaml.org,2002:str", data)
 
 
-# Register the custom representer
+def _list_representer(dumper: yaml.SafeDumper, data: list) -> yaml.SequenceNode:
+    """
+    Custom representer for lists that uses flow style for short lists.
+
+    Args:
+        dumper: YAML dumper instance
+        data: List to represent
+
+    Returns:
+        YAML sequence node with appropriate style
+    """
+    # Use flow style (inline) for short lists without nested structures
+    if len(data) <= 5 and all(
+        isinstance(item, (str, int, float, bool)) or item is None for item in data
+    ):
+        return dumper.represent_sequence("tag:yaml.org,2002:seq", data, flow_style=True)
+    # Use block style for longer or nested lists
+    return dumper.represent_sequence("tag:yaml.org,2002:seq", data, flow_style=False)
+
+
+# Register the custom representers
 LiteralBlockScalarDumper.add_representer(str, _str_representer)
+LiteralBlockScalarDumper.add_representer(list, _list_representer)
 
 
 def write_promptrek_yaml(data: Dict[str, Any], output_path: Path) -> None:

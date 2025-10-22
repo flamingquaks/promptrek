@@ -227,14 +227,266 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
         Parse Claude Code files back into a UniversalPrompt.
 
         Uses v3.0 format for lossless sync with clean top-level plugin structure.
+        Parses main CLAUDE.md plus any plugin files (agents, commands, hooks, MCP).
         """
         file_path = ".claude/CLAUDE.md"
         # Use v3 sync for lossless roundtrip with clean top-level plugins
-        return self.parse_single_markdown_file_v3(
+        prompt = self.parse_single_markdown_file_v3(
             source_dir=source_dir,
             file_path=file_path,
             editor_name="Claude Code",
         )
+
+        # Parse additional plugin files
+        agents = self._parse_agent_files(source_dir)
+        commands = self._parse_command_files(source_dir)
+        hooks = self._parse_hooks_file(source_dir)
+        mcp_servers = self._parse_mcp_file(source_dir)
+
+        # Add plugins to prompt
+        if agents:
+            prompt.agents = agents
+        if commands:
+            prompt.commands = commands
+        if hooks:
+            prompt.hooks = hooks
+        if mcp_servers:
+            prompt.mcp_servers = mcp_servers
+
+        return prompt
+
+    def _parse_agent_files(self, source_dir: Path) -> Optional[List[Any]]:
+        """Parse agent files from .claude/agents/ directory."""
+        from ..core.models import Agent
+
+        agents_dir = source_dir / ".claude" / "agents"
+        if not agents_dir.exists():
+            return None
+
+        agents = []
+        for agent_file in agents_dir.glob("*.md"):
+            try:
+                with open(agent_file, "r", encoding="utf-8") as f:
+                    content = f.read()
+
+                # Extract frontmatter
+                frontmatter, system_prompt = self._extract_frontmatter_from_content(
+                    content
+                )
+
+                if not frontmatter:
+                    click.echo(f"⚠️  Skipping {agent_file}: no frontmatter found")
+                    continue
+
+                # Convert escape sequences in description to actual newlines
+                description = frontmatter.get("description", "")
+                if description and isinstance(description, str):
+                    description = description.replace("\\n", "\n")
+
+                # Build agent object from frontmatter
+                agent = Agent(
+                    name=frontmatter.get("name", agent_file.stem),
+                    description=description,
+                    system_prompt=system_prompt.strip(),
+                    tools=frontmatter.get("tools"),
+                    trust_level=frontmatter.get("trust_level", "untrusted"),
+                    requires_approval=frontmatter.get("requires_approval", True),
+                    context=frontmatter.get("context"),
+                )
+                agents.append(agent)
+
+            except Exception as e:
+                click.echo(f"⚠️  Error parsing agent file {agent_file}: {e}")
+
+        return agents if agents else None
+
+    def _parse_command_files(self, source_dir: Path) -> Optional[List[Any]]:
+        """Parse command files from .claude/commands/ directory."""
+        from ..core.models import Command
+
+        commands_dir = source_dir / ".claude" / "commands"
+        if not commands_dir.exists():
+            return None
+
+        commands = []
+        for command_file in commands_dir.glob("*.md"):
+            try:
+                with open(command_file, "r", encoding="utf-8") as f:
+                    content = f.read()
+
+                # Extract frontmatter
+                frontmatter, prompt_content = self._extract_frontmatter_from_content(
+                    content
+                )
+
+                if not frontmatter:
+                    click.echo(f"⚠️  Skipping {command_file}: no frontmatter found")
+                    continue
+
+                # Convert escape sequences in description to actual newlines
+                description = frontmatter.get("description", "")
+                if description and isinstance(description, str):
+                    description = description.replace("\\n", "\n")
+
+                # Build command object from frontmatter and content
+                command = Command(
+                    name=frontmatter.get("name", command_file.stem),
+                    description=description,
+                    prompt=prompt_content.strip(),
+                    output_format=frontmatter.get("output_format"),
+                    requires_approval=frontmatter.get("requires_approval", False),
+                    system_message=frontmatter.get("system_message"),
+                    examples=frontmatter.get("examples"),
+                    trust_metadata=frontmatter.get("trust_metadata"),
+                )
+                commands.append(command)
+
+            except Exception as e:
+                click.echo(f"⚠️  Error parsing command file {command_file}: {e}")
+
+        return commands if commands else None
+
+    def _parse_hooks_file(self, source_dir: Path) -> Optional[List[Any]]:
+        """Parse hooks from .claude/hooks.yaml file."""
+        from ..core.models import Hook
+
+        hooks_file = source_dir / ".claude" / "hooks.yaml"
+        if not hooks_file.exists():
+            return None
+
+        try:
+            with open(hooks_file, "r", encoding="utf-8") as f:
+                hooks_config = yaml.safe_load(f)
+
+            if not hooks_config or "hooks" not in hooks_config:
+                return None
+
+            hooks = []
+            for hook_data in hooks_config["hooks"]:
+                hook = Hook(
+                    name=hook_data.get("name"),
+                    event=hook_data.get("event"),
+                    command=hook_data.get("command"),
+                    conditions=hook_data.get("conditions"),
+                    requires_reapproval=hook_data.get("requires_reapproval", True),
+                    description=hook_data.get("description"),
+                )
+                hooks.append(hook)
+
+            return hooks if hooks else None
+
+        except Exception as e:
+            click.echo(f"⚠️  Error parsing hooks file: {e}")
+            return None
+
+    def _parse_mcp_file(self, source_dir: Path) -> Optional[List[Any]]:
+        """Parse MCP servers from .mcp.json file."""
+        from ..core.models import MCPServer
+
+        mcp_file = source_dir / ".mcp.json"
+        if not mcp_file.exists():
+            return None
+
+        try:
+            with open(mcp_file, "r", encoding="utf-8") as f:
+                mcp_config = json.load(f)
+
+            if not mcp_config or "mcpServers" not in mcp_config:
+                return None
+
+            servers = []
+            for server_name, server_config in mcp_config["mcpServers"].items():
+                server = MCPServer(
+                    name=server_name,
+                    command=server_config.get("command"),
+                    args=server_config.get("args"),
+                    env=server_config.get("env"),
+                    description=server_config.get("description"),
+                    trust_metadata=server_config.get("trust_metadata"),
+                )
+                servers.append(server)
+
+            return servers if servers else None
+
+        except Exception as e:
+            click.echo(f"⚠️  Error parsing MCP config file: {e}")
+            return None
+
+    def _extract_frontmatter_from_content(
+        self, content: str
+    ) -> tuple[Optional[Dict], str]:
+        """
+        Extract YAML frontmatter from markdown content.
+
+        Handles both standard YAML and Claude Code native format with special chars.
+
+        Returns:
+            Tuple of (frontmatter_dict, remaining_content)
+        """
+        if not content.startswith("---"):
+            return None, content
+
+        parts = content.split("---", 2)
+        if len(parts) < 3:
+            return None, content
+
+        frontmatter_text = parts[1]
+        remaining = parts[2].strip()
+
+        # Try standard YAML parsing first
+        try:
+            frontmatter = yaml.safe_load(frontmatter_text)
+            return frontmatter, remaining
+        except yaml.YAMLError:
+            # Fallback: manual parsing for Claude Code native format
+            try:
+                frontmatter = self._parse_frontmatter_manually(frontmatter_text)
+                return frontmatter, remaining
+            except Exception as e:
+                click.echo(f"⚠️  Error parsing frontmatter: {e}")
+                return None, content
+
+    def _parse_frontmatter_manually(self, frontmatter_text: str) -> Dict[str, Any]:
+        """
+        Manually parse frontmatter that may contain YAML-incompatible content.
+
+        This handles Claude Code native format where fields like 'description'
+        may contain unquoted strings with colons and special characters.
+        """
+        frontmatter: Dict[str, Any] = {}
+        current_key: Optional[str] = None
+        current_value_lines: List[str] = []
+
+        for line in frontmatter_text.split("\n"):
+            # Check if this line starts a new key-value pair
+            if ": " in line and not line.startswith(" "):
+                # Save previous key-value if exists
+                if current_key:
+                    value = "\n".join(current_value_lines).strip()
+                    # Try to parse as YAML for structured values (lists, dicts)
+                    try:
+                        frontmatter[current_key] = yaml.safe_load(value)
+                    except (yaml.YAMLError, ValueError, TypeError):
+                        # If YAML parsing fails, keep as string
+                        frontmatter[current_key] = value
+
+                # Start new key-value pair
+                key, value = line.split(": ", 1)
+                current_key = key.strip()
+                current_value_lines = [value]
+            elif current_key:
+                # Continuation of current value
+                current_value_lines.append(line)
+
+        # Save the last key-value pair
+        if current_key:
+            value = "\n".join(current_value_lines).strip()
+            try:
+                frontmatter[current_key] = yaml.safe_load(value)
+            except (yaml.YAMLError, ValueError, TypeError):
+                frontmatter[current_key] = value
+
+        return frontmatter
 
     def _generate_plugins(
         self,
