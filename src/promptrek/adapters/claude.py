@@ -347,37 +347,79 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
         return commands if commands else None
 
     def _parse_hooks_file(self, source_dir: Path) -> Optional[List[Any]]:
-        """Parse hooks from .claude/hooks.yaml file."""
+        """Parse hooks from .claude/hooks.yaml or .claude/settings.local.json file."""
         from ..core.models import Hook
 
-        hooks_file = source_dir / ".claude" / "hooks.yaml"
-        if not hooks_file.exists():
-            return None
+        # Try hooks.yaml first (PrompTrek format)
+        hooks_yaml = source_dir / ".claude" / "hooks.yaml"
+        if hooks_yaml.exists():
+            try:
+                with open(hooks_yaml, "r", encoding="utf-8") as f:
+                    hooks_config = yaml.safe_load(f)
 
-        try:
-            with open(hooks_file, "r", encoding="utf-8") as f:
-                hooks_config = yaml.safe_load(f)
+                if hooks_config and "hooks" in hooks_config:
+                    hooks = []
+                    for hook_data in hooks_config["hooks"]:
+                        hook = Hook(
+                            name=hook_data.get("name"),
+                            event=hook_data.get("event"),
+                            command=hook_data.get("command"),
+                            conditions=hook_data.get("conditions"),
+                            requires_reapproval=hook_data.get("requires_reapproval", True),
+                            description=hook_data.get("description"),
+                        )
+                        hooks.append(hook)
+                    return hooks if hooks else None
 
-            if not hooks_config or "hooks" not in hooks_config:
+            except Exception as e:
+                click.echo(f"⚠️  Error parsing hooks.yaml file: {e}")
+
+        # Try settings.local.json (Claude Code native format)
+        settings_file = source_dir / ".claude" / "settings.local.json"
+        if settings_file.exists():
+            try:
+                with open(settings_file, "r", encoding="utf-8") as f:
+                    settings_config = json.load(f)
+
+                if not settings_config or "hooks" not in settings_config:
+                    return None
+
+                hooks = []
+                hook_counter = 0
+                # Parse Claude Code hooks format: {"PreToolUse": [{...}]}
+                for event_type, event_configs in settings_config["hooks"].items():
+                    for event_config in event_configs:
+                        matcher = event_config.get("matcher")
+                        # Each event_config has a "hooks" array with actual hook definitions
+                        for hook_def in event_config.get("hooks", []):
+                            hook_counter += 1
+                            # Generate a name from event type and matcher
+                            name_parts = [event_type.lower()]
+                            if matcher:
+                                name_parts.append(matcher.lower())
+                            name = f"{'-'.join(name_parts)}-{hook_counter}"
+
+                            conditions = {}
+                            if matcher:
+                                conditions["matcher"] = matcher
+
+                            hook = Hook(
+                                name=name,
+                                event=event_type,
+                                command=hook_def.get("command"),
+                                conditions=conditions if conditions else None,
+                                requires_reapproval=event_config.get("requires_reapproval", True),
+                                description=hook_def.get("description"),
+                            )
+                            hooks.append(hook)
+
+                return hooks if hooks else None
+
+            except Exception as e:
+                click.echo(f"⚠️  Error parsing settings.local.json hooks: {e}")
                 return None
 
-            hooks = []
-            for hook_data in hooks_config["hooks"]:
-                hook = Hook(
-                    name=hook_data.get("name"),
-                    event=hook_data.get("event"),
-                    command=hook_data.get("command"),
-                    conditions=hook_data.get("conditions"),
-                    requires_reapproval=hook_data.get("requires_reapproval", True),
-                    description=hook_data.get("description"),
-                )
-                hooks.append(hook)
-
-            return hooks if hooks else None
-
-        except Exception as e:
-            click.echo(f"⚠️  Error parsing hooks file: {e}")
-            return None
+        return None
 
     def _parse_mcp_file(self, source_dir: Path) -> Optional[List[Any]]:
         """Parse MCP servers from .mcp.json file."""
@@ -632,32 +674,102 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
 
         # Generate hooks
         if hooks:
-            hooks_file = claude_dir / "hooks.yaml"
-            hooks_config = {
-                "hooks": [
-                    {
-                        "name": hook.name,
-                        "event": hook.event,
-                        "command": hook.command,
-                        **({"conditions": hook.conditions} if hook.conditions else {}),
-                        "requires_reapproval": hook.requires_reapproval,
-                    }
-                    for hook in hooks
-                ]
-            }
+            # Separate hooks by type: those with matchers go to settings.local.json,
+            # others go to hooks.yaml
+            hooks_with_matchers = []
+            hooks_without_matchers = []
 
-            if dry_run:
-                click.echo(f"  📁 Would create: {hooks_file}")
-                if verbose:
-                    click.echo(
-                        f"    {yaml.dump(hooks_config, default_flow_style=False)[:200]}..."
-                    )
-            else:
-                claude_dir.mkdir(parents=True, exist_ok=True)
-                with open(hooks_file, "w", encoding="utf-8") as f:
-                    yaml.dump(hooks_config, f, default_flow_style=False)
-                click.echo(f"✅ Generated: {hooks_file}")
-            created_files.append(hooks_file)
+            for hook in hooks:
+                if hook.conditions and "matcher" in hook.conditions:
+                    hooks_with_matchers.append(hook)
+                else:
+                    hooks_without_matchers.append(hook)
+
+            # Generate settings.local.json for hooks with matchers (Claude Code native format)
+            if hooks_with_matchers:
+                settings_file = claude_dir / "settings.local.json"
+
+                # Group hooks by event type
+                hooks_by_event: Dict[str, List[Any]] = {}
+                for hook in hooks_with_matchers:
+                    event = hook.event
+                    if event not in hooks_by_event:
+                        hooks_by_event[event] = []
+
+                    # Build Claude Code format
+                    hook_config = {
+                        "matcher": hook.conditions["matcher"],
+                        "hooks": [
+                            {
+                                "type": "command",
+                                "command": hook.command,
+                            }
+                        ]
+                    }
+                    hooks_by_event[event].append(hook_config)
+
+                settings_config = {
+                    "hooks": hooks_by_event
+                }
+
+                if dry_run:
+                    click.echo(f"  📁 Would create: {settings_file}")
+                    if verbose:
+                        click.echo(f"    {json.dumps(settings_config, indent=2)[:200]}...")
+                else:
+                    claude_dir.mkdir(parents=True, exist_ok=True)
+
+                    # Merge with existing settings.local.json if it exists
+                    if settings_file.exists():
+                        try:
+                            with open(settings_file, "r", encoding="utf-8") as f:
+                                existing_config = json.load(f)
+                            # Merge hooks section
+                            if "hooks" in existing_config:
+                                for event, event_hooks in hooks_by_event.items():
+                                    if event in existing_config["hooks"]:
+                                        existing_config["hooks"][event].extend(event_hooks)
+                                    else:
+                                        existing_config["hooks"][event] = event_hooks
+                                settings_config = existing_config
+                            else:
+                                settings_config.update(existing_config)
+                        except Exception as e:
+                            click.echo(f"⚠️  Error reading existing settings.local.json: {e}")
+
+                    with open(settings_file, "w", encoding="utf-8") as f:
+                        json.dump(settings_config, f, indent=2)
+                    click.echo(f"✅ Generated: {settings_file}")
+                created_files.append(settings_file)
+
+            # Generate hooks.yaml for hooks without matchers (PrompTrek format)
+            if hooks_without_matchers:
+                hooks_file = claude_dir / "hooks.yaml"
+                hooks_config = {
+                    "hooks": [
+                        {
+                            "name": hook.name,
+                            "event": hook.event,
+                            "command": hook.command,
+                            **({"conditions": hook.conditions} if hook.conditions else {}),
+                            "requires_reapproval": hook.requires_reapproval,
+                        }
+                        for hook in hooks_without_matchers
+                    ]
+                }
+
+                if dry_run:
+                    click.echo(f"  📁 Would create: {hooks_file}")
+                    if verbose:
+                        click.echo(
+                            f"    {yaml.dump(hooks_config, default_flow_style=False)[:200]}..."
+                        )
+                else:
+                    claude_dir.mkdir(parents=True, exist_ok=True)
+                    with open(hooks_file, "w", encoding="utf-8") as f:
+                        yaml.dump(hooks_config, f, default_flow_style=False)
+                    click.echo(f"✅ Generated: {hooks_file}")
+                created_files.append(hooks_file)
 
         return created_files
 
