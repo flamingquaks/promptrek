@@ -143,3 +143,9 @@ test-project/
 .kiro/steering/*.md
 .tabnine_commands
 .vscode/mcp.json
+
+# PrompTrek editor-specific files (generated, not committed)
+.claude/commands/*.md
+.claude/agents/*.md
+.claude/hooks.yaml
+.mcp.json

@@ -38,6 +38,10 @@ def get_editor_file_patterns() -> List[str]:
         # Claude
         ".claude/CLAUDE.md",
         ".claude-context.md",
+        ".claude/commands/*.md",
+        ".claude/agents/*.md",
+        ".claude/hooks.yaml",
+        ".mcp.json",
         # Amazon Q
         ".amazonq/rules/*.md",
         ".amazonq/cli-agents/*.json",
