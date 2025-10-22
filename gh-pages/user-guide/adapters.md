@@ -70,12 +70,11 @@ When working on this project:
 
 **Custom Commands (.claude/commands/review.md)**:
 ```markdown
----
-name: review
-description: Review code for quality and best practices
-requires_approval: false
----
+# review
 
+**Description:** Review code for quality and best practices
+
+## Prompt
 Review the current file or selection for:
 - Code quality and maintainability
 - Adherence to project standards
@@ -83,21 +82,27 @@ Review the current file or selection for:
 - Performance optimizations
 ```
 
+**Note**: Command files use markdown headings (not YAML frontmatter) for compatibility with Claude Code's native format.
+
 **Autonomous Agents (.claude/agents/test-guardian.md)**:
 ```markdown
----
-name: test-guardian
-description: Ensures comprehensive test coverage
-trust_level: untrusted
-requires_approval: true
----
+# test-guardian
 
+**Description:** Ensures comprehensive test coverage for all code changes
+
+## System Prompt
 You are a test coverage specialist. Your mission is to:
 1. Identify untested code paths
 2. Generate comprehensive test cases
 3. Ensure 80%+ code coverage
 4. Validate edge cases and error handling
+
+## Configuration
+- Trust Level: untrusted
+- Requires Approval: True
 ```
+
+**Note**: Agent files use markdown headings (not YAML frontmatter) for compatibility with Claude Code's native format.
 
 **Event Hooks - Claude Code Native Format (.claude/settings.local.json)**:
 For hooks that need to match specific tools (using `matcher` conditions), Claude generates the native `settings.local.json` format:
