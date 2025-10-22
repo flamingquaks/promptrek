@@ -399,8 +399,9 @@ content: |-
   - ❌ **Not recommended**: Migrate to v3.0 for better maintainability
 variables: {}
 
-mcp_servers: 
-  - name: git
-    command: uvx
-    args: ["mcp-server-git"]
-    description: Provides an MCP Server for basic Git Operations
+mcp_servers:
+- name: git
+  command: uvx
+  args:
+  - mcp-server-git
+  description: Provides an MCP Server for basic Git Operations
