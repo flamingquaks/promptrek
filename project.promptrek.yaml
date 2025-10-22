@@ -400,7 +400,7 @@ content: |-
 variables: {}
 
 mcp_servers: 
-  - name: Git
+  - name: git
     command: uvx
     args: ["mcp-server-git"]
     description: Provides an MCP Server for basic Git Operations
