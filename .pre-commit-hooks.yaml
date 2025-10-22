@@ -53,7 +53,7 @@
   description: Blocks commits of variables.promptrek.yaml containing user-specific variables
   entry: promptrek check-generated
   language: python
-  files: variables\.promptrek\.ya?ml$
+  files: (^variables\.promptrek\.ya?ml$|\.promptrek/variables\.promptrek\.ya?ml$)
   stages: [pre-commit]
   always_run: false
   pass_filenames: true

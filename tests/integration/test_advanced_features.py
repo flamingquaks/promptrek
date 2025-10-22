@@ -169,7 +169,10 @@ variables:
   PROJECT_TYPE: "web application"
   TECH_STACK: "React and TypeScript"
 """
-        var_file = temp_dir / "variables.promptrek.yaml"
+        # Create .promptrek directory and variables file in new location
+        promptrek_dir = temp_dir / ".promptrek"
+        promptrek_dir.mkdir()
+        var_file = promptrek_dir / "variables.promptrek.yaml"
         var_file.write_text(var_content)
 
         # Test with variable overrides

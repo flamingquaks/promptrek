@@ -50,7 +50,7 @@ promptrek migrate old.promptrek.yaml -o new.promptrek.yaml
 
 **🔐 .gitignore Management:** When you run `promptrek init`, it automatically:
 - Creates `.gitignore` if it doesn't exist
-- Adds `variables.promptrek.yaml` to `.gitignore`
+- Adds `.promptrek/` directory to `.gitignore` (contains user-specific config like `variables.promptrek.yaml` and `user-config.promptrek.yaml`)
 - Adds 18 editor-specific file patterns to `.gitignore` (including `.github/copilot-instructions.md`, `.cursor/rules/*.mdc`, `.continue/rules/*.md`, etc.)
 
 This prevents generated editor files from being committed to version control. You can disable this with `ignore_editor_files: false` in your config.
@@ -186,11 +186,13 @@ ignore_editor_files: false
 For user-specific variables like names, emails, or API keys that should NOT be committed:
 
 ```yaml
-# variables.promptrek.yaml (automatically added to .gitignore by init)
+# .promptrek/variables.promptrek.yaml (automatically gitignored via .promptrek/ directory)
 AUTHOR_NAME: "Your Name"
 AUTHOR_EMAIL: "your.email@example.com"
 API_KEY: "your-secret-key"
 ```
+
+**Note:** The `.promptrek/` directory is automatically added to `.gitignore` when you run `promptrek init`, so all files in this directory (including `variables.promptrek.yaml`) will not be committed to version control.
 
 Variables from this file override defaults in your `.promptrek.yaml` file. See [Local Variables](user-guide.html#local-variables-file) for details.
 

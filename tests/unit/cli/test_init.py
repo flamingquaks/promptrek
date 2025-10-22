@@ -28,11 +28,11 @@ class TestInitCommand:
         # File should be created
         assert output_file.exists()
 
-        # Check content (V2 schema)
+        # Check content (V3 schema - default)
         with open(output_file) as f:
             data = yaml.safe_load(f)
 
-        assert data["schema_version"] == "2.0.0"  # V2 schema
+        assert data["schema_version"] == "3.0.0"  # V3 schema (default)
         assert "metadata" in data
         assert "content" in data  # V2 uses content instead of instructions
 
@@ -51,11 +51,11 @@ class TestInitCommand:
         # File should be created
         assert output_file.exists()
 
-        # Check React-specific content (V2 schema uses content field)
+        # Check React-specific content (V3 schema uses content field)
         with open(output_file) as f:
             data = yaml.safe_load(f)
 
-        assert data["schema_version"] == "2.0.0"
+        assert data["schema_version"] == "3.0.0"
         assert "content" in data
         # V2 schema includes technology info in the content string
         assert (
@@ -152,10 +152,10 @@ class TestInitCommand:
         with patch("click.echo"), patch("click.confirm", return_value=True):
             init_command(ctx, template=None, output=str(output_file), setup_hooks=False)
 
-        # File should be overwritten (V2 schema)
+        # File should be overwritten (V3 schema - default)
         with open(output_file) as f:
             data = yaml.safe_load(f)
-        assert data["schema_version"] == "2.0.0"  # V2 schema
+        assert data["schema_version"] == "3.0.0"  # V3 schema (default)
 
     def test_init_invalid_template(self, tmp_path):
         """Test initialization with invalid template."""
@@ -295,7 +295,7 @@ class TestInitCommand:
         assert gitignore.exists()
 
         content = gitignore.read_text()
-        assert "variables.promptrek.yaml" in content
+        assert ".promptrek/" in content
         assert "*.pyc" in content  # Original content preserved
 
     def test_init_creates_new_gitignore(self, tmp_path):
@@ -314,7 +314,7 @@ class TestInitCommand:
         assert gitignore.exists()
 
         content = gitignore.read_text()
-        assert "variables.promptrek.yaml" in content
+        assert ".promptrek/" in content
 
 
 class TestInitIntegration:

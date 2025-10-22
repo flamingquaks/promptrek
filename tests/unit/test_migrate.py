@@ -136,7 +136,7 @@ content: |
         result = runner.invoke(cli, ["migrate", str(v3_file)])
 
         assert result.exit_code == 0
-        assert "already v3.0 format" in result.output
+        assert "already v3.x format" in result.output
 
     def test_migrate_output_exists_no_force(self, tmp_path):
         """Test migration fails when output exists without --force."""

@@ -141,7 +141,7 @@ When working on this project:
 """
 
     return {
-        "schema_version": "3.1.0",
+        "schema_version": "3.0.0",
         "metadata": {
             "title": "My Project Assistant",
             "description": "AI assistant configuration for my project",
@@ -325,7 +325,7 @@ When working on this project:
 """
 
     return {
-        "schema_version": "3.1.0",
+        "schema_version": "3.0.0",
         "metadata": {
             "title": "React TypeScript Project Assistant",
             "description": "AI assistant for React TypeScript development",
@@ -409,7 +409,7 @@ When working on this project:
 """
 
     return {
-        "schema_version": "3.1.0",
+        "schema_version": "3.0.0",
         "metadata": {
             "title": "API Service Assistant",
             "description": "AI assistant for API development",
@@ -521,13 +521,17 @@ async def create_user(user: UserCreate):
 
 def _add_to_gitignore(project_dir: Path) -> None:
     """
-    Add variables.promptrek.yaml to .gitignore if not already present.
+    Add .promptrek/ directory to .gitignore if not already present.
+
+    The .promptrek/ directory contains user-specific configuration files
+    like variables.promptrek.yaml and user-config.promptrek.yaml that
+    should not be committed to version control.
 
     Args:
         project_dir: Project directory containing or to contain .gitignore
     """
     gitignore_path = project_dir / ".gitignore"
-    pattern = "variables.promptrek.yaml"
+    pattern = ".promptrek/"
 
     # Check if .gitignore exists
     if gitignore_path.exists():
@@ -537,7 +541,7 @@ def _add_to_gitignore(project_dir: Path) -> None:
                 content = f.read()
 
             # Check if pattern already exists
-            if pattern in content:
+            if pattern in content or ".promptrek" in content:
                 return
 
             # Add pattern to existing file
@@ -545,9 +549,7 @@ def _add_to_gitignore(project_dir: Path) -> None:
                 # Ensure file ends with newline before adding
                 if content and not content.endswith("\n"):
                     f.write("\n")
-                f.write(
-                    "\n# PrompTrek local variables (user-specific, not committed)\n"
-                )
+                f.write("\n# PrompTrek user-specific config (not committed)\n")
                 f.write(f"{pattern}\n")
 
             click.echo(f"📝 Added {pattern} to .gitignore")
@@ -557,7 +559,7 @@ def _add_to_gitignore(project_dir: Path) -> None:
         # Create new .gitignore with pattern
         try:
             with open(gitignore_path, "w", encoding="utf-8") as f:
-                f.write("# PrompTrek local variables (user-specific, not committed)\n")
+                f.write("# PrompTrek user-specific config (not committed)\n")
                 f.write(f"{pattern}\n")
             click.echo(f"📝 Created .gitignore and added {pattern}")
         except Exception as e:

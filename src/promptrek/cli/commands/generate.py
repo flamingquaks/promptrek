@@ -72,7 +72,7 @@ def generate_command(
     """
     verbose = ctx.obj.get("verbose", False)
 
-    # Load local variables from variables.promptrek.yaml
+    # Load local variables from .promptrek/variables.promptrek.yaml
     var_sub = VariableSubstitution()
     local_vars = var_sub.load_local_variables()
 

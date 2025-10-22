@@ -202,18 +202,6 @@ class MCPServer(BaseModel):
     )
 
 
-class EditorConfig(BaseModel):
-    """Editor-specific configuration paths and settings."""
-
-    cline_mcp_path: Optional[str] = Field(
-        default=None,
-        description="Absolute path to Cline's cline_mcp_settings.json file",
-    )
-
-    # Future fields can be added here for other editors
-    model_config = ConfigDict(extra="allow")
-
-
 class Command(BaseModel):
     """Slash command configuration for AI editors."""
 
@@ -401,11 +389,6 @@ class UniversalPromptV3(BaseModel):
         default=None, description="Hook configurations (top-level in v3.0+)"
     )
 
-    config: Optional[EditorConfig] = Field(
-        default=None,
-        description="Editor-specific configuration (v3.1.0+)",
-    )
-
     ignore_editor_files: Optional[bool] = Field(
         default=None,
         description="Automatically add editor-specific files to .gitignore (default: True)",
@@ -491,3 +474,33 @@ class UniversalPrompt(BaseModel):
     model_config = ConfigDict(
         validate_assignment=True, extra="forbid"  # Strict validation for the main model
     )
+
+
+# User-specific configuration (not committed to repository)
+
+
+class UserConfig(BaseModel):
+    """
+    User-specific configuration stored in user-config.promptrek.yaml.
+
+    This file contains user-specific settings that should NOT be committed
+    to version control. It is automatically added to .gitignore.
+    """
+
+    schema_version: str = Field(
+        default="1.0.0", description="User config schema version"
+    )
+    editor_paths: Optional[Dict[str, str]] = Field(
+        default=None,
+        description="Editor-specific file paths (e.g., cline_mcp_path)",
+    )
+
+    @field_validator("schema_version")
+    @classmethod
+    def validate_schema_version(cls, v: str) -> str:
+        """Validate schema version format."""
+        if not v.count(".") == 2:
+            raise ValueError("Schema version must be in format 'x.y.z'")
+        return v
+
+    model_config = ConfigDict(validate_assignment=True, extra="allow")

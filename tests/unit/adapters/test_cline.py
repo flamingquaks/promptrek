@@ -495,11 +495,15 @@ class TestClineUserLevelMCPConfiguration:
         # No files created because user declined overwrite
         assert len(created_files) == 0
 
+    @patch("promptrek.adapters.cline.ClineAdapter._read_user_config")
     @patch("promptrek.adapters.cline.ClineAdapter.find_mcp_config_file")
-    def test_generate_mcp_config_dry_run(self, mock_find, adapter, sample_mcp_servers):
+    def test_generate_mcp_config_dry_run(
+        self, mock_find, mock_read_user, adapter, sample_mcp_servers
+    ):
         """Test MCP config generation in dry run mode."""
-        # Mock file not found
+        # Mock file not found and no user config
         mock_find.return_value = None
+        mock_read_user.return_value = None
 
         output_dir = Path("/tmp/test")
         created_files = adapter._generate_mcp_config(
@@ -512,26 +516,35 @@ class TestClineUserLevelMCPConfiguration:
         # Dry run mode can't determine path without prompting, should skip
         assert len(created_files) == 0
 
+    @patch("promptrek.adapters.cline.ClineAdapter._read_user_config")
     @patch("promptrek.adapters.cline.click.confirm")
     @patch("promptrek.adapters.mcp_mixin.MCPGenerationMixin.read_existing_mcp_config")
     @patch("promptrek.adapters.mcp_mixin.MCPGenerationMixin.write_mcp_config_file")
-    def test_generate_mcp_config_with_config_field(
-        self, mock_write, mock_read, mock_confirm, adapter, sample_mcp_servers
+    def test_generate_mcp_config_with_user_config(
+        self,
+        mock_write,
+        mock_read,
+        mock_confirm,
+        mock_read_user,
+        adapter,
+        sample_mcp_servers,
     ):
-        """Test MCP config generation when path is provided in config field."""
-        from promptrek.core.models import (
-            EditorConfig,
-            PromptMetadata,
-            UniversalPromptV3,
-        )
+        """Test MCP config generation when path is provided in user config."""
+        from promptrek.core.models import PromptMetadata, UniversalPromptV3, UserConfig
 
-        # Create a v3 prompt with config field
+        # Create a v3 prompt
         prompt = UniversalPromptV3(
-            schema_version="3.1.0",
+            schema_version="3.0.0",
             metadata=PromptMetadata(title="Test", description="Test"),
             content="Test content",
-            config=EditorConfig(cline_mcp_path="/custom/path/cline_mcp_settings.json"),
         )
+
+        # Mock user config with saved path
+        user_config = UserConfig(
+            schema_version="1.0.0",
+            editor_paths={"cline_mcp_path": "/custom/path/cline_mcp_settings.json"},
+        )
+        mock_read_user.return_value = user_config
 
         # Setup mocks
         mock_read.return_value = None
@@ -547,9 +560,191 @@ class TestClineUserLevelMCPConfiguration:
             prompt=prompt,
         )
 
-        # Should use the configured path
+        # Should use the configured path from user config
         assert len(created_files) == 1
         assert str(created_files[0]) == "/custom/path/cline_mcp_settings.json"
 
         # Should have written config
         mock_write.assert_called_once()
+
+
+def test_find_user_config_in_output_dir(tmp_path):
+    """Test finding user-config.promptrek.yaml in .promptrek/ directory."""
+    # Create a .promptrek/user-config.promptrek.yaml file
+    promptrek_dir = tmp_path / ".promptrek"
+    promptrek_dir.mkdir()
+    user_config_file = promptrek_dir / "user-config.promptrek.yaml"
+    user_config_file.write_text("schema_version: 1.0.0\n")
+
+    found = ClineAdapter._find_user_config(tmp_path)
+    assert found == user_config_file
+
+
+def test_find_user_config_creates_default_path(tmp_path):
+    """Test that _find_user_config returns default path in .promptrek/ if file doesn't exist."""
+    found = ClineAdapter._find_user_config(tmp_path)
+    assert found == tmp_path / ".promptrek" / "user-config.promptrek.yaml"
+
+
+def test_read_user_config_file_not_exists(tmp_path):
+    """Test reading user config when file doesn't exist."""
+    promptrek_dir = tmp_path / ".promptrek"
+    user_config_file = promptrek_dir / "user-config.promptrek.yaml"
+    config = ClineAdapter._read_user_config(user_config_file)
+    assert config is None
+
+
+def test_read_user_config_valid_file(tmp_path):
+    """Test reading valid user config file."""
+    import yaml
+
+    promptrek_dir = tmp_path / ".promptrek"
+    promptrek_dir.mkdir()
+    user_config_file = promptrek_dir / "user-config.promptrek.yaml"
+    data = {
+        "schema_version": "1.0.0",
+        "editor_paths": {"cline_mcp_path": "/test/path.json"},
+    }
+
+    with open(user_config_file, "w") as f:
+        yaml.safe_dump(data, f)
+
+    config = ClineAdapter._read_user_config(user_config_file)
+    assert config is not None
+    assert config.schema_version == "1.0.0"
+    assert config.editor_paths["cline_mcp_path"] == "/test/path.json"
+
+
+def test_write_user_config_new_file(tmp_path):
+    """Test writing new user config file in .promptrek/ directory."""
+    promptrek_dir = tmp_path / ".promptrek"
+    user_config_file = promptrek_dir / "user-config.promptrek.yaml"
+    mcp_path = Path("/test/path/cline_mcp_settings.json")
+
+    result = ClineAdapter._write_user_config(user_config_file, mcp_path, verbose=False)
+
+    assert result is True
+    assert user_config_file.exists()
+
+    # Verify content
+    config = ClineAdapter._read_user_config(user_config_file)
+    assert config is not None
+    assert config.editor_paths["cline_mcp_path"] == str(mcp_path)
+
+    # Verify warning comments exist
+    with open(user_config_file, "r") as f:
+        content = f.read()
+        assert "WARNING" in content
+        assert "DO NOT commit" in content
+
+
+def test_write_user_config_update_existing(tmp_path):
+    """Test updating existing user config file."""
+    promptrek_dir = tmp_path / ".promptrek"
+    user_config_file = promptrek_dir / "user-config.promptrek.yaml"
+    old_path = Path("/old/path.json")
+
+    # Write initial config
+    ClineAdapter._write_user_config(user_config_file, old_path, verbose=False)
+
+    # Update with new path
+    new_path = Path("/new/path/cline_mcp_settings.json")
+    result = ClineAdapter._write_user_config(user_config_file, new_path, verbose=False)
+
+    assert result is True
+
+    # Verify updated content
+    config = ClineAdapter._read_user_config(user_config_file)
+    assert config is not None
+    assert config.editor_paths["cline_mcp_path"] == str(new_path)
+
+
+def test_add_to_gitignore_creates_new(tmp_path):
+    """Test creating new .gitignore with .promptrek/ pattern."""
+    ClineAdapter._add_to_gitignore(tmp_path, ".promptrek/")
+
+    gitignore = tmp_path / ".gitignore"
+    assert gitignore.exists()
+
+    content = gitignore.read_text()
+    assert ".promptrek/" in content
+
+
+def test_add_to_gitignore_appends_existing(tmp_path):
+    """Test appending to existing .gitignore."""
+    gitignore = tmp_path / ".gitignore"
+    gitignore.write_text("*.pyc\n")
+
+    ClineAdapter._add_to_gitignore(tmp_path, ".promptrek/")
+
+    content = gitignore.read_text()
+    assert "*.pyc" in content
+    assert ".promptrek/" in content
+
+
+def test_add_to_gitignore_already_exists(tmp_path):
+    """Test that pattern is not added twice."""
+    gitignore = tmp_path / ".gitignore"
+    gitignore.write_text(".promptrek/\n")
+
+    ClineAdapter._add_to_gitignore(tmp_path, ".promptrek/")
+
+    content = gitignore.read_text()
+    # Should only appear once
+    assert content.count(".promptrek/") == 1
+
+
+@patch("promptrek.adapters.cline.ClineAdapter._write_user_config")
+@patch("promptrek.adapters.cline.ClineAdapter._read_user_config")
+@patch("promptrek.adapters.cline.ClineAdapter._find_user_config")
+@patch("promptrek.adapters.cline.click.confirm")
+@patch("promptrek.adapters.mcp_mixin.MCPGenerationMixin.read_existing_mcp_config")
+@patch("promptrek.adapters.mcp_mixin.MCPGenerationMixin.write_mcp_config_file")
+@patch("promptrek.adapters.cline.ClineAdapter.find_mcp_config_file")
+def test_generate_mcp_config_auto_saves_discovered_path(
+    mock_find,
+    mock_write_mcp,
+    mock_read_mcp,
+    mock_confirm,
+    mock_find_user,
+    mock_read_user,
+    mock_write_user,
+):
+    """Test that auto-detected MCP path is saved to user-config.promptrek.yaml."""
+    from promptrek.core.models import MCPServer, PromptMetadata, UniversalPromptV3
+
+    adapter = ClineAdapter()
+
+    # Create a v3.1 prompt without config
+    prompt = UniversalPromptV3(
+        schema_version="3.0.0",
+        metadata=PromptMetadata(title="Test", description="Test"),
+        content="Test content",
+    )
+
+    # Setup mocks
+    discovered_path = Path("/auto/detected/cline_mcp_settings.json")
+    mock_find.return_value = discovered_path  # Auto-detect returns a path
+    mock_find_user.return_value = Path("/project/.promptrek/user-config.promptrek.yaml")
+    mock_read_user.return_value = None  # No existing user config
+    mock_read_mcp.return_value = None
+    mock_confirm.return_value = True
+    mock_write_mcp.return_value = True
+    mock_write_user.return_value = True
+
+    # Create proper MCPServer objects
+    sample_mcp_servers = [MCPServer(name="test-server", command="test", args=[])]
+
+    output_dir = Path("/tmp/test")
+    adapter._generate_mcp_config(
+        mcp_servers=sample_mcp_servers,
+        output_dir=output_dir,
+        dry_run=False,
+        verbose=False,
+        prompt=prompt,
+    )
+
+    # Verify user config update was called with the discovered path
+    mock_write_user.assert_called_once_with(
+        Path("/project/.promptrek/user-config.promptrek.yaml"), discovered_path, False
+    )

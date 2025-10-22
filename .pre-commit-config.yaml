@@ -22,7 +22,7 @@ repos:
     name: Prevent committing local variables
     entry: uv run promptrek check-generated
     language: system
-    files: variables\.promptrek\.ya?ml$
+    files: (^variables\.promptrek\.ya?ml$|\.promptrek/variables\.promptrek\.ya?ml$)
     stages:
     - pre-commit
     always_run: false
