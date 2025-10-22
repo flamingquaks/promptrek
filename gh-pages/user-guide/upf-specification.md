@@ -22,14 +22,14 @@ PrompTrek supports **three schema versions**:
 
 JSON Schemas are available for all versions to enable autocompletion and validation in your editor:
 
-- **v3.0**: [`https://promptrek.ai/schema/v3.0.json`](https://promptrek.ai/schema/v3.0.json)
-- **v2.1**: [`https://promptrek.ai/schema/v2.1.json`](https://promptrek.ai/schema/v2.1.json)
-- **v2.0**: [`https://promptrek.ai/schema/v2.0.json`](https://promptrek.ai/schema/v2.0.json)
+- **v3.0**: [`https://promptrek.ai/schema/v3.0.0.json`](https://promptrek.ai/schema/v3.0.0.json)
+- **v2.1**: [`https://promptrek.ai/schema/v2.1.0.json`](https://promptrek.ai/schema/v2.1.0.json)
+- **v2.0**: [`https://promptrek.ai/schema/v2.0.0.json`](https://promptrek.ai/schema/v2.0.0.json)
 
 **Enable in your editor**: Add a schema reference at the top of your `.promptrek.yaml` file:
 
 ```yaml
-# yaml-language-server: $schema=https://promptrek.ai/schema/v3.0.json
+# yaml-language-server: $schema=https://promptrek.ai/schema/v3.0.0.json
 schema_version: 3.0.0
 # ... rest of your configuration
 ```
@@ -38,13 +38,13 @@ See the [Schema Documentation](https://promptrek.ai/schema/) for more details.
 
 ## Schema Versions
 
-- **Stable**: `3.0.0` - [Jump to v3.0 Specification](#schema-v30-stable)
-- **Legacy**: `2.1.0` - [Jump to v2.1 Specification](#schema-v21-legacy)
-- **Legacy**: `2.0.0` - [Jump to v2.0 Specification](#schema-v20-legacy)
+- **Stable**: `3.0.0` - [Jump to v3.0.0 Specification](#schema-v30-stable)
+- **Legacy**: `2.1.0` - [Jump to v2.1.0 Specification](#schema-v21-legacy)
+- **Legacy**: `2.0.0` - [Jump to v2.0.0 Specification](#schema-v20-legacy)
 
 ---
 
-## Schema v3.0 (Stable)
+## Schema v3.0.0 (Stable)
 
 **v3.0.0**: Cleaner architecture by promoting plugin fields (mcp_servers, commands, agents, hooks) to the top level.
 
@@ -56,7 +56,7 @@ See the [Schema Documentation](https://promptrek.ai/schema/) for more details.
 - 📋 **Production Ready** - Stable schema for all new projects
 - 🎯 **Recommended** - Use v3.0 for all new projects
 
-### Key Changes from v2.1
+### Key Changes from v2.1.0
 
 **Before (v2.1) - Nested structure:**
 ```yaml
@@ -68,7 +68,7 @@ plugins:                    # ❌ Wrapper (removed in v3.0)
   hooks: [...]
 ```
 
-**After (v3.0) - Flat structure:**
+**After (v3.0.0) - Flat structure:**
 ```yaml
 schema_version: "3.0.0"
 # No plugins wrapper - fields are top-level
@@ -78,7 +78,7 @@ agents: [...]               # ✅ Top-level
 hooks: [...]                # ✅ Top-level
 ```
 
-### Complete v3.0 Schema
+### Complete v3.0.0 Schema
 
 ```yaml
 # Schema version (required)
@@ -140,7 +140,7 @@ commands:
     examples: [string]             # Usage examples (optional)
     trust_metadata: {}             # Trust metadata (optional)
 
-# Autonomous agents - NOW TOP-LEVEL in v3.0
+# Autonomous agents - NOW TOP-LEVEL in v3.0.0
 agents:
   - name: string                   # Agent name (required)
     description: string            # Agent description (required)
@@ -151,7 +151,7 @@ agents:
     context: {}                    # Additional context (optional)
     trust_metadata: {}             # Trust metadata (optional)
 
-# Event-driven hooks - NOW TOP-LEVEL in v3.0
+# Event-driven hooks - NOW TOP-LEVEL in v3.0.0
 hooks:
   - name: string                   # Hook name (required)
     event: string                  # Trigger event (required, e.g., 'pre-commit')
@@ -162,7 +162,7 @@ hooks:
     trust_metadata: {}             # Trust metadata (optional)
 ```
 
-### Complete v3.0 Example
+### Complete v3.0.0 Example
 
 ```yaml
 schema_version: "3.0.0"
@@ -256,9 +256,9 @@ hooks:
     requires_reapproval: true
 ```
 
-### Migration from v2.1 to v3.0
+### Migration from v2.1.0 to v3.0.0
 
-Use the `promptrek migrate` command to convert v2.1 files to v3.0:
+Use the `promptrek migrate` command to convert v2.1.0 files to v3.0.0:
 
 ```bash
 # Migrate to v3.0 format
@@ -280,7 +280,7 @@ The migration tool:
 
 **v2.1 files continue to work in v3.0!**
 
-When you use a v2.1 file (with nested `plugins.*` structure) in PrompTrek v3.0:
+When you use a v2.1.0 file (with nested `plugins.*` structure) in PrompTrek v3.0.0:
 1. ⚠️ A deprecation warning is displayed
 2. ✅ The parser automatically promotes nested fields to top-level internally
 3. ✅ Your file works without modification
@@ -289,7 +289,7 @@ When you use a v2.1 file (with nested `plugins.*` structure) in PrompTrek v3.0:
 ```
 ⚠️  DEPRECATION WARNING in project.promptrek.yaml:
    Detected nested plugin structure (plugins.mcp_servers, etc.)
-   This structure is deprecated in v3.0 and will be removed in v4.0.
+   This structure is deprecated in v3.0.0 and will be removed in v4.
    Please migrate to top-level fields:
      - Move 'plugins.mcp_servers' → 'mcp_servers' (top-level)
      - Move 'plugins.commands' → 'commands' (top-level)
@@ -303,7 +303,7 @@ When you use a v2.1 file (with nested `plugins.*` structure) in PrompTrek v3.0:
 - **v3.0.0** (Current): Nested structure deprecated, top-level recommended
 - **v4.0.0** (Future): Nested structure will be removed entirely
 
-### Benefits of v3.0
+### Benefits of v3.0.0
 
 1. **Cleaner YAML Structure**
    ```yaml
@@ -315,9 +315,9 @@ When you use a v2.1 file (with nested `plugins.*` structure) in PrompTrek v3.0:
    mcp_servers: [...]
    ```
 
-2. **Consistency with v2.0 Philosophy**
-   - v2.0 introduced a flatter, markdown-first approach
-   - v3.0 extends this philosophy to plugins
+2. **Consistency with v2.0.0 Philosophy**
+   - v2.0.0 introduced a flatter, markdown-first approach
+   - v3.0.0 extends this philosophy to plugins
 
 3. **Easier to Read and Write**
    - Less indentation
@@ -328,35 +328,29 @@ When you use a v2.1 file (with nested `plugins.*` structure) in PrompTrek v3.0:
    - Easier to add new plugin types without more nesting
    - Better tooling support (IDE auto-completion, validation)
 
-### Documentation
-
-For detailed migration information:
-- 📖 [V3 Migration Guide](../../docs/V3_MIGRATION_GUIDE.md) - Complete migration instructions
-- ⚠️ [Deprecation Warnings](../../docs/DEPRECATION_WARNINGS.md) - Understanding deprecation system
-- 🎯 Migration timeline and backward compatibility details
 
 ---
 
-## Schema v2.1 (Legacy)
+## Schema v2.1.0 (Legacy)
 
-**v2.1.0** (Superseded by v3.0): Plugin support for MCP servers, custom commands, autonomous agents, and event-driven hooks with nested structure.
+**v2.1.0** (Superseded by v3.0.0): Plugin support for MCP servers, custom commands, autonomous agents, and event-driven hooks with nested structure.
 
-### Migration to v3.0
+### Migration to v3.0.0
 
-**All v2.1 features are available in v3.0 with cleaner top-level structure.**
+**All v2.1.0 features are available in v3.0.0 with cleaner top-level structure.**
 
-Migrate to v3.0 for:
+Migrate to v3.0.0 for:
 - ✅ Cleaner YAML structure (no `plugins` wrapper)
 - ✅ Easier to read and maintain
 - ✅ Better IDE support and auto-completion
 - ✅ Production-ready stable schema
 
 ```bash
-# Migrate v2.1 to v3.0
+# Migrate v2.1.0 to v3.0.0
 promptrek migrate project.promptrek.yaml -o project-v3.promptrek.yaml
 ```
 
-### Complete v2.1 Schema
+### Complete v2.1.0 Schema
 
 ```yaml
 # Schema version (required)
@@ -445,7 +439,7 @@ plugins:
       trust_metadata: {}           # Trust metadata (optional)
 ```
 
-### v2.1 Plugin Examples
+### v2.1.0 Plugin Examples
 
 #### MCP Servers
 
@@ -617,7 +611,7 @@ plugins:
       description: "Auto-regenerate editor files when .promptrek.yaml changes"
 ```
 
-### Complete v2.1 Example
+### Complete v2.1.0 Example
 
 ```yaml
 schema_version: "2.1.0"
@@ -741,9 +735,9 @@ promptrek generate v2.0-file.promptrek.yaml --editor claude
 
 ---
 
-## Schema v2.0 (Legacy)
+## Schema v2.0.0 (Legacy)
 
-**v2.0.0** (Superseded by v3.0): Simpler markdown-first approach that aligns with how AI editors actually work.
+**v2.0.0** (Superseded by v3.0.0): Simpler markdown-first approach that aligns with how AI editors actually work.
 
 ### Key Benefits
 
@@ -753,7 +747,7 @@ promptrek generate v2.0-file.promptrek.yaml --editor claude
 - ✅ **Editor-friendly** - Matches how Claude Code, Copilot, and others use markdown
 - ✅ **Multi-file support** - Use `documents` field for multi-file editors
 
-### Complete v2 Schema
+### Complete v2.0.0 Schema
 
 ```yaml
 # Schema version (required)
@@ -886,7 +880,7 @@ documents:
 
 #### variables (optional)
 
-Template variables using `{``{``{``VARIABLE_NAME``}``}``}` syntax (triple braces to distinguish from Jinja2).
+Template variables using {{{VARIABLE_NAME}}} syntax (triple braces to distinguish from Jinja2).
 
 **Example**:
 ```yaml

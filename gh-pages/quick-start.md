@@ -145,7 +145,7 @@ promptrek validate my-project.promptrek.yaml --strict
 **💡 Editor Integration:** Enable schema validation in your editor for instant feedback while editing `.promptrek.yaml` files. Add this comment at the top of your file:
 
 ```yaml
-# yaml-language-server: $schema=https://promptrek.ai/schema/v3.0.json
+# yaml-language-server: $schema=https://promptrek.ai/schema/v3.0.0.json
 schema_version: 3.0.0
 # ... rest of your configuration
 ```
