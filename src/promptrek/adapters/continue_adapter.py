@@ -597,15 +597,11 @@ class ContinueAdapter(MCPGenerationMixin, EditorAdapter):
     ) -> str:
         """Build complete markdown file with YAML frontmatter and content."""
         lines = ["---"]
-        for key, value in frontmatter.items():
-            if isinstance(value, str):
-                # Escape quotes in string values and wrap in quotes
-                escaped_value = value.replace('"', '\\"')
-                lines.append(f'{key}: "{escaped_value}"')
-            elif isinstance(value, bool):
-                lines.append(f"{key}: {str(value).lower()}")
-            else:
-                lines.append(f"{key}: {value}")
+        # Use yaml.safe_dump to serialize frontmatter correctly
+        yaml_frontmatter = yaml.safe_dump(
+            frontmatter, default_flow_style=False, sort_keys=False
+        ).strip()
+        lines.append(yaml_frontmatter)
         lines.append("---")
         lines.append("")
 
