@@ -634,9 +634,13 @@ def test_write_user_config_new_file(tmp_path):
     assert config.editor_paths is not None
     assert config.editor_paths["cline_mcp_path"] == str(mcp_path)
 
-    # Verify warning comments exist
+    # Verify yaml-language-server directive and warning comments exist
     with open(user_config_file, "r") as f:
         content = f.read()
+        assert (
+            "yaml-language-server: $schema=https://promptrek.ai/schema/user-config/v1.0.0.json"
+            in content
+        )
         assert "WARNING" in content
         assert "DO NOT commit" in content
 
@@ -661,6 +665,14 @@ def test_write_user_config_update_existing(tmp_path):
     assert config is not None
     assert config.editor_paths is not None
     assert config.editor_paths["cline_mcp_path"] == str(new_path)
+
+    # Verify yaml-language-server directive is still present after update
+    with open(user_config_file, "r") as f:
+        content = f.read()
+        assert (
+            "yaml-language-server: $schema=https://promptrek.ai/schema/user-config/v1.0.0.json"
+            in content
+        )
 
 
 def test_add_to_gitignore_creates_new(tmp_path):

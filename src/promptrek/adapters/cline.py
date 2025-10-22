@@ -229,7 +229,12 @@ class ClineAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
             import yaml
 
             with open(user_config_path, "w", encoding="utf-8") as f:
-                # Add warning comments at the top
+                # Add YAML language server directive for schema validation
+                f.write(
+                    "# yaml-language-server: $schema=https://promptrek.ai/schema/user-config/v1.0.0.json\n"
+                )
+                f.write("#\n")
+                # Add warning comments
                 f.write("# WARNING: This file contains user-specific configuration\n")
                 f.write(
                     "# DO NOT commit this file to version control (it should be in .gitignore)\n"
