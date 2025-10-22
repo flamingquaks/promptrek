@@ -44,28 +44,28 @@ def migrate_command(
     # Check schema version and determine migration path
     if isinstance(prompt, UniversalPromptV3):
         # Already v3, no migration needed
-        click.echo(f"ℹ️  {input_file} is already v3.0 format, no migration needed")
+        click.echo(f"ℹ️  {input_file} is already v3.x format, no migration needed")
         return
     elif isinstance(prompt, UniversalPromptV2):
         # Check if v2.1
         if prompt.schema_version.startswith("2.1"):
-            # Migrate v2.1 → v3.0
-            click.echo(f"ℹ️  Migrating from v{prompt.schema_version} to v3.0.0...")
+            # Migrate v2.1 → v3.1
+            click.echo(f"ℹ️  Migrating from v{prompt.schema_version} to v3.1.0...")
             v3_prompt = _convert_v21_to_v3(prompt, verbose)
             old_version = prompt.schema_version
-            new_version = "3.0.0"
+            new_version = "3.1.0"
         else:
-            # Migrate v2.0 → v3.0 (skip v2.1)
-            click.echo(f"ℹ️  Migrating from v{prompt.schema_version} to v3.0.0...")
+            # Migrate v2.0 → v3.1 (skip v2.1)
+            click.echo(f"ℹ️  Migrating from v{prompt.schema_version} to v3.1.0...")
             v3_prompt = _convert_v2_to_v3(prompt, verbose)
             old_version = prompt.schema_version
-            new_version = "3.0.0"
+            new_version = "3.1.0"
     else:
-        # Convert v1 → v3.0 (modern format)
-        click.echo("ℹ️  Migrating from v1.0.0 to v3.0.0...")
+        # Convert v1 → v3.1 (modern format)
+        click.echo("ℹ️  Migrating from v1.0.0 to v3.1.0...")
         v3_prompt = _convert_v1_to_v3(prompt, verbose)
         old_version = "1.0.0"
-        new_version = "3.0.0"
+        new_version = "3.1.0"
 
     # Determine output path
     if not output_file:
@@ -102,7 +102,7 @@ def _convert_v21_to_v3(
     prompt: UniversalPromptV2, verbose: bool = False
 ) -> UniversalPromptV3:
     """
-    Convert a v2.1 UniversalPromptV2 to v3.0 UniversalPromptV3.
+    Convert a v2.1 UniversalPromptV2 to v3.1 UniversalPromptV3.
 
     Promotes nested plugins.* fields to top-level.
 
@@ -141,7 +141,7 @@ def _convert_v21_to_v3(
                 click.echo(f"   Moved {len(hooks)} hooks to top-level")
 
     return UniversalPromptV3(
-        schema_version="3.0.0",
+        schema_version="3.1.0",
         metadata=prompt.metadata,
         content=prompt.content,
         documents=prompt.documents,
@@ -157,7 +157,7 @@ def _convert_v2_to_v3(
     prompt: UniversalPromptV2, verbose: bool = False
 ) -> UniversalPromptV3:
     """
-    Convert a v2.0 UniversalPromptV2 to v3.0 UniversalPromptV3.
+    Convert a v2.0 UniversalPromptV2 to v3.1 UniversalPromptV3.
 
     Args:
         prompt: v2.0 UniversalPromptV2 to convert
@@ -167,10 +167,10 @@ def _convert_v2_to_v3(
         UniversalPromptV3
     """
     if verbose:
-        click.echo("   Upgrading v2.0 to v3.0 schema...")
+        click.echo("   Upgrading v2.0 to v3.1 schema...")
 
     return UniversalPromptV3(
-        schema_version="3.0.0",
+        schema_version="3.1.0",
         metadata=prompt.metadata,
         content=prompt.content,
         documents=prompt.documents,
@@ -186,7 +186,7 @@ def _convert_v1_to_v3(
     prompt: UniversalPrompt, verbose: bool = False
 ) -> UniversalPromptV3:
     """
-    Convert a v1 UniversalPrompt to v3.0 UniversalPromptV3.
+    Convert a v1 UniversalPrompt to v3.1 UniversalPromptV3.
 
     Args:
         prompt: v1 UniversalPrompt to convert
@@ -212,7 +212,7 @@ def _convert_v1_to_v3(
     variables = prompt.variables if prompt.variables else None
 
     return UniversalPromptV3(
-        schema_version="3.0.0",
+        schema_version="3.1.0",
         metadata=metadata,
         content=content,
         documents=None,  # v1 doesn't have multi-document structure

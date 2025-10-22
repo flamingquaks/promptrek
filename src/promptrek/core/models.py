@@ -202,6 +202,18 @@ class MCPServer(BaseModel):
     )
 
 
+class EditorConfig(BaseModel):
+    """Editor-specific configuration paths and settings."""
+
+    cline_mcp_path: Optional[str] = Field(
+        default=None,
+        description="Absolute path to Cline's cline_mcp_settings.json file",
+    )
+
+    # Future fields can be added here for other editors
+    model_config = ConfigDict(extra="allow")
+
+
 class Command(BaseModel):
     """Slash command configuration for AI editors."""
 
@@ -387,6 +399,11 @@ class UniversalPromptV3(BaseModel):
     )
     hooks: Optional[List[Hook]] = Field(
         default=None, description="Hook configurations (top-level in v3.0+)"
+    )
+
+    config: Optional[EditorConfig] = Field(
+        default=None,
+        description="Editor-specific configuration (v3.1.0+)",
     )
 
     ignore_editor_files: Optional[bool] = Field(

@@ -228,3 +228,136 @@ class MCPGenerationMixin:
 
         strategy_map = {1: "merge", 2: "replace", 3: "skip", 4: "system"}
         return strategy_map.get(choice, "merge")
+
+    def compare_mcp_servers(
+        self, server1: Dict[str, Any], server2: Dict[str, Any]
+    ) -> bool:
+        """
+        Compare two MCP server configurations to see if they're different.
+
+        Args:
+            server1: First server config
+            server2: Second server config
+
+        Returns:
+            True if configurations are different, False if identical
+        """
+        # Compare all relevant fields
+        fields_to_compare = ["command", "args", "env", "description"]
+
+        for field in fields_to_compare:
+            val1 = server1.get(field)
+            val2 = server2.get(field)
+
+            # Handle None vs missing key
+            if val1 != val2:
+                return True
+
+        return False
+
+    def detect_conflicting_servers(
+        self,
+        new_servers: Dict[str, Any],
+        existing_config: Dict[str, Any],
+    ) -> List[str]:
+        """
+        Detect MCP servers that exist with same name but different configuration.
+
+        Args:
+            new_servers: New MCP servers dict (name -> config)
+            existing_config: Existing full config with mcpServers
+
+        Returns:
+            List of server names that have conflicts
+        """
+        conflicts = []
+        existing_servers = existing_config.get("mcpServers", {})
+
+        for server_name, new_config in new_servers.items():
+            if server_name in existing_servers:
+                existing_server_config = existing_servers[server_name]
+                if self.compare_mcp_servers(new_config, existing_server_config):
+                    conflicts.append(server_name)
+
+        return conflicts
+
+    def prompt_mcp_server_overwrite(
+        self,
+        server_name: str,
+        existing_config: Dict[str, Any],
+        new_config: Dict[str, Any],
+        dry_run: bool = False,
+    ) -> bool:
+        """
+        Ask user to confirm overwriting an existing MCP server with different config.
+
+        Args:
+            server_name: Name of the MCP server
+            existing_config: Existing server configuration
+            new_config: New server configuration
+            dry_run: If True, don't actually prompt (just show message)
+
+        Returns:
+            True if user confirms overwrite (or dry_run), False otherwise
+        """
+        if dry_run:
+            click.echo(
+                f"\n⚠️  Would overwrite existing MCP server '{server_name}' with different configuration"
+            )
+            return True
+
+        click.echo("\n⚠️  Conflicting MCP Server Configuration Detected")
+        click.echo(f"   Server name: {server_name}")
+        click.echo("")
+        click.echo("   Existing configuration:")
+        click.echo(f"   {json.dumps(existing_config, indent=2)}")
+        click.echo("")
+        click.echo("   New configuration:")
+        click.echo(f"   {json.dumps(new_config, indent=2)}")
+        click.echo("")
+
+        return click.confirm(
+            f"Overwrite existing '{server_name}' MCP server?", default=False
+        )
+
+    def warn_user_level_operations(
+        self,
+        editor_name: str,
+        config_path: Path,
+        server_count: int,
+        dry_run: bool = False,
+    ) -> bool:
+        """
+        Warn user about user-level MCP configuration operations.
+
+        Args:
+            editor_name: Name of the editor
+            config_path: Path to user-level config file
+            server_count: Number of MCP servers to add/update
+            dry_run: If True, don't actually prompt (just show message)
+
+        Returns:
+            True if user confirms to proceed (or dry_run), False otherwise
+        """
+        if dry_run:
+            click.echo(f"\n⚠️  Would update user-level {editor_name} MCP configuration")
+            click.echo(f"   Location: {config_path}")
+            click.echo(f"   Servers to add/update: {server_count}")
+            return True
+
+        click.echo(f"\n⚠️  {editor_name} User-Level MCP Configuration Warning")
+        click.echo(
+            f"   {editor_name} does not support project-level MCP server configuration"
+        )
+        click.echo("   This will update your user-level configuration at:")
+        click.echo(f"   {config_path}")
+        click.echo("")
+        click.echo(f"   MCP servers to add/update: {server_count}")
+        click.echo(
+            "   Note: Existing MCP servers will NOT be removed, only added/updated"
+        )
+        click.echo("")
+
+        return click.confirm(
+            f"Proceed with user-level {editor_name} MCP configuration?", default=False
+        )

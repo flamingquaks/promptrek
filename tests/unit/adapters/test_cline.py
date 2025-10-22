@@ -249,3 +249,307 @@ class TestClineAdapter(TestAdapterBase):
         assert "Test description" in content
         assert "Write clean code" in content
         assert "Use TypeScript" in content
+
+
+class TestClineUserLevelMCPConfiguration:
+    """Test user-level MCP configuration for Cline."""
+
+    @pytest.fixture
+    def adapter(self):
+        """Create Cline adapter instance."""
+        return ClineAdapter()
+
+    @pytest.fixture
+    def sample_mcp_servers(self):
+        """Create sample MCP servers for testing."""
+        from promptrek.core.models import MCPServer
+
+        return [
+            MCPServer(
+                name="filesystem",
+                command="npx",
+                args=["-y", "@modelcontextprotocol/server-filesystem"],
+                env={"ROOT_PATH": "/tmp"},
+            ),
+            MCPServer(
+                name="github",
+                command="npx",
+                args=["-y", "@modelcontextprotocol/server-github"],
+                env={"GITHUB_TOKEN": "token123"},
+            ),
+        ]
+
+    def test_get_default_config_paths(self, adapter):
+        """Test getting default config path list."""
+        paths = adapter.get_default_config_paths()
+
+        # Should return a list
+        assert isinstance(paths, list)
+        assert len(paths) >= 1
+
+        # All should be Path objects
+        assert all(isinstance(p, Path) for p in paths)
+
+        # Should include expected filename
+        assert all(p.name == "cline_mcp_settings.json" for p in paths)
+
+        # Should include expected directory structure
+        assert all("globalStorage" in str(p) for p in paths)
+        assert all("saoudrizwan.claude-dev" in str(p) for p in paths)
+
+    def test_find_mcp_config_file_not_found(self, adapter):
+        """Test finding MCP config file when it doesn't exist."""
+        # In test environment, file likely won't exist
+        result = adapter.find_mcp_config_file()
+        # Could be None or a Path if the file actually exists on dev machine
+        assert result is None or isinstance(result, Path)
+
+    def test_get_mcp_config_strategy(self, adapter):
+        """Test MCP configuration strategy for Cline."""
+        strategy = adapter.get_mcp_config_strategy()
+
+        # Cline should NOT support project-level config
+        assert strategy["supports_project"] is False
+        assert strategy["project_path"] is None
+
+        # System path is now determined at runtime
+        assert strategy["system_path"] is None
+
+        # Should require confirmation for user-level changes
+        assert strategy["requires_confirmation"] is True
+
+        # Should use JSON format
+        assert strategy["config_format"] == "json"
+
+    @patch("promptrek.adapters.cline.ClineAdapter.find_mcp_config_file")
+    @patch("promptrek.adapters.cline.click.confirm")
+    @patch("promptrek.adapters.mcp_mixin.MCPGenerationMixin.read_existing_mcp_config")
+    @patch("promptrek.adapters.mcp_mixin.MCPGenerationMixin.write_mcp_config_file")
+    def test_generate_mcp_config_user_accepts(
+        self,
+        mock_write,
+        mock_read,
+        mock_confirm,
+        mock_find,
+        adapter,
+        sample_mcp_servers,
+    ):
+        """Test MCP config generation when user accepts."""
+        # Setup mocks - file found automatically
+        mock_find.return_value = Path("/fake/path/cline_mcp_settings.json")
+        mock_confirm.return_value = True  # User accepts
+        mock_read.return_value = None  # No existing config
+        mock_write.return_value = True
+
+        output_dir = Path("/tmp/test")
+        created_files = adapter._generate_mcp_config(
+            mcp_servers=sample_mcp_servers,
+            output_dir=output_dir,
+            dry_run=False,
+            verbose=False,
+        )
+
+        # Should create the config file
+        assert len(created_files) == 1
+        assert "cline_mcp_settings.json" in str(created_files[0])
+
+        # Should have prompted user for warning
+        mock_confirm.assert_called_once()
+
+        # Should have written config
+        mock_write.assert_called_once()
+
+    @patch("promptrek.adapters.cline.ClineAdapter.find_mcp_config_file")
+    @patch("promptrek.adapters.cline.click.confirm")
+    @patch("promptrek.adapters.mcp_mixin.MCPGenerationMixin.read_existing_mcp_config")
+    @patch("promptrek.adapters.mcp_mixin.MCPGenerationMixin.write_mcp_config_file")
+    def test_generate_mcp_config_user_declines(
+        self,
+        mock_write,
+        mock_read,
+        mock_confirm,
+        mock_find,
+        adapter,
+        sample_mcp_servers,
+    ):
+        """Test MCP config generation when user declines."""
+        # Setup mocks
+        mock_find.return_value = Path("/fake/path/cline_mcp_settings.json")
+        mock_confirm.return_value = False  # User declines
+        mock_read.return_value = None
+
+        output_dir = Path("/tmp/test")
+        created_files = adapter._generate_mcp_config(
+            mcp_servers=sample_mcp_servers,
+            output_dir=output_dir,
+            dry_run=False,
+            verbose=False,
+        )
+
+        # Should NOT create any files
+        assert len(created_files) == 0
+
+        # Should have prompted user
+        mock_confirm.assert_called_once()
+
+        # Should NOT have written config
+        mock_write.assert_not_called()
+
+    @patch("promptrek.adapters.cline.ClineAdapter.find_mcp_config_file")
+    @patch("promptrek.adapters.cline.click.confirm")
+    @patch("promptrek.adapters.mcp_mixin.MCPGenerationMixin.read_existing_mcp_config")
+    @patch("promptrek.adapters.mcp_mixin.MCPGenerationMixin.write_mcp_config_file")
+    def test_generate_mcp_config_merge_with_existing(
+        self,
+        mock_write,
+        mock_read,
+        mock_confirm,
+        mock_find,
+        adapter,
+        sample_mcp_servers,
+    ):
+        """Test MCP config merging with existing configuration."""
+        # Setup mocks
+        mock_find.return_value = Path("/fake/path/cline_mcp_settings.json")
+        existing_config = {
+            "mcpServers": {
+                "existing_server": {
+                    "command": "existing",
+                    "args": ["--test"],
+                }
+            }
+        }
+        mock_read.return_value = existing_config
+        mock_confirm.return_value = True  # User accepts
+        mock_write.return_value = True
+
+        output_dir = Path("/tmp/test")
+        created_files = adapter._generate_mcp_config(
+            mcp_servers=sample_mcp_servers,
+            output_dir=output_dir,
+            dry_run=False,
+            verbose=False,
+        )
+
+        # Should create the config file
+        assert len(created_files) == 1
+
+        # Should have written merged config
+        mock_write.assert_called_once()
+        written_config = mock_write.call_args[0][0]
+
+        # Should have both existing and new servers
+        assert "existing_server" in written_config["mcpServers"]
+        assert "filesystem" in written_config["mcpServers"]
+        assert "github" in written_config["mcpServers"]
+
+    @patch("promptrek.adapters.cline.ClineAdapter.find_mcp_config_file")
+    @patch("promptrek.adapters.cline.click.confirm")
+    @patch("promptrek.adapters.mcp_mixin.MCPGenerationMixin.read_existing_mcp_config")
+    @patch("promptrek.adapters.mcp_mixin.MCPGenerationMixin.write_mcp_config_file")
+    def test_generate_mcp_config_conflict_detection(
+        self, mock_write, mock_read, mock_confirm, mock_find, adapter
+    ):
+        """Test conflict detection for MCP servers with same name."""
+        from promptrek.core.models import MCPServer
+
+        # Setup mocks
+        mock_find.return_value = Path("/fake/path/cline_mcp_settings.json")
+
+        # Existing config has a server with same name but different config
+        existing_config = {
+            "mcpServers": {
+                "filesystem": {
+                    "command": "old-command",
+                    "args": ["--old"],
+                }
+            }
+        }
+        mock_read.return_value = existing_config
+
+        # New server with same name but different config
+        new_servers = [
+            MCPServer(
+                name="filesystem",
+                command="npx",
+                args=["-y", "@modelcontextprotocol/server-filesystem"],
+            )
+        ]
+
+        # User accepts initial warning but declines overwrite
+        mock_confirm.side_effect = [True, False]  # Accept warning, decline overwrite
+        mock_write.return_value = True
+
+        output_dir = Path("/tmp/test")
+        created_files = adapter._generate_mcp_config(
+            mcp_servers=new_servers,
+            output_dir=output_dir,
+            dry_run=False,
+            verbose=False,
+        )
+
+        # Should prompt twice: initial warning + conflict confirmation
+        assert mock_confirm.call_count == 2
+
+        # Should have skipped due to conflict
+        # No files created because user declined overwrite
+        assert len(created_files) == 0
+
+    @patch("promptrek.adapters.cline.ClineAdapter.find_mcp_config_file")
+    def test_generate_mcp_config_dry_run(self, mock_find, adapter, sample_mcp_servers):
+        """Test MCP config generation in dry run mode."""
+        # Mock file not found
+        mock_find.return_value = None
+
+        output_dir = Path("/tmp/test")
+        created_files = adapter._generate_mcp_config(
+            mcp_servers=sample_mcp_servers,
+            output_dir=output_dir,
+            dry_run=True,
+            verbose=True,
+        )
+
+        # Dry run mode can't determine path without prompting, should skip
+        assert len(created_files) == 0
+
+    @patch("promptrek.adapters.cline.click.confirm")
+    @patch("promptrek.adapters.mcp_mixin.MCPGenerationMixin.read_existing_mcp_config")
+    @patch("promptrek.adapters.mcp_mixin.MCPGenerationMixin.write_mcp_config_file")
+    def test_generate_mcp_config_with_config_field(
+        self, mock_write, mock_read, mock_confirm, adapter, sample_mcp_servers
+    ):
+        """Test MCP config generation when path is provided in config field."""
+        from promptrek.core.models import (
+            EditorConfig,
+            PromptMetadata,
+            UniversalPromptV3,
+        )
+
+        # Create a v3 prompt with config field
+        prompt = UniversalPromptV3(
+            schema_version="3.1.0",
+            metadata=PromptMetadata(title="Test", description="Test"),
+            content="Test content",
+            config=EditorConfig(cline_mcp_path="/custom/path/cline_mcp_settings.json"),
+        )
+
+        # Setup mocks
+        mock_read.return_value = None
+        mock_confirm.return_value = True
+        mock_write.return_value = True
+
+        output_dir = Path("/tmp/test")
+        created_files = adapter._generate_mcp_config(
+            mcp_servers=sample_mcp_servers,
+            output_dir=output_dir,
+            dry_run=False,
+            verbose=False,
+            prompt=prompt,
+        )
+
+        # Should use the configured path
+        assert len(created_files) == 1
+        assert str(created_files[0]) == "/custom/path/cline_mcp_settings.json"
+
+        # Should have written config
+        mock_write.assert_called_once()

@@ -141,7 +141,7 @@ When working on this project:
 """
 
     return {
-        "schema_version": "2.0.0",
+        "schema_version": "3.1.0",
         "metadata": {
             "title": "My Project Assistant",
             "description": "AI assistant configuration for my project",
@@ -325,7 +325,7 @@ When working on this project:
 """
 
     return {
-        "schema_version": "2.0.0",
+        "schema_version": "3.1.0",
         "metadata": {
             "title": "React TypeScript Project Assistant",
             "description": "AI assistant for React TypeScript development",
@@ -409,7 +409,7 @@ When working on this project:
 """
 
     return {
-        "schema_version": "2.0.0",
+        "schema_version": "3.1.0",
         "metadata": {
             "title": "API Service Assistant",
             "description": "AI assistant for API development",
