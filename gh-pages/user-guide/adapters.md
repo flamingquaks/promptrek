@@ -50,9 +50,27 @@ When working on this project:
 
 ### ✅ Continue
 **Generated Files**: `.continue/rules/*.md`
-**Features**: ✅ Project Files, ✅ Variables, ✅ Conditionals, ✅ Sync
+**Features**: ✅ Project Files, ✅ Variables, ✅ Conditionals, ✅ Sync, ✅ Frontmatter Metadata
 
-Continue adapter generates organized markdown rule files for enhanced AI-powered code completion and chat.
+Continue adapter generates organized markdown rule files with YAML frontmatter for enhanced AI-powered code completion and chat.
+
+**Metadata-Driven Configuration**:
+
+The Continue adapter uses meaningful metadata fields to control rule behavior:
+
+```yaml
+# Main content metadata (top-level)
+content_description: "General coding guidelines"  # Default if not specified
+content_always_apply: true  # Default for main content
+
+# Document metadata (per-document)
+documents:
+  - name: documentation-standards
+    content: "# Documentation Standards..."
+    description: "Standards for writing and maintaining Continue Docs"
+    file_globs: "docs/**/*.{md,mdx}"  # Files where rule applies
+    always_apply: false  # Only applies to matching files
+```
 
 **Rule Files (.continue/rules/)**:
 - `general.md` - General coding guidelines
@@ -60,19 +78,42 @@ Continue adapter generates organized markdown rule files for enhanced AI-powered
 - `testing.md` - Testing guidelines
 - `{technology}-rules.md` - Technology-specific rules (e.g., `python-rules.md`, `typescript-rules.md`)
 
-**Example Rule File (general.md)**:
+**Example Rule File with Frontmatter (general.md)**:
 ```markdown
+---
+name: "General"
+alwaysApply: true
+description: "General coding guidelines"
+---
+
 # General Coding Rules
 
 - Write clean, maintainable code with proper error handling
 - Follow SOLID principles and design patterns
 - Include comprehensive documentation
-
-## Additional Guidelines
-- Follow project-specific patterns and conventions
-- Maintain consistency with existing codebase
-- Consider performance and security implications
 ```
+
+**Example Document with File Patterns (documentation-standards.md)**:
+```markdown
+---
+name: "documentation-standards"
+globs: "docs/**/*.{md,mdx}"
+alwaysApply: false
+description: "Standards for writing and maintaining Continue Docs"
+---
+
+# Documentation Standards
+
+- Use clear, concise language
+- Include code examples where appropriate
+- Keep documentation up-to-date with code changes
+```
+
+**Frontmatter Fields**:
+- `name`: Display name for the rule (required)
+- `description`: Human-readable description (optional)
+- `globs`: File patterns where rule applies (optional, e.g., `**/*.{ts,tsx}`)
+- `alwaysApply`: `true` = always applies, `false` = applies only to matching files (default: false for documents, true for main content)
 
 **Sync Support**: Continue adapter supports bidirectional sync - you can import existing Continue configurations back to PrompTrek format using `promptrek sync`.
 
