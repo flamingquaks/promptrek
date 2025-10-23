@@ -207,18 +207,23 @@ Full support for PrompTrek v3.0 schema with top-level plugin fields.
 ### Claude Code
 
 **Files Generated**:
-- `.claude/context.md`
-- `.claude/mcp.json` (MCP server configuration)
+- `.claude/CLAUDE.md` - Main project context and guidelines
+- `.mcp.json` - MCP server configurations (project root)
+- `.claude/commands/*.md` - Custom slash commands
+- `.claude/agents/*.md` - Autonomous agents
+- `.claude/settings.local.json` - Event hooks with tool matchers (Claude Code native format)
+- `.claude/hooks.yaml` - Event hooks without matchers (PrompTrek format)
 
 **Unique Features**:
-- ✅ Rich context format
-- ✅ Detailed project information
-- ✅ Markdown-based guidance
-- ✅ Bidirectional sync (v2 lossless format)
-- ✅ MCP server support
+- ✅ Rich markdown context format
+- ✅ Full plugin ecosystem support (MCP, commands, agents, hooks)
+- ✅ Bidirectional sync (v2/v3 lossless format)
+- ✅ Dual hooks format (native + PrompTrek)
 - ✅ v3.0 schema with top-level plugins
+- ✅ Autonomous agent support with trust levels
+- ✅ Custom slash command support
 
-**Best For**: Projects using Claude, comprehensive context needs
+**Best For**: Projects using Claude Code, comprehensive context needs, teams requiring full plugin ecosystem (MCP servers, custom commands, autonomous agents, event hooks)
 
 ---
 

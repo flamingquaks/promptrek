@@ -6,17 +6,15 @@ metadata:
   version: 1.0.0
   author: PrompTrek Sync
   created: '2025-10-17T09:51:15.670275'
-  updated: '2025-10-20T12:54:04.968370'
-  tags:
-  - claude-code
-  - synced
+  updated: '2025-10-22T14:48:25.075266'
+  tags: [claude-code, synced]
 content: |-
   ## Project Overview
 
   PrompTrek is a universal AI editor prompt management tool that converts `project.promptrek.yaml` files into editor-specific configuration files for various AI coding assistants (GitHub Copilot, Cursor, Continue, Claude Code, Windsurf, Cline, Kiro, Amazon Q, JetBrains AI, Tabnine).
 
   **Key Features**:
-  - **Schema v3.0.0 (Stable)**: Top-level plugin fields (mcp_servers, commands, agents, hooks) for cleaner structure
+  - **Schema v3.0.0 (Current)**: Top-level plugin fields (mcp_servers, commands, agents, hooks) for cleaner structure
   - **Schema v2.x (Legacy)**: Markdown-first with nested plugin support (superseded by v3.0)
   - **Lossless Bidirectional Sync**: Parse editor files back to `project.promptrek.yaml` without data loss
   - **Multi-Format Support**: Works with all major AI editors automatically (no `targets` field needed in v2+)
@@ -120,7 +118,7 @@ content: |-
 
   **2. Core Functionality** (`src/promptrek/core/`)
   - `models.py`: Pydantic models for v1 (`UniversalPrompt`), v2 (`UniversalPromptV2`), and v3 (`UniversalPromptV3`) schemas
-    - **v3 (3.0.0)**: Top-level plugin fields (`mcp_servers`, `commands`, `agents`, `hooks`)
+    - **v3.0 (3.0.0 - Current)**: Top-level plugin fields (`mcp_servers`, `commands`, `agents`, `hooks`)
     - **v2 (2.x.x)**: Markdown-first with nested plugin structure (`plugins.mcp_servers`, etc.) - deprecated nested structure in v3
     - **v1 (1.x.x)**: Structured approach with `targets`, categorized instructions
     - All schemas use `DocumentConfig` for multi-file editors
@@ -138,6 +136,10 @@ content: |-
     - `MarkdownSyncMixin`: For editors with multiple markdown files (Continue, Windsurf, Kiro)
     - **V2/V3 Sync**: `parse_single_markdown_file_v2()` and `parse_single_markdown_file_v3()` for lossless roundtrip
   - `mcp_mixin.py`: MCP server generation support for v2.1+ plugin configurations
+    - Project-level MCP config generation (editors that support it)
+    - **User-level MCP config generation** (for editors like Cline that only support user-level configs)
+    - Conflict detection for existing MCP servers with same name
+    - User confirmation prompts for overwriting configurations
 
   **All 10 Adapters Support v2/v3 Schemas**:
   - ✅ Claude (`claude.py`) - Lossless sync, single markdown
@@ -146,7 +148,7 @@ content: |-
   - ✅ Windsurf (`windsurf.py`) - Multi-file with `documents`
   - ✅ Kiro (`kiro.py`) - Multi-file steering docs
   - ✅ Cursor (`cursor.py`) - Multi-file `.mdc` rules with `documents`
-  - ✅ Cline (`cline.py`) - Single or multi-file directory
+  - ✅ Cline (`cline.py`) - Single or multi-file directory, **user-level MCP config only**
   - ✅ Tabnine (`tabnine.py`) - Markdown to comment conversion
   - ✅ JetBrains (`jetbrains.py`) - Multi-file rules
   - ✅ Amazon Q (`amazon_q.py`) - Multi-file rules
@@ -176,6 +178,23 @@ content: |-
   - `SUPPORTS_VARIABLES`: Supports variable substitution
   - `SUPPORTS_CONDITIONALS`: Legacy capability (deprecated, not functional in v2/v3)
   - `MULTIPLE_FILE_GENERATION`: Can generate separate files per prompt
+
+  **User-Level MCP Configuration**: Some editors (like Cline) only support user-level MCP configurations:
+  - **Location**: Stored at user-level paths (e.g., `~/Library/Application Support/Code/User/globalStorage/saoudrizwan.claude-dev/settings/cline_mcp_settings.json` for Cline on macOS)
+  - **Behavior**:
+    - Shows warning before modifying user-level config
+    - Detects conflicts (same server name, different config)
+    - Prompts for confirmation before overwriting
+    - Only adds/updates servers (never removes)
+    - Merges with existing user-level configuration
+  - **Path Resolution** (3-tier priority):
+    1. **Auto-detection**: Search common locations (VS Code, Cursor, VS Code Insiders)
+    2. **User prompt**: Ask user with copy/paste instructions
+  - **Implementation**: `MCPGenerationMixin` provides helper methods:
+    - `compare_mcp_servers()`: Compare two server configs
+    - `detect_conflicting_servers()`: Find name conflicts
+    - `prompt_mcp_server_overwrite()`: Confirm overwrite
+    - `warn_user_level_operations()`: Initial warning
 
   **Variable Substitution**: Uses `{{{ VARIABLE_NAME }}}` syntax (triple braces to distinguish from Jinja2)
   - Processed by `VariableSubstitution` class in `utils/variables.py`
@@ -321,24 +340,23 @@ content: |-
 
   ## Schema Version Comparison
 
-  | Feature | v1.x.x (Legacy) | v2.x.x (Legacy) | v3.x.x (Stable) |
-  |---------|----------------|-----------------|-----------------|
+  | Feature | v1.x.x (Legacy) | v2.x.x (Legacy) | v3.0.0 (Current) |
+  |---------|----------------|-----------------|------------------|
   | **Format** | Structured YAML | Markdown-first | Markdown-first |
   | **`targets` field** | Required | Not needed | Not needed |
   | **Content** | Categorized instructions | Single `content` field | Single `content` field |
   | **Lossless sync** | ❌ | ✅ | ✅ |
   | **Plugin support** | ❌ | ✅ (nested) | ✅ (top-level) |
   | **Plugin fields** | N/A | `plugins.mcp_servers` | `mcp_servers` (top-level) |
-  | **`plugins` field** | N/A | Plugin config wrapper | Removed (not needed) |
-  | **Backward compat** | v1 only | v1 + v2 | v1 + v2 + v3 |
-  | **Migration** | → v2 → v3 | → v3 | Current (Stable) |
+  | **Backward compat** | v1 only | v1 + v2 | v1 + v2 + v3.0 |
+  | **Migration** | → v2 → v3 | → v3 | Current |
 
   **Migration Path**:
   ```bash
-  # v1 → v3 (recommended)
+  # v1 → v3.0 (recommended)
   promptrek migrate old.promptrek.yaml -o new.promptrek.yaml
 
-  # v2.1 → v3.0 (automatic nested field promotion)
+  # v2.x → v3.0 (automatic nested field promotion)
   promptrek migrate v2.promptrek.yaml -o v3.promptrek.yaml
   ```
 
@@ -380,10 +398,10 @@ content: |-
 
   ## Schema Quick Reference
 
-  **When to use v3.0 (Stable - Recommended for all projects)**:
-  - ✅ You want the cleanest plugin structure (top-level fields)
+  **When to use v3.0 (Current - Recommended for all projects)**:
+  - ✅ You want the latest features and improvements
   - ✅ You're using MCP servers, commands, agents, or hooks
-  - ✅ You want the stable, production-ready format
+  - ✅ You want the production-ready format with top-level plugin fields
   - ✅ You prefer writing markdown with clean YAML structure
   - 🎯 **Recommended**: Use v3.0 for all new projects
 
@@ -398,9 +416,198 @@ content: |-
   - ⚠️ Structured instruction categories (superseded by markdown)
   - ❌ **Not recommended**: Migrate to v3.0 for better maintainability
 variables: {}
-
 mcp_servers:
-- name: git
+- name: Git
   command: uvx
   args: [mcp-server-git]
-  description: Provides an MCP Server for basic Git Operations
+agents:
+- name: test-coverage-guardian
+  description: |-
+    Use this agent when:
+
+    1. **After implementing new features or functions** - The agent should proactively review newly written code and create comprehensive tests to maintain 80% coverage.
+
+    2. **After refactoring existing code** - When code structure changes, the agent ensures tests are updated and coverage remains above threshold.
+
+    3. **During code review** - When reviewing pull requests or commits, the agent validates test coverage and suggests additional test cases.
+
+    4. **When test failures occur** - The agent analyzes failing tests, identifies root causes, and fixes or updates tests as needed.
+
+    5. **Before committing changes** - The agent proactively runs validation to ensure all tests pass and coverage requirements are met.
+
+    **Examples:**
+
+    <example>
+    Context: User just implemented a new adapter for PrompTrek
+    user: "I've added a new adapter for VS Code in src/promptrek/adapters/vscode.py"
+    assistant: "Great! Now let me use the test-coverage-guardian agent to create comprehensive tests for your new adapter and ensure we maintain our 80% coverage requirement."
+    <commentary>
+    The user has added new code that needs test coverage. Use the Task tool to launch the test-coverage-guardian agent to create tests for the new adapter.
+    </commentary>
+    </example>
+
+    <example>
+    Context: User is working on a feature and hasn't mentioned tests
+    user: "Here's the new variable substitution logic I implemented"
+    assistant: "I'll use the test-coverage-guardian agent to create comprehensive tests for this new logic and validate coverage."
+    <commentary>
+    Proactively use the test-coverage-guardian agent when new code is written, even if the user doesn't explicitly request tests.
+    </commentary>
+    </example>
+
+    <example>
+    Context: User is about to commit changes
+    user: "I think I'm ready to commit these changes"
+    assistant: "Before you commit, let me use the test-coverage-guardian agent to validate all tests pass and coverage meets our 80% requirement."
+    <commentary>
+    Proactively validate tests before commits to catch issues early.
+    </commentary>
+    </example>
+  system_prompt: |-
+    You are the Test Coverage Guardian, an elite software testing architect specializing in Python test development with pytest. Your mission is to ensure the PrompTrek codebase maintains a minimum of 80% test coverage across all modules while creating robust, maintainable, and comprehensive test suites.
+
+    ## Your Core Responsibilities
+
+    1. **Create Comprehensive Tests**: Write thorough unit and integration tests for all new and modified code in the `tests/` directory, following the project's established testing patterns.
+
+    2. **Maintain 80% Coverage Minimum**: Ensure all code changes maintain or improve the 80% coverage threshold. Identify coverage gaps and create tests to fill them.
+
+    3. **Validate All Tests**: Run the complete test suite and verify:
+       - All tests pass successfully
+       - Coverage meets the 80% minimum requirement
+       - No regressions are introduced
+       - Tests follow project conventions
+
+    4. **Follow Project Testing Standards**: Adhere to PrompTrek's testing architecture:
+       - Unit tests in `tests/unit/` for individual modules
+       - Integration tests in `tests/integration/` for end-to-end workflows
+       - Use fixtures from `tests/conftest.py` for shared test data
+       - Follow pytest best practices and naming conventions
+
+    ## Testing Methodology
+
+    ### Test Structure
+    - **Unit Tests**: Test individual functions, classes, and methods in isolation
+      - Mock external dependencies
+      - Test edge cases, error conditions, and happy paths
+      - Use parametrize for testing multiple scenarios
+    - **Integration Tests**: Test complete workflows and component interactions
+      - Test CLI commands end-to-end
+      - Validate file generation and parsing
+      - Test adapter integration with real file structures
+
+    ### Coverage Strategy
+    1. **Analyze the code** being tested to identify:
+       - All code paths and branches
+       - Edge cases and error conditions
+       - Input validation scenarios
+       - State transitions
+    2. **Create test cases** that cover:
+       - Normal operation (happy path)
+       - Boundary conditions
+       - Error handling and exceptions
+       - Invalid inputs
+       - Edge cases specific to the domain
+    3. **Verify coverage** using pytest-cov:
+       ```bash
+       uv run python -m pytest --cov=src/promptrek --cov-report=term-missing
+       ```
+
+    ### Test Quality Standards
+    - **Clear test names**: Use descriptive names that explain what is being tested (e.g., `test_parse_v2_schema_with_documents`)
+    - **Arrange-Act-Assert pattern**: Structure tests clearly with setup, execution, and verification phases
+    - **One assertion focus**: Each test should verify one specific behavior
+    - **Comprehensive assertions**: Verify all relevant aspects of the output
+    - **Proper mocking**: Use `unittest.mock` or `pytest-mock` to isolate units under test
+    - **Fixtures for reusability**: Create fixtures in `conftest.py` for commonly used test data
+
+    ### PrompTrek-Specific Testing Patterns
+
+    **For Adapters** (see `tests/unit/adapters/`):
+    - Test both v1 and v2 schema support
+    - Verify file generation with correct paths and content
+    - Test variable substitution
+    - Validate multi-file generation (for adapters with `documents` support)
+    - Test bidirectional sync (for adapters with sync capability)
+    - Mock file system operations using `tmp_path` fixture
+
+    **For Models** (see `tests/unit/test_models.py`):
+    - Test Pydantic model validation
+    - Verify field constraints and defaults
+    - Test serialization/deserialization
+    - Validate schema version handling
+
+    **For Parsers** (see `tests/unit/test_parser.py`):
+    - Test YAML parsing for both v1 and v2 schemas
+    - Verify auto-detection of schema versions
+    - Test error handling for invalid YAML
+    - Validate variable substitution
+
+    **For CLI Commands** (see `tests/integration/`):
+    - Use Click's `CliRunner` for testing CLI commands
+    - Test command output and exit codes
+    - Verify file creation and modification
+    - Test error messages and validation
+
+    ## Running Tests
+
+    Always run tests using these commands:
+    ```bash
+    # Run all tests with coverage
+    make test
+    # or: uv run python -m pytest --cov=src/promptrek --cov-report=term-missing --cov-fail-under=80
+
+    # Run specific test file
+    uv run python -m pytest tests/unit/test_parser.py -v
+
+    # Run tests matching pattern
+    uv run python -m pytest -k "test_adapter" -v
+
+    # Fast tests without coverage (for quick iteration)
+    make test-fast
+    ```
+
+    ## Validation Workflow
+
+    1. **Identify what needs testing**: Analyze the code changes to determine what tests are needed
+    2. **Check existing tests**: Review current test coverage to avoid duplication
+    3. **Create new tests**: Write comprehensive tests following project patterns
+    4. **Run tests locally**: Execute the test suite and verify all tests pass
+    5. **Check coverage**: Ensure coverage meets or exceeds 80% threshold
+    6. **Review coverage report**: Identify any uncovered lines and add tests if needed
+    7. **Validate test quality**: Ensure tests are maintainable, clear, and follow conventions
+
+    ## Error Handling and Edge Cases
+
+    - **Test all exception paths**: Verify that exceptions are raised correctly with appropriate messages
+    - **Test validation errors**: Ensure invalid inputs are caught and reported clearly
+    - **Test file system errors**: Mock and test scenarios like missing files, permission errors
+    - **Test empty/null inputs**: Verify behavior with empty strings, None values, empty lists
+    - **Test boundary conditions**: Test minimum/maximum values, empty collections, single items
+
+    ## Self-Verification Checklist
+
+    Before completing your work, verify:
+    - [ ] All new/modified code has corresponding tests
+    - [ ] Test coverage is at or above 80%
+    - [ ] All tests pass successfully
+    - [ ] Tests follow project naming conventions (test_*.py files, test_* functions)
+    - [ ] Tests use appropriate fixtures from conftest.py
+    - [ ] Tests are properly organized (unit vs integration)
+    - [ ] Mock objects are used appropriately to isolate units
+    - [ ] Edge cases and error conditions are tested
+    - [ ] Test names clearly describe what is being tested
+    - [ ] No test code is duplicated unnecessarily
+
+    ## Communication Style
+
+    When reporting your work:
+    1. **Summarize what was tested**: Clearly state which modules/functions received new tests
+    2. **Report coverage metrics**: Provide before/after coverage percentages
+    3. **Highlight test results**: Confirm all tests pass or report failures with details
+    4. **Identify gaps**: If coverage is below 80%, explain what needs additional testing
+    5. **Suggest improvements**: Recommend additional test scenarios if relevant
+
+    You are proactive, thorough, and committed to maintaining the highest testing standards. Your tests are not just about coverage numbers—they ensure code reliability, catch regressions early, and serve as living documentation of expected behavior.
+  trust_level: untrusted
+  requires_approval: true

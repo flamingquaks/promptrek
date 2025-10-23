@@ -123,7 +123,7 @@ For technical architecture and development planning, see the developer documenta
 - **Continue** - `.continue/rules/*.md` - Organized markdown rules directory with bidirectional sync support
 - **Kiro** - `.kiro/steering/*.md` - Comprehensive steering system with YAML frontmatter
 - **Cline** - `.clinerules/*.md`, `.vscode/settings.json` (MCP) - VSCode autonomous AI agent with markdown rules
-- **Claude Code** - `.claude/context.md` - Rich context format with detailed project information
+- **Claude Code** - `.claude/CLAUDE.md`, `.mcp.json`, `.claude/agents/*.md`, `.claude/commands/*.md`, `.claude/settings.local.json` - Rich context format with full plugin ecosystem (MCP servers, custom commands, autonomous agents, event hooks)
 - **Windsurf** - `.windsurf/rules/*.md` - Organized markdown rule files for AI-powered coding assistance
 - **Amazon Q** - `.amazonq/rules/*.md`, `.amazonq/cli-agents/*.json` - Rules directory and CLI agents with sync support
 - **JetBrains AI** - `.assistant/rules/*.md` - Markdown rules for IDE-integrated AI assistance
@@ -334,7 +334,7 @@ PrompTrek v3.0 provides MCP server integration with **clean top-level fields** (
 
 | Editor | MCP Servers | Custom Commands | Agents | Config Location |
 |--------|-------------|-----------------|--------|-----------------|
-| **Claude Code** | ✅ | ⚠️ | ⚠️ | `.claude/mcp.json` (project) |
+| **Claude Code** | ✅ | ✅ | ✅ | `.mcp.json` (project root) |
 | **Cursor** | ✅ | ✅ | ✅ | `.cursor/mcp.json` (project) |
 | **Continue** | ✅ | ✅ | ⚠️ | `.continue/config.json` (unified) |
 | **Cline** | ✅ | ⚠️ | ⚠️ | `.vscode/settings.json` (project) |
@@ -571,7 +571,7 @@ Generate optimized configurations for all major AI coding assistants:
 - **Continue** → `.continue/rules/*.md` with organized rules + bidirectional sync
 - **Kiro** → `.kiro/steering/*.md` with YAML frontmatter
 - **Cline** → `.clinerules/*.md` with project-specific rules
-- **Claude Code** → `.claude/context.md` with rich context
+- **Claude Code** → `.claude/CLAUDE.md`, `.mcp.json`, `.claude/agents/*.md`, `.claude/commands/*.md`, `.claude/settings.local.json` with full plugin ecosystem
 - **Windsurf** → `.windsurf/rules/*.md` with organized guidelines
 - **Amazon Q** → `.amazonq/rules/*.md` + CLI agents + sync support
 - **JetBrains AI** → `.assistant/rules/*.md` for IDE integration
