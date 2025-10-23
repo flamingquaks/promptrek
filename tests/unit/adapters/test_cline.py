@@ -29,11 +29,7 @@ class TestClineAdapter(TestAdapterBase):
     def test_init(self, adapter):
         """Test adapter initialization."""
         assert adapter.name == "cline"
-        assert (
-            adapter.description
-            == "Cline VSCode Extension (.clinerules, .clinerules/*.md)"
-        )
-        assert ".clinerules" in adapter.file_patterns
+        assert adapter.description == "Cline VSCode Extension (.clinerules/*.md)"
         assert ".clinerules/*.md" in adapter.file_patterns
 
     def test_supports_features(self, adapter):
@@ -250,39 +246,30 @@ class TestClineAdapter(TestAdapterBase):
         assert "Write clean code" in content
         assert "Use TypeScript" in content
 
-    def test_generate_v2_removes_directory_when_creating_file(self, adapter, tmp_path):
-        """Test that .clinerules directory is removed when creating single file."""
+    def test_generate_v2_creates_directory_with_default_rules(self, adapter, tmp_path):
+        """Test that .clinerules directory is created with default-rules.md."""
         from promptrek.core.models import PromptMetadata, UniversalPromptV2
 
-        # Create a v2 prompt without documents (should generate single file)
+        # Create a v2 prompt without documents (should generate default-rules.md in directory)
         prompt = UniversalPromptV2(
             schema_version="2.0.0",
             metadata=PromptMetadata(title="Test", description="Test description"),
             content="Test content",
         )
 
-        # Create .clinerules as a directory with some content
-        clinerules_dir = tmp_path / ".clinerules"
-        clinerules_dir.mkdir()
-        (clinerules_dir / "workflow.md").write_text("Some workflow content")
-
-        # Verify it's a directory
-        assert clinerules_dir.exists()
-        assert clinerules_dir.is_dir()
-
-        # Generate should remove directory and create file
+        # Generate should create directory with default-rules.md
         files = adapter._generate_v2(
             prompt, tmp_path, dry_run=False, verbose=False, variables=None
         )
 
-        # Verify file was created
+        # Verify file was created in directory
         assert len(files) == 1
-        assert files[0] == tmp_path / ".clinerules"
+        assert files[0] == tmp_path / ".clinerules" / "default-rules.md"
 
-        # Verify it's now a file, not a directory
+        # Verify it's a file in a directory
         assert files[0].exists()
         assert files[0].is_file()
-        assert not files[0].is_dir()
+        assert files[0].parent.is_dir()
 
         # Verify content is correct
         content = files[0].read_text()

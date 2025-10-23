@@ -23,8 +23,8 @@ from .sync_mixin import MarkdownSyncMixin
 class ClineAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
     """Adapter for Cline VSCode AI coding assistant extension."""
 
-    _description = "Cline VSCode Extension (.clinerules, .clinerules/*.md)"
-    _file_patterns = [".clinerules", ".clinerules/*.md"]
+    _description = "Cline VSCode Extension (.clinerules/*.md)"
+    _file_patterns = [".clinerules/*.md"]
 
     def __init__(self) -> None:
         super().__init__(
@@ -386,12 +386,12 @@ class ClineAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
         verbose: bool,
         variables: Optional[Dict[str, Any]] = None,
     ) -> List[Path]:
-        """Generate Cline files from v2/v3 schema (using documents for multi-file or content for single file)."""
+        """Generate Cline files from v2/v3 schema (always uses .clinerules/ directory format)."""
         created_files = []
+        clinerules_dir = output_dir / ".clinerules"
 
         # If documents field is present, generate directory format with separate files
         if prompt.documents:
-            clinerules_dir = output_dir / ".clinerules"
             for doc in prompt.documents:
                 # Apply variable substitution
                 content = doc.content
@@ -421,14 +421,14 @@ class ClineAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
                     click.echo(f"✅ Generated: {output_file}")
                     created_files.append(output_file)
         else:
-            # No documents, use main content as single .clinerules file
+            # No documents, use main content as default-rules.md in .clinerules/ directory
             content = prompt.content
             if variables:
                 for var_name, var_value in variables.items():
                     placeholder = "{{{ " + var_name + " }}}"
                     content = content.replace(placeholder, var_value)
 
-            output_file = output_dir / ".clinerules"
+            output_file = clinerules_dir / "default-rules.md"
 
             if dry_run:
                 click.echo(f"  📁 Would create: {output_file}")
@@ -437,14 +437,7 @@ class ClineAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
                     click.echo(f"    {preview}")
                 created_files.append(output_file)
             else:
-                # Check if .clinerules exists as a directory and remove it
-                if output_file.exists() and output_file.is_dir():
-                    import shutil
-
-                    shutil.rmtree(output_file)
-                    if verbose:
-                        click.echo(f"  🗑️  Removed existing directory: {output_file}")
-
+                clinerules_dir.mkdir(parents=True, exist_ok=True)
                 with open(output_file, "w", encoding="utf-8") as f:
                     f.write(content)
                 click.echo(f"✅ Generated: {output_file}")
