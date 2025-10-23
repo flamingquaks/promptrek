@@ -27,3 +27,58 @@ repos:
     - pre-commit
     always_run: false
     pass_filenames: true
+  # Basic code formatting and linting (local versions)
+  - id: black
+    name: black pyton linting
+    entry: uv run black
+    language: system
+    types: [python]
+    args: ["--check", "--diff"]
+    pass_filenames: true
+
+  - id: isort-check
+    name: Check import sorting with isort
+    entry: uv run isort
+    args: ["--check", "--diff"]
+    language: system
+    types: [python]
+    pass_filenames: true
+
+  - id: flake8-check
+    name: Check code style with flake8
+    entry: uv run flake8
+    language: system
+    types: [python]
+    pass_filenames: true
+
+  - id: end-of-file-fixer
+    name: Fix end of files
+    entry: >
+      bash -c 'for file in "$@"; do
+      [ -s "$file" ] && [ -z "$(tail -c 1 "$file")" ] || echo >> "$file";
+      done' --
+    language: system
+    types: [text]
+
+  - id: check-yaml
+    name: Check YAML
+    entry: python -c "import yaml, sys; [yaml.safe_load(open(f)) for f in sys.argv[1:]]"
+    language: system
+    files: \.ya?ml$
+    exclude: \.promptrek\.ya?ml$ 
+
+  - id: check-merge-conflict
+    name: Check for merge conflicts
+    entry: >
+      bash -c 'if grep -rn "^<<<<<<< \|^=======$\|^>>>>>>> " "$@"; then
+      echo "Error: Merge conflict markers found"; exit 1; fi' --
+    language: system
+    types: [text]
+
+  - id: debug-statements
+    name: Debug Statements (Python)
+    entry: >
+      bash -c 'if grep -rn "import pdb\|pdb.set_trace()\|import ipdb\|ipdb.set_trace()" "$@"; then
+      echo "Error: Debug statements found"; exit 1; fi' --
+    language: system
+    files: \.py$
