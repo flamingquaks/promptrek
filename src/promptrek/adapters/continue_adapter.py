@@ -327,7 +327,8 @@ class ContinueAdapter(MCPGenerationMixin, EditorAdapter):
 
             # Build Continue-specific YAML format
             yaml_content = {
-                "name": server.name.replace("-", " ").replace("_", " ").title() + " MCP Server",
+                "name": server.name.replace("-", " ").replace("_", " ").title()
+                + " MCP Server",
                 "version": "0.0.1",
                 "schema": "v1",
                 "mcpServers": [server_config],
@@ -345,7 +346,9 @@ class ContinueAdapter(MCPGenerationMixin, EditorAdapter):
             else:
                 mcp_dir.mkdir(parents=True, exist_ok=True)
                 with open(yaml_file, "w", encoding="utf-8") as f:
-                    yaml.dump(yaml_content, f, default_flow_style=False, sort_keys=False)
+                    yaml.dump(
+                        yaml_content, f, default_flow_style=False, sort_keys=False
+                    )
                 click.echo(f"✅ Generated: {yaml_file}")
                 created_files.append(yaml_file)
 
@@ -379,7 +382,9 @@ class ContinueAdapter(MCPGenerationMixin, EditorAdapter):
             }
 
             lines = ["---"]
-            yaml_fm = yaml.safe_dump(frontmatter, default_flow_style=False, sort_keys=False).strip()
+            yaml_fm = yaml.safe_dump(
+                frontmatter, default_flow_style=False, sort_keys=False
+            ).strip()
             lines.append(yaml_fm)
             lines.append("---")
             lines.append("")
@@ -393,7 +398,11 @@ class ContinueAdapter(MCPGenerationMixin, EditorAdapter):
             if dry_run:
                 click.echo(f"  📁 Would create: {md_file}")
                 if verbose:
-                    preview = md_content[:300] + "..." if len(md_content) > 300 else md_content
+                    preview = (
+                        md_content[:300] + "..."
+                        if len(md_content) > 300
+                        else md_content
+                    )
                     click.echo(f"    {preview}")
                 created_files.append(md_file)
             else:
@@ -428,9 +437,9 @@ class ContinueAdapter(MCPGenerationMixin, EditorAdapter):
         if commands:
             prompts_list = []
             for command in commands:
-                prompts_list.append({
-                    "uses": f"file://.continue/prompts/{command.name}.md"
-                })
+                prompts_list.append(
+                    {"uses": f"file://.continue/prompts/{command.name}.md"}
+                )
             config["prompts"] = prompts_list
 
         if dry_run:
@@ -868,6 +877,7 @@ class ContinueAdapter(MCPGenerationMixin, EditorAdapter):
                     if yaml_content and "mcpServers" in yaml_content:
                         for server_config in yaml_content["mcpServers"]:
                             from promptrek.core.models import MCPServer
+
                             mcp_servers.append(
                                 MCPServer(
                                     name=server_config.get("name"),
@@ -896,6 +906,7 @@ class ContinueAdapter(MCPGenerationMixin, EditorAdapter):
                             prompt_content = parts[2].strip()
 
                             from promptrek.core.models import Command
+
                             commands.append(
                                 Command(
                                     name=frontmatter.get("name", md_file.stem),

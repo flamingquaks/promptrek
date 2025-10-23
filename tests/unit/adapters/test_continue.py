@@ -325,7 +325,7 @@ Text that's not a bullet
 
     def test_generate_individual_mcp_yaml_files_v3(self, adapter, tmp_path):
         """Test generating individual MCP server YAML files."""
-        from promptrek.core.models import MCPServer, UniversalPromptV3, PromptMetadata
+        from promptrek.core.models import MCPServer, PromptMetadata, UniversalPromptV3
 
         # Create v3 prompt with MCP servers
         prompt = UniversalPromptV3(
@@ -357,7 +357,9 @@ Text that's not a bullet
         )
 
         # Generate files
-        files = adapter.generate(prompt, tmp_path, dry_run=False, variables={"GITHUB_TOKEN": "test-token"})
+        files = adapter.generate(
+            prompt, tmp_path, dry_run=False, variables={"GITHUB_TOKEN": "test-token"}
+        )
 
         # Check that individual YAML files were created
         mcp_dir = tmp_path / ".continue" / "mcpServers"
@@ -373,6 +375,7 @@ Text that's not a bullet
 
         # Verify filesystem YAML content
         import yaml
+
         with open(filesystem_yaml, "r") as f:
             fs_content = yaml.safe_load(f)
 
@@ -393,7 +396,7 @@ Text that's not a bullet
 
     def test_generate_individual_prompt_markdown_files_v3(self, adapter, tmp_path):
         """Test generating individual prompt markdown files."""
-        from promptrek.core.models import Command, UniversalPromptV3, PromptMetadata
+        from promptrek.core.models import Command, PromptMetadata, UniversalPromptV3
 
         # Create v3 prompt with commands
         prompt = UniversalPromptV3(
@@ -422,7 +425,9 @@ Text that's not a bullet
         )
 
         # Generate files
-        files = adapter.generate(prompt, tmp_path, dry_run=False, variables={"DETAIL_LEVEL": "high"})
+        files = adapter.generate(
+            prompt, tmp_path, dry_run=False, variables={"DETAIL_LEVEL": "high"}
+        )
 
         # Check that individual markdown files were created
         prompts_dir = tmp_path / ".continue" / "prompts"
@@ -455,7 +460,12 @@ Text that's not a bullet
 
     def test_generate_config_yaml_with_prompt_references(self, adapter, tmp_path):
         """Test generating config.yaml with prompt file references."""
-        from promptrek.core.models import Command, MCPServer, UniversalPromptV3, PromptMetadata
+        from promptrek.core.models import (
+            Command,
+            MCPServer,
+            PromptMetadata,
+            UniversalPromptV3,
+        )
 
         # Create v3 prompt with both MCP servers and commands
         prompt = UniversalPromptV3(
@@ -473,7 +483,9 @@ Text that's not a bullet
                 MCPServer(name="filesystem", command="npx", args=["-y", "test"]),
             ],
             commands=[
-                Command(name="refactor", description="Refactor", prompt="Refactor code"),
+                Command(
+                    name="refactor", description="Refactor", prompt="Refactor code"
+                ),
                 Command(name="explain", description="Explain", prompt="Explain code"),
             ],
         )
@@ -488,6 +500,7 @@ Text that's not a bullet
 
         # Verify config.yaml content
         import yaml
+
         with open(config_yaml, "r") as f:
             config_content = yaml.safe_load(f)
 
@@ -504,13 +517,17 @@ Text that's not a bullet
 
     def test_mcp_yaml_format_validation(self, adapter, tmp_path):
         """Test that generated MCP YAML files have correct Continue format."""
-        from promptrek.core.models import MCPServer, UniversalPromptV3, PromptMetadata
+        from promptrek.core.models import MCPServer, PromptMetadata, UniversalPromptV3
 
         prompt = UniversalPromptV3(
             schema_version="3.0.0",
             metadata=PromptMetadata(
-                title="Test", description="Test", version="1.0.0",
-                author="test", created="2024-01-01", updated="2024-01-01",
+                title="Test",
+                description="Test",
+                version="1.0.0",
+                author="test",
+                created="2024-01-01",
+                updated="2024-01-01",
             ),
             content="# Test",
             mcp_servers=[
@@ -527,6 +544,7 @@ Text that's not a bullet
 
         # Read and validate YAML structure
         import yaml
+
         yaml_file = tmp_path / ".continue" / "mcpServers" / "test-server.yaml"
         with open(yaml_file, "r") as f:
             content = yaml.safe_load(f)
@@ -543,13 +561,17 @@ Text that's not a bullet
 
     def test_prompt_markdown_frontmatter_validation(self, adapter, tmp_path):
         """Test that generated prompt markdown files have correct frontmatter."""
-        from promptrek.core.models import Command, UniversalPromptV3, PromptMetadata
+        from promptrek.core.models import Command, PromptMetadata, UniversalPromptV3
 
         prompt = UniversalPromptV3(
             schema_version="3.0.0",
             metadata=PromptMetadata(
-                title="Test", description="Test", version="1.0.0",
-                author="test", created="2024-01-01", updated="2024-01-01",
+                title="Test",
+                description="Test",
+                version="1.0.0",
+                author="test",
+                created="2024-01-01",
+                updated="2024-01-01",
             ),
             content="# Test",
             commands=[
@@ -570,8 +592,11 @@ Text that's not a bullet
 
         # Verify frontmatter structure
         import yaml
+
         parts = content.split("---")
-        assert len(parts) >= 3  # Should have opening ---, frontmatter, closing ---, and content
+        assert (
+            len(parts) >= 3
+        )  # Should have opening ---, frontmatter, closing ---, and content
 
         frontmatter = yaml.safe_load(parts[1])
         assert frontmatter["name"] == "test-command"
@@ -583,13 +608,17 @@ Text that's not a bullet
 
     def test_multiple_mcp_servers_creates_multiple_files(self, adapter, tmp_path):
         """Test that multiple MCP servers create multiple YAML files."""
-        from promptrek.core.models import MCPServer, UniversalPromptV3, PromptMetadata
+        from promptrek.core.models import MCPServer, PromptMetadata, UniversalPromptV3
 
         prompt = UniversalPromptV3(
             schema_version="3.0.0",
             metadata=PromptMetadata(
-                title="Test", description="Test", version="1.0.0",
-                author="test", created="2024-01-01", updated="2024-01-01",
+                title="Test",
+                description="Test",
+                version="1.0.0",
+                author="test",
+                created="2024-01-01",
+                updated="2024-01-01",
             ),
             content="# Test",
             mcp_servers=[
@@ -613,13 +642,17 @@ Text that's not a bullet
 
     def test_multiple_commands_creates_multiple_files(self, adapter, tmp_path):
         """Test that multiple commands create multiple markdown files."""
-        from promptrek.core.models import Command, UniversalPromptV3, PromptMetadata
+        from promptrek.core.models import Command, PromptMetadata, UniversalPromptV3
 
         prompt = UniversalPromptV3(
             schema_version="3.0.0",
             metadata=PromptMetadata(
-                title="Test", description="Test", version="1.0.0",
-                author="test", created="2024-01-01", updated="2024-01-01",
+                title="Test",
+                description="Test",
+                version="1.0.0",
+                author="test",
+                created="2024-01-01",
+                updated="2024-01-01",
             ),
             content="# Test",
             commands=[
@@ -645,19 +678,28 @@ Text that's not a bullet
 
     def test_sync_parses_mcp_servers_from_yaml_files(self, adapter, tmp_path):
         """Test that sync can parse MCP servers from individual YAML files."""
-        from promptrek.core.models import MCPServer, UniversalPromptV3, PromptMetadata
+        from promptrek.core.models import MCPServer, PromptMetadata, UniversalPromptV3
 
         # Generate files first
         prompt = UniversalPromptV3(
             schema_version="3.0.0",
             metadata=PromptMetadata(
-                title="Test", description="Test", version="1.0.0",
-                author="test", created="2024-01-01", updated="2024-01-01",
+                title="Test",
+                description="Test",
+                version="1.0.0",
+                author="test",
+                created="2024-01-01",
+                updated="2024-01-01",
             ),
             content="# Test",
             mcp_servers=[
                 MCPServer(name="filesystem", command="npx", args=["-y", "fs-server"]),
-                MCPServer(name="github", command="npx", args=["-y", "gh-server"], env={"TOKEN": "secret"}),
+                MCPServer(
+                    name="github",
+                    command="npx",
+                    args=["-y", "gh-server"],
+                    env={"TOKEN": "secret"},
+                ),
             ],
         )
 
@@ -676,19 +718,31 @@ Text that's not a bullet
 
     def test_sync_parses_commands_from_prompt_files(self, adapter, tmp_path):
         """Test that sync can parse commands from individual prompt markdown files."""
-        from promptrek.core.models import Command, UniversalPromptV3, PromptMetadata
+        from promptrek.core.models import Command, PromptMetadata, UniversalPromptV3
 
         # Generate files first
         prompt = UniversalPromptV3(
             schema_version="3.0.0",
             metadata=PromptMetadata(
-                title="Test", description="Test", version="1.0.0",
-                author="test", created="2024-01-01", updated="2024-01-01",
+                title="Test",
+                description="Test",
+                version="1.0.0",
+                author="test",
+                created="2024-01-01",
+                updated="2024-01-01",
             ),
             content="# Test",
             commands=[
-                Command(name="refactor", description="Refactor code", prompt="Refactor this code"),
-                Command(name="explain", description="Explain code", prompt="Explain how this works"),
+                Command(
+                    name="refactor",
+                    description="Refactor code",
+                    prompt="Refactor this code",
+                ),
+                Command(
+                    name="explain",
+                    description="Explain code",
+                    prompt="Explain how this works",
+                ),
             ],
         )
 
@@ -712,14 +766,23 @@ Text that's not a bullet
 
     def test_sync_roundtrip_preserves_all_data(self, adapter, tmp_path):
         """Test that generate → sync → generate preserves all data."""
-        from promptrek.core.models import Command, MCPServer, UniversalPromptV3, PromptMetadata
+        from promptrek.core.models import (
+            Command,
+            MCPServer,
+            PromptMetadata,
+            UniversalPromptV3,
+        )
 
         # Create comprehensive prompt
         original = UniversalPromptV3(
             schema_version="3.0.0",
             metadata=PromptMetadata(
-                title="Full Test", description="Complete test", version="1.0.0",
-                author="test", created="2024-01-01", updated="2024-01-01",
+                title="Full Test",
+                description="Complete test",
+                version="1.0.0",
+                author="test",
+                created="2024-01-01",
+                updated="2024-01-01",
             ),
             content="# Full Test Project",
             mcp_servers=[
