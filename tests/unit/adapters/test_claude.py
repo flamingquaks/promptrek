@@ -213,7 +213,8 @@ class TestClaudeAdapter(TestAdapterBase):
 
         # Create agent file in markdown format
         agent_file = agents_dir / "test-agent.md"
-        agent_file.write_text("""# test-agent
+        agent_file.write_text(
+            """# test-agent
 
 **Description:** This is a test agent
 
@@ -234,12 +235,13 @@ You are a test agent. Follow these instructions:
 ## Additional Context
 - **project**: promptrek
 - **language**: python
-""")
+"""
+        )
 
         result = adapter.parse_files(tmp_path)
 
         assert result is not None
-        assert hasattr(result, 'agents')
+        assert hasattr(result, "agents")
         assert result.agents is not None
         assert len(result.agents) == 1
 
@@ -265,7 +267,8 @@ You are a test agent. Follow these instructions:
 
         # Create agent file with frontmatter
         agent_file = agents_dir / "test-agent.md"
-        agent_file.write_text("""---
+        agent_file.write_text(
+            """---
 name: test-agent
 description: This is a test agent
 tools: ["Read", "Write"]
@@ -273,12 +276,13 @@ trust_level: full
 requires_approval: false
 ---
 
-You are a test agent with frontmatter configuration.""")
+You are a test agent with frontmatter configuration."""
+        )
 
         result = adapter.parse_files(tmp_path)
 
         assert result is not None
-        assert hasattr(result, 'agents')
+        assert hasattr(result, "agents")
         assert result.agents is not None
         assert len(result.agents) == 1
 
@@ -302,7 +306,8 @@ You are a test agent with frontmatter configuration.""")
 
         # Create command file in markdown format
         command_file = commands_dir / "review.md"
-        command_file.write_text("""# review
+        command_file.write_text(
+            """# review
 
 **Description:** Review code for quality
 
@@ -318,12 +323,13 @@ Review the current file for:
 ## Examples
 - Review function for performance
 - Check error handling
-""")
+"""
+        )
 
         result = adapter.parse_files(tmp_path)
 
         assert result is not None
-        assert hasattr(result, 'commands')
+        assert hasattr(result, "commands")
         assert result.commands is not None
         assert len(result.commands) == 1
 
@@ -347,18 +353,20 @@ Review the current file for:
 
         # Create command file with frontmatter
         command_file = commands_dir / "test-command.md"
-        command_file.write_text("""---
+        command_file.write_text(
+            """---
 name: test-command
 description: Test command description
 requires_approval: true
 ---
 
-This is the command prompt.""")
+This is the command prompt."""
+        )
 
         result = adapter.parse_files(tmp_path)
 
         assert result is not None
-        assert hasattr(result, 'commands')
+        assert hasattr(result, "commands")
         assert result.commands is not None
         assert len(result.commands) == 1
 
@@ -388,22 +396,17 @@ This is the command prompt.""")
                         "hooks": [
                             {
                                 "type": "command",
-                                "command": "echo 'Running bash command'"
+                                "command": "echo 'Running bash command'",
                             }
-                        ]
+                        ],
                     }
                 ],
                 "PostToolUse": [
                     {
                         "matcher": "Read",
-                        "hooks": [
-                            {
-                                "type": "command",
-                                "command": "echo 'File read'"
-                            }
-                        ]
+                        "hooks": [{"type": "command", "command": "echo 'File read'"}],
                     }
-                ]
+                ],
             }
         }
         settings_file.write_text(json.dumps(settings_data, indent=2))
@@ -411,7 +414,7 @@ This is the command prompt.""")
         result = adapter.parse_files(tmp_path)
 
         assert result is not None
-        assert hasattr(result, 'hooks')
+        assert hasattr(result, "hooks")
         assert result.hooks is not None
         assert len(result.hooks) == 2
 
@@ -446,7 +449,7 @@ This is the command prompt.""")
                     "event": "PreCommit",
                     "command": "npm run lint",
                     "requires_reapproval": True,
-                    "description": "Run linting before commits"
+                    "description": "Run linting before commits",
                 }
             ]
         }
@@ -455,7 +458,7 @@ This is the command prompt.""")
         result = adapter.parse_files(tmp_path)
 
         assert result is not None
-        assert hasattr(result, 'hooks')
+        assert hasattr(result, "hooks")
         assert result.hooks is not None
         assert len(result.hooks) == 1
 
@@ -468,8 +471,9 @@ This is the command prompt.""")
 
     def test_generate_with_hooks_matcher(self, adapter, tmp_path):
         """Test generating hooks with matcher to settings.local.json."""
-        from promptrek.core.models import UniversalPromptV3, Hook
         import json
+
+        from promptrek.core.models import Hook, UniversalPromptV3
 
         prompt = UniversalPromptV3(
             schema_version="3.0.0",
@@ -488,9 +492,9 @@ This is the command prompt.""")
                     event="PreToolUse",
                     command="echo 'test'",
                     conditions={"matcher": "Bash"},
-                    requires_reapproval=True
+                    requires_reapproval=True,
                 )
-            ]
+            ],
         )
 
         files = adapter.generate(prompt, tmp_path)
@@ -507,8 +511,9 @@ This is the command prompt.""")
 
     def test_generate_with_hooks_no_matcher(self, adapter, tmp_path):
         """Test generating hooks without matcher to hooks.yaml."""
-        from promptrek.core.models import UniversalPromptV3, Hook
         import yaml
+
+        from promptrek.core.models import Hook, UniversalPromptV3
 
         prompt = UniversalPromptV3(
             schema_version="3.0.0",
@@ -526,9 +531,9 @@ This is the command prompt.""")
                     name="simple-hook",
                     event="PreCommit",
                     command="make lint",
-                    requires_reapproval=False
+                    requires_reapproval=False,
                 )
-            ]
+            ],
         )
 
         files = adapter.generate(prompt, tmp_path)
@@ -545,7 +550,7 @@ This is the command prompt.""")
 
     def test_generate_with_agents_and_commands(self, adapter, tmp_path):
         """Test generating agents and commands."""
-        from promptrek.core.models import UniversalPromptV3, Agent, Command
+        from promptrek.core.models import Agent, Command, UniversalPromptV3
 
         prompt = UniversalPromptV3(
             schema_version="3.0.0",
@@ -565,7 +570,7 @@ This is the command prompt.""")
                     system_prompt="You are a test agent",
                     tools=["Read", "Write"],
                     trust_level="untrusted",
-                    requires_approval=True
+                    requires_approval=True,
                 )
             ],
             commands=[
@@ -573,9 +578,9 @@ This is the command prompt.""")
                     name="test-command",
                     description="Test command",
                     prompt="This is a test command",
-                    requires_approval=False
+                    requires_approval=False,
                 )
-            ]
+            ],
         )
 
         files = adapter.generate(prompt, tmp_path)
@@ -597,8 +602,9 @@ This is the command prompt.""")
 
     def test_generate_with_mcp_servers(self, adapter, tmp_path):
         """Test generating MCP servers."""
-        from promptrek.core.models import UniversalPromptV3, MCPServer
         import json
+
+        from promptrek.core.models import MCPServer, UniversalPromptV3
 
         prompt = UniversalPromptV3(
             schema_version="3.0.0",
@@ -616,9 +622,9 @@ This is the command prompt.""")
                     name="filesystem",
                     command="npx",
                     args=["-y", "@modelcontextprotocol/server-filesystem", "/path"],
-                    type="stdio"
+                    type="stdio",
                 )
-            ]
+            ],
         )
 
         files = adapter.generate(prompt, tmp_path)
@@ -650,7 +656,7 @@ This is the command prompt.""")
                 "test-server": {
                     "command": "test-command",
                     "args": ["arg1", "arg2"],
-                    "type": "stdio"
+                    "type": "stdio",
                 }
             }
         }
@@ -659,7 +665,7 @@ This is the command prompt.""")
         result = adapter.parse_files(tmp_path)
 
         assert result is not None
-        assert hasattr(result, 'mcp_servers')
+        assert hasattr(result, "mcp_servers")
         assert result.mcp_servers is not None
         assert len(result.mcp_servers) == 1
 
