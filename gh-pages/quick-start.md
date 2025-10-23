@@ -261,7 +261,12 @@ PrompTrek generates sophisticated configuration files for each editor:
 - `.clinerules/*.md` - Markdown-based rules configuration
 
 ### Claude Code
-- `.claude/context.md` - Rich context format with project information
+- `.claude/CLAUDE.md` - Main project context and guidelines
+- `.mcp.json` - MCP server configurations (project root)
+- `.claude/commands/*.md` - Custom slash commands
+- `.claude/agents/*.md` - Autonomous agents
+- `.claude/settings.local.json` - Event hooks with tool matchers
+- **Bidirectional sync support**: Full lossless sync including plugins
 
 ### Windsurf
 - `.windsurf/rules/*.md` - Organized markdown rule files by category and technology

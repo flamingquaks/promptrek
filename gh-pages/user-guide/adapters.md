@@ -12,12 +12,19 @@ PrompTrek supports 9 AI-powered code editors and assistants. Each adapter genera
 ## Supported Editors
 
 ### ✅ Claude Code
-**Generated Files**: `.claude/context.md`  
-**Features**: Variable substitution, Conditional instructions
+**Generated Files**:
+- `.claude/CLAUDE.md` - Main project context and guidelines
+- `.mcp.json` - MCP server configurations (project root)
+- `.claude/commands/*.md` - Custom slash commands
+- `.claude/agents/*.md` - Autonomous agents
+- `.claude/settings.local.json` - Hooks with tool matchers (Claude Code native format)
+- `.claude/hooks.yaml` - Hooks without matchers (PrompTrek format)
 
-Claude Code adapter generates comprehensive context files in Markdown format that provide detailed project information and coding guidelines optimized for Claude's understanding.
+**Features**: ✅ Project Files, ✅ Variables, ✅ Conditionals, ✅ Bidirectional Sync, ✅ MCP Servers, ✅ Custom Commands, ✅ Autonomous Agents, ✅ Event Hooks
 
-**Example Output**:
+Claude Code adapter generates comprehensive markdown context files with full plugin ecosystem support including MCP servers, custom commands, autonomous agents, and event-driven hooks.
+
+**Main Context File (.claude/CLAUDE.md)**:
 ```markdown
 # My Project
 
@@ -47,6 +54,97 @@ When working on this project:
 - Maintain consistency with the existing codebase
 - Consider the project context and requirements in all suggestions
 ```
+
+**MCP Server Configuration (.mcp.json in project root)**:
+```json
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/path/to/allowed/files"],
+      "type": "stdio"
+    }
+  }
+}
+```
+
+**Custom Commands (.claude/commands/review.md)**:
+```markdown
+# review
+
+**Description:** Review code for quality and best practices
+
+## Prompt
+Review the current file or selection for:
+- Code quality and maintainability
+- Adherence to project standards
+- Potential bugs or issues
+- Performance optimizations
+```
+
+**Note**: Command files use markdown headings (not YAML frontmatter) for compatibility with Claude Code's native format.
+
+**Autonomous Agents (.claude/agents/test-guardian.md)**:
+```markdown
+# test-guardian
+
+**Description:** Ensures comprehensive test coverage for all code changes
+
+## System Prompt
+You are a test coverage specialist. Your mission is to:
+1. Identify untested code paths
+2. Generate comprehensive test cases
+3. Ensure 80%+ code coverage
+4. Validate edge cases and error handling
+
+## Configuration
+- Trust Level: untrusted
+- Requires Approval: True
+```
+
+**Note**: Agent files use markdown headings (not YAML frontmatter) for compatibility with Claude Code's native format.
+
+**Event Hooks - Claude Code Native Format (.claude/settings.local.json)**:
+For hooks that need to match specific tools (using `matcher` conditions), Claude generates the native `settings.local.json` format:
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'Running bash command...'"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+**Event Hooks - PrompTrek Format (.claude/hooks.yaml)**:
+For hooks without tool matchers, Claude generates the PrompTrek YAML format:
+```yaml
+hooks:
+  - name: pre-commit-validator
+    event: PreCommit
+    command: npm run lint
+    requires_reapproval: true
+    description: Validate code before commits
+```
+
+**Bidirectional Sync Support**:
+```bash
+# Generate from PrompTrek to Claude files
+promptrek generate --editor claude project.promptrek.yaml
+
+# Sync from Claude files back to PrompTrek
+promptrek sync --editor claude --source-dir . --output project.promptrek.yaml
+```
+
+The sync system preserves all plugin configurations including MCP servers, commands, agents, and hooks in both native Claude Code and PrompTrek formats.
 
 ### ✅ Continue
 **Generated Files**: `.continue/rules/*.md`
@@ -568,16 +666,25 @@ Generated files are organized by editor:
 ```
 project/
 ├── .claude/
-│   └── context.md
+│   ├── CLAUDE.md                      # Main context file
+│   ├── settings.local.json            # Hooks with matchers (native format)
+│   ├── hooks.yaml                     # Hooks without matchers
+│   ├── agents/
+│   │   ├── test-guardian.md
+│   │   └── code-reviewer.md
+│   └── commands/
+│       ├── review.md
+│       └── analyze.md
+├── .mcp.json                          # MCP servers (project root)
 ├── .continue/
-│   ├── rules/
-│   │   ├── general.md
-│   │   ├── code-style.md
-│   │   ├── testing.md
-│   │   └── typescript-rules.md
-├── config.yaml
+│   └── rules/
+│       ├── general.md
+│       ├── code-style.md
+│       ├── testing.md
+│       └── typescript-rules.md
 ├── .cursor/
 │   └── rules/
+│       ├── index.mdc
 │       ├── coding-standards.mdc
 │       ├── testing-guidelines.mdc
 │       └── typescript-guidelines.mdc
@@ -589,26 +696,18 @@ project/
 │       ├── typescript.instructions.md
 │       └── testing.instructions.md
 ├── .kiro/
-│   ├── steering/
-│   │   ├── product.md
-│   │   ├── tech.md
-│   │   ├── structure.md
-│   │   ├── api-rest-conventions.md
-│   │   └── component-development-patterns.md
-│   ├── specs/
-│   │   ├── {project-name}/
-│   │   │   ├── requirements.md
-│   │   │   ├── design.md
-│   │   │   └── tasks.md
-│   └── hooks/
-│       ├── code-quality.md
-│       └── pre-commit.md
-├── .prompts/
-│   ├── development.md
-│   └── refactoring.md
-├── AGENTS.md
-├── CLAUDE.md
-└── .clinerules
+│   └── steering/
+│       ├── product.md
+│       ├── tech.md
+│       ├── structure.md
+│       ├── api-rest-conventions.md
+│       └── component-development-patterns.md
+├── .windsurf/
+│   └── rules/
+│       ├── general.md
+│       └── typescript-guidelines.md
+├── .clinerules                        # Cline rules (single file or directory)
+└── project.promptrek.yaml             # Source configuration
 ```
 
 ### Version Control

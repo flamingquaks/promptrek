@@ -265,6 +265,25 @@ def _merge_prompts(
                     doc.model_dump(exclude_none=True) for doc in parsed.documents
                 ]
 
+            # Update plugin fields if present in parsed
+            if parsed.agents:
+                merged_data["agents"] = [
+                    agent.model_dump(exclude_none=True) for agent in parsed.agents
+                ]
+            if parsed.commands:
+                merged_data["commands"] = [
+                    cmd.model_dump(exclude_none=True) for cmd in parsed.commands
+                ]
+            if parsed.hooks:
+                merged_data["hooks"] = [
+                    hook.model_dump(exclude_none=True) for hook in parsed.hooks
+                ]
+            if parsed.mcp_servers:
+                merged_data["mcp_servers"] = [
+                    server.model_dump(exclude_none=True)
+                    for server in parsed.mcp_servers
+                ]
+
             return UniversalPromptV3.model_validate(merged_data)
         else:
             # V1 or V2 exists, V3 parsed: Replace with V3 (no cross-schema merge)
@@ -301,6 +320,10 @@ def _merge_prompts(
                 merged_data["documents"] = [
                     doc.model_dump(exclude_none=True) for doc in parsed.documents
                 ]
+
+            # Update plugins if present in parsed (V2.1 nested structure)
+            if parsed.plugins:
+                merged_data["plugins"] = parsed.plugins.model_dump(exclude_none=True)
 
             return UniversalPromptV2.model_validate(merged_data)
         else:
