@@ -147,15 +147,35 @@ promptrek sync --editor claude --source-dir . --output project.promptrek.yaml
 The sync system preserves all plugin configurations including MCP servers, commands, agents, and hooks in both native Claude Code and PrompTrek formats.
 
 ### ✅ Continue
-**Generated Files**: `.continue/rules/*.md`
-**Features**: ✅ Project Files, ✅ Variables, ✅ Conditionals, ✅ Sync, ✅ Frontmatter Metadata
+**Generated Files**:
+- `.continue/config.yaml` - Main configuration with metadata and prompt references
+- `.continue/mcpServers/*.yaml` - Individual MCP server configurations
+- `.continue/prompts/*.md` - Individual slash command prompts
+- `.continue/rules/*.md` - Rule files with frontmatter
 
-Continue adapter generates organized markdown rule files with YAML frontmatter for enhanced AI-powered code completion and chat.
+**Features**: ✅ Project Files, ✅ Variables, ✅ Conditionals, ✅ Sync, ✅ MCP Servers, ✅ Slash Commands, ✅ Frontmatter Metadata
+
+Continue adapter generates a modular configuration system with separate files for MCP servers, slash commands, and rules, following Continue's recommended best practices.
 
 **File Generation Behavior**:
 
+**Rules Directory** (`.continue/rules/*.md`):
 - **With `documents` field**: Generates one `.md` file per document using the document's `name` field
 - **Without `documents` field**: Generates a single `general.md` file containing the main `content`
+
+**MCP Servers Directory** (`.continue/mcpServers/*.yaml`):
+- Generates one YAML file per MCP server configuration
+- Continue-specific format with metadata fields: `name`, `version`, `schema`
+- Example: `filesystem.yaml`, `github.yaml`
+
+**Prompts Directory** (`.continue/prompts/*.md`):
+- Generates one markdown file per slash command
+- Includes YAML frontmatter with `name`, `description`, `invokable: true`
+- Referenced in `config.yaml` for automatic loading
+
+**Configuration File** (`.continue/config.yaml`):
+- Contains project metadata and prompt file references
+- Automatically links to individual prompt files using `uses: file://...` syntax
 
 **Metadata-Driven Configuration**:
 
@@ -175,11 +195,9 @@ documents:
     always_apply: false  # Only applies to matching files
 ```
 
-**Example Generated Files (.continue/rules/)**:
-- With `documents`: Files named according to document `name` field (e.g., `documentation-standards.md`, `typescript-guidelines.md`)
-- Without `documents`: `general.md` only
+**Example Generated Files**:
 
-**Example Rule File with Frontmatter (general.md)**:
+**Rule File with Frontmatter** (`.continue/rules/general.md`):
 ```markdown
 ---
 name: "General"
@@ -194,27 +212,48 @@ description: "General coding guidelines"
 - Include comprehensive documentation
 ```
 
-**Example Document with File Patterns (documentation-standards.md)**:
+**MCP Server YAML** (`.continue/mcpServers/filesystem.yaml`):
+```yaml
+name: Filesystem MCP Server
+version: 0.0.1
+schema: v1
+mcpServers:
+  - name: filesystem
+    command: npx
+    args:
+      - "-y"
+      - "@modelcontextprotocol/server-filesystem"
+      - "/path/to/workspace"
+```
+
+**Slash Command Prompt** (`.continue/prompts/refactor.md`):
 ```markdown
 ---
-name: "documentation-standards"
-globs: "docs/**/*.{md,mdx}"
-alwaysApply: false
-description: "Standards for writing and maintaining Continue Docs"
+name: refactor
+description: Refactor code for better quality
+invokable: true
 ---
 
-# Documentation Standards
+Refactor the selected code following these principles:
+1. Simplification - Break down complex functions
+2. Naming - Use descriptive variable names
+3. DRY Principle - Eliminate code duplication
+```
 
-- Use clear, concise language
-- Include code examples where appropriate
-- Keep documentation up-to-date with code changes
+**Config YAML** (`.continue/config.yaml`):
+```yaml
+name: PrompTrek Generated Configuration
+version: 1.0.0
+schema: v1
+prompts:
+  - uses: file://.continue/prompts/refactor.md
+  - uses: file://.continue/prompts/explain.md
 ```
 
 **Frontmatter Fields**:
-- `name`: Display name for the rule (required)
-- `description`: Human-readable description (optional)
-- `globs`: File patterns where rule applies (optional, e.g., `**/*.{ts,tsx}`)
-- `alwaysApply`: `true` = always applies, `false` = applies only to matching files (default: false for documents, true for main content)
+- **Rules**: `name`, `description`, `globs`, `alwaysApply`
+- **Prompts**: `name`, `description`, `invokable`
+- **MCP Servers**: Top-level metadata includes `name`, `version`, `schema`
 
 **Sync Support**: Continue adapter supports bidirectional sync - you can import existing Continue configurations back to PrompTrek format using `promptrek sync`.
 
@@ -677,6 +716,13 @@ project/
 │       └── analyze.md
 ├── .mcp.json                          # MCP servers (project root)
 ├── .continue/
+│   ├── config.yaml                    # Main configuration
+│   ├── mcpServers/
+│   │   ├── filesystem.yaml
+│   │   └── github.yaml
+│   ├── prompts/
+│   │   ├── refactor.md
+│   │   └── explain.md
 │   └── rules/
 │       ├── general.md
 │       ├── code-style.md

@@ -33,6 +33,9 @@ class TestGetEditorFilePatterns:
         # Check for key patterns
         assert ".github/copilot-instructions.md" in patterns
         assert ".cursor/rules/*.mdc" in patterns
+        assert ".continue/config.yaml" in patterns
+        assert ".continue/mcpServers/*.yaml" in patterns
+        assert ".continue/prompts/*.md" in patterns
         assert ".continue/rules/*.md" in patterns
         assert ".windsurf/rules/*.md" in patterns
         assert ".clinerules" in patterns

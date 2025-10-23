@@ -1,41 +1,64 @@
 # yaml-language-server: $schema=https://promptrek.ai/schema/v2.1.0.json
 schema_version: 2.1.0
 metadata:
-  title: Continue Unified Config Example
-  description: Example showing Continue's unified plugin configuration
+  title: Continue Modular Config Example
+  description: Example showing Continue's modular plugin configuration with individual files
   version: 1.0.0
   author: PrompTrek Team
-  tags: [continue, unified-config, mcp, commands]
+  tags: [continue, modular-config, mcp, commands, prompts]
 
 content: |
-  # Continue Unified Configuration Example
+  # Continue Modular Configuration Example
 
-  Continue uses a unique unified configuration format that combines:
-  - MCP servers (`mcpServers`)
-  - Slash commands (`slashCommands`)
-  - Context providers
-  - Model configurations
+  Continue uses a modular configuration approach with separate files for better organization:
+  - **Individual MCP servers** in `.continue/mcpServers/*.yaml` (one file per server)
+  - **Individual slash commands** in `.continue/prompts/*.md` (one file per command)
+  - **Main configuration** in `.continue/config.yaml` (metadata + prompt references)
+  - **Rules** in `.continue/rules/*.md` (general coding guidelines)
 
-  This example shows how PrompTrek generates Continue's unified `.continue/config.json`.
+  This example shows how PrompTrek generates Continue's modular file structure.
+
+  ## Generated File Structure
+
+  ```
+  .continue/
+    config.yaml          # Main configuration with metadata
+    mcpServers/          # Individual MCP server YAML files
+      filesystem.yaml
+      github.yaml
+      brave-search.yaml
+    prompts/             # Individual slash command markdown files
+      refactor.md
+      explain.md
+      commit.md
+    rules/               # General coding rules
+      general.md
+  ```
 
   ## Features
 
-  ### MCP Servers
-  Continue supports MCP servers in the same format as Claude Code and Cursor:
-  - Filesystem access
-  - GitHub integration
-  - Custom servers
+  ### MCP Servers (Individual YAML Files)
+  Each MCP server gets its own YAML file with Continue's required metadata:
+  - `name`: Display name for the server
+  - `version`: Server version (0.0.1)
+  - `schema`: Configuration schema (v1)
+  - `mcpServers`: Array with single server configuration
 
-  ### Slash Commands
-  Continue's slash commands are powerful and customizable:
-  - `/edit` - Code editing
-  - `/comment` - Add comments
-  - Custom commands with prompts
+  ### Slash Commands (Individual Markdown Files)
+  Each command is a markdown file with YAML frontmatter:
+  - `name`: Command name (used as `/name` in Continue)
+  - `description`: What the command does
+  - `invokable: true`: Makes it available as a slash command
+
+  ### Config YAML (Main Configuration)
+  References all prompt files for automatic loading:
+  - `prompts`: Array of `uses: file://...` references
+  - `name`, `version`, `schema`: Project metadata
 
   ## Quick Start
 
   ```bash
-  # Generate Continue config
+  # Generate Continue modular config
   promptrek plugins generate continue-unified.promptrek.yaml -e continue
 
   # Restart Continue extension
@@ -43,21 +66,12 @@ content: |
   # Type "Developer: Reload Window"
   ```
 
-  ## Continue Config Structure
+  ## Benefits of Modular Structure
 
-  The generated `.continue/config.json` will have this structure:
-  ```json
-  {
-    "mcpServers": {
-      "server-name": { ... }
-    },
-    "slashCommands": [
-      { "name": "command", "prompt": "..." }
-    ],
-    "models": [ ... ],
-    "contextProviders": [ ... ]
-  }
-  ```
+  1. **Better Version Control**: See exactly what changed per server/command
+  2. **Easier Sharing**: Share individual MCP servers or commands across projects
+  3. **Cleaner Organization**: One file per concern, easier to navigate
+  4. **Continue Best Practice**: Follows Continue's official documentation recommendations
 
 plugins:
   mcp_servers:

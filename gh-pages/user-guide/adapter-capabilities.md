@@ -150,18 +150,21 @@ Full support for PrompTrek v3.0 schema with top-level plugin fields.
 ### Continue
 
 **Files Generated**:
-- `.continue/config.json` (main configuration)
-- `.continue/rules/*.md` (rule files)
+- `.continue/config.yaml` (main configuration with metadata)
+- `.continue/mcpServers/*.yaml` (individual MCP server configurations)
+- `.continue/prompts/*.md` (individual slash command prompts)
+- `.continue/rules/*.md` (rule files with frontmatter)
 
 **Unique Features**:
-- ✅ JSON-based configuration
+- ✅ Modular file structure (one file per server/command)
+- ✅ YAML-based configuration following Continue's recommendations
+- ✅ Individual MCP server files with Continue metadata format
+- ✅ Individual prompt markdown files with frontmatter
 - ✅ Bidirectional sync
 - ✅ Advanced rules directory
-- ✅ Context provider configuration
-- ✅ MCP server and commands support
 - ✅ v3.0 schema with top-level plugins
 
-**Best For**: VS Code users, customizable AI workflows
+**Best For**: VS Code users, customizable AI workflows, modular configuration management
 
 ---
 

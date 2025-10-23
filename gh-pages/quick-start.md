@@ -250,7 +250,9 @@ PrompTrek generates sophisticated configuration files for each editor:
 - **Metadata support**: Rules use `description`, `file_globs`, and `always_apply` fields
 
 ### Continue
-- `config.yaml` - Main configuration in modern YAML format
+- `.continue/config.yaml` - Main configuration with metadata and prompt references
+- `.continue/mcpServers/*.yaml` - Individual MCP server YAML files
+- `.continue/prompts/*.md` - Individual slash command prompts with frontmatter
 - `.continue/rules/*.md` - Organized rule files by category and technology
 
 ### Kiro

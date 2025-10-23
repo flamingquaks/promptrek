@@ -15,7 +15,7 @@ Many AI editors can self-update their markdown configuration files based on proj
 
 Currently, the sync feature supports:
 
-- **Continue**: Reads from `.continue/rules/*.md` files
+- **Continue**: Reads from `.continue/config.yaml`, `.continue/mcpServers/*.yaml`, `.continue/prompts/*.md`, and `.continue/rules/*.md` files
 - **GitHub Copilot**: Reads from `.github/copilot-instructions.md`, `.github/instructions/*.instructions.md`, and `.github/prompts/*.prompt.md` files
 
 ## Usage
@@ -72,9 +72,12 @@ The sync feature maps editor files to PrompTrek instruction categories:
 #### Continue Editor
 | Editor File | PrompTrek Field |
 |-------------|-----------------|
+| `.continue/config.yaml` | Project metadata (`name`, `version`, `schema`) |
+| `.continue/mcpServers/*.yaml` | Each MCP server file becomes an `mcp_servers` entry |
+| `.continue/prompts/*.md` | Each prompt file becomes a `commands` entry |
 | `.continue/rules/*.md` | Each markdown file becomes a `document` entry in the `documents` field |
 
-**Note**: Continue sync creates v3.0 format with `documents` field, where each rule file becomes a separate document with its content preserved.
+**Note**: Continue sync creates v3.0 format with modular structure. MCP servers and prompts are stored in top-level `mcp_servers` and `commands` fields, while rules become documents.
 
 #### GitHub Copilot
 | Editor File | PrompTrek Category |
