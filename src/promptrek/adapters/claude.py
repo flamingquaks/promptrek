@@ -3,6 +3,7 @@ Claude Code adapter implementation.
 """
 
 import json
+import re
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
@@ -257,8 +258,6 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
 
     def _parse_agent_files(self, source_dir: Path) -> Optional[List[Any]]:
         """Parse agent files from .claude/agents/ directory."""
-        import re
-
         from ..core.models import Agent
 
         agents_dir = source_dir / ".claude" / "agents"
@@ -376,8 +375,6 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
 
     def _parse_command_files(self, source_dir: Path) -> Optional[List[Any]]:
         """Parse command files from .claude/commands/ directory."""
-        import re
-
         from ..core.models import Command
 
         commands_dir = source_dir / ".claude" / "commands"
