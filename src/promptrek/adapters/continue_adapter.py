@@ -417,7 +417,6 @@ class ContinueAdapter(MCPGenerationMixin, EditorAdapter):
 
         for command in commands:
             # Apply variable substitution to prompt
-            command_prompt = command.prompt
             # Apply variable substitution to prompt
             command_prompt = command.prompt
             if variables:
