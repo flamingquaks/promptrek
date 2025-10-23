@@ -287,6 +287,57 @@ class ContinueAdapter(MCPGenerationMixin, EditorAdapter):
 
         return created_files
 
+    def _sanitize_filename(self, name: str) -> str:
+        """Sanitize a string to be safe for use as a filename.
+
+        Args:
+            name: The name to sanitize
+
+        Returns:
+            A sanitized filename containing only alphanumeric characters, hyphens, and underscores
+        """
+        # Replace any character that's not alphanumeric, hyphen, or underscore with hyphen
+        sanitized = re.sub(r"[^a-zA-Z0-9_-]", "-", name)
+        # Remove leading/trailing hyphens and collapse multiple hyphens
+        sanitized = re.sub(r"-+", "-", sanitized).strip("-")
+        # Ensure we have at least some valid characters
+        if not sanitized:
+            sanitized = "unnamed"
+        return sanitized
+
+    def _format_server_name(self, name: str) -> str:
+        """Format a server name for display, preserving known acronyms.
+
+        Args:
+            name: The server name (e.g., "github", "filesystem")
+
+        Returns:
+            A formatted display name (e.g., "GitHub", "Filesystem")
+        """
+        # Special case mappings for known acronyms and proper names
+        special_cases = {
+            "github": "GitHub",
+            "gitlab": "GitLab",
+            "npm": "NPM",
+            "aws": "AWS",
+            "api": "API",
+            "http": "HTTP",
+            "https": "HTTPS",
+            "ssh": "SSH",
+            "sql": "SQL",
+            "mysql": "MySQL",
+            "postgresql": "PostgreSQL",
+            "mongodb": "MongoDB",
+        }
+
+        # Check if the name matches a special case
+        lower_name = name.lower()
+        if lower_name in special_cases:
+            return special_cases[lower_name]
+
+        # Otherwise, use title case
+        return name.replace("-", " ").replace("_", " ").title()
+
     def _generate_individual_mcp_files(
         self,
         mcp_servers: List[Any],
@@ -317,25 +368,23 @@ class ContinueAdapter(MCPGenerationMixin, EditorAdapter):
             server_config: Dict[str, Any] = {
                 "name": server.name,
                 "command": server.command,
+                "args": server.args,
             }
-
-            if server.args:
-                server_config["args"] = server.args
 
             if env_vars:
                 server_config["env"] = env_vars
 
             # Build Continue-specific YAML format
             yaml_content = {
-                "name": server.name.replace("-", " ").replace("_", " ").title()
-                + " MCP Server",
+                "name": self._format_server_name(server.name) + " MCP Server",
                 "version": "0.0.1",
                 "schema": "v1",
                 "mcpServers": [server_config],
             }
 
-            # Write YAML file
-            yaml_file = mcp_dir / f"{server.name}.yaml"
+            # Write YAML file with sanitized filename
+            safe_filename = self._sanitize_filename(server.name)
+            yaml_file = mcp_dir / f"{safe_filename}.yaml"
 
             if dry_run:
                 click.echo(f"  📁 Would create: {yaml_file}")
@@ -369,12 +418,14 @@ class ContinueAdapter(MCPGenerationMixin, EditorAdapter):
         for command in commands:
             # Apply variable substitution to prompt
             command_prompt = command.prompt
+            # Apply variable substitution to prompt
+            command_prompt = command.prompt
             if variables:
                 for var_name, var_value in variables.items():
                     placeholder = "{{{ " + var_name + " }}}"
                     command_prompt = command_prompt.replace(placeholder, var_value)
 
-            # Build markdown with frontmatter
+            # Build frontmatter
             frontmatter = {
                 "name": command.name,
                 "description": command.description,
@@ -392,8 +443,9 @@ class ContinueAdapter(MCPGenerationMixin, EditorAdapter):
 
             md_content = "\n".join(lines)
 
-            # Write markdown file
-            md_file = prompts_dir / f"{command.name}.md"
+            # Write markdown file with sanitized filename
+            safe_filename = self._sanitize_filename(command.name)
+            md_file = prompts_dir / f"{safe_filename}.md"
 
             if dry_run:
                 click.echo(f"  📁 Would create: {md_file}")
@@ -437,8 +489,9 @@ class ContinueAdapter(MCPGenerationMixin, EditorAdapter):
         if commands:
             prompts_list = []
             for command in commands:
+                safe_filename = self._sanitize_filename(command.name)
                 prompts_list.append(
-                    {"uses": f"file://.continue/prompts/{command.name}.md"}
+                    {"uses": f"file://.continue/prompts/{safe_filename}.md"}
                 )
             config["prompts"] = prompts_list
 
