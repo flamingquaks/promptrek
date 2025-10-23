@@ -627,8 +627,8 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
         current_value_lines: List[str] = []
 
         for line in frontmatter_text.split("\n"):
-            # Check if this line starts a new key-value pair
-            if ": " in line and not line.startswith(" "):
+            # Check if this line starts a new key-value pair (no leading whitespace)
+            if ": " in line and line.lstrip() == line:
                 # Save previous key-value if exists
                 if current_key:
                     value = "\n".join(current_value_lines).strip()
