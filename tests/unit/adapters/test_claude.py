@@ -2,10 +2,25 @@
 Unit tests for Claude adapter.
 """
 
+import json
+
 import pytest
+import yaml
 
 from promptrek.adapters.claude import ClaudeAdapter
-from promptrek.core.models import PromptMetadata, UniversalPrompt
+from promptrek.core.models import (
+    Agent,
+    Command,
+    Condition,
+    Hook,
+    Instructions,
+    MCPServer,
+    ProjectContext,
+    PromptMetadata,
+    UniversalPrompt,
+    UniversalPromptV2,
+    UniversalPromptV3,
+)
 
 from .base_test import TestAdapterBase
 
@@ -68,8 +83,6 @@ class TestClaudeAdapter(TestAdapterBase):
 
     def test_generate_v1_dry_run_verbose(self, adapter, tmp_path):
         """Test v1 generation with dry run and verbose."""
-        from promptrek.core.models import Instructions
-
         prompt = UniversalPrompt(
             schema_version="1.0.0",
             metadata=PromptMetadata(
@@ -92,8 +105,6 @@ class TestClaudeAdapter(TestAdapterBase):
 
     def test_generate_with_conditionals(self, adapter, tmp_path):
         """Test generation with conditional instructions."""
-        from promptrek.core.models import Condition, Instructions
-
         prompt = UniversalPrompt(
             schema_version="1.0.0",
             metadata=PromptMetadata(
@@ -124,8 +135,6 @@ class TestClaudeAdapter(TestAdapterBase):
 
     def test_generate_v2_dry_run_verbose(self, adapter, tmp_path):
         """Test v2 generation with dry run and verbose."""
-        from promptrek.core.models import UniversalPromptV2
-
         prompt = UniversalPromptV2(
             schema_version="2.0.0",
             metadata=PromptMetadata(
@@ -143,8 +152,6 @@ class TestClaudeAdapter(TestAdapterBase):
 
     def test_generate_v1_all_instruction_categories(self, adapter, tmp_path):
         """Test v1 generation with all instruction categories."""
-        from promptrek.core.models import Instructions, ProjectContext
-
         prompt = UniversalPrompt(
             schema_version="1.0.0",
             metadata=PromptMetadata(
@@ -377,8 +384,6 @@ This is the command prompt."""
 
     def test_parse_hooks_from_settings_local_json(self, adapter, tmp_path):
         """Test parsing hooks from .claude/settings.local.json."""
-        import json
-
         claude_dir = tmp_path / ".claude"
         claude_dir.mkdir()
 
@@ -431,8 +436,6 @@ This is the command prompt."""
 
     def test_parse_hooks_from_hooks_yaml(self, adapter, tmp_path):
         """Test parsing hooks from .claude/hooks.yaml."""
-        import yaml
-
         claude_dir = tmp_path / ".claude"
         claude_dir.mkdir()
 
@@ -471,10 +474,6 @@ This is the command prompt."""
 
     def test_generate_with_hooks_matcher(self, adapter, tmp_path):
         """Test generating hooks with matcher to settings.local.json."""
-        import json
-
-        from promptrek.core.models import Hook, UniversalPromptV3
-
         prompt = UniversalPromptV3(
             schema_version="3.0.0",
             metadata=PromptMetadata(
@@ -511,10 +510,6 @@ This is the command prompt."""
 
     def test_generate_with_hooks_no_matcher(self, adapter, tmp_path):
         """Test generating hooks without matcher to hooks.yaml."""
-        import yaml
-
-        from promptrek.core.models import Hook, UniversalPromptV3
-
         prompt = UniversalPromptV3(
             schema_version="3.0.0",
             metadata=PromptMetadata(
@@ -550,8 +545,6 @@ This is the command prompt."""
 
     def test_generate_with_agents_and_commands(self, adapter, tmp_path):
         """Test generating agents and commands."""
-        from promptrek.core.models import Agent, Command, UniversalPromptV3
-
         prompt = UniversalPromptV3(
             schema_version="3.0.0",
             metadata=PromptMetadata(
@@ -602,10 +595,6 @@ This is the command prompt."""
 
     def test_generate_with_mcp_servers(self, adapter, tmp_path):
         """Test generating MCP servers."""
-        import json
-
-        from promptrek.core.models import MCPServer, UniversalPromptV3
-
         prompt = UniversalPromptV3(
             schema_version="3.0.0",
             metadata=PromptMetadata(
@@ -622,7 +611,6 @@ This is the command prompt."""
                     name="filesystem",
                     command="npx",
                     args=["-y", "@modelcontextprotocol/server-filesystem", "/path"],
-                    type="stdio",
                 )
             ],
         )
@@ -640,8 +628,6 @@ This is the command prompt."""
 
     def test_parse_mcp_file(self, adapter, tmp_path):
         """Test parsing MCP server configuration."""
-        import json
-
         claude_dir = tmp_path / ".claude"
         claude_dir.mkdir()
 
