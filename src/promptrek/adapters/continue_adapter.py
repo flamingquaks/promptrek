@@ -260,134 +260,252 @@ class ContinueAdapter(MCPGenerationMixin, EditorAdapter):
         verbose: bool,
         variables: Optional[Dict[str, Any]] = None,
     ) -> List[Path]:
-        """Generate unified plugin configuration for Continue (MCP + commands + hooks)."""
-        strategy = self.get_mcp_config_strategy()
+        """Generate modular plugin configuration for Continue (individual files per server/command)."""
         created_files = []
 
-        # Continue supports all plugins in config.json
-        if strategy["supports_project"] and strategy["project_path"]:
-            config_path = output_dir / strategy["project_path"]
+        # Generate individual MCP server YAML files
+        if mcp_servers:
+            mcp_files = self._generate_individual_mcp_files(
+                mcp_servers, output_dir, dry_run, verbose, variables
+            )
+            created_files.extend(mcp_files)
 
-            # Build unified config
-            unified_config = {}
+        # Generate individual prompt markdown files
+        if commands:
+            prompt_files = self._generate_individual_prompt_files(
+                commands, output_dir, dry_run, verbose, variables
+            )
+            created_files.extend(prompt_files)
 
-            # Add MCP servers if present
-            if mcp_servers:
-                mcp_config = self.build_mcp_servers_config(
-                    mcp_servers, variables, format_style="standard"
-                )
-                unified_config.update(mcp_config)
-
-            # Add slash commands if present
-            if commands:
-                slash_commands = []
-                for command in commands:
-                    # Apply variable substitution
-                    command_prompt = command.prompt
-                    if variables:
-                        for var_name, var_value in variables.items():
-                            placeholder = "{{{ " + var_name + " }}}"
-                            command_prompt = command_prompt.replace(
-                                placeholder, var_value
-                            )
-
-                    slash_cmd = {
-                        "name": command.name,
-                        "description": command.description,
-                        "prompt": command_prompt,
-                    }
-                    if command.requires_approval:
-                        slash_cmd["requiresApproval"] = True
-                    slash_commands.append(slash_cmd)
-
-                unified_config["slashCommands"] = slash_commands
-
-            # Check if config already exists and merge
-            existing_config = self.read_existing_mcp_config(config_path)
-            if existing_config:
-                if verbose:
-                    click.echo("  ℹ️  Merging plugins with existing Continue config")
-                # Merge configs
-                merged_config = existing_config.copy()
-                merged_config.update(unified_config)
-            else:
-                merged_config = unified_config
-
-            # Write the config
-            if self.write_mcp_config_file(merged_config, config_path, dry_run, verbose):
-                created_files.append(config_path)
+        # Generate config.yaml if we have any plugins
+        if mcp_servers or commands:
+            config_file = self._generate_config_yaml(
+                mcp_servers, commands, output_dir, dry_run, verbose, variables
+            )
+            if config_file:
+                created_files.append(config_file)
 
         return created_files
 
-    def _generate_mcp_config(
+    def _sanitize_filename(self, name: str) -> str:
+        """Sanitize a string to be safe for use as a filename.
+
+        Args:
+            name: The name to sanitize
+
+        Returns:
+            A sanitized filename containing only alphanumeric characters, hyphens, and underscores
+        """
+        # Replace any character that's not alphanumeric, hyphen, or underscore with hyphen
+        sanitized = re.sub(r"[^a-zA-Z0-9_-]", "-", name)
+        # Remove leading/trailing hyphens and collapse multiple hyphens
+        sanitized = re.sub(r"-+", "-", sanitized).strip("-")
+        # Ensure we have at least some valid characters
+        if not sanitized:
+            sanitized = "unnamed"
+        return sanitized
+
+    def _format_server_name(self, name: str) -> str:
+        """Format a server name for display, preserving known acronyms.
+
+        Args:
+            name: The server name (e.g., "github", "filesystem")
+
+        Returns:
+            A formatted display name (e.g., "GitHub", "Filesystem")
+        """
+        # Special case mappings for known acronyms and proper names
+        special_cases = {
+            "github": "GitHub",
+            "gitlab": "GitLab",
+            "npm": "NPM",
+            "aws": "AWS",
+            "api": "API",
+            "http": "HTTP",
+            "https": "HTTPS",
+            "ssh": "SSH",
+            "sql": "SQL",
+            "mysql": "MySQL",
+            "postgresql": "PostgreSQL",
+            "mongodb": "MongoDB",
+        }
+
+        # Check if the name matches a special case
+        lower_name = name.lower()
+        if lower_name in special_cases:
+            return special_cases[lower_name]
+
+        # Otherwise, use title case
+        return name.replace("-", " ").replace("_", " ").title()
+
+    def _generate_individual_mcp_files(
         self,
-        mcp_servers: list,
+        mcp_servers: List[Any],
         output_dir: Path,
         dry_run: bool,
         verbose: bool,
         variables: Optional[Dict[str, Any]] = None,
     ) -> List[Path]:
-        """Generate MCP configuration for Continue."""
-        strategy = self.get_mcp_config_strategy()
+        """Generate individual YAML files for each MCP server in .continue/mcpServers/."""
+        mcp_dir = output_dir / ".continue" / "mcpServers"
         created_files = []
 
-        # Try project-level first (preferred)
-        if strategy["supports_project"] and strategy["project_path"]:
-            project_config_path = output_dir / strategy["project_path"]
+        for server in mcp_servers:
+            # Apply variable substitution to env vars
+            env_vars = {}
+            if server.env:
+                for key, value in server.env.items():
+                    substituted_value = value
+                    if variables:
+                        for var_name, var_value in variables.items():
+                            placeholder = "{{{ " + var_name + " }}}"
+                            substituted_value = substituted_value.replace(
+                                placeholder, var_value
+                            )
+                    env_vars[key] = substituted_value
 
-            # Build MCP servers config (uses standard MCP format)
-            mcp_config = self.build_mcp_servers_config(
-                mcp_servers, variables, format_style="standard"
-            )
+            # Build server config
+            server_config: Dict[str, Any] = {
+                "name": server.name,
+                "command": server.command,
+                "args": server.args,
+            }
 
-            # Check if config already exists
-            existing_config = self.read_existing_mcp_config(project_config_path)
+            if env_vars:
+                server_config["env"] = env_vars
 
-            if existing_config:
-                # Merge with existing config
+            # Build Continue-specific YAML format
+            yaml_content = {
+                "name": self._format_server_name(server.name) + " MCP Server",
+                "version": "0.0.1",
+                "schema": "v1",
+                "mcpServers": [server_config],
+            }
+
+            # Write YAML file with sanitized filename
+            safe_filename = self._sanitize_filename(server.name)
+            yaml_file = mcp_dir / f"{safe_filename}.yaml"
+
+            if dry_run:
+                click.echo(f"  📁 Would create: {yaml_file}")
                 if verbose:
-                    click.echo("  ℹ️  Merging MCP servers with existing Continue config")
-                merged_config = self.merge_mcp_config(
-                    existing_config, mcp_config, format_style="standard"
-                )
+                    preview = yaml.dump(yaml_content, default_flow_style=False)[:300]
+                    click.echo(f"    {preview}...")
+                created_files.append(yaml_file)
             else:
-                merged_config = mcp_config
-
-            # Write the config
-            if self.write_mcp_config_file(
-                merged_config, project_config_path, dry_run, verbose
-            ):
-                created_files.append(project_config_path)
-
-        # Fallback to system-wide if project-level is not supported
-        elif strategy["system_path"]:
-            system_path = Path(strategy["system_path"]).expanduser()
-
-            # Confirm with user for system-wide changes
-            if not self.confirm_system_wide_mcp_update(
-                "Continue", system_path, dry_run
-            ):
-                if verbose:
-                    click.echo("  ⏭️  Skipping Continue MCP configuration")
-                return created_files
-
-            # Build and write system-wide config
-            mcp_config = self.build_mcp_servers_config(
-                mcp_servers, variables, format_style="standard"
-            )
-
-            existing_config = self.read_existing_mcp_config(system_path)
-            if existing_config:
-                merged_config = self.merge_mcp_config(
-                    existing_config, mcp_config, format_style="standard"
-                )
-            else:
-                merged_config = mcp_config
-
-            if self.write_mcp_config_file(merged_config, system_path, dry_run, verbose):
-                created_files.append(system_path)
+                mcp_dir.mkdir(parents=True, exist_ok=True)
+                with open(yaml_file, "w", encoding="utf-8") as f:
+                    yaml.dump(
+                        yaml_content, f, default_flow_style=False, sort_keys=False
+                    )
+                click.echo(f"✅ Generated: {yaml_file}")
+                created_files.append(yaml_file)
 
         return created_files
+
+    def _generate_individual_prompt_files(
+        self,
+        commands: List[Any],
+        output_dir: Path,
+        dry_run: bool,
+        verbose: bool,
+        variables: Optional[Dict[str, Any]] = None,
+    ) -> List[Path]:
+        """Generate individual markdown files for each slash command in .continue/prompts/."""
+        prompts_dir = output_dir / ".continue" / "prompts"
+        created_files = []
+
+        for command in commands:
+            # Apply variable substitution to prompt
+            # Apply variable substitution to prompt
+            command_prompt = command.prompt
+            if variables:
+                for var_name, var_value in variables.items():
+                    placeholder = "{{{ " + var_name + " }}}"
+                    command_prompt = command_prompt.replace(placeholder, var_value)
+
+            # Build frontmatter
+            frontmatter = {
+                "name": command.name,
+                "description": command.description,
+                "invokable": True,
+            }
+
+            lines = ["---"]
+            yaml_fm = yaml.safe_dump(
+                frontmatter, default_flow_style=False, sort_keys=False
+            ).strip()
+            lines.append(yaml_fm)
+            lines.append("---")
+            lines.append("")
+            lines.append(command_prompt)
+
+            md_content = "\n".join(lines)
+
+            # Write markdown file with sanitized filename
+            safe_filename = self._sanitize_filename(command.name)
+            md_file = prompts_dir / f"{safe_filename}.md"
+
+            if dry_run:
+                click.echo(f"  📁 Would create: {md_file}")
+                if verbose:
+                    preview = (
+                        md_content[:300] + "..."
+                        if len(md_content) > 300
+                        else md_content
+                    )
+                    click.echo(f"    {preview}")
+                created_files.append(md_file)
+            else:
+                prompts_dir.mkdir(parents=True, exist_ok=True)
+                with open(md_file, "w", encoding="utf-8") as f:
+                    f.write(md_content)
+                click.echo(f"✅ Generated: {md_file}")
+                created_files.append(md_file)
+
+        return created_files
+
+    def _generate_config_yaml(
+        self,
+        mcp_servers: Optional[List[Any]],
+        commands: Optional[List[Any]],
+        output_dir: Path,
+        dry_run: bool,
+        verbose: bool,
+        variables: Optional[Dict[str, Any]] = None,
+    ) -> Optional[Path]:
+        """Generate .continue/config.yaml with metadata and prompt references."""
+        config_path = output_dir / ".continue" / "config.yaml"
+
+        # Build config structure
+        config: Dict[str, Any] = {
+            "name": "PrompTrek Generated Configuration",
+            "version": "1.0.0",
+            "schema": "v1",
+        }
+
+        # Add prompt references if commands present
+        if commands:
+            prompts_list = []
+            for command in commands:
+                safe_filename = self._sanitize_filename(command.name)
+                prompts_list.append(
+                    {"uses": f"file://.continue/prompts/{safe_filename}.md"}
+                )
+            config["prompts"] = prompts_list
+
+        if dry_run:
+            click.echo(f"  📁 Would create: {config_path}")
+            if verbose:
+                preview = yaml.dump(config, default_flow_style=False)[:300]
+                click.echo(f"    {preview}...")
+        else:
+            config_path.parent.mkdir(parents=True, exist_ok=True)
+            with open(config_path, "w", encoding="utf-8") as f:
+                yaml.dump(config, f, default_flow_style=False, sort_keys=False)
+            click.echo(f"✅ Generated: {config_path}")
+
+        return config_path
 
     def _generate_rules_system(
         self,
@@ -798,16 +916,98 @@ class ContinueAdapter(MCPGenerationMixin, EditorAdapter):
             except Exception as e:
                 click.echo(f"Warning: Could not parse {md_file}: {e}")
 
-        # Create metadata
-        metadata = PromptMetadata(
-            title="Continue AI Assistant",
-            description="Configuration synced from Continue rules",
-            version="1.0.0",
-            author="PrompTrek Sync",
-            created=datetime.now().isoformat(),
-            updated=datetime.now().isoformat(),
-            tags=["continue", "synced"],
-        )
+        # Parse MCP servers from .continue/mcpServers/*.yaml
+        mcp_servers = []
+        mcp_dir = source_dir / ".continue" / "mcpServers"
+        if mcp_dir.exists():
+            for yaml_file in sorted(mcp_dir.glob("*.yaml")):
+                try:
+                    with open(yaml_file, "r", encoding="utf-8") as f:
+                        yaml_content = yaml.safe_load(f)
+
+                    # Parse Continue's MCP server format
+                    if yaml_content and "mcpServers" in yaml_content:
+                        for server_config in yaml_content["mcpServers"]:
+                            from promptrek.core.models import MCPServer
+
+                            mcp_servers.append(
+                                MCPServer(
+                                    name=server_config.get("name"),
+                                    command=server_config.get("command"),
+                                    args=server_config.get("args"),
+                                    env=server_config.get("env"),
+                                )
+                            )
+                except Exception as e:
+                    click.echo(f"Warning: Could not parse {yaml_file}: {e}")
+
+        # Parse slash commands from .continue/prompts/*.md
+        commands = []
+        prompts_dir = source_dir / ".continue" / "prompts"
+        if prompts_dir.exists():
+            for md_file in sorted(prompts_dir.glob("*.md")):
+                try:
+                    with open(md_file, "r", encoding="utf-8") as f:
+                        content = f.read()
+
+                    # Parse frontmatter
+                    if content.startswith("---"):
+                        parts = content.split("---", 2)
+                        if len(parts) >= 3:
+                            frontmatter = yaml.safe_load(parts[1])
+                            prompt_content = parts[2].strip()
+
+                            from promptrek.core.models import Command
+
+                            commands.append(
+                                Command(
+                                    name=frontmatter.get("name", md_file.stem),
+                                    description=frontmatter.get("description", ""),
+                                    prompt=prompt_content,
+                                )
+                            )
+                except Exception as e:
+                    click.echo(f"Warning: Could not parse {md_file}: {e}")
+
+        # Parse metadata from .continue/config.yaml if it exists
+        config_yaml = source_dir / ".continue" / "config.yaml"
+        if config_yaml.exists():
+            try:
+                with open(config_yaml, "r", encoding="utf-8") as f:
+                    config = yaml.safe_load(f)
+
+                # Use config metadata if available
+                metadata = PromptMetadata(
+                    title=config.get("name", "Continue AI Assistant"),
+                    description="Configuration synced from Continue",
+                    version=config.get("version", "1.0.0"),
+                    author="PrompTrek Sync",
+                    created=datetime.now().isoformat(),
+                    updated=datetime.now().isoformat(),
+                    tags=["continue", "synced"],
+                )
+            except Exception as e:
+                click.echo(f"Warning: Could not parse config.yaml: {e}")
+                metadata = PromptMetadata(
+                    title="Continue AI Assistant",
+                    description="Configuration synced from Continue rules",
+                    version="1.0.0",
+                    author="PrompTrek Sync",
+                    created=datetime.now().isoformat(),
+                    updated=datetime.now().isoformat(),
+                    tags=["continue", "synced"],
+                )
+        else:
+            # Create default metadata
+            metadata = PromptMetadata(
+                title="Continue AI Assistant",
+                description="Configuration synced from Continue rules",
+                version="1.0.0",
+                author="PrompTrek Sync",
+                created=datetime.now().isoformat(),
+                updated=datetime.now().isoformat(),
+                tags=["continue", "synced"],
+            )
 
         # Build main content from all documents
         main_content = (
@@ -821,6 +1021,8 @@ class ContinueAdapter(MCPGenerationMixin, EditorAdapter):
             metadata=metadata,
             content=main_content,
             documents=documents if documents else None,
+            mcp_servers=mcp_servers if mcp_servers else None,
+            commands=commands if commands else None,
             variables={},
         )
 

@@ -29,6 +29,9 @@ def get_editor_file_patterns() -> List[str]:
         ".cursor/rules/index.mdc",
         "AGENTS.md",
         # Continue
+        ".continue/config.yaml",
+        ".continue/mcpServers/*.yaml",
+        ".continue/prompts/*.md",
         ".continue/rules/*.md",
         # Windsurf
         ".windsurf/rules/*.md",

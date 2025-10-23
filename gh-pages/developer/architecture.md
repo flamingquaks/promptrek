@@ -168,7 +168,9 @@ templates/
 ├── cursor/
 │   └── cursorrules.j2
 ├── continue/
-│   └── config.json.j2
+│   ├── config.yaml.j2        # Main config with metadata
+│   ├── mcp_server.yaml.j2    # Individual MCP server template
+│   └── prompt.md.j2          # Individual prompt template
 └── shared/
     ├── common.md.j2
     └── examples.md.j2
@@ -277,7 +279,13 @@ project-root/
 │   └── copilot-instructions.md # Generated Copilot prompts
 ├── .cursorrules                # Generated Cursor prompts
 ├── .continue/
-│   └── config.json             # Generated Continue prompts
+│   ├── config.yaml             # Main configuration
+│   ├── mcpServers/
+│   │   └── *.yaml              # Individual MCP server files
+│   ├── prompts/
+│   │   └── *.md                # Individual slash command prompts
+│   └── rules/
+│       └── *.md                # Rule files
 └── .ai-prompts/                # Optional: centralized output directory
     ├── copilot/
     ├── cursor/

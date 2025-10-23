@@ -316,7 +316,7 @@ When `ignore_editor_files` is enabled (default: true), these patterns are added 
 
 - **GitHub Copilot**: `.github/copilot-instructions.md`, `.github/instructions/*.instructions.md`, `.github/prompts/*.prompt.md`
 - **Cursor**: `.cursor/rules/*.mdc`, `.cursor/rules/index.mdc`, `AGENTS.md`
-- **Continue**: `.continue/rules/*.md`
+- **Continue**: `.continue/config.yaml`, `.continue/mcpServers/*.yaml`, `.continue/prompts/*.md`, `.continue/rules/*.md`
 - **Windsurf**: `.windsurf/rules/*.md`
 - **Cline**: `.clinerules`, `.clinerules/*.md`
 - **Claude**: `.claude/CLAUDE.md`, `.claude-context.md`
