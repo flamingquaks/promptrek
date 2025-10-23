@@ -250,6 +250,44 @@ class TestClineAdapter(TestAdapterBase):
         assert "Write clean code" in content
         assert "Use TypeScript" in content
 
+    def test_generate_v2_removes_directory_when_creating_file(self, adapter, tmp_path):
+        """Test that .clinerules directory is removed when creating single file."""
+        from promptrek.core.models import PromptMetadata, UniversalPromptV2
+
+        # Create a v2 prompt without documents (should generate single file)
+        prompt = UniversalPromptV2(
+            schema_version="2.0.0",
+            metadata=PromptMetadata(title="Test", description="Test description"),
+            content="Test content",
+        )
+
+        # Create .clinerules as a directory with some content
+        clinerules_dir = tmp_path / ".clinerules"
+        clinerules_dir.mkdir()
+        (clinerules_dir / "workflow.md").write_text("Some workflow content")
+
+        # Verify it's a directory
+        assert clinerules_dir.exists()
+        assert clinerules_dir.is_dir()
+
+        # Generate should remove directory and create file
+        files = adapter._generate_v2(
+            prompt, tmp_path, dry_run=False, verbose=False, variables=None
+        )
+
+        # Verify file was created
+        assert len(files) == 1
+        assert files[0] == tmp_path / ".clinerules"
+
+        # Verify it's now a file, not a directory
+        assert files[0].exists()
+        assert files[0].is_file()
+        assert not files[0].is_dir()
+
+        # Verify content is correct
+        content = files[0].read_text()
+        assert content == "Test content"
+
 
 class TestClineUserLevelMCPConfiguration:
     """Test user-level MCP configuration for Cline."""

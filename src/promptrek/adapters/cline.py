@@ -437,6 +437,14 @@ class ClineAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
                     click.echo(f"    {preview}")
                 created_files.append(output_file)
             else:
+                # Check if .clinerules exists as a directory and remove it
+                if output_file.exists() and output_file.is_dir():
+                    import shutil
+
+                    shutil.rmtree(output_file)
+                    if verbose:
+                        click.echo(f"  🗑️  Removed existing directory: {output_file}")
+
                 with open(output_file, "w", encoding="utf-8") as f:
                     f.write(content)
                 click.echo(f"✅ Generated: {output_file}")
@@ -934,6 +942,14 @@ class ClineAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
                 preview = content[:200] + "..." if len(content) > 200 else content
                 click.echo(f"      {preview}")
         else:
+            # Check if .clinerules exists as a directory and remove it
+            if output_file.exists() and output_file.is_dir():
+                import shutil
+
+                shutil.rmtree(output_file)
+                if verbose:
+                    click.echo(f"  🗑️  Removed existing directory: {output_file}")
+
             with open(output_file, "w", encoding="utf-8") as f:
                 f.write(content)
             click.echo(f"✅ Generated: {output_file}")

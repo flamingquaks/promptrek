@@ -417,7 +417,7 @@ content: |-
   - ❌ **Not recommended**: Migrate to v3.0 for better maintainability
 variables: {}
 mcp_servers:
-- name: Git
+- name: git
   command: uvx
   args: [mcp-server-git]
 agents:
