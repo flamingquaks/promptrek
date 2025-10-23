@@ -391,7 +391,7 @@ Text that's not a bullet
         with open(github_yaml, "r") as f:
             gh_content = yaml.safe_load(f)
 
-        assert gh_content["name"] == "Github MCP Server"
+        assert gh_content["name"] == "GitHub MCP Server"
         assert gh_content["mcpServers"][0]["env"]["GITHUB_TOKEN"] == "test-token"
 
     def test_generate_individual_prompt_markdown_files_v3(self, adapter, tmp_path):
