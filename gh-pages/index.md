@@ -384,6 +384,12 @@ variables:
 
     <div class="features-grid">
       <div class="feature-card-modern">
+        <div class="feature-icon">⚡</div>
+        <h3>Multi-Step Workflows</h3>
+        <p>Define complex, automated workflows with tool requirements and structured steps. Perfect for PR reviews, deployments, and testing pipelines. <a href="user-guide/workflows.html">Learn more →</a></p>
+      </div>
+
+      <div class="feature-card-modern">
         <div class="feature-icon">🔄</div>
         <h3>Variable Substitution</h3>
         <p>Dynamic variables with local file support. Keep sensitive values like API keys in .promptrek/variables.promptrek.yaml (automatically gitignored via .promptrek/ directory).</p>

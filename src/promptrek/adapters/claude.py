@@ -420,6 +420,25 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
                     )
                     description = desc_match.group(1).strip() if desc_match else ""
 
+                    # Extract required tools for workflows
+                    tool_calls = None
+                    tools_match = re.search(
+                        r"##\s+Required Tools\s*\n\n((?:- `[^`]+`\n?)+)",
+                        content,
+                        re.MULTILINE,
+                    )
+                    if tools_match:
+                        tool_lines = tools_match.group(1).strip().split("\n")
+                        tool_calls = []
+                        for line in tool_lines:
+                            tool_match = re.search(r"`([^`]+)`", line)
+                            if tool_match:
+                                tool_calls.append(tool_match.group(1))
+
+                    # Infer multi_step from presence of tool_calls or workflow sections
+                    # (no need to parse the text "Type: Multi-step Workflow")
+                    multi_step = bool(tool_calls)
+
                     # Extract system message (after ## System Message)
                     system_message = None
                     sys_msg_match = re.search(
@@ -457,6 +476,8 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
                         system_message=system_message,
                         examples=examples if examples else None,
                         trust_metadata=None,
+                        multi_step=multi_step,
+                        tool_calls=tool_calls,
                     )
 
                 commands.append(command)
@@ -906,12 +927,28 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
         return created_files
 
     def _build_command_content(self, command: Any, prompt: str) -> str:
-        """Build markdown content for a slash command."""
+        """Build markdown content for a slash command or workflow."""
         lines = []
         lines.append(f"# {command.name}")
         lines.append("")
         lines.append(f"**Description:** {command.description}")
         lines.append("")
+
+        # Check if this is a workflow (has steps or tool_calls)
+        is_workflow = bool(command.steps or command.tool_calls)
+
+        # Add workflow indicator if this is a workflow
+        if is_workflow:
+            lines.append("**Type:** Multi-step Workflow")
+            lines.append("")
+
+        # Add required tools for workflows
+        if command.tool_calls:
+            lines.append("## Required Tools")
+            lines.append("")
+            for tool in command.tool_calls:
+                lines.append(f"- `{tool}`")
+            lines.append("")
 
         if command.system_message:
             lines.append("## System Message")
@@ -921,6 +958,19 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
         lines.append("## Prompt")
         lines.append(prompt)
         lines.append("")
+
+        # Add structured steps for workflows
+        if command.steps:
+            lines.append("## Workflow Steps")
+            lines.append("")
+            for i, step in enumerate(command.steps, 1):
+                lines.append(f"### {i}. {step.name}")
+                if step.description:
+                    lines.append(f"   {step.description}")
+                lines.append(f"   - Action: `{step.action}`")
+                if step.params:
+                    lines.append(f"   - Parameters: {step.params}")
+                lines.append("")
 
         if command.examples:
             lines.append("## Examples")

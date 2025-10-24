@@ -298,6 +298,33 @@ class ContinueAdapter(MCPGenerationMixin, EditorAdapter):
                     }
                     if command.requires_approval:
                         slash_cmd["requiresApproval"] = True
+
+                    # Add workflow-specific fields
+                    # Infer multiStep from presence of steps or tool_calls (or explicit multi_step)
+                    if command.multi_step or command.steps or command.tool_calls:
+                        slash_cmd["multiStep"] = True
+                    if command.tool_calls:
+                        slash_cmd["toolCalls"] = command.tool_calls
+                    if command.steps:
+                        slash_cmd["steps"] = [
+                            {
+                                "name": step.name,
+                                "action": step.action,
+                                **(
+                                    {"description": step.description}
+                                    if step.description
+                                    else {}
+                                ),
+                                **({"params": step.params} if step.params else {}),
+                                **(
+                                    {"conditions": step.conditions}
+                                    if step.conditions
+                                    else {}
+                                ),
+                            }
+                            for step in command.steps
+                        ]
+
                     slash_commands.append(slash_cmd)
 
                 unified_config["slashCommands"] = slash_commands

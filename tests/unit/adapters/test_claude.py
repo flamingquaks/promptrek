@@ -659,3 +659,261 @@ This is the command prompt."""
         assert server.name == "test-server"
         assert server.command == "test-command"
         assert server.args == ["arg1", "arg2"]
+
+
+class TestClaudeWorkflowsV3:
+    """Test v3.1 workflow support for Claude adapter."""
+
+    @pytest.fixture
+    def adapter(self):
+        """Create Claude adapter instance."""
+        return ClaudeAdapter()
+
+    @pytest.fixture
+    def sample_workflow_prompt_v3(self):
+        """Create sample v3 prompt with workflows."""
+        from promptrek.core.models import WorkflowStep
+
+        workflow = Command(
+            name="deploy-production",
+            description="Deploy application to production environment",
+            prompt="Deploy the application following best practices and safety checks",
+            multi_step=True,
+            tool_calls=["gh", "docker", "kubectl"],
+            steps=[
+                WorkflowStep(
+                    name="verify_tests",
+                    action="execute_command",
+                    description="Verify all tests pass",
+                    params={"command": "npm test"},
+                ),
+                WorkflowStep(
+                    name="build_image",
+                    action="execute_command",
+                    description="Build production Docker image",
+                    params={"command": "docker build -t app:prod ."},
+                ),
+                WorkflowStep(
+                    name="deploy",
+                    action="execute_command",
+                    description="Deploy to Kubernetes cluster",
+                    params={"command": "kubectl apply -f prod/"},
+                ),
+            ],
+            requires_approval=True,
+            examples=["Deploy latest version to production"],
+        )
+
+        return UniversalPromptV3(
+            schema_version="3.1.0",
+            metadata=PromptMetadata(
+                title="Test Workflows", description="Test workflow configuration"
+            ),
+            content="# Test Project\n\nProject with production deployment workflows",
+            commands=[workflow],
+        )
+
+    def test_generate_v3_workflow_as_command(
+        self, adapter, sample_workflow_prompt_v3, tmp_path
+    ):
+        """Test that v3.1 workflows are generated as Claude commands."""
+        files = adapter.generate(
+            sample_workflow_prompt_v3, tmp_path, dry_run=False, verbose=False
+        )
+
+        # Should create CLAUDE.md and command file
+        assert len(files) == 2
+
+        # Check that command file exists for workflow
+        command_file = tmp_path / ".claude" / "commands" / "deploy-production.md"
+        assert command_file.exists()
+        assert command_file.is_file()
+
+        content = command_file.read_text()
+        assert "# deploy-production" in content
+        assert "Deploy application to production environment" in content
+
+    def test_generate_v3_workflow_includes_type_marker(
+        self, adapter, sample_workflow_prompt_v3, tmp_path
+    ):
+        """Test that workflow command includes Type: Multi-step Workflow marker."""
+        files = adapter.generate(
+            sample_workflow_prompt_v3, tmp_path, dry_run=False, verbose=False
+        )
+
+        command_file = tmp_path / ".claude" / "commands" / "deploy-production.md"
+        content = command_file.read_text()
+
+        # Should include workflow type marker
+        assert "**Type:** Multi-step Workflow" in content
+
+    def test_generate_v3_workflow_includes_required_tools(
+        self, adapter, sample_workflow_prompt_v3, tmp_path
+    ):
+        """Test that workflow includes Required Tools section."""
+        files = adapter.generate(
+            sample_workflow_prompt_v3, tmp_path, dry_run=False, verbose=False
+        )
+
+        command_file = tmp_path / ".claude" / "commands" / "deploy-production.md"
+        content = command_file.read_text()
+
+        # Check for Required Tools section
+        assert "## Required Tools" in content
+        assert "- `gh`" in content
+        assert "- `docker`" in content
+        assert "- `kubectl`" in content
+
+    def test_generate_v3_workflow_includes_steps(
+        self, adapter, sample_workflow_prompt_v3, tmp_path
+    ):
+        """Test that workflow includes Workflow Steps section."""
+        files = adapter.generate(
+            sample_workflow_prompt_v3, tmp_path, dry_run=False, verbose=False
+        )
+
+        command_file = tmp_path / ".claude" / "commands" / "deploy-production.md"
+        content = command_file.read_text()
+
+        # Check for Workflow Steps section
+        assert "## Workflow Steps" in content
+        assert "### 1. verify_tests" in content
+        assert "Verify all tests pass" in content
+        assert "execute_command" in content
+
+    def test_generate_v3_multiple_workflows_and_commands(self, adapter, tmp_path):
+        """Test generating both workflows and regular commands."""
+        from promptrek.core.models import WorkflowStep
+
+        regular_command = Command(
+            name="format-code",
+            description="Format code using prettier",
+            prompt="Format all code files using prettier with project settings",
+            multi_step=False,  # Regular command
+        )
+
+        workflow = Command(
+            name="run-ci",
+            description="Run CI pipeline",
+            prompt="Execute full CI pipeline including lint, test, and build",
+            multi_step=True,  # Workflow
+            tool_calls=["npm"],
+            steps=[
+                WorkflowStep(
+                    name="lint",
+                    action="execute_command",
+                    params={"command": "npm run lint"},
+                ),
+                WorkflowStep(
+                    name="test",
+                    action="execute_command",
+                    params={"command": "npm test"},
+                ),
+            ],
+        )
+
+        prompt = UniversalPromptV3(
+            schema_version="3.1.0",
+            metadata=PromptMetadata(title="Test", description="Test"),
+            content="Test content",
+            commands=[regular_command, workflow],
+        )
+
+        files = adapter.generate(prompt, tmp_path, dry_run=False, verbose=False)
+
+        # Should create CLAUDE.md + 2 command files
+        assert len(files) == 3
+
+        # Both should be in .claude/commands/
+        assert (tmp_path / ".claude" / "commands" / "format-code.md").exists()
+        assert (tmp_path / ".claude" / "commands" / "run-ci.md").exists()
+
+        # Workflow should have type marker
+        workflow_content = (tmp_path / ".claude" / "commands" / "run-ci.md").read_text()
+        assert "**Type:** Multi-step Workflow" in workflow_content
+
+        # Regular command should NOT have type marker
+        regular_content = (
+            tmp_path / ".claude" / "commands" / "format-code.md"
+        ).read_text()
+        assert "**Type:** Multi-step Workflow" not in regular_content
+
+    def test_generate_v3_workflow_with_variables(self, adapter, tmp_path):
+        """Test workflow generation with variable substitution."""
+        workflow = Command(
+            name="deploy",
+            description="Deploy to environment",
+            prompt="Deploy the application to {{{ ENVIRONMENT }}} with {{{ VERSION }}}",
+            multi_step=True,
+            tool_calls=["kubectl"],
+        )
+
+        prompt = UniversalPromptV3(
+            schema_version="3.1.0",
+            metadata=PromptMetadata(title="Test", description="Test"),
+            content="Test content",
+            commands=[workflow],
+        )
+
+        variables = {"ENVIRONMENT": "staging", "VERSION": "v1.2.3"}
+
+        files = adapter.generate(
+            prompt, tmp_path, dry_run=False, verbose=False, variables=variables
+        )
+
+        command_file = tmp_path / ".claude" / "commands" / "deploy.md"
+        content = command_file.read_text()
+
+        # Variables should be substituted in prompt section
+        assert "Deploy the application to staging with v1.2.3" in content
+
+    def test_validate_v3_workflow_prompt(self, adapter, sample_workflow_prompt_v3):
+        """Test validation of v3 prompt with workflows."""
+        errors = adapter.validate(sample_workflow_prompt_v3)
+        # V3 validation is simpler - just checks content exists
+        assert len(errors) == 0
+
+    def test_generate_v3_workflow_dry_run(
+        self, adapter, sample_workflow_prompt_v3, tmp_path
+    ):
+        """Test workflow generation in dry run mode."""
+        files = adapter.generate(
+            sample_workflow_prompt_v3, tmp_path, dry_run=True, verbose=True
+        )
+
+        # Should return expected file paths
+        assert len(files) == 2
+
+        # But files should not be created
+        command_file = tmp_path / ".claude" / "commands" / "deploy-production.md"
+        assert not command_file.exists()
+
+    def test_generate_v3_workflow_without_steps(self, adapter, tmp_path):
+        """Test workflow generation when steps are not provided."""
+        workflow = Command(
+            name="simple-workflow",
+            description="Simple workflow without detailed steps",
+            prompt="Execute a simple workflow",
+            multi_step=True,
+            tool_calls=["npm"],
+            # No steps provided
+        )
+
+        prompt = UniversalPromptV3(
+            schema_version="3.1.0",
+            metadata=PromptMetadata(title="Test", description="Test"),
+            content="Test content",
+            commands=[workflow],
+        )
+
+        files = adapter.generate(prompt, tmp_path, dry_run=False, verbose=False)
+
+        command_file = tmp_path / ".claude" / "commands" / "simple-workflow.md"
+        content = command_file.read_text()
+
+        # Should still have workflow type marker and tools
+        assert "**Type:** Multi-step Workflow" in content
+        assert "## Required Tools" in content
+
+        # But no Workflow Steps section
+        assert "## Workflow Steps" not in content

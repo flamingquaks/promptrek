@@ -789,3 +789,272 @@ def test_generate_mcp_config_auto_saves_discovered_path(
     mock_write_user.assert_called_once_with(
         Path("/project/.promptrek/user-config.promptrek.yaml"), discovered_path, False
     )
+
+
+class TestClineWorkflowsV3:
+    """Test v3.1 workflow support for Cline adapter."""
+
+    @pytest.fixture
+    def adapter(self):
+        """Create Cline adapter instance."""
+        return ClineAdapter()
+
+    @pytest.fixture
+    def sample_workflow_prompt_v3(self):
+        """Create sample v3 prompt with workflows."""
+        from promptrek.core.models import (
+            Command,
+            PromptMetadata,
+            UniversalPromptV3,
+            WorkflowStep,
+        )
+
+        workflow = Command(
+            name="deploy-app",
+            description="Deploy application to production",
+            prompt="Deploy the application following the standard deployment process",
+            multi_step=True,
+            tool_calls=["gh", "docker", "kubectl"],
+            steps=[
+                WorkflowStep(
+                    name="run_tests",
+                    action="execute_command",
+                    description="Run test suite",
+                    params={"command": "npm test"},
+                ),
+                WorkflowStep(
+                    name="build_docker",
+                    action="execute_command",
+                    description="Build Docker image",
+                    params={"command": "docker build -t myapp:latest ."},
+                ),
+                WorkflowStep(
+                    name="deploy_k8s",
+                    action="execute_command",
+                    description="Deploy to Kubernetes",
+                    params={"command": "kubectl apply -f k8s/"},
+                ),
+            ],
+            requires_approval=True,
+            examples=["Deploy to production", "Deploy to staging environment"],
+        )
+
+        return UniversalPromptV3(
+            schema_version="3.1.0",
+            metadata=PromptMetadata(
+                title="Test Workflows", description="Test workflow configuration"
+            ),
+            content="# Test Project\n\nProject with workflows",
+            commands=[workflow],
+        )
+
+    def test_generate_v3_workflow_creates_workflow_file(
+        self, adapter, sample_workflow_prompt_v3, tmp_path
+    ):
+        """Test that v3.1 workflows are generated to .clinerules/workflows/ directory."""
+        files = adapter.generate(
+            sample_workflow_prompt_v3, tmp_path, dry_run=False, verbose=False
+        )
+
+        # Should create default-rules.md and workflow file
+        assert len(files) == 2
+
+        # Check that workflow file exists
+        workflow_file = tmp_path / ".clinerules" / "workflows" / "deploy-app.md"
+        assert workflow_file.exists()
+        assert workflow_file.is_file()
+
+        content = workflow_file.read_text()
+        assert "# deploy-app" in content
+        assert "Deploy application to production" in content
+
+    def test_generate_v3_workflow_includes_tool_calls(
+        self, adapter, sample_workflow_prompt_v3, tmp_path
+    ):
+        """Test that workflow includes Required Tools section."""
+        files = adapter.generate(
+            sample_workflow_prompt_v3, tmp_path, dry_run=False, verbose=False
+        )
+
+        workflow_file = tmp_path / ".clinerules" / "workflows" / "deploy-app.md"
+        content = workflow_file.read_text()
+
+        # Check for Required Tools section
+        assert "## Required Tools" in content
+        assert "- `gh`" in content
+        assert "- `docker`" in content
+        assert "- `kubectl`" in content
+
+    def test_generate_v3_workflow_includes_steps(
+        self, adapter, sample_workflow_prompt_v3, tmp_path
+    ):
+        """Test that workflow includes structured steps."""
+        files = adapter.generate(
+            sample_workflow_prompt_v3, tmp_path, dry_run=False, verbose=False
+        )
+
+        workflow_file = tmp_path / ".clinerules" / "workflows" / "deploy-app.md"
+        content = workflow_file.read_text()
+
+        # Check for Detailed Steps section
+        assert "## Detailed Steps" in content
+        assert "### 1. run_tests" in content
+        assert "Run test suite" in content
+        assert "execute_command" in content
+        assert "npm test" in content
+
+    def test_generate_v3_workflow_includes_examples(
+        self, adapter, sample_workflow_prompt_v3, tmp_path
+    ):
+        """Test that workflow includes examples."""
+        files = adapter.generate(
+            sample_workflow_prompt_v3, tmp_path, dry_run=False, verbose=False
+        )
+
+        workflow_file = tmp_path / ".clinerules" / "workflows" / "deploy-app.md"
+        content = workflow_file.read_text()
+
+        # Check for Examples section
+        assert "## Examples" in content
+        assert "Deploy to production" in content
+        assert "Deploy to staging environment" in content
+
+    def test_generate_v3_multiple_workflows(self, adapter, tmp_path):
+        """Test generating multiple workflows."""
+        from promptrek.core.models import (
+            Command,
+            PromptMetadata,
+            UniversalPromptV3,
+            WorkflowStep,
+        )
+
+        workflow1 = Command(
+            name="test-workflow",
+            description="Run tests",
+            prompt="Execute test suite",
+            multi_step=True,
+            tool_calls=["npm"],
+            steps=[
+                WorkflowStep(
+                    name="unit_tests",
+                    action="execute_command",
+                    params={"command": "npm test"},
+                )
+            ],
+        )
+
+        workflow2 = Command(
+            name="build-workflow",
+            description="Build project",
+            prompt="Build the project",
+            multi_step=True,
+            tool_calls=["npm"],
+            steps=[
+                WorkflowStep(
+                    name="build",
+                    action="execute_command",
+                    params={"command": "npm run build"},
+                )
+            ],
+        )
+
+        prompt = UniversalPromptV3(
+            schema_version="3.1.0",
+            metadata=PromptMetadata(title="Test", description="Test"),
+            content="Test content",
+            commands=[workflow1, workflow2],
+        )
+
+        files = adapter.generate(prompt, tmp_path, dry_run=False, verbose=False)
+
+        # Should create default-rules.md + 2 workflow files
+        assert len(files) == 3
+
+        # Check both workflow files exist
+        assert (tmp_path / ".clinerules" / "workflows" / "test-workflow.md").exists()
+        assert (tmp_path / ".clinerules" / "workflows" / "build-workflow.md").exists()
+
+    def test_generate_v3_mixed_commands_and_workflows(self, adapter, tmp_path):
+        """Test generating both regular commands and workflows."""
+        from promptrek.core.models import Command, PromptMetadata, UniversalPromptV3
+
+        regular_command = Command(
+            name="format-code",
+            description="Format code",
+            prompt="Format the code using prettier",
+            multi_step=False,  # Regular command
+        )
+
+        workflow = Command(
+            name="deploy",
+            description="Deploy app",
+            prompt="Deploy the application",
+            multi_step=True,  # Workflow
+            tool_calls=["docker"],
+        )
+
+        prompt = UniversalPromptV3(
+            schema_version="3.1.0",
+            metadata=PromptMetadata(title="Test", description="Test"),
+            content="Test content",
+            commands=[regular_command, workflow],
+        )
+
+        files = adapter.generate(prompt, tmp_path, dry_run=False, verbose=False)
+
+        # Should create default-rules.md + workflow file (regular command not generated separately)
+        assert len(files) == 2
+
+        # Workflow should be in workflows/
+        assert (tmp_path / ".clinerules" / "workflows" / "deploy.md").exists()
+
+    def test_generate_v3_workflow_with_variables(self, adapter, tmp_path):
+        """Test workflow generation with variable substitution."""
+        from promptrek.core.models import Command, PromptMetadata, UniversalPromptV3
+
+        workflow = Command(
+            name="deploy",
+            description="Deploy application",
+            prompt="Deploy the application to {{{ ENVIRONMENT }}} environment",
+            multi_step=True,
+            tool_calls=["kubectl"],
+        )
+
+        prompt = UniversalPromptV3(
+            schema_version="3.1.0",
+            metadata=PromptMetadata(title="Test", description="Test"),
+            content="Test content",
+            commands=[workflow],
+        )
+
+        variables = {"ENVIRONMENT": "production"}
+
+        files = adapter.generate(
+            prompt, tmp_path, dry_run=False, verbose=False, variables=variables
+        )
+
+        workflow_file = tmp_path / ".clinerules" / "workflows" / "deploy.md"
+        content = workflow_file.read_text()
+
+        # Variables should be substituted in prompt
+        assert "Deploy the application to production environment" in content
+
+    def test_validate_v3_workflow_prompt(self, adapter, sample_workflow_prompt_v3):
+        """Test validation of v3 prompt with workflows."""
+        errors = adapter.validate(sample_workflow_prompt_v3)
+        assert len(errors) == 0
+
+    def test_generate_v3_workflow_dry_run(
+        self, adapter, sample_workflow_prompt_v3, tmp_path
+    ):
+        """Test workflow generation in dry run mode."""
+        files = adapter.generate(
+            sample_workflow_prompt_v3, tmp_path, dry_run=True, verbose=True
+        )
+
+        # Should return expected file paths
+        assert len(files) == 2
+
+        # But files should not be created
+        workflow_file = tmp_path / ".clinerules" / "workflows" / "deploy-app.md"
+        assert not workflow_file.exists()

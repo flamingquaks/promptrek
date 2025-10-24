@@ -403,6 +403,7 @@ promptrek <command> --help          # Command-specific help
 
 ## Next Steps
 
+- Learn about [Multi-Step Workflows](user-guide/workflows.html) for automated task sequences
 - Read the [User Guide](user-guide.html) for comprehensive documentation
 - Explore [Advanced Features](user-guide.html#advanced-features) like variables and conditionals
 - Learn about [Editor-Specific Features](user-guide.html#editor-specific-features)

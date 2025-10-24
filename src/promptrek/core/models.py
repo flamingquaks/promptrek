@@ -202,8 +202,31 @@ class MCPServer(BaseModel):
     )
 
 
+class WorkflowStep(BaseModel):
+    """Single step in a multi-step workflow."""
+
+    name: str = Field(..., description="Step name/identifier")
+    action: str = Field(
+        ..., description="Action to perform (e.g., 'read_file', 'execute_command')"
+    )
+    description: Optional[str] = Field(
+        default=None, description="Human-readable step description"
+    )
+    params: Optional[Dict[str, Any]] = Field(
+        default=None, description="Parameters for the action"
+    )
+    conditions: Optional[Dict[str, Any]] = Field(
+        default=None, description="Conditions for step execution"
+    )
+
+
 class Command(BaseModel):
-    """Slash command configuration for AI editors."""
+    """
+    Slash command or workflow configuration for AI editors.
+
+    Supports both simple commands (single prompt) and complex workflows
+    (multi-step procedures with tool calls). Use multi_step=True for workflows.
+    """
 
     name: str = Field(..., description="Command name (e.g., 'review-code')")
     description: str = Field(..., description="Command description")
@@ -222,6 +245,19 @@ class Command(BaseModel):
     )
     trust_metadata: Optional[TrustMetadata] = Field(
         default=None, description="Trust and security metadata"
+    )
+
+    # Workflow-specific fields (v3.1.0+)
+    multi_step: bool = Field(
+        default=False,
+        description="Whether this is a multi-step workflow (vs simple command)",
+    )
+    steps: Optional[List["WorkflowStep"]] = Field(
+        default=None, description="Structured workflow steps (optional)"
+    )
+    tool_calls: Optional[List[str]] = Field(
+        default=None,
+        description="Tools/commands this workflow uses (e.g., ['gh', 'read_file'])",
     )
 
 
