@@ -276,7 +276,7 @@
           "type": "string"
         },
         "event": {
-          "description": "Event that triggers the hook (e.g., 'pre-commit', 'post-save')",
+          "description": "Event that triggers the hook (e.g., 'pre-commit', 'post-save', 'prompt-submit', 'agent-spawn')",
           "title": "Event",
           "type": "string"
         },
