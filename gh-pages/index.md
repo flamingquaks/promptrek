@@ -350,6 +350,18 @@ variables:
           </div>
           <div class="file-item">
             <span class="file-icon">📄</span>
+            <span class="file-name">.continue/config.yaml</span>
+          </div>
+          <div class="file-item">
+            <span class="file-icon">📄</span>
+            <span class="file-name">.continue/mcpServers/*.yaml</span>
+          </div>
+          <div class="file-item">
+            <span class="file-icon">📄</span>
+            <span class="file-name">.continue/prompts/*.md</span>
+          </div>
+          <div class="file-item">
+            <span class="file-icon">📄</span>
             <span class="file-name">.continue/rules/*.md</span>
           </div>
           <div class="file-item">

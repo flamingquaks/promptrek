@@ -126,8 +126,10 @@ src/promptrek/
 │   ├── cursor/                  # Cursor templates
 │   │   ├── index.mdc.j2         # Main project overview template
 │   │   └── rule.mdc.j2          # Category-specific rule template
-│   ├── continue/                # Continue templates
-│   │   └── config.json.j2
+│   ├── continue/                # Continue templates (modular)
+│   │   ├── config.yaml.j2       # Main config template
+│   │   ├── mcp_server.yaml.j2   # MCP server template
+│   │   └── prompt.md.j2         # Prompt markdown template
 │   └── shared/                  # Shared template components
 │       ├── common.md.j2
 │       └── examples.md.j2
@@ -196,7 +198,13 @@ project-root/
 │       ├── index.mdc               # Main project overview (Always rule)
 │       └── *.mdc                   # Category-specific rules (Auto Attached)
 ├── .continue/
-│   └── config.json                 # Generated Continue prompts
+│   ├── config.yaml                 # Main configuration
+│   ├── mcpServers/
+│   │   └── *.yaml                  # Individual MCP server files
+│   ├── prompts/
+│   │   └── *.md                    # Individual slash command prompts
+│   └── rules/
+│       └── *.md                    # Rule files
 └── .ai-prompts/                    # Centralized output (optional)
     ├── copilot/
     ├── cursor/
