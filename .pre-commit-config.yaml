@@ -29,7 +29,7 @@ repos:
     pass_filenames: true
   # Basic code formatting and linting (local versions)
   - id: black
-    name: black pyton linting
+    name: black python linting
     entry: uv run black
     language: system
     types: [python]
