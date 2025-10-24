@@ -21,8 +21,12 @@ MAX_AGENT_INSTRUCTIONS = 3
 class AmazonQAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
     """Adapter for Amazon Q AI assistant."""
 
-    _description = "Amazon Q (.amazonq/rules/, .amazonq/cli-agents/)"
-    _file_patterns = [".amazonq/rules/*.md", ".amazonq/cli-agents/*.json"]
+    _description = "Amazon Q (.amazonq/rules/, .amazonq/prompts/, .amazonq/cli-agents/)"
+    _file_patterns = [
+        ".amazonq/rules/*.md",
+        ".amazonq/prompts/*.md",
+        ".amazonq/cli-agents/*.json",
+    ]
 
     def __init__(self) -> None:
         super().__init__(
@@ -82,12 +86,8 @@ class AmazonQAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
         )
         created_files.extend(rules_files)
 
-        # Generate CLI agents if headless is enabled
-        if headless:
-            agent_files = self._generate_cli_agents(
-                processed_prompt, output_dir, dry_run, verbose
-            )
-            created_files.extend(agent_files)
+        # Note: V1 schema does not support agents/hooks via plugin fields
+        # For v3 schema, use agents and hooks fields instead
 
         return created_files
 
@@ -169,25 +169,24 @@ class AmazonQAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
         """Generate Amazon Q files from v2.1/v3.0 schema with plugin support."""
         created_files = []
 
-        # First, generate the regular v2/v3 markdown files
+        # First, generate the regular v2/v3 markdown files (rules)
         markdown_files = self._generate_v2(
             prompt, output_dir, dry_run, verbose, variables
         )
         created_files.extend(markdown_files)
 
-        # Then, extract and handle MCP servers from either v3 top-level or v2.1 nested structure
+        # Extract plugin fields (v3 only - we're focusing on v3.x)
         mcp_servers = None
+        commands = None
+        agents = None
+        hooks = None
 
         if isinstance(prompt, UniversalPromptV3):
-            # V3: Check top-level field
+            # V3: Extract top-level plugin fields
             mcp_servers = prompt.mcp_servers
-        elif isinstance(prompt, UniversalPromptV2) and prompt.plugins:
-            # V2.1: Use nested plugins structure (deprecated)
-            if prompt.plugins.mcp_servers:
-                click.echo(
-                    DeprecationWarnings.v3_nested_plugin_field_warning("mcp_servers")
-                )
-                mcp_servers = prompt.plugins.mcp_servers
+            commands = prompt.commands
+            agents = prompt.agents
+            hooks = prompt.hooks
 
         # Generate MCP config if we have MCP servers
         if mcp_servers:
@@ -199,6 +198,38 @@ class AmazonQAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
                 variables,
             )
             created_files.extend(mcp_files)
+
+        # Generate prompts from non-workflow commands
+        if commands:
+            prompts_files = self._generate_prompts(
+                commands,
+                output_dir,
+                dry_run,
+                verbose,
+                variables,
+            )
+            created_files.extend(prompts_files)
+
+        # Generate agents (agents will include hooks via injection)
+        if agents:
+            agent_files = self._generate_agents_v3(
+                agents,
+                hooks,
+                output_dir,
+                dry_run,
+                verbose,
+                variables,
+            )
+            created_files.extend(agent_files)
+        elif hooks:
+            # No agents but hooks exist - create default agent with hooks
+            default_agent_files = self._generate_default_agent_with_hooks(
+                hooks,
+                output_dir,
+                dry_run,
+                verbose,
+            )
+            created_files.extend(default_agent_files)
 
         return created_files
 
@@ -263,6 +294,219 @@ class AmazonQAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
                 created_files.append(system_path)
 
         return created_files
+
+    def _generate_prompts(
+        self,
+        commands: list,
+        output_dir: Path,
+        dry_run: bool,
+        verbose: bool,
+        variables: Optional[Dict[str, Any]] = None,
+    ) -> List[Path]:
+        """Generate .amazonq/prompts/*.md from non-workflow commands."""
+        prompts_dir = output_dir / ".amazonq" / "prompts"
+        created_files = []
+
+        # Filter: only commands without steps/tool_calls (non-workflows)
+        prompt_commands = [cmd for cmd in commands if not (cmd.steps or cmd.tool_calls)]
+
+        for cmd in prompt_commands:
+            # Build markdown content
+            content_lines = [f"# {cmd.description}", ""]
+            content_lines.append(cmd.prompt)
+
+            if cmd.system_message:
+                content_lines.append("")
+                content_lines.append("## System Context")
+                content_lines.append(cmd.system_message)
+
+            content = "\n".join(content_lines)
+
+            # Apply variable substitution
+            if variables:
+                for var_name, var_value in variables.items():
+                    placeholder = "{{{ " + var_name + " }}}"
+                    content = content.replace(placeholder, var_value)
+
+            # Write file
+            output_file = prompts_dir / f"{cmd.name}.md"
+
+            if dry_run:
+                click.echo(f"  📁 Would create: {output_file}")
+                if verbose:
+                    preview = content[:200] + "..." if len(content) > 200 else content
+                    click.echo(f"    {preview}")
+                created_files.append(output_file)
+            else:
+                prompts_dir.mkdir(parents=True, exist_ok=True)
+                output_file.write_text(content, encoding="utf-8")
+                click.echo(f"✅ Generated: {output_file}")
+                created_files.append(output_file)
+
+        return created_files
+
+    def _map_hook_event(self, event: str) -> Optional[str]:
+        """Map PrompTrek hook event to Amazon Q event."""
+        event_map = {
+            "prompt-submit": "userPromptSubmit",
+            "agent-spawn": "agentSpawn",
+        }
+        return event_map.get(event)
+
+    def _build_agent_hooks(
+        self,
+        agent_name: str,
+        hooks: list,
+    ) -> Optional[Dict[str, list]]:
+        """
+        Build Amazon Q hooks configuration for a specific agent.
+
+        Includes:
+        - Hooks with matching agent field
+        - Hooks with no agent field (global hooks)
+
+        Returns None if no applicable hooks.
+        """
+        agent_hooks_config = {}
+
+        for hook in hooks:
+            # Skip if hook is scoped to a different agent
+            if hook.agent and hook.agent != agent_name:
+                continue
+
+            # Map event name to Amazon Q format
+            amazon_q_event = self._map_hook_event(hook.event)
+            if not amazon_q_event:
+                # Unsupported event, skip
+                continue
+
+            # Build hook config
+            hook_config = {"command": hook.command}
+
+            # Add to event group
+            if amazon_q_event not in agent_hooks_config:
+                agent_hooks_config[amazon_q_event] = []
+            agent_hooks_config[amazon_q_event].append(hook_config)
+
+        return agent_hooks_config if agent_hooks_config else None
+
+    def _generate_agents_v3(
+        self,
+        agents: list,
+        hooks: Optional[list],
+        output_dir: Path,
+        dry_run: bool,
+        verbose: bool,
+        variables: Optional[Dict[str, Any]] = None,
+    ) -> List[Path]:
+        """Generate .amazonq/cli-agents/*.json from v3 agents field."""
+        agents_dir = output_dir / ".amazonq" / "cli-agents"
+        created_files = []
+
+        for agent in agents:
+            # Build Amazon Q agent v1 schema
+            agent_config = {
+                "name": agent.name,
+                "description": agent.description,
+                "prompt": agent.system_prompt,
+            }
+
+            # Add tools if present
+            if agent.tools:
+                agent_config["tools"] = agent.tools
+
+            # Always add resources pointing to rules
+            agent_config["resources"] = ["file://.amazonq/rules/**/*.md"]
+
+            # Inject hooks scoped to this agent
+            if hooks:
+                agent_hooks = self._build_agent_hooks(agent.name, hooks)
+                if agent_hooks:
+                    agent_config["hooks"] = agent_hooks
+
+            # Apply variable substitution to prompt
+            if variables:
+                for var_name, var_value in variables.items():
+                    placeholder = "{{{ " + var_name + " }}}"
+                    agent_config["prompt"] = agent_config["prompt"].replace(
+                        placeholder, var_value
+                    )
+
+            # Write file
+            output_file = agents_dir / f"{agent.name}.json"
+
+            if dry_run:
+                click.echo(f"  📁 Would create: {output_file}")
+                if verbose:
+                    preview = json.dumps(agent_config, indent=2)[:200]
+                    click.echo(f"    {preview}...")
+                created_files.append(output_file)
+            else:
+                agents_dir.mkdir(parents=True, exist_ok=True)
+                output_file.write_text(
+                    json.dumps(agent_config, indent=2), encoding="utf-8"
+                )
+                click.echo(f"✅ Generated: {output_file}")
+                created_files.append(output_file)
+
+        return created_files
+
+    def _generate_default_agent_with_hooks(
+        self,
+        hooks: list,
+        output_dir: Path,
+        dry_run: bool,
+        verbose: bool,
+    ) -> List[Path]:
+        """
+        Generate a default agent with global hooks when no agents are defined.
+        Only creates agent if there are applicable hooks.
+        """
+        # Check if any hooks are supported by Amazon Q
+        applicable_hooks = [
+            hook for hook in hooks if self._map_hook_event(hook.event) is not None
+        ]
+
+        if not applicable_hooks:
+            return []
+
+        agents_dir = output_dir / ".amazonq" / "cli-agents"
+
+        # Create minimal default agent
+        default_agent = {
+            "name": "default",
+            "description": "Default assistant with project hooks",
+            "prompt": "You are a helpful AI assistant.",
+            "resources": ["file://.amazonq/rules/**/*.md"],
+        }
+
+        # Add hooks (all hooks since there's no agent filtering)
+        hooks_config: Dict[str, list] = {}
+        for hook in applicable_hooks:
+            amazon_q_event = self._map_hook_event(hook.event)
+            if amazon_q_event:
+                if amazon_q_event not in hooks_config:
+                    hooks_config[amazon_q_event] = []
+                hooks_config[amazon_q_event].append({"command": hook.command})
+
+        default_agent["hooks"] = hooks_config
+
+        # Write file
+        output_file = agents_dir / "default.json"
+
+        if dry_run:
+            click.echo(f"  📁 Would create: {output_file}")
+            if verbose:
+                preview = json.dumps(default_agent, indent=2)[:200]
+                click.echo(f"    {preview}...")
+            return [output_file]
+        else:
+            agents_dir.mkdir(parents=True, exist_ok=True)
+            output_file.write_text(
+                json.dumps(default_agent, indent=2), encoding="utf-8"
+            )
+            click.echo(f"✅ Generated: {output_file}")
+            return [output_file]
 
     def _generate_rules_system(
         self,
@@ -424,84 +668,6 @@ class AmazonQAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
                         f.write(tech_content)
                     click.echo(f"✅ Generated: {tech_file}")
                     created_files.append(tech_file)
-
-        return created_files
-
-    def _generate_cli_agents(
-        self,
-        prompt: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3],
-        output_dir: Path,
-        dry_run: bool,
-        verbose: bool,
-    ) -> List[Path]:
-        """Generate .amazonq/cli-agents/ directory with agent JSON files."""
-        agents_dir = output_dir / ".amazonq" / "cli-agents"
-        created_files = []
-
-        # Generate default agents based on instructions (V1 only)
-        agents = []
-
-        # Code review agent
-        if (
-            isinstance(prompt, UniversalPrompt)
-            and prompt.instructions
-            and prompt.instructions.code_style
-        ):
-            agents.append(
-                {
-                    "name": "code-review-agent",
-                    "description": "Reviews code for style and quality issues",
-                    "instructions": "Focus on code style, readability, and best practices. "
-                    + " ".join(prompt.instructions.code_style[:MAX_AGENT_INSTRUCTIONS]),
-                }
-            )
-
-        # Security review agent
-        if (
-            isinstance(prompt, UniversalPrompt)
-            and prompt.instructions
-            and prompt.instructions.security
-        ):
-            agents.append(
-                {
-                    "name": "security-review-agent",
-                    "description": "Reviews code for security vulnerabilities",
-                    "instructions": "Always focus on OWASP Top 10 vulnerabilities. "
-                    + " ".join(prompt.instructions.security[:3]),
-                }
-            )
-
-        # Testing agent
-        if (
-            isinstance(prompt, UniversalPrompt)
-            and prompt.instructions
-            and prompt.instructions.testing
-        ):
-            agents.append(
-                {
-                    "name": "test-generation-agent",
-                    "description": "Generates unit and integration tests",
-                    "instructions": "Follow testing best practices. "
-                    + " ".join(prompt.instructions.testing[:3]),
-                }
-            )
-
-        # Generate agent files
-        for agent in agents:
-            agent_file = agents_dir / f"{agent['name']}.json"
-            agent_content = json.dumps(agent, indent=2)
-
-            if dry_run:
-                click.echo(f"  📁 Would create: {agent_file}")
-                if verbose:
-                    click.echo(f"    {agent_content[:150]}...")
-                created_files.append(agent_file)
-            else:
-                agents_dir.mkdir(parents=True, exist_ok=True)
-                with open(agent_file, "w", encoding="utf-8") as f:
-                    f.write(agent_content)
-                click.echo(f"✅ Generated: {agent_file}")
-                created_files.append(agent_file)
 
         return created_files
 

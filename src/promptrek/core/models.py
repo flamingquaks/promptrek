@@ -298,7 +298,7 @@ class Hook(BaseModel):
     name: str = Field(..., description="Hook name/identifier")
     event: str = Field(
         ...,
-        description="Event that triggers the hook (e.g., 'pre-commit', 'post-save')",
+        description="Event that triggers the hook (e.g., 'pre-commit', 'post-save', 'prompt-submit', 'agent-spawn')",
     )
     command: str = Field(..., description="Command to execute")
     conditions: Optional[Dict[str, Any]] = Field(
@@ -308,6 +308,10 @@ class Hook(BaseModel):
         default=True, description="Whether hook requires reapproval after changes"
     )
     description: Optional[str] = Field(default=None, description="Hook description")
+    agent: Optional[str] = Field(
+        default=None,
+        description="Agent name to associate hook with (for editors that support agent-scoped hooks like Amazon Q). If not specified, hook applies to all agents or is project-level.",
+    )
     trust_metadata: Optional[TrustMetadata] = Field(
         default=None, description="Trust and security metadata"
     )

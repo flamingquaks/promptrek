@@ -152,3 +152,7 @@ test-project/
 
 # PrompTrek user-specific config (not committed)
 .promptrek/
+
+# PrompTrek editor-specific files (generated, not committed)
+.amazonq/prompts/*.md
+.amazonq/mcp.json
