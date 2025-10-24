@@ -1,0 +1,131 @@
+name: Auto Label PRs
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v45
+        with:
+          separator: ","
+
+      - name: Determine labels
+        id: determine-labels
+        run: |
+          python .github/scripts/determine_labels.py "${{ steps.changed-files.outputs.all_changed_files }}"
+
+      - name: Apply labels
+        if: steps.determine-labels.outputs.labels != ''
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const labels = '${{ steps.determine-labels.outputs.labels }}'.split(',').filter(Boolean);
+
+            if (labels.length === 0) {
+              console.log('No labels to apply');
+              return;
+            }
+
+            console.log(`Applying labels: ${labels.join(', ')}`);
+
+            // Get existing labels on the PR
+            const { data: currentLabels } = await github.rest.issues.listLabelsOnIssue({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number
+            });
+
+            const currentLabelNames = currentLabels.map(l => l.name);
+            const editorLabels = currentLabelNames.filter(l => l.startsWith('Editor:'));
+
+            // Remove old editor labels that are no longer relevant
+            const labelsToRemove = editorLabels.filter(l => !labels.includes(l));
+            for (const label of labelsToRemove) {
+              console.log(`Removing outdated label: ${label}`);
+              await github.rest.issues.removeLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                name: label
+              }).catch(err => console.log(`Failed to remove ${label}: ${err.message}`));
+            }
+
+            // Add new labels
+            const labelsToAdd = labels.filter(l => !currentLabelNames.includes(l));
+            if (labelsToAdd.length > 0) {
+              console.log(`Adding labels: ${labelsToAdd.join(', ')}`);
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                labels: labelsToAdd
+              });
+            }
+
+      - name: Comment on PR
+        if: steps.determine-labels.outputs.labels != ''
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const labels = '${{ steps.determine-labels.outputs.labels }}'.split(',').filter(Boolean);
+
+            if (labels.length === 0) return;
+
+            const editorList = labels.map(l => `- **${l.replace('Editor:', '')}**`).join('\n');
+
+            const body = `## Auto-Labeling Complete
+
+            This PR has been automatically labeled based on the files changed:
+
+            ${editorList}
+
+            These labels help us track which editors are impacted by this change.`;
+
+            // Check if we already commented
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number
+            });
+
+            const botComment = comments.find(c =>
+              c.user.type === 'Bot' &&
+              c.body.includes('Auto-Labeling Complete')
+            );
+
+            if (botComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: body
+              });
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: body
+              });
+            }
