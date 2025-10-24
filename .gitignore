@@ -156,3 +156,8 @@ test-project/
 # PrompTrek editor-specific files (generated, not committed)
 .amazonq/prompts/*.md
 .amazonq/mcp.json
+
+# PrompTrek editor-specific files (generated, not committed)
+.continue/config.yaml
+.continue/mcpServers/*.yaml
+.continue/prompts/*.md
