@@ -318,9 +318,6 @@ You are a test agent with frontmatter configuration."""
 
 **Description:** Review code for quality
 
-## System Message
-Use best practices when reviewing
-
 ## Prompt
 Review the current file for:
 - Code quality
@@ -344,7 +341,6 @@ Review the current file for:
         assert command.name == "review"
         assert "quality" in command.description.lower()
         assert "code quality" in command.prompt.lower()
-        assert "best practices" in command.system_message.lower()
         assert len(command.examples) == 2
 
     def test_parse_command_files_frontmatter_format(self, adapter, tmp_path):

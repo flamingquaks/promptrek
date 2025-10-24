@@ -365,35 +365,6 @@ class TestAmazonQAdapterV3:
         # Should not have pre-commit (not in Amazon Q event map)
         assert "preCommit" not in agent_data["hooks"]
 
-    def test_prompts_with_system_message(self, adapter, tmp_path):
-        """Test that prompts with system_message include it."""
-        prompt = UniversalPromptV3(
-            schema_version="3.1.0",
-            metadata=PromptMetadata(
-                title="System Message Test",
-                description="Test",
-                version="1.0.0",
-                author="test@example.com",
-            ),
-            content="# Test\n\nContent",
-            commands=[
-                Command(
-                    name="test-cmd",
-                    description="Test command",
-                    prompt="Test prompt",
-                    system_message="Test system message",
-                ),
-            ],
-        )
-
-        files = adapter.generate(prompt, tmp_path)
-
-        prompt_file = tmp_path / ".amazonq" / "prompts" / "test-cmd.md"
-        content = prompt_file.read_text()
-
-        assert "## System Context" in content
-        assert "Test system message" in content
-
     def test_prompts_with_variables(self, adapter, tmp_path):
         """Test variable substitution in prompts."""
         prompt = UniversalPromptV3(

@@ -128,8 +128,9 @@
             }
           ],
           "default": null,
-          "description": "Optional system message for the command",
-          "title": "System Message"
+          "deprecated": true,
+          "description": "DEPRECATED: This field is ignored and will be removed in v3.2.0. Include any behavioral instructions directly in the 'prompt' field instead.",
+          "title": "System Message (Deprecated)"
         },
         "examples": {
           "anyOf": [

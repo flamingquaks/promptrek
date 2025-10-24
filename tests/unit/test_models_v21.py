@@ -123,7 +123,6 @@ class TestCommand:
             prompt="Review the PR for code quality",
             output_format="markdown",
             requires_approval=True,
-            system_message="You are a code reviewer",
             examples=["review-pr --pr=123", "review-pr --detailed"],
         )
         assert cmd.name == "review-pr"

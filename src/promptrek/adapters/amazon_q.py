@@ -315,11 +315,6 @@ class AmazonQAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
             content_lines = [f"# {cmd.description}", ""]
             content_lines.append(cmd.prompt)
 
-            if cmd.system_message:
-                content_lines.append("")
-                content_lines.append("## System Context")
-                content_lines.append(cmd.system_message)
-
             content = "\n".join(content_lines)
 
             # Apply variable substitution

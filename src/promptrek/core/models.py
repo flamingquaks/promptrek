@@ -237,9 +237,6 @@ class Command(BaseModel):
     requires_approval: bool = Field(
         default=False, description="Whether command execution requires approval"
     )
-    system_message: Optional[str] = Field(
-        default=None, description="Optional system message for the command"
-    )
     examples: Optional[List[str]] = Field(
         default=None, description="Example usage of the command"
     )

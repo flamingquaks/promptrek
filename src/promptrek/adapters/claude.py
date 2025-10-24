@@ -402,7 +402,6 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
                         prompt=remaining.strip(),
                         output_format=frontmatter.get("output_format"),
                         requires_approval=frontmatter.get("requires_approval", False),
-                        system_message=frontmatter.get("system_message"),
                         examples=frontmatter.get("examples"),
                         trust_metadata=frontmatter.get("trust_metadata"),
                     )
@@ -439,14 +438,6 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
                     # (no need to parse the text "Type: Multi-step Workflow")
                     multi_step = bool(tool_calls)
 
-                    # Extract system message (after ## System Message)
-                    system_message = None
-                    sys_msg_match = re.search(
-                        r"##\s+System Message\s+(.*?)(?=##|\Z)", content, re.DOTALL
-                    )
-                    if sys_msg_match:
-                        system_message = sys_msg_match.group(1).strip()
-
                     # Extract prompt (after ## Prompt)
                     prompt_match = re.search(
                         r"##\s+Prompt\s+(.*?)(?=##|\Z)", content, re.DOTALL
@@ -473,7 +464,6 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
                         prompt=prompt,
                         output_format=None,
                         requires_approval=False,
-                        system_message=system_message,
                         examples=examples if examples else None,
                         trust_metadata=None,
                         multi_step=multi_step,
@@ -948,11 +938,6 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
             lines.append("")
             for tool in command.tool_calls:
                 lines.append(f"- `{tool}`")
-            lines.append("")
-
-        if command.system_message:
-            lines.append("## System Message")
-            lines.append(command.system_message)
             lines.append("")
 
         lines.append("## Prompt")

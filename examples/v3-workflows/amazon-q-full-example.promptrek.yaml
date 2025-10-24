@@ -36,11 +36,10 @@ commands:
       3. Key concepts and patterns used
       4. Potential improvements or considerations
 
-  # Prompt with system message - generates .amazonq/prompts/write-tests.md
+  # Prompt for test generation - generates .amazonq/prompts/write-tests.md
   - name: write-tests
     description: Generate comprehensive test cases
-    prompt: "Generate unit tests for the selected code, covering normal cases, edge cases, and error conditions"
-    system_message: "Focus on testing edge cases and error handling. Use mocking for external dependencies."
+    prompt: "Generate unit tests for the selected code, covering normal cases, edge cases, and error conditions. Focus on testing edge cases and error handling. Use mocking for external dependencies."
 
   # Prompt with variable substitution
   - name: review-security
