@@ -153,11 +153,7 @@ class ContinueAdapter(MCPGenerationMixin, EditorAdapter):
                     created_files.append(output_file)
         else:
             # No documents, use main content as general rules
-            main_name = (
-                prompt.metadata.title
-                if hasattr(prompt, "metadata") and prompt.metadata.title
-                else "General"
-            )
+            main_name = "General Rules"
             main_description = prompt.content_description or "General coding guidelines"
             main_always_apply = (
                 prompt.content_always_apply
