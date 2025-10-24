@@ -318,6 +318,19 @@
           "description": "Hook description",
           "title": "Description"
         },
+        "agent": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Agent name to associate hook with (for editors that support agent-scoped hooks like Amazon Q). If not specified, hook applies to all agents or is project-level.",
+          "title": "Agent"
+        },
         "trust_metadata": {
           "anyOf": [
             {
