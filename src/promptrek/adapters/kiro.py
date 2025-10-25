@@ -427,28 +427,28 @@ class KiroAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
                 editor_name="Kiro",
             )
 
-        # V2: Parse each markdown file as a document
+        # V3: Parse markdown files - treat project.md as main content, others as documents
         documents = []
-        main_content_parts = []
+        main_content = None
 
         for md_file in sorted(steering_dir.glob("*.md")):
             try:
                 with open(md_file, "r", encoding="utf-8") as f:
                     content = f.read()
 
-                # Create document for this file
                 doc_name = md_file.stem  # Remove .md extension
-                documents.append(
-                    DocumentConfig(
-                        name=doc_name,
-                        content=content.strip(),
-                    )
-                )
 
-                # Also add to main content
-                main_content_parts.append(
-                    f"## {doc_name.replace('-', ' ').title()}\n\n{content}"
-                )
+                # Special case: project.md becomes the main content
+                if doc_name.lower() == "project":
+                    main_content = content.strip()
+                else:
+                    # Other files become documents
+                    documents.append(
+                        DocumentConfig(
+                            name=doc_name,
+                            content=content.strip(),
+                        )
+                    )
 
             except Exception as e:
                 click.echo(f"Warning: Could not parse {md_file}: {e}")
@@ -464,15 +464,12 @@ class KiroAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
             tags=["kiro", "synced"],
         )
 
-        # Build main content from all documents
-        main_content = (
-            "\n\n".join(main_content_parts)
-            if main_content_parts
-            else "# Kiro AI Assistant\n\nNo steering docs found."
-        )
+        # Use project.md as main content, or fallback
+        if main_content is None:
+            main_content = "# Kiro AI Assistant\n\nNo project.md found."
 
-        return UniversalPromptV2(
-            schema_version="2.0.0",
+        return UniversalPromptV3(
+            schema_version="3.1.0",
             metadata=metadata,
             content=main_content,
             documents=documents if documents else None,

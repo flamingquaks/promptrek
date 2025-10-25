@@ -343,8 +343,8 @@ class WindsurfAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
             else "# Windsurf AI Assistant\n\nNo rules found."
         )
 
-        return UniversalPromptV2(
-            schema_version="2.0.0",
+        return UniversalPromptV3(
+            schema_version="3.1.0",
             metadata=metadata,
             content=main_content,
             documents=documents if documents else None,
