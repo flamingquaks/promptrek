@@ -19,10 +19,10 @@ class LiteralString(str):
 class LiteralBlockScalarDumper(yaml.SafeDumper):
     """Custom YAML dumper that uses literal block scalar (|-) for multi-line strings."""
 
-    def write_line_break(self, data=None):
+    def write_line_break(self, data: Any = None) -> None:
         super().write_line_break(data)
 
-    def choose_scalar_style(self):
+    def choose_scalar_style(self) -> str:
         # Override to prefer literal style for multi-line strings
         if (
             isinstance(self.event, yaml.events.ScalarEvent)
@@ -30,15 +30,14 @@ class LiteralBlockScalarDumper(yaml.SafeDumper):
             and "\n" in self.event.value
         ):
             return "|"
-        return super().choose_scalar_style()
+        result = super().choose_scalar_style()
+        return result if isinstance(result, str) else ""
 
 
 def _literal_str_representer(dumper: yaml.SafeDumper, data: str) -> yaml.ScalarNode:
     """Representer for LiteralString that forces literal block scalar style."""
     # Use '|' which produces a literal block scalar with final newline preserved
     # Force literal style even for strings with special characters
-    if isinstance(data, str):
-        return dumper.represent_scalar("tag:yaml.org,2002:str", data, style="|")
     return dumper.represent_scalar("tag:yaml.org,2002:str", data, style="|")
 
 

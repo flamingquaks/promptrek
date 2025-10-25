@@ -879,24 +879,12 @@ class ClineAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
         workflows_dir = source_dir / ".clinerules" / "workflows"
         if workflows_dir.exists() and workflows_dir.is_dir():
             workflows = self._parse_workflow_files(workflows_dir)
-            if workflows:
-                # Add workflows as commands to the prompt
-                if isinstance(prompt, UniversalPromptV3):
-                    # V3: Add to top-level commands field
-                    if prompt.commands:
-                        prompt.commands.extend(workflows)
-                    else:
-                        prompt.commands = workflows
-                elif isinstance(prompt, UniversalPromptV2):
-                    # V2.1: Add to nested plugins.commands field
-                    from ..core.models import PluginConfig
-
-                    if not prompt.plugins:
-                        prompt.plugins = PluginConfig()
-                    if prompt.plugins.commands:
-                        prompt.plugins.commands.extend(workflows)
-                    else:
-                        prompt.plugins.commands = workflows
+            if workflows and isinstance(prompt, UniversalPromptV3):
+                # V3: Add workflows to top-level commands field
+                if prompt.commands:
+                    prompt.commands.extend(workflows)
+                else:
+                    prompt.commands = workflows
 
         return prompt
 

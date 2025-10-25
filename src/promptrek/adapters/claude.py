@@ -11,7 +11,7 @@ import click
 import yaml
 
 from ..core.exceptions import DeprecationWarnings, ValidationError
-from ..core.models import UniversalPrompt, UniversalPromptV2, UniversalPromptV3
+from ..core.models import Agent, UniversalPrompt, UniversalPromptV2, UniversalPromptV3
 from .base import EditorAdapter
 from .sync_mixin import SingleFileMarkdownSyncMixin
 
@@ -258,8 +258,6 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
 
     def _parse_agent_files(self, source_dir: Path) -> Optional[List[Any]]:
         """Parse agent files from .claude/agents/ directory."""
-        from ..core.models import Agent
-
         agents_dir = source_dir / ".claude" / "agents"
         if not agents_dir.exists():
             return None
@@ -279,23 +277,24 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
                     prompt_content = remaining.strip() if remaining else ""
 
                     # Description is optional from frontmatter
-                    description = frontmatter.get("description")
-                    if description and isinstance(description, str):
-                        description = description.replace("\\n", "\n")
+                    description_raw = frontmatter.get("description")
+                    description: Optional[str] = None
+                    if description_raw and isinstance(description_raw, str):
+                        description = description_raw.replace("\\n", "\n")
 
                     # Parse tools - handle both list and comma-separated string
-                    tools = frontmatter.get("tools")
-                    if tools:
-                        if isinstance(tools, str):
+                    tools_raw = frontmatter.get("tools")
+                    tools: Optional[List[str]] = None
+                    if tools_raw:
+                        if isinstance(tools_raw, str):
                             # Split comma-separated string into list
-                            tools = [t.strip() for t in tools.split(",")]
-                        elif not isinstance(tools, list):
-                            # Convert other types to None for safety
-                            tools = None
+                            tools = [t.strip() for t in tools_raw.split(",")]
+                        elif isinstance(tools_raw, list):
+                            tools = tools_raw
 
                     agent = Agent(
                         name=frontmatter.get("name", agent_file.stem),
-                        prompt=prompt_content,
+                        prompt=prompt_content,  # type: ignore[call-arg]  # Pydantic alias: prompt/system_prompt
                         description=description,
                         tools=tools,
                         trust_level=frontmatter.get("trust_level", "untrusted"),
@@ -369,7 +368,7 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
 
                     agent = Agent(
                         name=name,
-                        prompt=prompt_content,
+                        prompt=prompt_content,  # type: ignore[call-arg]  # Pydantic alias: prompt/system_prompt
                         description=description,
                         tools=tools if tools else None,
                         trust_level=trust_level,
@@ -842,7 +841,10 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
                     if event not in hooks_by_event:
                         hooks_by_event[event] = []
 
-                    # Build Claude Code format
+                    # Build Claude Code format (conditions already validated above)
+                    if not hook.conditions or "matcher" not in hook.conditions:
+                        continue  # Skip if conditions invalid
+
                     hook_config = {
                         "matcher": hook.conditions["matcher"],
                         "hooks": [

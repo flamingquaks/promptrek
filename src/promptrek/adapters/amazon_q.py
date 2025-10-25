@@ -362,7 +362,7 @@ class AmazonQAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
 
         Returns None if no applicable hooks.
         """
-        agent_hooks_config = {}
+        agent_hooks_config: Dict[str, List[Dict[str, str]]] = {}
 
         for hook in hooks:
             # Skip if hook is scoped to a different agent
@@ -467,16 +467,8 @@ class AmazonQAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
 
         agents_dir = output_dir / ".amazonq" / "cli-agents"
 
-        # Create minimal default agent
-        default_agent = {
-            "name": "default",
-            "description": "Default assistant with project hooks",
-            "prompt": "You are a helpful AI assistant.",
-            "resources": ["file://.amazonq/rules/**/*.md"],
-        }
-
         # Add hooks (all hooks since there's no agent filtering)
-        hooks_config: Dict[str, list] = {}
+        hooks_config: Dict[str, List[Dict[str, str]]] = {}
         for hook in applicable_hooks:
             amazon_q_event = self._map_hook_event(hook.event)
             if amazon_q_event:
@@ -484,7 +476,14 @@ class AmazonQAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
                     hooks_config[amazon_q_event] = []
                 hooks_config[amazon_q_event].append({"command": hook.command})
 
-        default_agent["hooks"] = hooks_config
+        # Create minimal default agent
+        default_agent: Dict[str, Any] = {
+            "name": "default",
+            "description": "Default assistant with project hooks",
+            "prompt": "You are a helpful AI assistant.",
+            "resources": ["file://.amazonq/rules/**/*.md"],
+            "hooks": hooks_config,
+        }
 
         # Write file
         output_file = agents_dir / "default.json"

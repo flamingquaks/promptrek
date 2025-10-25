@@ -556,8 +556,8 @@ This is the command prompt."""
             agents=[
                 Agent(
                     name="test-agent",
+                    prompt="You are a test agent",  # type: ignore[call-arg]  # Pydantic field alias
                     description="Test agent",
-                    prompt="# test-agent\n\n**Description:** Test agent\n\n## System Prompt\nYou are a test agent",
                     tools=["Read", "Write"],
                     trust_level="untrusted",
                     requires_approval=True,

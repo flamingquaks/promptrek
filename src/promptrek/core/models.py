@@ -262,11 +262,14 @@ class Agent(BaseModel):
     """Autonomous agent configuration."""
 
     name: str = Field(..., description="Agent name/identifier")
-    description: str = Field(
-        ..., description="High-level summary of agent purpose (for documentation)"
-    )
     prompt: str = Field(
-        ..., description="Full markdown prompt/instructions for the agent"
+        ...,
+        description="Full markdown prompt/instructions for the agent",
+        alias="system_prompt",  # Backward compatibility with v2.x
+    )
+    description: Optional[str] = Field(
+        default=None,
+        description="Optional high-level summary of agent purpose (for documentation)",
     )
     tools: Optional[List[str]] = Field(
         default=None, description="Available tools for the agent"
@@ -284,6 +287,8 @@ class Agent(BaseModel):
         default=None, description="Trust and security metadata"
     )
 
+    model_config = ConfigDict(populate_by_name=True)
+
     @field_validator("trust_level")
     @classmethod
     def validate_trust_level(cls, v: str) -> str:
@@ -294,7 +299,7 @@ class Agent(BaseModel):
 
     @model_validator(mode="before")
     @classmethod
-    def handle_system_prompt_compatibility(cls, values):
+    def handle_system_prompt_compatibility(cls, values: Any) -> Any:
         """Handle backward compatibility for system_prompt field (v3.0.0)."""
         if isinstance(values, dict):
             # If system_prompt is provided but prompt is not, use system_prompt for prompt
@@ -304,8 +309,6 @@ class Agent(BaseModel):
             elif "system_prompt" in values and "prompt" in values:
                 values.pop("system_prompt")
         return values
-
-    model_config = ConfigDict(populate_by_name=True)
 
 
 class Hook(BaseModel):
