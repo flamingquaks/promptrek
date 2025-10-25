@@ -35,7 +35,7 @@ class LiteralBlockScalarDumper(yaml.SafeDumper):
 
 def _literal_str_representer(dumper: yaml.SafeDumper, data: str) -> yaml.ScalarNode:
     """Representer for LiteralString that forces literal block scalar style."""
-    # Use '|' which produces '|-' (strip final newlines) in output
+    # Use '|' which produces a literal block scalar with final newline preserved
     # Force literal style even for strings with special characters
     if isinstance(data, str):
         return dumper.represent_scalar("tag:yaml.org,2002:str", data, style="|")
