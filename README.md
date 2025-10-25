@@ -396,7 +396,7 @@ See [`examples/v21-plugins/`](https://github.com/flamingquaks/promptrek/tree/mai
 - `promptrek plugins generate` - Generate plugin files for a specific editor
 - `promptrek plugins validate` - Validate plugin configuration
 - `promptrek plugins sync` - Sync plugins from editor files
-- `promptrek agents` - Generate agent-specific instructions
+- `promptrek agents` - ⚠️ **[DEPRECATED]** Generate agent-specific instructions (use `promptrek generate --all` instead)
 - `promptrek install-hooks` - Set up pre-commit hooks (use `--activate` to activate automatically)
 - `promptrek list-editors` - Show supported editors and their status
 

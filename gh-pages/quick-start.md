@@ -387,6 +387,14 @@ promptrek --help                    # General help
 promptrek <command> --help          # Command-specific help
 ```
 
+### Deprecated Commands
+```bash
+# ⚠️ DEPRECATED: Use 'promptrek generate --all' instead
+# promptrek agents                               # Legacy agent generation (v3.1.0+)
+```
+
+**Note**: The `agents` command is deprecated as of v3.1.0 and will be removed in a future version. All functionality is available through `promptrek generate --all`.
+
 ## Troubleshooting
 
 ### Common Issues
