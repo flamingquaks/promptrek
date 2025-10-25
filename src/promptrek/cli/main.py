@@ -364,13 +364,29 @@ def agents(
     dry_run: bool,
     force: bool,
 ) -> None:
-    """Generate persistent agent instruction files.
+    """[DEPRECATED] Generate persistent agent instruction files.
+
+    ⚠️  DEPRECATED: This command is deprecated and will be removed in a future version.
+    Use 'promptrek generate' with the --all flag instead, which now includes all
+    necessary agent configuration through editor-specific files.
 
     Creates agent instruction files (AGENTS.md, .github/copilot-instructions.md, etc.)
     that tell autonomous agents to use PrompTrek and follow the generated instructions.
     These files persist in your repository and help autonomous agents understand
     your project configuration.
     """
+    # Show deprecation warning
+    click.echo(
+        "⚠️  WARNING: The 'promptrek agents' command is deprecated and will be "
+        "removed in a future version.",
+        err=True,
+    )
+    click.echo(
+        "   Use 'promptrek generate --all' instead for comprehensive editor configuration.",
+        err=True,
+    )
+    click.echo()
+
     try:
         agents_command(ctx, prompt_file, output, dry_run, force)
     except PrompTrekError as e:

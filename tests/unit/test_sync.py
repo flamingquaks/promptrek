@@ -89,21 +89,20 @@ class TestSyncCommand:
         )  # V3 uses default title
 
         # V3 schema uses documents instead of instructions
+        # general.md becomes main content, other files become documents
         assert parsed_prompt.documents is not None
-        assert len(parsed_prompt.documents) >= 2  # general.md and code-style.md
+        assert len(parsed_prompt.documents) >= 1  # code-style.md
 
         # Check documents were parsed
         doc_names = [doc.name for doc in parsed_prompt.documents]
-        assert "general" in doc_names
+        assert "general" not in doc_names  # general.md is main content, not a document
         assert "code-style" in doc_names
 
-        # Check content is in documents
-        general_doc = next(
-            (d for d in parsed_prompt.documents if d.name == "general"), None
-        )
-        assert general_doc is not None
-        assert "Use descriptive variable names" in general_doc.content
+        # Check general.md content is in main content field
+        assert parsed_prompt.content is not None
+        assert "Use descriptive variable names" in parsed_prompt.content
 
+        # Check code-style is in documents
         code_style_doc = next(
             (d for d in parsed_prompt.documents if d.name == "code-style"), None
         )
@@ -130,8 +129,10 @@ class TestSyncCommand:
         assert isinstance(parsed_prompt, UniversalPromptV3)  # V3 schema
         assert parsed_prompt.schema_version == "3.0.0"
         assert parsed_prompt.metadata.title == "Continue AI Assistant"
-        assert len(parsed_prompt.documents) == 1
-        assert parsed_prompt.documents[0].name == "general"
+        # general.md becomes main content, not a document
+        assert parsed_prompt.documents is None or parsed_prompt.documents == []
+        assert parsed_prompt.content is not None
+        assert "Use descriptive names" in parsed_prompt.content
 
     def test_continue_adapter_parse_files_empty_directory(self, tmp_path):
         """Test parsing from empty directory."""
@@ -403,10 +404,15 @@ Some other text that should be ignored.
         content = yaml.safe_load(output_file.read_text())
         assert content["schema_version"] == "3.0.0"
         assert content["metadata"]["title"] == "Continue AI Assistant"
-        # V3 uses documents, not instructions
-        assert "documents" in content
-        assert len(content["documents"]) == 1
-        assert content["documents"][0]["name"] == "general"
+        # V3: general.md becomes main content, not a document
+        assert "content" in content
+        assert content["content"] is not None
+        assert "New test rule" in content["content"]
+        # When documents is None or empty, it may not be in the YAML
+        if "documents" in content:
+            assert (
+                len(content["documents"]) == 0
+            )  # Only general.md, which is main content
 
     def test_continue_adapter_technology_detection(self, tmp_path):
         """Test technology detection from technology-specific rule files."""

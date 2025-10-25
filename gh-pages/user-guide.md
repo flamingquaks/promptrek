@@ -28,7 +28,7 @@ Comprehensive guide to all supported AI editors. Learn how PrompTrek generates e
 Compare features across different editor adapters. See which advanced features are supported by each AI editor integration.
 
 ### 🔄 [Sync Feature](user-guide/sync.html)
-Learn about bidirectional synchronization between editor-specific configurations and PrompTrek's universal format. Keep your prompts in sync across all tools.
+Import existing editor configurations into PrompTrek format, or sync generated editor files back to maintain a single source of truth. Keep your prompts consistent across all tools.
 
 ### 🔗 [Pre-commit Integration](user-guide/pre-commit.html)
 Set up automated prompt generation and validation with pre-commit hooks. Ensure your prompts are always up-to-date and valid before committing changes.
@@ -65,6 +65,11 @@ promptrek validate
 # Sync from editor-specific files back to UPF
 promptrek sync --from copilot
 ```
+
+### Deprecated Commands
+
+**Note**: As of v3.1.0, the following commands are deprecated:
+- `promptrek agents` - Use `promptrek generate --all` instead
 
 ## Need More Help?
 

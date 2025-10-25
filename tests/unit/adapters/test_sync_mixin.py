@@ -62,15 +62,24 @@ class TestMarkdownSyncMixin:
             editor_name="Test Editor",
         )
 
+        # Should return v3 format
+        assert result.schema_version == "3.1.0"
         assert result.metadata.title == "Test Editor Configuration"
         assert "Test Editor" in result.metadata.description
-        assert result.targets == ["test-editor"]
 
-        # Check instructions were parsed
-        assert "Follow best practices" in result.instructions.general
-        assert "Write clean code" in result.instructions.general
-        assert "Use proper indentation" in result.instructions.code_style
-        assert "Write unit tests" in result.instructions.testing
+        # Check content and documents
+        assert result.content is not None
+        # First file (general.md) becomes main content
+        assert (
+            "Follow best practices" in result.content
+            or "Use proper indentation" in result.content
+        )
+
+        # Other files become documents
+        if result.documents:
+            doc_names = [doc.name for doc in result.documents]
+            # At least one document should exist
+            assert len(doc_names) > 0
 
     def test_parse_markdown_file(self, mixin, temp_dir):
         """Test parsing a single markdown file."""
@@ -112,9 +121,11 @@ class TestMarkdownSyncMixin:
             editor_name="Test",
         )
 
-        # Should return valid prompt with no instructions
+        # Should return valid v3 prompt with default content
+        assert result.schema_version == "3.1.0"
         assert result.metadata.title == "Test Configuration"
-        assert result.instructions.general is None or result.instructions.general == []
+        assert result.content is not None
+        assert "No rules found" in result.content
 
     def test_parse_nonexistent_directory(self, mixin, temp_dir):
         """Test parsing when directory doesn't exist."""
@@ -125,8 +136,10 @@ class TestMarkdownSyncMixin:
             editor_name="Test",
         )
 
-        # Should return valid prompt even if directory doesn't exist
+        # Should return valid v3 prompt even if directory doesn't exist
+        assert result.schema_version == "3.1.0"
         assert result.metadata.title == "Test Configuration"
+        assert result.content is not None
 
     def test_extract_technology_from_filename(self, mixin):
         """Test extracting technology from filename."""

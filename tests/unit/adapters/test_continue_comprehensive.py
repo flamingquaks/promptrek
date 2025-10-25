@@ -408,10 +408,14 @@ class TestContinueAdapterComprehensive:
         result = adapter.parse_files(tmp_path)
 
         assert isinstance(result, UniversalPromptV3)
+        # general.md becomes main content, other files become documents
+        assert result.content is not None
+        assert "Rule 1" in result.content
         assert result.documents is not None
-        assert len(result.documents) == 3
-        assert any(doc.name == "general" for doc in result.documents)
+        assert len(result.documents) == 2  # code-style and testing
+        assert not any(doc.name == "general" for doc in result.documents)
         assert any(doc.name == "code-style" for doc in result.documents)
+        assert any(doc.name == "testing" for doc in result.documents)
 
     def test_parse_files_v2_with_error(self, adapter, tmp_path):
         """Test parsing with file read error."""

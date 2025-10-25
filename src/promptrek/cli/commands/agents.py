@@ -1,6 +1,10 @@
 """
 Agents command implementation.
 
+⚠️  DEPRECATED: This command is deprecated as of PrompTrek v3.1.0 and will be
+removed in a future version. Use 'promptrek generate --all' instead, which now
+includes all necessary agent configuration through editor-specific files.
+
 Handles generation of persistent agent instruction files that tell autonomous agents
 to use PrompTrek and follow the generated instructions.
 """

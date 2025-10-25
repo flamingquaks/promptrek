@@ -134,7 +134,6 @@ plugins:
         Provide specific, actionable feedback with code examples.
       output_format: markdown
       requires_approval: false
-      system_message: You are a senior software architect with 15+ years of experience
       examples:
         - "/review src/api/users.ts"
         - "/review --focus=security src/auth/"

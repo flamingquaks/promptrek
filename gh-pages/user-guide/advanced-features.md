@@ -17,8 +17,8 @@ Use triple braces to define variable placeholders in your UPF files:
 
 {% raw %}
 ```yaml
-# v3.0 format (recommended)
-schema_version: "3.0.0"
+# v3.1 format (recommended)
+schema_version: "3.1.0"
 metadata:
   title: "{{{ PROJECT_NAME }}} Assistant"
   description: "AI assistant for {{{ PROJECT_NAME }}}"
@@ -40,7 +40,7 @@ variables:
 You can also reference environment variables using `${}` syntax:
 
 ```yaml
-schema_version: "3.0.0"
+schema_version: "3.1.0"
 metadata:
   author: "${AUTHOR_NAME}"
 
@@ -105,7 +105,7 @@ You can disable this with `ignore_editor_files: false` in your config.
 {% raw %}
 ```yaml
 # project.promptrek.yaml (committed to git)
-schema_version: "3.0.0"
+schema_version: "3.1.0"
 metadata:
   title: "{{{ PROJECT_NAME }}} Assistant"
   author: "{{{ AUTHOR_NAME }}}"
@@ -150,7 +150,7 @@ In v3.0, you can combine variable substitution with multiple documents:
 
 {% raw %}
 ```yaml
-schema_version: "3.0.0"
+schema_version: "3.1.0"
 metadata:
   title: "{{{ PROJECT_NAME }}} Assistant"
 
@@ -180,7 +180,7 @@ Documents in v2.0+ and v3.0 support metadata fields that control how editors lik
 
 {% raw %}
 ```yaml
-schema_version: "3.0.0"
+schema_version: "3.1.0"
 metadata:
   title: "{{{ PROJECT_NAME }}} Assistant"
 

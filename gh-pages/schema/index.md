@@ -12,54 +12,76 @@ This page provides JSON Schema files for the Universal Prompt Format (UPF) used 
 <!-- <div class="schema-list"> -->
 
 
-### v3.0 (Current Stable) ✨
+### v3.1.0 (Current Stable)
+
+**Schema Version**: 3.1.0
+
+Current stable schema with refined agent model and workflow support.
+
+- **Schema URL**: [`https://promptrek.ai/schema/v3.1.0.json`](v3.1.0.json)
+- **Features**:
+  - **Agent field rename**: `prompt` (was `system_prompt` in v3.0)
+  - Multi-step workflow support with `multi_step`, `tool_calls`, and `steps` fields
+  - Agent-scoped hooks with `agent` field
+  - Top-level plugin fields: `mcp_servers`, `commands`, `agents`, `hooks`
+  - Plugin marketplace support via `plugins` field
+  - Markdown-first content approach
+  - Lossless round-trip sync with literal block scalar formatting
+  - 100% backward compatible with v3.0 (automatic field mapping)
+- **Recommended**: Use this for all new projects
+
+[Download v3.1.0 Schema](v3.1.0.json){: .btn .btn-primary}
+
+---
+
+### v3.0 (Stable)
 
 **Schema Version**: 3.0.x
 
-Latest stable schema with top-level plugin fields and plugin marketplace support.
+Stable schema with top-level plugin fields and plugin marketplace support.
 
-- **Schema URL**: [`https://promptrek.ai/schema/v3.0.json`](v3.0.json)
+- **Schema URL**: [`https://promptrek.ai/schema/v3.0.0.json`](v3.0.0.json)
 - **Features**:
   - Top-level plugin fields: `mcp_servers`, `commands`, `agents`, `hooks`
   - Plugin marketplace support via `plugins` field
   - Markdown-first content approach
-  - Lossless bidirectional sync
-- **Recommended**: Use this for all new projects
+  - Lossless round-trip sync
+- **Note**: Consider upgrading to v3.1 for workflow support
 
-[Download v3.0 Schema](v3.0.json){: .btn .btn-primary}
+[Download v3.0.0 Schema](v3.0.0.json){: .btn}
 
 ---
 
 ### v2.1 (Legacy)
 
-**Schema Version**: 2.1.x
+**Schema Version**: 2.1.0
 
 Legacy schema with nested plugin structure.
 
-- **Schema URL**: [`https://promptrek.ai/schema/v2.1.json`](v2.1.json)
+- **Schema URL**: [`https://promptrek.ai/schema/v2.1.0.json`](v2.1.0.json)
 - **Features**:
   - Nested plugin structure: `plugins.mcp_servers`, `plugins.commands`, etc.
   - Markdown-first content approach
-  - Lossless bidirectional sync
+  - Lossless round-trip sync
 - **Note**: Consider migrating to v3.0
 
 [Download v2.1 Schema](v2.1.json){: .btn}
 
 ---
 
-### v2.0 (Legacy)
+### v2.0.0 (Legacy)
 
-**Schema Version**: 2.0.x
+**Schema Version**: 2.0.0
 
 Simplified markdown-first schema without plugin support.
 
-- **Schema URL**: [`https://promptrek.ai/schema/v2.0.json`](v2.0.json)
+- **Schema URL**: [`https://promptrek.ai/schema/v2.0.0.json`](v2.0.0.json)
 - **Features**:
   - Markdown-first content approach
   - No plugin support
 - **Note**: Consider migrating to v3.0
 
-[Download v2.0 Schema](v2.0.json){: .btn}
+[Download v2.0.0 Schema](v2.0.0.json){: .btn}
 
 <!-- </div> -->
 
@@ -70,12 +92,12 @@ Simplified markdown-first schema without plugin support.
 Add a schema reference at the top of your `project.promptrek.yaml`:
 
 ```yaml
-# yaml-language-server: $schema=https://promptrek.ai/schema/v3.0.0.json
-schema_version: 3.0.0
+# yaml-language-server: $schema=https://promptrek.ai/schema/v3.1.0.json
+schema_version: 3.1.0
 metadata:
   title: My Project
   description: Project description
-content: |
+content: |-
   # Your markdown content here
 ```
 
@@ -83,8 +105,8 @@ content: |
 
 1. Go to **Settings** → **Languages & Frameworks** → **Schemas and DTDs** → **JSON Schema Mappings**
 2. Add a new mapping:
-   - **Name**: PrompTrek UPF v3.0
-   - **Schema file or URL**: `https://promptrek.ai/schema/v3.0.json`
+   - **Name**: PrompTrek UPF v3.1
+   - **Schema file or URL**: `https://promptrek.ai/schema/v3.1.0.json`
    - **File path pattern**: `*.promptrek.yaml`
 
 ## Programmatic Validation
@@ -134,11 +156,14 @@ if (!valid) console.log(validate.errors);
 To migrate between schema versions, use the PrompTrek CLI:
 
 ```bash
-# Migrate from v2.x to v3.0
+# Migrate from v2.x to v3.1
 promptrek migrate project.promptrek.yaml -o project.v3.promptrek.yaml
 
 # Or migrate in-place
 promptrek migrate project.promptrek.yaml --in-place
+
+# v3.0 to v3.1 migration is automatic (100% backward compatible)
+# Just update schema_version: "3.1.0" to use new workflow features
 ```
 
 ## Schema Generation

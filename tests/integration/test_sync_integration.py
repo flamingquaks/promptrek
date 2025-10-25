@@ -85,21 +85,21 @@ class TestSyncIntegration:
             )  # V3 uses default title
 
             # V3 uses documents instead of targets/instructions
+            # general.md becomes main content, other files become documents
             assert "documents" in content
-            assert len(content["documents"]) >= 2  # general.md and testing.md
+            assert len(content["documents"]) >= 1  # testing.md
+
+            # Check general.md content is in main content field
+            assert "content" in content
+            assert content["content"] is not None
+            assert "Use integration tests" in content["content"]
 
             # Check documents were parsed
             doc_names = [doc["name"] for doc in content["documents"]]
-            assert "general" in doc_names
+            assert "general" not in doc_names  # general.md is main content
             assert "testing" in doc_names
 
-            # Check content in documents
-            general_doc = next(
-                (d for d in content["documents"] if d["name"] == "general"), None
-            )
-            assert general_doc is not None
-            assert "Use integration tests" in general_doc["content"]
-
+            # Check testing.md in documents
             testing_doc = next(
                 (d for d in content["documents"] if d["name"] == "testing"), None
             )

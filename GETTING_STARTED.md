@@ -237,7 +237,7 @@ promptrek generate my-project.promptrek.yaml --all
 The `.promptrek.yaml` files use a standardized format. Here's a minimal v3.0 example (recommended):
 
 ```yaml
-schema_version: "3.0.0"
+schema_version: "3.1.0"
 
 metadata:
   title: "My Project Assistant"

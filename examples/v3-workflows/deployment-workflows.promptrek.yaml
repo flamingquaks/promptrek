@@ -1,0 +1,321 @@
+# yaml-language-server: $schema=https://promptrek.ai/schema/v3.1.0.json
+schema_version: 3.1.0
+metadata:
+  title: Deployment Workflows Example
+  description: Multi-step deployment workflows for production and staging environments
+  version: 1.0.0
+  author: PrompTrek Team
+  tags: [workflows, deployment, ci-cd, v3.1]
+
+content: |
+  # Deployment Workflows
+
+  This project demonstrates multi-step workflows for automated deployment processes.
+
+  ## Overview
+
+  Use workflows to automate complex deployment tasks with built-in safety checks,
+  tool requirements, and approval gates.
+
+  ## Available Workflows
+
+  - `/deploy-staging` - Deploy to staging environment
+  - `/deploy-production` - Deploy to production (requires approval)
+  - `/rollback` - Rollback to previous version
+  - `/run-full-ci` - Execute complete CI pipeline
+
+# Multi-step workflows (v3.1+)
+commands:
+  # Staging deployment workflow
+  - name: deploy-staging
+    description: Deploy application to staging environment
+    prompt: |
+      Deploy the application to the staging environment following these steps:
+
+      1. Verify all tests pass
+      2. Build Docker image with staging tag
+      3. Push image to container registry
+      4. Deploy to staging Kubernetes cluster
+      5. Run smoke tests
+      6. Notify team on Slack
+
+      Ensure proper error handling at each step.
+    multi_step: true
+    tool_calls:
+      - npm
+      - docker
+      - kubectl
+      - gh
+    steps:
+      - name: run_tests
+        action: execute_command
+        description: Run full test suite
+        params:
+          command: npm test
+          working_dir: .
+
+      - name: build_image
+        action: execute_command
+        description: Build Docker image for staging
+        params:
+          command: docker build -t myapp:staging-${GITHUB_SHA} .
+          env:
+            DOCKER_BUILDKIT: "1"
+
+      - name: push_image
+        action: execute_command
+        description: Push image to registry
+        params:
+          command: docker push myapp:staging-${GITHUB_SHA}
+
+      - name: deploy_k8s
+        action: execute_command
+        description: Deploy to Kubernetes staging cluster
+        params:
+          command: kubectl apply -f k8s/staging/ --context=staging
+
+      - name: smoke_tests
+        action: execute_command
+        description: Run smoke tests against staging
+        params:
+          command: npm run test:smoke -- --env=staging
+
+    requires_approval: false
+    examples:
+      - Deploy latest commit to staging
+      - Deploy feature branch to staging for testing
+
+  # Production deployment workflow
+  - name: deploy-production
+    description: Deploy application to production environment
+    prompt: |
+      Deploy the application to PRODUCTION following strict safety protocols:
+
+      **Pre-deployment Checks:**
+      1. Verify staging deployment is successful
+      2. Ensure all tests pass
+      3. Check for security vulnerabilities
+      4. Review recent commits
+
+      **Deployment Steps:**
+      1. Create git tag for release
+      2. Build production Docker image
+      3. Push to production registry
+      4. Deploy to production cluster (blue-green deployment)
+      5. Run health checks
+      6. Switch traffic to new version
+      7. Monitor metrics for 5 minutes
+
+      **Post-deployment:**
+      1. Notify team
+      2. Update changelog
+      3. Create GitHub release
+
+      ⚠️ This requires manual approval before proceeding.
+    multi_step: true
+    tool_calls:
+      - git
+      - npm
+      - docker
+      - kubectl
+      - gh
+    steps:
+      - name: verify_staging
+        action: check_deployment
+        description: Verify staging deployment is healthy
+        params:
+          environment: staging
+          health_check_url: https://staging.example.com/health
+
+      - name: security_scan
+        action: execute_command
+        description: Run security vulnerability scan
+        params:
+          command: npm audit --audit-level=high
+
+      - name: create_tag
+        action: execute_command
+        description: Create git tag for this release
+        params:
+          command: git tag -a v${VERSION} -m "Release ${VERSION}"
+
+      - name: build_prod_image
+        action: execute_command
+        description: Build production Docker image
+        params:
+          command: docker build -t myapp:${VERSION} -t myapp:latest .
+          env:
+            DOCKER_BUILDKIT: "1"
+            NODE_ENV: production
+
+      - name: push_prod_image
+        action: execute_command
+        description: Push to production registry
+        params:
+          command: |
+            docker push myapp:${VERSION}
+            docker push myapp:latest
+
+      - name: deploy_blue
+        action: execute_command
+        description: Deploy to blue environment
+        params:
+          command: kubectl apply -f k8s/production/blue/ --context=production
+
+      - name: health_check
+        action: execute_command
+        description: Verify deployment health
+        params:
+          command: kubectl wait --for=condition=ready pod -l app=myapp-blue --timeout=300s
+
+      - name: switch_traffic
+        action: execute_command
+        description: Switch traffic to new version
+        params:
+          command: kubectl apply -f k8s/production/service-blue.yaml
+
+      - name: monitor
+        action: wait_and_monitor
+        description: Monitor metrics for 5 minutes
+        params:
+          duration: 300
+          metrics:
+            - error_rate
+            - response_time
+            - cpu_usage
+
+      - name: create_release
+        action: execute_command
+        description: Create GitHub release
+        params:
+          command: gh release create v${VERSION} --generate-notes
+
+    requires_approval: true
+    examples:
+      - Deploy version 2.1.0 to production
+      - Deploy hotfix to production
+
+  # Rollback workflow
+  - name: rollback
+    description: Rollback deployment to previous version
+    prompt: |
+      Perform emergency rollback to the previous stable version:
+
+      1. Identify current and previous versions
+      2. Switch Kubernetes deployment to previous version
+      3. Verify health checks pass
+      4. Notify team of rollback
+      5. Create incident report
+
+      This is an emergency procedure - act quickly but carefully.
+    multi_step: true
+    tool_calls:
+      - kubectl
+      - gh
+    steps:
+      - name: identify_versions
+        action: execute_command
+        description: Get current and previous versions
+        params:
+          command: kubectl get deployments myapp -o jsonpath='{.spec.template.spec.containers[0].image}'
+
+      - name: rollback_deployment
+        action: execute_command
+        description: Rollback to previous version
+        params:
+          command: kubectl rollout undo deployment/myapp
+
+      - name: wait_for_rollback
+        action: execute_command
+        description: Wait for rollback to complete
+        params:
+          command: kubectl rollout status deployment/myapp --timeout=300s
+
+      - name: verify_health
+        action: execute_command
+        description: Verify application health
+        params:
+          command: curl -f https://api.example.com/health || exit 1
+
+      - name: create_incident
+        action: execute_command
+        description: Create incident report
+        params:
+          command: gh issue create --title "Production Rollback - $(date)" --body "Emergency rollback performed"
+
+    requires_approval: true
+    examples:
+      - Rollback production to previous version
+      - Emergency rollback due to critical bug
+
+  # Full CI pipeline workflow
+  - name: run-full-ci
+    description: Execute complete CI pipeline
+    prompt: |
+      Run the full CI/CD pipeline including:
+
+      1. Code linting
+      2. Unit tests
+      3. Integration tests
+      4. Build Docker image
+      5. Security scanning
+      6. Performance tests
+      7. Generate reports
+
+      Fail fast on any errors.
+    multi_step: true
+    tool_calls:
+      - npm
+      - docker
+    steps:
+      - name: lint
+        action: execute_command
+        description: Run code linting
+        params:
+          command: npm run lint
+
+      - name: unit_tests
+        action: execute_command
+        description: Run unit tests with coverage
+        params:
+          command: npm run test:unit -- --coverage
+
+      - name: integration_tests
+        action: execute_command
+        description: Run integration tests
+        params:
+          command: npm run test:integration
+
+      - name: build_test_image
+        action: execute_command
+        description: Build test Docker image
+        params:
+          command: docker build -t myapp:test .
+
+      - name: security_scan
+        action: execute_command
+        description: Scan for vulnerabilities
+        params:
+          command: npm audit && docker scan myapp:test
+
+      - name: performance_tests
+        action: execute_command
+        description: Run performance benchmarks
+        params:
+          command: npm run test:perf
+
+      - name: generate_reports
+        action: execute_command
+        description: Generate test and coverage reports
+        params:
+          command: npm run reports:generate
+
+    requires_approval: false
+    examples:
+      - Run full CI pipeline before merge
+      - Validate PR with complete test suite
+
+# Variables for workflows (stored in .promptrek/variables.promptrek.yaml)
+# VERSION: 1.0.0
+# GITHUB_SHA: abc123
+# ENVIRONMENT: staging

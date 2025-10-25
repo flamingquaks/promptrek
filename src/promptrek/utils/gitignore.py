@@ -47,7 +47,9 @@ def get_editor_file_patterns() -> List[str]:
         ".mcp.json",
         # Amazon Q
         ".amazonq/rules/*.md",
+        ".amazonq/prompts/*.md",
         ".amazonq/cli-agents/*.json",
+        ".amazonq/mcp.json",
         # JetBrains
         ".assistant/rules/*.md",
         # Kiro

@@ -231,14 +231,19 @@ class TestClineAdapterV2(TestAdapterV2Base):
         return ClineAdapter()
 
     def test_generate_v2_single_file(self, adapter, sample_v2_prompt, tmp_path):
-        """Test v2 generation with single file."""
+        """Test v2 generation with single file (creates directory with default-rules.md)."""
         files = adapter.generate(sample_v2_prompt, tmp_path)
 
         assert len(files) == 1
-        cline_file = tmp_path / ".clinerules"
-        assert cline_file.exists()
+        # V2 now always creates directory structure
+        rules_dir = tmp_path / ".clinerules"
+        assert rules_dir.exists()
+        assert rules_dir.is_dir()
 
-        content = cline_file.read_text()
+        default_file = rules_dir / "default-rules.md"
+        assert default_file.exists()
+
+        content = default_file.read_text()
         assert "# Test Project" in content
 
     def test_generate_v2_multi_file(

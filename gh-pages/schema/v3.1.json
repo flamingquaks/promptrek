@@ -9,14 +9,9 @@
           "type": "string"
         },
         "description": {
-          "description": "Agent description and purpose",
-          "title": "Description",
-          "type": "string"
-        },
-        "system_prompt": {
-          "description": "System prompt for the agent",
-          "title": "System Prompt",
-          "type": "string"
+          "type": "string",
+          "description": "High-level summary of agent purpose (for documentation)",
+          "title": "Description"
         },
         "tools": {
           "anyOf": [
@@ -71,18 +66,22 @@
           ],
           "default": null,
           "description": "Trust and security metadata"
+        },
+        "prompt": {
+          "description": "Full markdown prompt/instructions for the agent",
+          "title": "Prompt",
+          "type": "string"
         }
       },
       "required": [
         "name",
-        "description",
-        "system_prompt"
+        "prompt"
       ],
       "title": "Agent",
       "type": "object"
     },
     "Command": {
-      "description": "Slash command configuration for AI editors.",
+      "description": "Slash command or workflow configuration for AI editors.\n\nSupports both simple commands (single prompt) and complex workflows\n(multi-step procedures with tool calls). Use multi_step=True for workflows.",
       "properties": {
         "name": {
           "description": "Command name (e.g., 'review-code')",
@@ -159,6 +158,44 @@
           ],
           "default": null,
           "description": "Trust and security metadata"
+        },
+        "multi_step": {
+          "default": false,
+          "description": "Whether this is a multi-step workflow (vs simple command)",
+          "title": "Multi Step",
+          "type": "boolean"
+        },
+        "steps": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/WorkflowStep"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Structured workflow steps (optional)",
+          "title": "Steps"
+        },
+        "tool_calls": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Tools/commands this workflow uses (e.g., ['gh', 'read_file'])",
+          "title": "Tool Calls"
         }
       },
       "required": [
@@ -238,7 +275,7 @@
           "type": "string"
         },
         "event": {
-          "description": "Event that triggers the hook (e.g., 'pre-commit', 'post-save')",
+          "description": "Event that triggers the hook (e.g., 'pre-commit', 'post-save', 'prompt-submit', 'agent-spawn')",
           "title": "Event",
           "type": "string"
         },
@@ -279,6 +316,19 @@
           "default": null,
           "description": "Hook description",
           "title": "Description"
+        },
+        "agent": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Agent name to associate hook with (for editors that support agent-scoped hooks like Amazon Q). If not specified, hook applies to all agents or is project-level.",
+          "title": "Agent"
         },
         "trust_metadata": {
           "anyOf": [
@@ -377,78 +427,6 @@
         "command"
       ],
       "title": "MCPServer",
-      "type": "object"
-    },
-    "PluginConfig": {
-      "additionalProperties": false,
-      "description": "Container for all plugin configurations (v2.1.0+).",
-      "properties": {
-        "mcp_servers": {
-          "anyOf": [
-            {
-              "items": {
-                "$ref": "#/$defs/MCPServer"
-              },
-              "type": "array"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "MCP server configurations",
-          "title": "Mcp Servers"
-        },
-        "commands": {
-          "anyOf": [
-            {
-              "items": {
-                "$ref": "#/$defs/Command"
-              },
-              "type": "array"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Slash command configurations",
-          "title": "Commands"
-        },
-        "agents": {
-          "anyOf": [
-            {
-              "items": {
-                "$ref": "#/$defs/Agent"
-              },
-              "type": "array"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Agent configurations",
-          "title": "Agents"
-        },
-        "hooks": {
-          "anyOf": [
-            {
-              "items": {
-                "$ref": "#/$defs/Hook"
-              },
-              "type": "array"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Hook configurations",
-          "title": "Hooks"
-        }
-      },
-      "title": "PluginConfig",
       "type": "object"
     },
     "PromptMetadata": {
@@ -610,13 +588,75 @@
       },
       "title": "TrustMetadata",
       "type": "object"
+    },
+    "WorkflowStep": {
+      "description": "Single step in a multi-step workflow.",
+      "properties": {
+        "name": {
+          "description": "Step name/identifier",
+          "title": "Name",
+          "type": "string"
+        },
+        "action": {
+          "description": "Action to perform (e.g., 'read_file', 'execute_command')",
+          "title": "Action",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Human-readable step description",
+          "title": "Description"
+        },
+        "params": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Parameters for the action",
+          "title": "Params"
+        },
+        "conditions": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Conditions for step execution",
+          "title": "Conditions"
+        }
+      },
+      "required": [
+        "name",
+        "action"
+      ],
+      "title": "WorkflowStep",
+      "type": "object"
     }
   },
   "additionalProperties": false,
-  "description": "JSON Schema for Universal Prompt Format version 2.0 - Simplified markdown-first approach",
+  "description": "JSON Schema for Universal Prompt Format version 3.1 - Adds multi-step workflow support (multi_step, tool_calls, steps fields in commands)",
   "properties": {
     "schema_version": {
-      "description": "UPF schema version (2.x.x)",
+      "description": "UPF schema version (3.x.x)",
       "title": "Schema Version",
       "type": "string"
     },
@@ -687,17 +727,69 @@
       "description": "Template variables",
       "title": "Variables"
     },
-    "plugins": {
+    "mcp_servers": {
       "anyOf": [
         {
-          "$ref": "#/$defs/PluginConfig"
+          "items": {
+            "$ref": "#/$defs/MCPServer"
+          },
+          "type": "array"
         },
         {
           "type": "null"
         }
       ],
       "default": null,
-      "description": "Plugin configurations (v2.1.0+ - deprecated in v3.0)"
+      "description": "MCP server configurations (top-level in v3.0+)",
+      "title": "Mcp Servers"
+    },
+    "commands": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/Command"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Slash command configurations (top-level in v3.0+)",
+      "title": "Commands"
+    },
+    "agents": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/Agent"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Agent configurations (top-level in v3.0+)",
+      "title": "Agents"
+    },
+    "hooks": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/Hook"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Hook configurations (top-level in v3.0+)",
+      "title": "Hooks"
     },
     "ignore_editor_files": {
       "anyOf": [
@@ -718,7 +810,7 @@
     "metadata",
     "content"
   ],
-  "title": "Universal Prompt Format v2.0",
+  "title": "Universal Prompt Format v3.1",
   "type": "object",
   "$schema": "http://json-schema.org/draft-07/schema#"
 }

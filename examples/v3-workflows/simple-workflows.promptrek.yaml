@@ -1,0 +1,177 @@
+# yaml-language-server: $schema=https://promptrek.ai/schema/v3.1.0.json
+schema_version: 3.1.0
+metadata:
+  title: Simple Workflows Example
+  description: Basic multi-step workflow examples for common development tasks
+  version: 1.0.0
+  author: PrompTrek Team
+  tags: [workflows, simple, getting-started, v3.1]
+
+content: |
+  # Simple Workflows
+
+  This example demonstrates basic multi-step workflows for common development tasks.
+
+  ## Getting Started
+
+  Workflows are multi-step commands that can:
+  - Execute multiple actions in sequence
+  - Specify required tools
+  - Include structured steps
+  - Require approval for destructive operations
+
+  ## Available Workflows
+
+  - `/test-and-build` - Run tests then build the project
+  - `/format-and-lint` - Format code then run linting
+  - `/git-push-pr` - Stage, commit, push, and create PR
+
+commands:
+  # Simple test and build workflow
+  - name: test-and-build
+    description: Run tests and build the project
+    prompt: |
+      Execute the following workflow:
+      1. Run the full test suite
+      2. If tests pass, build the project
+      3. Report success or failure
+
+      Stop immediately if any step fails.
+    multi_step: true
+    tool_calls:
+      - npm
+    steps:
+      - name: run_tests
+        action: execute_command
+        description: Run all tests
+        params:
+          command: npm test
+
+      - name: build_project
+        action: execute_command
+        description: Build for production
+        params:
+          command: npm run build
+
+    requires_approval: false
+    examples:
+      - Run tests and build before deployment
+      - Verify changes with test-and-build
+
+  # Format and lint workflow
+  - name: format-and-lint
+    description: Format code and run linting
+    prompt: |
+      Clean up the codebase:
+      1. Format all code files with prettier
+      2. Run ESLint to check for issues
+      3. Report any remaining problems
+    multi_step: true
+    tool_calls:
+      - npm
+    steps:
+      - name: format_code
+        action: execute_command
+        description: Format code with prettier
+        params:
+          command: npm run format
+
+      - name: run_lint
+        action: execute_command
+        description: Run ESLint
+        params:
+          command: npm run lint
+
+    requires_approval: false
+    examples:
+      - Clean up code before committing
+      - Format and lint the entire codebase
+
+  # Git workflow
+  - name: git-push-pr
+    description: Stage, commit, push, and create pull request
+    prompt: |
+      Complete git workflow:
+      1. Stage all changes
+      2. Commit with provided message
+      3. Push to remote branch
+      4. Create pull request
+
+      This workflow requires approval to prevent accidental commits.
+    multi_step: true
+    tool_calls:
+      - git
+      - gh
+    steps:
+      - name: git_add
+        action: execute_command
+        description: Stage all changes
+        params:
+          command: git add .
+
+      - name: git_commit
+        action: execute_command
+        description: Commit changes
+        params:
+          command: git commit -m "${COMMIT_MESSAGE}"
+
+      - name: git_push
+        action: execute_command
+        description: Push to remote
+        params:
+          command: git push -u origin HEAD
+
+      - name: create_pr
+        action: execute_command
+        description: Create pull request
+        params:
+          command: gh pr create --fill
+
+    requires_approval: true
+    examples:
+      - Commit and create PR for feature
+      - Push changes and open pull request
+
+  # Documentation update workflow
+  - name: update-docs
+    description: Generate and commit documentation
+    prompt: |
+      Update project documentation:
+      1. Generate API documentation from code
+      2. Build documentation site
+      3. Stage and commit documentation changes
+    multi_step: true
+    tool_calls:
+      - npm
+      - git
+    steps:
+      - name: generate_api_docs
+        action: execute_command
+        description: Generate API documentation
+        params:
+          command: npm run docs:generate
+
+      - name: build_docs_site
+        action: execute_command
+        description: Build documentation site
+        params:
+          command: npm run docs:build
+
+      - name: commit_docs
+        action: execute_command
+        description: Commit documentation changes
+        params:
+          command: |
+            git add docs/
+            git commit -m "docs: update API documentation"
+
+    requires_approval: false
+    examples:
+      - Update docs after API changes
+      - Regenerate documentation
+
+# Example usage with variables
+# To use this with variables, create .promptrek/variables.promptrek.yaml:
+#
+# COMMIT_MESSAGE: "feat: add new feature"
+# BRANCH_NAME: "feature/new-feature"

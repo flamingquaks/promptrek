@@ -3,6 +3,7 @@ Cline (VSCode AI coding assistant extension) adapter implementation.
 """
 
 import platform
+import re
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
@@ -23,8 +24,8 @@ from .sync_mixin import MarkdownSyncMixin
 class ClineAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
     """Adapter for Cline VSCode AI coding assistant extension."""
 
-    _description = "Cline VSCode Extension (.clinerules, .clinerules/*.md)"
-    _file_patterns = [".clinerules", ".clinerules/*.md"]
+    _description = "Cline VSCode Extension (.clinerules/*.md)"
+    _file_patterns = [".clinerules/*.md"]
 
     def __init__(self) -> None:
         super().__init__(
@@ -386,12 +387,12 @@ class ClineAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
         verbose: bool,
         variables: Optional[Dict[str, Any]] = None,
     ) -> List[Path]:
-        """Generate Cline files from v2/v3 schema (using documents for multi-file or content for single file)."""
+        """Generate Cline files from v2/v3 schema (always uses .clinerules/ directory format)."""
         created_files = []
+        clinerules_dir = output_dir / ".clinerules"
 
         # If documents field is present, generate directory format with separate files
         if prompt.documents:
-            clinerules_dir = output_dir / ".clinerules"
             for doc in prompt.documents:
                 # Apply variable substitution
                 content = doc.content
@@ -421,14 +422,14 @@ class ClineAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
                     click.echo(f"✅ Generated: {output_file}")
                     created_files.append(output_file)
         else:
-            # No documents, use main content as single .clinerules file
+            # No documents, use main content as default-rules.md in .clinerules/ directory
             content = prompt.content
             if variables:
                 for var_name, var_value in variables.items():
                     placeholder = "{{{ " + var_name + " }}}"
                     content = content.replace(placeholder, var_value)
 
-            output_file = output_dir / ".clinerules"
+            output_file = clinerules_dir / "default-rules.md"
 
             if dry_run:
                 click.echo(f"  📁 Would create: {output_file}")
@@ -437,6 +438,7 @@ class ClineAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
                     click.echo(f"    {preview}")
                 created_files.append(output_file)
             else:
+                clinerules_dir.mkdir(parents=True, exist_ok=True)
                 with open(output_file, "w", encoding="utf-8") as f:
                     f.write(content)
                 click.echo(f"✅ Generated: {output_file}")
@@ -461,12 +463,14 @@ class ClineAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
         )
         created_files.extend(markdown_files)
 
-        # Then, extract and handle MCP servers from either v3 top-level or v2.1 nested structure
+        # Then, extract and handle plugins from either v3 top-level or v2.1 nested structure
         mcp_servers = None
+        commands = None
 
         if isinstance(prompt, UniversalPromptV3):
-            # V3: Check top-level field
+            # V3: Check top-level fields
             mcp_servers = prompt.mcp_servers
+            commands = prompt.commands
         elif isinstance(prompt, UniversalPromptV2) and prompt.plugins:
             # V2.1: Use nested plugins structure (deprecated)
             if prompt.plugins.mcp_servers:
@@ -474,6 +478,11 @@ class ClineAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
                     DeprecationWarnings.v3_nested_plugin_field_warning("mcp_servers")
                 )
                 mcp_servers = prompt.plugins.mcp_servers
+            if prompt.plugins.commands:
+                click.echo(
+                    DeprecationWarnings.v3_nested_plugin_field_warning("commands")
+                )
+                commands = prompt.plugins.commands
 
         # Generate MCP config if we have MCP servers
         if mcp_servers:
@@ -486,6 +495,17 @@ class ClineAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
                 prompt,
             )
             created_files.extend(mcp_files)
+
+        # Generate workflows if we have commands
+        if commands:
+            workflow_files = self._generate_workflows(
+                commands,
+                output_dir,
+                dry_run,
+                verbose,
+                variables,
+            )
+            created_files.extend(workflow_files)
 
         return created_files
 
@@ -620,6 +640,116 @@ class ClineAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
 
         return created_files
 
+    def _generate_workflows(
+        self,
+        commands: list,
+        output_dir: Path,
+        dry_run: bool,
+        verbose: bool,
+        variables: Optional[Dict[str, Any]] = None,
+    ) -> List[Path]:
+        """Generate workflow files for Cline in .clinerules/workflows/ directory."""
+        created_files = []
+
+        # Separate workflows (commands with steps/tools) from regular commands
+        # Workflows are identified by presence of steps or tool_calls
+        workflows = [cmd for cmd in commands if (cmd.steps or cmd.tool_calls)]
+        regular_commands = [
+            cmd for cmd in commands if not (cmd.steps or cmd.tool_calls)
+        ]
+
+        # Inform user about regular commands (not supported by Cline currently)
+        if regular_commands:
+            if verbose:
+                click.echo(
+                    f"  ℹ️  Skipping {len(regular_commands)} regular command(s) "
+                    "(Cline only supports workflows with steps/tool_calls in .clinerules/workflows/)"
+                )
+
+        # Generate workflow files
+        if workflows:
+            workflows_dir = output_dir / ".clinerules" / "workflows"
+
+            for workflow in workflows:
+                # Apply variable substitution to prompt
+                workflow_content = workflow.prompt
+                if variables:
+                    for var_name, var_value in variables.items():
+                        placeholder = "{{{ " + var_name + " }}}"
+                        workflow_content = workflow_content.replace(
+                            placeholder, var_value
+                        )
+
+                # Build complete workflow markdown file
+                content_lines = []
+
+                # Add header with workflow name and description
+                content_lines.append(f"# {workflow.name}")
+                content_lines.append("")
+                content_lines.append(workflow.description)
+                content_lines.append("")
+
+                # Add tool information if specified
+                if workflow.tool_calls:
+                    content_lines.append("## Required Tools")
+                    content_lines.append("")
+                    for tool in workflow.tool_calls:
+                        content_lines.append(f"- `{tool}`")
+                    content_lines.append("")
+
+                # Add main workflow content
+                content_lines.append("## Workflow")
+                content_lines.append("")
+                content_lines.append(workflow_content)
+                content_lines.append("")
+
+                # Add examples if provided
+                if workflow.examples:
+                    content_lines.append("## Examples")
+                    content_lines.append("")
+                    for example in workflow.examples:
+                        content_lines.append(f"- {example}")
+                    content_lines.append("")
+
+                # Add structured steps if provided
+                if workflow.steps:
+                    content_lines.append("## Detailed Steps")
+                    content_lines.append("")
+                    for i, step in enumerate(workflow.steps, 1):
+                        content_lines.append(f"### {i}. {step.name}")
+                        if step.description:
+                            content_lines.append(f"   {step.description}")
+                        content_lines.append(f"   - Action: `{step.action}`")
+                        if step.params:
+                            content_lines.append(f"   - Parameters: {step.params}")
+                        content_lines.append("")
+
+                content = "\n".join(content_lines)
+
+                # Generate filename from workflow name (lowercase with hyphens)
+                filename = f"{workflow.name}.md"
+                workflow_file = workflows_dir / filename
+
+                if dry_run:
+                    click.echo(f"  📁 Would create workflow: {workflow_file}")
+                    if verbose:
+                        preview = (
+                            content[:200] + "..." if len(content) > 200 else content
+                        )
+                        click.echo(f"    {preview}")
+                    created_files.append(workflow_file)
+                else:
+                    workflows_dir.mkdir(parents=True, exist_ok=True)
+                    with open(workflow_file, "w", encoding="utf-8") as f:
+                        f.write(content)
+                    click.echo(f"✅ Generated workflow: {workflow_file}")
+                    created_files.append(workflow_file)
+
+            if not dry_run:
+                click.echo(f"  ✅ Generated {len(workflows)} workflow(s)")
+
+        return created_files
+
     def validate(
         self, prompt: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3]
     ) -> List[ValidationError]:
@@ -669,13 +799,181 @@ class ClineAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
     def parse_files(
         self, source_dir: Path
     ) -> Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3]:
-        """Parse Cline files back into a UniversalPrompt, UniversalPromptV2, or UniversalPromptV3."""
-        return self.parse_markdown_rules_files(
-            source_dir=source_dir,
-            rules_subdir=".clinerules",
-            file_extension="md",
-            editor_name="Cline",
-        )
+        """
+        Parse Cline files back into UniversalPromptV3.
+
+        Special handling: default-rules.md becomes the main content field.
+        All other .md files in .clinerules/ become documents.
+        """
+        from datetime import datetime
+
+        from ..core.models import DocumentConfig, PromptMetadata
+
+        rules_dir = source_dir / ".clinerules"
+
+        if not rules_dir.exists():
+            # Fallback to generic parsing
+            prompt = self.parse_markdown_rules_files(
+                source_dir=source_dir,
+                rules_subdir=".clinerules",
+                file_extension="md",
+                editor_name="Cline",
+            )
+        else:
+            # Parse markdown files - treat default-rules.md as main content
+            documents = []
+            main_content = None
+
+            for md_file in sorted(rules_dir.glob("*.md")):
+                # Skip workflow directory files
+                if "workflows" in md_file.parts:
+                    continue
+
+                try:
+                    with open(md_file, "r", encoding="utf-8") as f:
+                        content = f.read()
+
+                    doc_name = md_file.stem
+
+                    # Special handling: default-rules.md becomes the main content field
+                    # This is the default file generated by PrompTrek and should not be renamed
+                    # All other .md files in .clinerules/ become documents
+                    if doc_name == "default-rules":
+                        main_content = content.strip()
+                    else:
+                        # Other files become documents
+                        documents.append(
+                            DocumentConfig(
+                                name=doc_name,
+                                content=content.strip(),
+                            )
+                        )
+
+                except Exception as e:
+                    click.echo(f"Warning: Could not parse {md_file}: {e}")
+
+            # Create metadata
+            metadata = PromptMetadata(
+                title="Cline AI Assistant",
+                description="Configuration synced from Cline rules",
+                version="1.0.0",
+                author="PrompTrek Sync",
+                created=datetime.now().isoformat(),
+                updated=datetime.now().isoformat(),
+                tags=["cline", "synced"],
+            )
+
+            # Use default-rules.md as main content, or fallback
+            if main_content is None:
+                main_content = "# Cline AI Assistant\n\nNo default-rules.md found."
+
+            prompt = UniversalPromptV3(
+                schema_version="3.1.0",
+                metadata=metadata,
+                content=main_content,
+                documents=documents if documents else None,
+                variables={},
+            )
+
+        # Parse workflow files if they exist
+        workflows_dir = source_dir / ".clinerules" / "workflows"
+        if workflows_dir.exists() and workflows_dir.is_dir():
+            workflows = self._parse_workflow_files(workflows_dir)
+            if workflows and isinstance(prompt, UniversalPromptV3):
+                # V3: Add workflows to top-level commands field
+                if prompt.commands:
+                    prompt.commands.extend(workflows)
+                else:
+                    prompt.commands = workflows
+
+        return prompt
+
+    def _parse_workflow_files(self, workflows_dir: Path) -> List[Any]:
+        """Parse workflow markdown files from .clinerules/workflows/ directory."""
+        from ..core.models import Command
+
+        workflows = []
+
+        for workflow_file in sorted(workflows_dir.glob("*.md")):
+            try:
+                with open(workflow_file, "r", encoding="utf-8") as f:
+                    content = f.read()
+
+                # Extract workflow name from filename (remove .md extension)
+                workflow_name = workflow_file.stem
+
+                # Parse workflow content
+                # Look for title (# heading)
+                title_match = re.search(r"^#\s+(.+)$", content, re.MULTILINE)
+                title = title_match.group(1).strip() if title_match else workflow_name
+
+                # Extract description (first paragraph after title)
+                desc_match = re.search(
+                    r"^#\s+.+?\n\n(.+?)(?:\n\n|\n##|$)",
+                    content,
+                    re.MULTILINE | re.DOTALL,
+                )
+                description = desc_match.group(1).strip() if desc_match else ""
+
+                # Extract tool calls if present
+                tool_calls = None
+                tools_match = re.search(
+                    r"##\s+Required Tools\s*\n\n((?:- `[^`]+`\n?)+)",
+                    content,
+                    re.MULTILINE,
+                )
+                if tools_match:
+                    tool_lines = tools_match.group(1).strip().split("\n")
+                    tool_calls = []
+                    for line in tool_lines:
+                        match = re.search(r"`([^`]+)`", line)
+                        if match:
+                            tool_calls.append(match.group(1))
+
+                # Extract main workflow content
+                workflow_match = re.search(
+                    r"##\s+Workflow\s*\n\n(.+?)(?:\n##|$)",
+                    content,
+                    re.MULTILINE | re.DOTALL,
+                )
+                workflow_content = (
+                    workflow_match.group(1).strip() if workflow_match else content
+                )
+
+                # Extract examples if present
+                examples = None
+                examples_match = re.search(
+                    r"##\s+Examples\s*\n\n((?:- .+\n?)+)", content, re.MULTILINE
+                )
+                if examples_match:
+                    example_lines = examples_match.group(1).strip().split("\n")
+                    examples = [
+                        line[2:].strip()
+                        for line in example_lines
+                        if line.startswith("- ")
+                    ]
+
+                # Create Command object with multi_step=True
+                workflow = Command(
+                    name=workflow_name,
+                    description=description or title,
+                    prompt=workflow_content,
+                    multi_step=True,
+                    tool_calls=tool_calls,
+                    examples=examples,
+                    requires_approval=True,  # Workflows typically require approval
+                )
+
+                workflows.append(workflow)
+
+            except Exception as e:
+                click.echo(
+                    f"⚠️  Warning: Could not parse workflow file {workflow_file}: {e}",
+                    err=True,
+                )
+                continue
+
+        return workflows
 
     def _generate_rule_files(
         self,
@@ -934,6 +1232,22 @@ class ClineAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
                 preview = content[:200] + "..." if len(content) > 200 else content
                 click.echo(f"      {preview}")
         else:
+            # Check if .clinerules exists as a directory and remove it
+            if output_file.exists() and output_file.is_dir():
+                import shutil
+
+                click.echo(
+                    f"⚠️  Warning: {output_file} exists as a directory and will be removed"
+                )
+                if not click.confirm(
+                    "  Continue and replace directory with single file?", default=False
+                ):
+                    click.echo("  ⏭️  Skipped generation (user cancelled)")
+                    return []
+
+                shutil.rmtree(output_file)
+                if verbose:
+                    click.echo(f"  🗑️  Removed existing directory: {output_file}")
             with open(output_file, "w", encoding="utf-8") as f:
                 f.write(content)
             click.echo(f"✅ Generated: {output_file}")
