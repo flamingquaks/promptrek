@@ -37,9 +37,9 @@ class MarkdownSyncMixin:
         rules_subdir: str,
         file_extension: str = "md",
         editor_name: str = "AI Assistant",
-    ) -> UniversalPrompt:
+    ) -> UniversalPromptV3:
         """
-        Parse markdown rules files back into a UniversalPrompt.
+        Parse markdown rules files back into a UniversalPromptV3.
 
         Args:
             source_dir: Root directory containing editor configuration
@@ -48,7 +48,7 @@ class MarkdownSyncMixin:
             editor_name: Name of the editor for metadata
 
         Returns:
-            UniversalPrompt object parsed from markdown files
+            UniversalPromptV3 object parsed from markdown files
         """
         # Initialize parsed data
         metadata = PromptMetadata(
@@ -61,65 +61,76 @@ class MarkdownSyncMixin:
             tags=[editor_name.lower().replace(" ", "-"), "synced"],
         )
 
-        instructions = Instructions()
-        technologies = []
+        documents = []
+        main_content = ""
 
         # Parse markdown files from rules directory
         rules_dir = source_dir / rules_subdir
         if rules_dir.exists():
-            instructions_dict: Dict[str, List[str]] = {}
-
             pattern = f"*.{file_extension}"
-            for md_file in rules_dir.glob(pattern):
+            md_files = sorted(rules_dir.glob(pattern))
+
+            for md_file in md_files:
                 try:
-                    instructions_from_file = self._parse_markdown_file(md_file)
+                    with open(md_file, "r", encoding="utf-8") as f:
+                        content = f.read()
 
-                    # Map file names to instruction categories
-                    filename = md_file.stem
-                    category = self._map_filename_to_category(filename)
+                    # Parse frontmatter if exists
+                    doc_name = md_file.stem
+                    doc_description = None
+                    doc_always_apply = None
+                    doc_file_globs = None
+                    actual_content = content.strip()
 
-                    if category == "technology":
-                        # Extract technology name from filename
-                        tech = self._extract_technology_from_filename(filename)
-                        if tech:
-                            technologies.append(tech)
-                        # Add to general instructions
-                        if "general" not in instructions_dict:
-                            instructions_dict["general"] = []
-                        instructions_dict["general"].extend(instructions_from_file)
-                    elif category:
-                        if category not in instructions_dict:
-                            instructions_dict[category] = []
-                        instructions_dict[category].extend(instructions_from_file)
+                    if content.startswith("---"):
+                        parts = content.split("---", 2)
+                        if len(parts) >= 3:
+                            try:
+                                frontmatter = yaml.safe_load(parts[1])
+                                actual_content = parts[2].strip()
+
+                                if frontmatter:
+                                    doc_name = frontmatter.get("name", doc_name)
+                                    doc_description = frontmatter.get("description")
+                                    doc_always_apply = frontmatter.get("alwaysApply")
+                                    doc_file_globs = frontmatter.get("applyToFiles")
+                            except Exception:
+                                pass
+
+                    # Check if this is the main file (index, general, or first file)
+                    is_main = (
+                        md_file.stem.lower() in ["index", "general", "main"]
+                        or len(md_files) == 1
+                        or (not main_content and md_file == md_files[0])
+                    )
+
+                    if is_main and not main_content:
+                        # Use as main content
+                        main_content = actual_content
+                    else:
+                        # Add as document
+                        documents.append(
+                            DocumentConfig(
+                                name=doc_name,
+                                content=actual_content,
+                                description=doc_description,
+                                always_apply=doc_always_apply,
+                                file_globs=doc_file_globs,
+                            )
+                        )
 
                 except Exception as e:
                     click.echo(f"Warning: Could not parse {md_file}: {e}")
 
-            # Update instructions object
-            for category, instrs in instructions_dict.items():
-                if instrs:
-                    # Deduplicate instructions
-                    unique_instrs = list(dict.fromkeys(instrs))
-                    setattr(instructions, category, unique_instrs)
+        # If no main content, use a default message
+        if not main_content:
+            main_content = f"# {editor_name}\n\nNo rules found."
 
-        # Create context if technologies were found
-        context = None
-        if technologies:
-            context = ProjectContext(
-                project_type="application",
-                technologies=list(set(technologies)),  # Deduplicate
-                description=f"Project using {', '.join(set(technologies))}",
-            )
-
-        # Determine target based on editor name
-        target = editor_name.lower().replace(" ", "-")
-
-        return UniversalPrompt(
-            schema_version="1.0.0",
+        return UniversalPromptV3(
+            schema_version="3.1.0",
             metadata=metadata,
-            targets=[target],
-            context=context,
-            instructions=instructions,
+            content=main_content,
+            documents=documents if documents else None,
         )
 
     def _parse_markdown_file(self, md_file: Path) -> List[str]:
@@ -411,7 +422,7 @@ class SingleFileMarkdownSyncMixin:
 
         # Build v3 prompt with raw markdown content
         return UniversalPromptV3(
-            schema_version="3.0.0",
+            schema_version="3.1.0",
             metadata=metadata,
             content=content,  # Raw markdown content, lossless!
             variables={},

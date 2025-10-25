@@ -402,8 +402,8 @@ class AmazonQAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
             # Build Amazon Q agent v1 schema
             agent_config = {
                 "name": agent.name,
-                "description": agent.description,
-                "prompt": agent.system_prompt,
+                "description": agent.description if agent.description else agent.name,
+                "prompt": agent.prompt,
             }
 
             # Add tools if present

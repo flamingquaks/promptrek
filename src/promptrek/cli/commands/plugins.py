@@ -315,8 +315,8 @@ def validate_plugins_command(
     # Validate agents
     if agents:
         for agent in agents:
-            if not agent.system_prompt:
-                errors.append(f"Agent '{agent.name}' missing system_prompt")
+            if not agent.prompt:
+                errors.append(f"Agent '{agent.name}' missing prompt")
             if agent.trust_level == "untrusted":
                 warnings.append(f"Agent '{agent.name}' has untrusted access level")
 

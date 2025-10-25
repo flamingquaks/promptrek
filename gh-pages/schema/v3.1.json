@@ -9,14 +9,17 @@
           "type": "string"
         },
         "description": {
-          "description": "Agent description and purpose",
-          "title": "Description",
-          "type": "string"
-        },
-        "system_prompt": {
-          "description": "System prompt for the agent",
-          "title": "System Prompt",
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional high-level summary of agent purpose (for documentation)",
+          "title": "Description"
         },
         "tools": {
           "anyOf": [
@@ -71,12 +74,16 @@
           ],
           "default": null,
           "description": "Trust and security metadata"
+        },
+        "prompt": {
+          "description": "Full markdown prompt/instructions for the agent",
+          "title": "Prompt",
+          "type": "string"
         }
       },
       "required": [
         "name",
-        "description",
-        "system_prompt"
+        "prompt"
       ],
       "title": "Agent",
       "type": "object"

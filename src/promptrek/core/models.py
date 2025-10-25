@@ -262,8 +262,15 @@ class Agent(BaseModel):
     """Autonomous agent configuration."""
 
     name: str = Field(..., description="Agent name/identifier")
-    description: str = Field(..., description="Agent description and purpose")
-    system_prompt: str = Field(..., description="System prompt for the agent")
+    prompt: str = Field(
+        ...,
+        description="Full markdown prompt/instructions for the agent",
+        alias="system_prompt",  # Backward compatibility with v2.x
+    )
+    description: Optional[str] = Field(
+        default=None,
+        description="Optional high-level summary of agent purpose (for documentation)",
+    )
     tools: Optional[List[str]] = Field(
         default=None, description="Available tools for the agent"
     )
@@ -287,6 +294,8 @@ class Agent(BaseModel):
         if v not in ["full", "partial", "untrusted"]:
             raise ValueError("Trust level must be 'full', 'partial', or 'untrusted'")
         return v
+
+    model_config = ConfigDict(populate_by_name=True)
 
 
 class Hook(BaseModel):
