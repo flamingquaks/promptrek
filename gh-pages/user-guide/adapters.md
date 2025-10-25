@@ -294,13 +294,15 @@ A modern web application built with React and TypeScript.
 
 ### ✅ Windsurf
 **Generated Files**: `.windsurf/rules/*.md`
-**Features**: ✅ Project Files, ✅ Variables, ✅ Conditionals
+**Features**: ✅ Project Files, ✅ Variables, ✅ Conditionals, ✅ Bidirectional Sync
 
 Windsurf adapter generates organized markdown rule files for AI-powered coding assistance.
 
 **File Generation Behavior**:
 - **With `documents` field**: Generates one `.md` file per document using the document's `name` field
 - **Without `documents` field**: Generates a single `general.md` file containing the main `content`
+
+⚠️ **Important for Sync**: The `general.md` file has special meaning - it maps to the main `content` field during sync. Do not rename this file if you want bidirectional sync to work correctly. All other `.md` files in `.windsurf/rules/` become `documents`.
 
 **Example Generated Files (.windsurf/rules/)**:
 - With `documents`: Files named according to document `name` field (e.g., `typescript-guidelines.md`, `testing-standards.md`)
@@ -319,6 +321,17 @@ Windsurf adapter generates organized markdown rule files for AI-powered coding a
 - Maintain consistency with existing codebase
 - Consider performance and security implications
 ```
+
+**Bidirectional Sync Support**:
+```bash
+# Generate from PrompTrek to Windsurf files
+promptrek generate --editor windsurf project.promptrek.yaml
+
+# Sync from Windsurf files back to PrompTrek
+promptrek sync --editor windsurf --source-dir . --output project.promptrek.yaml
+```
+
+The sync system preserves the main content in `general.md` and treats all other rule files as documents in the `documents` array.
 
 ### ✅ JetBrains AI
 **Generated Files**: `.assistant/rules/*.md`
