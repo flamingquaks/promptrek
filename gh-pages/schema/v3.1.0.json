@@ -10,7 +10,7 @@
         },
         "description": {
           "type": "string",
-          "description": "Optional high-level summary of agent purpose (for documentation)",
+          "description": "High-level summary of agent purpose (for documentation)",
           "title": "Description"
         },
         "tools": {
