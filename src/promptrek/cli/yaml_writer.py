@@ -24,7 +24,11 @@ class LiteralBlockScalarDumper(yaml.SafeDumper):
 
     def choose_scalar_style(self):
         # Override to prefer literal style for multi-line strings
-        if self.event.value and "\n" in self.event.value:
+        if (
+            isinstance(self.event, yaml.events.ScalarEvent)
+            and self.event.value
+            and "\n" in self.event.value
+        ):
             return "|"
         return super().choose_scalar_style()
 
@@ -117,9 +121,22 @@ def write_promptrek_yaml(data: Dict[str, Any], output_path: Path) -> None:
 
     # Determine schema version and URL
     schema_version = data.get("schema_version", "3.0.0")
-    if schema_version.startswith("3.1"):
+    # Parse version for more precise comparison
+    version_parts = schema_version.split(".")
+    major = (
+        int(version_parts[0])
+        if len(version_parts) > 0 and version_parts[0].isdigit()
+        else 0
+    )
+    minor = (
+        int(version_parts[1])
+        if len(version_parts) > 1 and version_parts[1].isdigit()
+        else 0
+    )
+
+    if major == 3 and minor >= 1:
         schema_url = "https://promptrek.ai/schema/v3.1.0.json"
-    elif schema_version.startswith("3."):
+    elif major == 3:
         schema_url = "https://promptrek.ai/schema/v3.0.0.json"
     elif schema_version.startswith("2.1"):
         schema_url = "https://promptrek.ai/schema/v2.1.0.json"

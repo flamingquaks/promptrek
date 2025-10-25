@@ -1248,7 +1248,18 @@ class ClineAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
             if output_file.exists() and output_file.is_dir():
                 import shutil
 
+                click.echo(
+                    f"⚠️  Warning: {output_file} exists as a directory and will be removed"
+                )
+                if not click.confirm(
+                    "  Continue and replace directory with single file?", default=False
+                ):
+                    click.echo("  ⏭️  Skipped generation (user cancelled)")
+                    return []
+
                 shutil.rmtree(output_file)
+                if verbose:
+                    click.echo(f"  🗑️  Removed existing directory: {output_file}")
                 if verbose:
                     click.echo(f"  🗑️  Removed existing directory: {output_file}")
 
