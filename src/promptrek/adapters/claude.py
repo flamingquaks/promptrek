@@ -303,22 +303,38 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
                     )
                 else:
                     # Parse markdown format (no frontmatter - just pure markdown)
-                    # The entire content is the prompt
                     # Extract name from # heading
                     name_match = re.match(r"^#\s+(.+?)$", content, re.MULTILINE)
                     name = (
                         name_match.group(1).strip() if name_match else agent_file.stem
                     )
 
-                    # Full content is the prompt
-                    prompt_content = content.strip()
-
-                    # Optionally extract description (between **Description:** and next ## heading)
-                    # This is optional metadata
+                    # Extract description (between **Description:** and next content)
+                    # This is optional metadata that we add during generation
                     desc_match = re.search(
-                        r"\*\*Description:\*\*\s+(.*?)(?=##|\Z)", content, re.DOTALL
+                        r"\*\*Description:\*\*\s+(.*?)(?=\n\n|\Z)", content, re.DOTALL
                     )
                     description = desc_match.group(1).strip() if desc_match else None
+
+                    # Extract the actual prompt content (everything after heading and description)
+                    # Remove the heading line
+                    prompt_content = content
+                    if name_match:
+                        # Remove heading and everything up to first blank line after it
+                        prompt_content = re.sub(
+                            r"^#\s+.+?\n+", "", prompt_content, count=1
+                        )
+
+                    # Remove description if present
+                    if desc_match:
+                        prompt_content = re.sub(
+                            r"\*\*Description:\*\*\s+.*?\n+",
+                            "",
+                            prompt_content,
+                            count=1,
+                        )
+
+                    prompt_content = prompt_content.strip()
 
                     # Extract tools (after ## Available Tools)
                     tools = None
@@ -989,10 +1005,24 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
     def _build_agent_content(self, agent: Any, agent_prompt: str) -> str:
         """Build markdown content for an agent.
 
-        Simply returns the full prompt content since agents now store
-        the complete markdown in the prompt field.
+        Creates a structured markdown format with agent name as heading,
+        optional description, and the full prompt content.
         """
-        return agent_prompt
+        lines = []
+
+        # Add agent name as heading
+        lines.append(f"# {agent.name}")
+        lines.append("")
+
+        # Add description if available
+        if agent.description:
+            lines.append(f"**Description:** {agent.description}")
+            lines.append("")
+
+        # Add the prompt content
+        lines.append(agent_prompt)
+
+        return "\n".join(lines)
 
     def _build_content(
         self,
