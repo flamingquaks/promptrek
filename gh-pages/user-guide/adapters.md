@@ -163,6 +163,8 @@ Continue adapter generates a modular configuration system with separate files fo
 - **With `documents` field**: Generates one `.md` file per document using the document's `name` field
 - **Without `documents` field**: Generates a single `general.md` file containing the main `content`
 
+⚠️ **Important for Sync**: The `general.md` file has special meaning - it maps to the main `content` field during sync. Do not rename this file if you want bidirectional sync to work correctly. All other `.md` files in `.continue/rules/` become `documents`.
+
 **MCP Servers Directory** (`.continue/mcpServers/*.yaml`):
 - Generates one YAML file per MCP server configuration
 - Continue-specific format with metadata fields: `name`, `version`, `schema`
@@ -480,6 +482,8 @@ Kiro adapter generates steering documents that guide AI-powered coding assistant
 **File Generation Behavior**:
 - **With `documents` field**: Generates one `.md` file per document using the document's `name` field
 - **Without `documents` field**: Generates a single `project.md` file containing the main `content`
+
+⚠️ **Important for Sync**: The `project.md` file has special meaning - it maps to the main `content` field during sync. Do not rename this file if you want bidirectional sync to work correctly. All other `.md` files in `.kiro/steering/` become `documents`.
 
 **Example Generated Files (.kiro/steering/)**:
 - With `documents`: Files named according to document `name` field (e.g., `architecture.md`, `api-conventions.md`)
