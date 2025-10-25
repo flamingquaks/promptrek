@@ -579,8 +579,17 @@ This is the command prompt."""
         agent_file = tmp_path / ".claude" / "agents" / "test-agent.md"
         assert agent_file.exists()
         agent_content = agent_file.read_text()
-        assert "# test-agent" in agent_content
-        assert "Test agent" in agent_content
+        # Check for YAML frontmatter format
+        assert "---" in agent_content
+        assert "name: test-agent" in agent_content
+        assert "description: Test agent" in agent_content
+        assert "model: sonnet" in agent_content
+        assert "tools:" in agent_content
+        assert "- Read" in agent_content
+        assert "- Write" in agent_content
+        assert "trust_level: untrusted" in agent_content
+        assert "requires_approval: true" in agent_content
+        # Check prompt content after frontmatter
         assert "You are a test agent" in agent_content
 
         # Check command file

@@ -410,7 +410,7 @@ variables:
       <div class="feature-card-modern">
         <div class="feature-icon">⟷</div>
         <h3>Bidirectional Sync</h3>
-        <p>Sync editor configurations back to PrompTrek format. 6 editors (GitHub Copilot, Cursor, Continue, Kiro, Cline, Windsurf, Claude Code, Amazon Q) support lossless two-way sync.</p>
+        <p>Sync editor configurations back to PrompTrek format. 8 editors (GitHub Copilot, Cursor, Kiro, Cline, Windsurf, Claude Code, Amazon Q, JetBrains) support lossless two-way sync.</p>
       </div>
 
       <div class="feature-card-modern">
@@ -421,14 +421,14 @@ variables:
 
       <div class="feature-card-modern">
         <div class="feature-icon">▣</div>
-        <h3>Rich Examples</h3>
-        <p>8 production-ready templates for monorepos, microservices, mobile apps, ML projects, and more. Get started instantly.</p>
+        <h3>Built-in Templates</h3>
+        <p>Production-ready templates for common project types (basic, React, API). Initialize new projects instantly with best practices baked in.</p>
       </div>
 
       <div class="feature-card-modern">
         <div class="feature-icon">◎</div>
         <h3>Multi-Editor Support</h3>
-        <p>Generate prompts for 9 major AI coding assistants from a single source. Never write the same prompt twice.</p>
+        <p>Generate prompts for 9 major AI coding assistants from a single source (GitHub Copilot, Cursor, Continue, Claude Code, Cline, Windsurf, Kiro, Amazon Q, JetBrains). Never write the same prompt twice.</p>
       </div>
 
       <div class="feature-card-modern">

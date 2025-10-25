@@ -1005,21 +1005,56 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
     def _build_agent_content(self, agent: Any, agent_prompt: str) -> str:
         """Build markdown content for an agent.
 
-        Creates a structured markdown format with agent name as heading,
-        optional description, and the full prompt content.
-        """
-        lines = []
+        Creates Claude Code native YAML frontmatter format with agent metadata
+        and the full prompt content after the frontmatter.
 
-        # Add agent name as heading
-        lines.append(f"# {agent.name}")
-        lines.append("")
+        Uses proper YAML serialization to handle complex values like multiline strings.
+        """
+        # Build frontmatter as a dictionary
+        frontmatter_dict: Dict[str, Any] = {
+            "name": agent.name,
+        }
 
         # Add description if available
         if agent.description:
-            lines.append(f"**Description:** {agent.description}")
-            lines.append("")
+            frontmatter_dict["description"] = agent.description
 
-        # Add the prompt content
+        # Add model (default to sonnet if not specified)
+        model = getattr(agent, "model", "sonnet")
+        frontmatter_dict["model"] = model
+
+        # Add tools if specified
+        if agent.tools:
+            frontmatter_dict["tools"] = agent.tools
+
+        # Add trust level if specified
+        if hasattr(agent, "trust_level") and agent.trust_level:
+            frontmatter_dict["trust_level"] = agent.trust_level
+
+        # Add requires_approval if specified
+        if hasattr(agent, "requires_approval") and agent.requires_approval is not None:
+            frontmatter_dict["requires_approval"] = agent.requires_approval
+
+        # Add context if specified
+        if hasattr(agent, "context") and agent.context:
+            frontmatter_dict["context"] = agent.context
+
+        # Serialize frontmatter as YAML
+        frontmatter_yaml = yaml.dump(
+            frontmatter_dict,
+            default_flow_style=False,
+            allow_unicode=True,
+            sort_keys=False,
+        )
+
+        # Build final content
+        lines = []
+        lines.append("---")
+        lines.append(
+            frontmatter_yaml.rstrip()
+        )  # Remove trailing newline from yaml.dump
+        lines.append("---")
+        lines.append("")
         lines.append(agent_prompt)
 
         return "\n".join(lines)

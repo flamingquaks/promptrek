@@ -342,7 +342,7 @@ Workflows generate to `.continue/config.json`:
 ```
 
 ## Variable Substitution
-
+{% raw %}
 Workflows support variable substitution using `{{{ VAR }}}` syntax:
 
 ```yaml
@@ -358,6 +358,7 @@ commands:
         params:
           command: "deploy.sh {{{ ENVIRONMENT }}} {{{ BRANCH }}}"
 ```
+{% endraw %}
 
 Generate with variables:
 
