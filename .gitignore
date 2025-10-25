@@ -141,6 +141,7 @@ test-project/
 .amazonq/cli-agents/*.json
 .assistant/rules/*.md
 .kiro/steering/*.md
+.kiro/settings/mcp.json
 .tabnine_commands
 .vscode/mcp.json
 
