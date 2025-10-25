@@ -262,12 +262,11 @@ class Agent(BaseModel):
     """Autonomous agent configuration."""
 
     name: str = Field(..., description="Agent name/identifier")
+    description: str = Field(
+        ..., description="High-level summary of agent purpose (for documentation)"
+    )
     prompt: str = Field(
         ..., description="Full markdown prompt/instructions for the agent"
-    )
-    description: Optional[str] = Field(
-        default=None,
-        description="Optional high-level summary of agent purpose (for documentation)",
     )
     tools: Optional[List[str]] = Field(
         default=None, description="Available tools for the agent"
