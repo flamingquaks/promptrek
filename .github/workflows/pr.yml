@@ -264,15 +264,15 @@ jobs:
             for (const comment of validationComments) {
               try {
                 await github.graphql(`
-                  mutation {
+                  mutation MinimizeComment($subjectId: ID!) {
                     minimizeComment(input: {
-                      subjectId: "${comment.node_id}",
+                      subjectId: $subjectId,
                       classifier: RESOLVED
                     }) {
                       clientMutationId
                     }
                   }
-                `);
+                `, { subjectId: comment.node_id });
                 console.log(`Minimized previous validation comment ${comment.id}`);
               } catch (error) {
                 console.log(`Failed to minimize comment ${comment.id}: ${error.message}`);
