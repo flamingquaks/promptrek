@@ -1,5 +1,5 @@
 # yaml-language-server: $schema=https://promptrek.ai/schema/v3.0.0.json
-schema_version: 3.0.0
+schema_version: 3.1.0
 metadata:
   title: Nx Monorepo
   description: Large-scale monorepo development with Nx

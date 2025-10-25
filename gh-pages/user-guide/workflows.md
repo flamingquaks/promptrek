@@ -429,7 +429,7 @@ v3.1.0 is **100% backward compatible** with v3.0. To add workflow features:
 ### Before (v3.0)
 
 ```yaml
-schema_version: "3.0.0"
+schema_version: "3.1.0"
 
 commands:
   - name: my-command

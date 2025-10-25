@@ -45,7 +45,7 @@ Ability to organize content across multiple documents using the `documents` fiel
 
 **Example**:
 ```yaml
-schema_version: "3.0.0"
+schema_version: "3.1.0"
 content: |
   # Main guidelines
   - General project rules

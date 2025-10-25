@@ -76,11 +76,11 @@ See [examples on GitHub](https://github.com/flamingquaks/promptrek/tree/main/exa
 
 Edit the generated `.promptrek.yaml` file to match your project needs.
 
-**Using v3.0 Format (Recommended - Default)**:
+**Using v3.1 Format (Recommended - Default)**:
 
 {% raw %}
 ```yaml
-schema_version: "3.0.0"
+schema_version: "3.1.0"
 
 metadata:
   title: "My Project Assistant"
