@@ -402,43 +402,43 @@ variables:
       </div>
 
       <div class="feature-card-modern">
-        <div class="feature-icon">🔄</div>
+        <div class="feature-icon">◆</div>
         <h3>Variable Substitution</h3>
         <p>Dynamic variables with local file support. Keep sensitive values like API keys in .promptrek/variables.promptrek.yaml (automatically gitignored via .promptrek/ directory).</p>
       </div>
 
       <div class="feature-card-modern">
-        <div class="feature-icon">🔄</div>
+        <div class="feature-icon">⟷</div>
         <h3>Bidirectional Sync</h3>
         <p>Sync editor configurations back to PrompTrek format. 6 editors (GitHub Copilot, Cursor, Continue, Kiro, Cline, Windsurf, Claude Code, Amazon Q) support lossless two-way sync.</p>
       </div>
 
       <div class="feature-card-modern">
-        <div class="feature-icon">👁️</div>
+        <div class="feature-icon">◉</div>
         <h3>Preview Mode</h3>
         <p>Preview generated output before creating files. Test configurations with variable overrides without making changes.</p>
       </div>
 
       <div class="feature-card-modern">
-        <div class="feature-icon">📚</div>
+        <div class="feature-icon">▣</div>
         <h3>Rich Examples</h3>
         <p>8 production-ready templates for monorepos, microservices, mobile apps, ML projects, and more. Get started instantly.</p>
       </div>
 
       <div class="feature-card-modern">
-        <div class="feature-icon">🎨</div>
+        <div class="feature-icon">◎</div>
         <h3>Multi-Editor Support</h3>
         <p>Generate prompts for 9 major AI coding assistants from a single source. Never write the same prompt twice.</p>
       </div>
 
       <div class="feature-card-modern">
-        <div class="feature-icon">🔒</div>
+        <div class="feature-icon">✓</div>
         <h3>Pre-commit Integration</h3>
         <p>Automatic validation and protection. Pre-commit hooks ensure your .promptrek.yaml files are valid and prevent accidental commits of generated files.</p>
       </div>
 
       <div class="feature-card-modern">
-        <div class="feature-icon">📋</div>
+        <div class="feature-icon">≡</div>
         <h3>JSON Schema Support</h3>
         <p>Published JSON Schemas for v2.0, v2.1, v3.0, and v3.1. Get autocompletion, validation, and inline documentation in your editor. <a href="schema/">Learn more →</a></p>
       </div>
