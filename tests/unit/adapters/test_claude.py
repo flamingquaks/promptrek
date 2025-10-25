@@ -254,7 +254,8 @@ You are a test agent. Follow these instructions:
 
         agent = result.agents[0]
         assert agent.name == "test-agent"
-        assert "test agent" in agent.description.lower() if agent.description else True
+        assert agent.description is not None and agent.description.strip() != ""
+        assert "test agent" in agent.description.lower()
         assert "test thoroughly" in agent.prompt.lower()
         assert agent.tools == ["Read", "Write", "Bash"]
         assert agent.trust_level == "untrusted"
@@ -556,7 +557,7 @@ This is the command prompt."""
                 Agent(
                     name="test-agent",
                     description="Test agent",
-                    system_prompt="# test-agent\n\n**Description:** Test agent\n\n## System Prompt\nYou are a test agent",
+                    prompt="# test-agent\n\n**Description:** Test agent\n\n## System Prompt\nYou are a test agent",
                     tools=["Read", "Write"],
                     trust_level="untrusted",
                     requires_approval=True,
