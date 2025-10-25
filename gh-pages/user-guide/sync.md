@@ -131,6 +131,61 @@ The sync command provides clear error messages for common issues:
 
 ## Advanced Features
 
+### Schema Version Handling
+
+The sync command intelligently handles schema versions to ensure compatibility:
+
+**Current Behavior (v3.1.0)**:
+- Synced files always use the **latest schema version** (`3.1.0`)
+- All adapters produce v3.1.0 format when syncing
+- Legacy fields are automatically converted to current format
+
+**Field Name Handling**:
+- **v3.1.0 files**: Agents use `prompt` field (new name)
+- **v3.0.x files**: Agents use `system_prompt` field (backward compatibility)
+- **Automatic conversion**: Old field names are mapped to new ones during sync
+
+**Example**:
+```bash
+# Generate from v3.0.0 file (has system_prompt)
+promptrek generate old-v3.0.yaml --editor claude
+
+# Sync back - produces v3.1.0 file (has prompt)
+promptrek sync --editor claude --output new-v3.1.yaml
+```
+
+The synced `new-v3.1.yaml` will use:
+- `schema_version: 3.1.0`
+- `prompt` field for agents (not `system_prompt`)
+- Literal block scalar formatting (`|-`) for multi-line strings
+
+### YAML Formatting
+
+Synced files use clean, readable YAML formatting:
+
+**Literal Block Scalars** (`|-`):
+- All multi-line strings use literal block scalar style
+- No escaped newlines (`\n`) or quoted strings
+- Preserves markdown formatting and readability
+
+**Before (quoted style - old behavior)**:
+```yaml
+agents:
+  - name: code-reviewer
+    prompt: "You are a code reviewer.\n\nAnalyze code for:\n- Best practices\n- Security issues"
+```
+
+**After (literal block scalar - current behavior)**:
+```yaml
+agents:
+  - name: code-reviewer
+    prompt: |-
+      You are a code reviewer.
+
+      Analyze code for:
+      - Best practices
+      - Security issues
+```
 
 ### Round-trip Compatibility
 
@@ -138,3 +193,5 @@ The sync system ensures complete round-trip compatibility:
 - **Generate → Sync → Generate** maintains data integrity
 - No information loss during bidirectional conversion
 - User customizations are preserved across sync operations
+- Schema versions are upgraded automatically (v3.0 → v3.1)
+- YAML formatting remains clean and readable

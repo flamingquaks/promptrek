@@ -64,8 +64,7 @@ commands:
 agents:
   # Code reviewer agent - gets global hooks + scoped hook
   - name: code-reviewer
-    description: Reviews code for quality, security, and best practices
-    system_prompt: |
+    prompt: |-
       You are an expert code reviewer with deep knowledge of software engineering.
 
       Your responsibilities:
@@ -76,6 +75,7 @@ agents:
       5. Recommend additional test coverage
 
       Provide constructive feedback with specific examples and explanations.
+    description: Reviews code for quality, security, and best practices
     tools:
       - file_read
       - git_diff
@@ -83,8 +83,7 @@ agents:
 
   # Documentation generator agent - gets only global hooks
   - name: doc-generator
-    description: Generates and updates project documentation
-    system_prompt: |
+    prompt: |-
       You are a documentation specialist focused on creating clear,
       comprehensive documentation that helps developers understand and use the code.
 
@@ -94,6 +93,7 @@ agents:
       - Common use cases and patterns
       - API references
       - Troubleshooting guides
+    description: Generates and updates project documentation
     tools:
       - file_read
       - file_write
@@ -101,11 +101,11 @@ agents:
 
   # Test generator agent - custom prompt with variable
   - name: test-generator
-    description: Generates comprehensive test suites
-    system_prompt: |
+    prompt: |-
       You are a test automation expert for {{{ PROJECT_TYPE }}} projects.
       Generate comprehensive tests that cover normal operations, edge cases,
       and error conditions. Use mocking for external dependencies.
+    description: Generates comprehensive test suites
 
 # Hooks: Injected into agents based on 'agent' field
 hooks:
