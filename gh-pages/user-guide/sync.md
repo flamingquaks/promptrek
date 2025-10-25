@@ -5,11 +5,14 @@ title: Sync Feature
 
 # PrompTrek Sync Feature
 
-The sync feature allows you to read AI editor-specific configuration files and create or update PrompTrek configuration from them. This enables bidirectional synchronization between PrompTrek and AI editors.
+The sync feature allows you to import AI editor-specific configuration files into PrompTrek format, or sync generated editor files back to your PrompTrek configuration. This creates a workflow where you can:
+1. **Import**: Start with existing editor configs and convert them to PrompTrek
+2. **Generate**: Use PrompTrek to generate editor-specific files
+3. **Sync back**: Capture manual edits from editor files back into PrompTrek
 
 ## Overview
 
-Many AI editors can self-update their markdown configuration files based on project context and user interactions. The sync feature allows you to capture these changes back into your PrompTrek configuration, creating a feedback loop that keeps your universal prompts up-to-date.
+Many AI editors allow manual editing of their configuration files. The sync feature allows you to capture these changes back into your PrompTrek configuration, maintaining PrompTrek as your single source of truth while preserving manual edits.
 
 ## Supported Editors
 
@@ -180,11 +183,11 @@ The sync feature maps editor files to PrompTrek fields:
 
 ## Benefits
 
-- **Bidirectional sync**: Changes flow both ways between PrompTrek and editors
-- **AI-driven updates**: Capture improvements made by AI editors
-- **Centralized configuration**: Maintain a single source of truth
+- **Import & sync workflow**: Import existing configs, generate to editors, sync manual changes back
+- **Lossless round-trip**: No data loss when going from PrompTrek → Editor → PrompTrek
+- **Centralized configuration**: Maintain a single source of truth in PrompTrek format
 - **Version control friendly**: All changes are captured in PrompTrek YAML files
-- **Flexible merging**: Preserves manual customizations while adding AI improvements
+- **Flexible merging**: Preserves manual customizations while adding new content
 
 ## Error Handling
 
@@ -257,7 +260,7 @@ agents:
 
 The sync system ensures complete round-trip compatibility:
 - **Generate → Sync → Generate** maintains data integrity
-- No information loss during bidirectional conversion
+- No information loss during the round-trip (PrompTrek → Editor → PrompTrek)
 - User customizations are preserved across sync operations
 - Schema versions are upgraded automatically (v3.0 → v3.1)
 - YAML formatting remains clean and readable

@@ -20,7 +20,7 @@ PrompTrek supports 9 AI-powered code editors and assistants. Each adapter genera
 - `.claude/settings.local.json` - Hooks with tool matchers (Claude Code native format)
 - `.claude/hooks.yaml` - Hooks without matchers (PrompTrek format)
 
-**Features**: ✅ Project Files, ✅ Variables, ✅ Conditionals, ✅ Bidirectional Sync, ✅ MCP Servers, ✅ Custom Commands, ✅ Autonomous Agents, ✅ Event Hooks
+**Features**: ✅ Project Files, ✅ Variables, ✅ Conditionals, ✅ Sync Support, ✅ MCP Servers, ✅ Custom Commands, ✅ Autonomous Agents, ✅ Event Hooks
 
 Claude Code adapter generates comprehensive markdown context files with full plugin ecosystem support including MCP servers, custom commands, autonomous agents, and event-driven hooks.
 
@@ -135,7 +135,7 @@ hooks:
     description: Validate code before commits
 ```
 
-**Bidirectional Sync Support**:
+**Sync Support Support**:
 ```bash
 # Generate from PrompTrek to Claude files
 promptrek generate --editor claude project.promptrek.yaml
@@ -163,7 +163,7 @@ Continue adapter generates a modular configuration system with separate files fo
 - **With `documents` field**: Generates one `.md` file per document using the document's `name` field
 - **Without `documents` field**: Generates a single `general.md` file containing the main `content`
 
-⚠️ **Important for Sync**: The `general.md` file has special meaning - it maps to the main `content` field during sync. Do not rename this file if you want bidirectional sync to work correctly. All other `.md` files in `.continue/rules/` become `documents`.
+⚠️ **Important for Sync**: The `general.md` file has special meaning - it maps to the main `content` field during sync. Do not rename this file if you want round-trip sync to work correctly. All other `.md` files in `.continue/rules/` become `documents`.
 
 **MCP Servers Directory** (`.continue/mcpServers/*.yaml`):
 - Generates one YAML file per MCP server configuration
@@ -257,11 +257,11 @@ prompts:
 - **Prompts**: `name`, `description`, `invokable`
 - **MCP Servers**: Top-level metadata includes `name`, `version`, `schema`
 
-**Sync Support**: Continue adapter supports bidirectional sync - you can import existing Continue configurations back to PrompTrek format using `promptrek sync`.
+**Sync Support**: Continue adapter supports round-trip sync - you can import existing Continue configurations back to PrompTrek format using `promptrek sync`.
 
 ### ✅ Cline (VSCode Extension)
 **Generated Files**: `.clinerules`, `.clinerules/*.md`, `.vscode/settings.json` (MCP)
-**Features**: Variable substitution, Conditional instructions, MCP server support, Bidirectional sync
+**Features**: Variable substitution, Conditional instructions, MCP server support, Round-trip sync
 
 Cline adapter generates markdown-based rules for the Cline VSCode extension - an autonomous AI coding agent with file creation/editing, command execution, and browser automation capabilities.
 
@@ -269,7 +269,7 @@ Cline adapter generates markdown-based rules for the Cline VSCode extension - an
 - **With `documents` field**: Generates one `.md` file per document using the document's `name` field
 - **Without `documents` field**: Generates a single `default-rules.md` file containing the main `content`
 
-⚠️ **Important for Sync**: The `default-rules.md` file has special meaning - it maps to the main `content` field during sync. Do not rename this file if you want bidirectional sync to work correctly. All other `.md` files in `.clinerules/` become `documents`.
+⚠️ **Important for Sync**: The `default-rules.md` file has special meaning - it maps to the main `content` field during sync. Do not rename this file if you want round-trip sync to work correctly. All other `.md` files in `.clinerules/` become `documents`.
 
 **Example Output (.clinerules/default-rules.md)**:
 ```markdown
@@ -294,7 +294,7 @@ A modern web application built with React and TypeScript.
 
 ### ✅ Windsurf
 **Generated Files**: `.windsurf/rules/*.md`
-**Features**: ✅ Project Files, ✅ Variables, ✅ Conditionals, ✅ Bidirectional Sync
+**Features**: ✅ Project Files, ✅ Variables, ✅ Conditionals, ✅ Sync Support
 
 Windsurf adapter generates organized markdown rule files for AI-powered coding assistance.
 
@@ -302,7 +302,7 @@ Windsurf adapter generates organized markdown rule files for AI-powered coding a
 - **With `documents` field**: Generates one `.md` file per document using the document's `name` field
 - **Without `documents` field**: Generates a single `general.md` file containing the main `content`
 
-⚠️ **Important for Sync**: The `general.md` file has special meaning - it maps to the main `content` field during sync. Do not rename this file if you want bidirectional sync to work correctly. All other `.md` files in `.windsurf/rules/` become `documents`.
+⚠️ **Important for Sync**: The `general.md` file has special meaning - it maps to the main `content` field during sync. Do not rename this file if you want round-trip sync to work correctly. All other `.md` files in `.windsurf/rules/` become `documents`.
 
 **Example Generated Files (.windsurf/rules/)**:
 - With `documents`: Files named according to document `name` field (e.g., `typescript-guidelines.md`, `testing-standards.md`)
@@ -322,7 +322,7 @@ Windsurf adapter generates organized markdown rule files for AI-powered coding a
 - Consider performance and security implications
 ```
 
-**Bidirectional Sync Support**:
+**Sync Support Support**:
 ```bash
 # Generate from PrompTrek to Windsurf files
 promptrek generate --editor windsurf project.promptrek.yaml
@@ -351,9 +351,9 @@ JetBrains AI adapter generates markdown rules for AI assistance integrated into 
 
 ### ✅ GitHub Copilot
 **Generated Files**: `.github/copilot-instructions.md`, `.github/instructions/*.instructions.md`, `.github/prompts/*.prompt.md`
-**Features**: Variable substitution, Conditional instructions, Path-specific instructions, Bidirectional sync
+**Features**: Variable substitution, Conditional instructions, Path-specific instructions, Round-trip sync
 
-GitHub Copilot adapter generates sophisticated instruction systems with repository-wide and path-specific configurations. Supports full bidirectional synchronization for seamless round-trip workflows.
+GitHub Copilot adapter generates sophisticated instruction systems with repository-wide and path-specific configurations. Supports full round-trip synchronization for seamless round-trip workflows.
 
 **Repository Instructions (.github/copilot-instructions.md)**:
 ```markdown
@@ -383,7 +383,7 @@ applyTo: "**/*.{ts,tsx}"
 - Use proper typing for all function parameters
 ```
 
-**Bidirectional Sync Support**:
+**Sync Support Support**:
 ```bash
 # Round-trip workflow
 promptrek generate --editor copilot project.promptrek.yaml
@@ -502,7 +502,7 @@ Kiro adapter generates steering documents that guide AI-powered coding assistant
 - **With `documents` field**: Generates one `.md` file per document using the document's `name` field
 - **Without `documents` field**: Generates a single `project.md` file containing the main `content`
 
-⚠️ **Important for Sync**: The `project.md` file has special meaning - it maps to the main `content` field during sync. Do not rename this file if you want bidirectional sync to work correctly. All other `.md` files in `.kiro/steering/` become `documents`.
+⚠️ **Important for Sync**: The `project.md` file has special meaning - it maps to the main `content` field during sync. Do not rename this file if you want round-trip sync to work correctly. All other `.md` files in `.kiro/steering/` become `documents`.
 
 **Example Generated Files (.kiro/steering/)**:
 - With `documents`: Files named according to document `name` field (e.g., `architecture.md`, `api-conventions.md`)

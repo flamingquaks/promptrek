@@ -13,7 +13,7 @@ PrompTrek supports **four schema versions**:
 - **v3.1.0** (Current): Refined agent model with `prompt` field, workflow support (backward compatible with v3.0.x)
 - **v3.0.0** (Stable): Top-level plugin fields (mcp_servers, commands, agents, hooks), cleaner architecture (backward compatible with v2.x)
 - **v2.1.0** (Legacy): Markdown-first with nested plugin support (superseded by v3.0)
-- **v2.0.0** (Legacy): Markdown-first, simpler format with lossless bidirectional sync
+- **v2.0.0** (Legacy): Markdown-first, simpler format with lossless round-trip sync
 
 ## File Extension
 
@@ -962,7 +962,7 @@ promptrek generate v2.0-file.promptrek.yaml --editor claude
 ### Key Benefits
 
 - ✅ **No `targets` field** - Works with ALL editors automatically
-- ✅ **Lossless bidirectional sync** - Parse editor files back without data loss
+- ✅ **Lossless round-trip sync** - Parse editor files back without data loss
 - ✅ **Simpler format** - Just markdown content, no complex nested structures
 - ✅ **Editor-friendly** - Matches how Claude Code, Copilot, and others use markdown
 - ✅ **Multi-file support** - Use `documents` field for multi-file editors
@@ -1212,7 +1212,7 @@ variables:
 **v3.0 offers:**
 - ✅ Simple markdown-first format
 - ✅ Top-level plugin fields (cleaner than v2.x nested structure)
-- ✅ Lossless bidirectional sync
+- ✅ Lossless round-trip sync
 - ✅ Works with ALL editors without `targets`
 - ✅ Matches how AI editors use markdown natively
 

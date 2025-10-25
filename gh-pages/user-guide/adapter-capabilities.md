@@ -9,7 +9,7 @@ This document provides a comprehensive comparison of features supported by each 
 
 ## Quick Reference Table
 
-| Editor | Variable Substitution | Multi-Document Support | Bidirectional Sync | Project Files | v3.0 Schema |
+| Editor | Variable Substitution | Multi-Document Support | Sync Support | Project Files | v3.0 Schema |
 |--------|:--------------------:|:----------------------:|:------------------:|:-------------:|:-------------:|
 | **GitHub Copilot** | ✅ | ✅ | ✅ | ✅  | ✅ |
 | **Cursor** | ✅ | ✅ | ✅ | ✅  | ✅ |
@@ -68,7 +68,7 @@ documents:
     # Metadata fields optional - smart defaults used
 ```
 
-### Bidirectional Sync
+### Sync Support
 Ability to read editor-specific files and create/update PrompTrek configuration from them.
 
 **Supported by**: All adapters
@@ -115,7 +115,7 @@ Full support for PrompTrek v3.0 schema with top-level plugin fields.
 
 **Unique Features**:
 - ✅ Path-specific instructions with YAML frontmatter (applyTo field)
-- ✅ Bidirectional sync (v2 lossless format)
+- ✅ Round-trip sync (v2 lossless format)
 - ✅ Advanced glob pattern matching
 - ✅ MCP server integration
 - ✅ v3.0 schema with top-level plugins
@@ -139,7 +139,7 @@ Full support for PrompTrek v3.0 schema with top-level plugin fields.
 - ✅ Always/Auto Attached rule types via metadata
 - ✅ Technology-specific rule generation with smart defaults
 - ✅ Advanced ignore file support
-- ✅ Bidirectional sync
+- ✅ Round-trip sync
 - ✅ MCP server, commands, and agents support
 - ✅ v3.0 schema with top-level plugins
 
@@ -160,7 +160,7 @@ Full support for PrompTrek v3.0 schema with top-level plugin fields.
 - ✅ YAML-based configuration following Continue's recommendations
 - ✅ Individual MCP server files with Continue metadata format
 - ✅ Individual prompt markdown files with frontmatter
-- ✅ Bidirectional sync
+- ✅ Round-trip sync
 - ✅ Advanced rules directory
 - ✅ v3.0 schema with top-level plugins
 
@@ -180,7 +180,7 @@ Full support for PrompTrek v3.0 schema with top-level plugin fields.
 - ✅ YAML frontmatter support
 - ✅ Separate specs for features
 - ✅ Structured guidance approach
-- ✅ Bidirectional sync
+- ✅ Round-trip sync
 - ✅ MCP server support
 - ✅ v3.0 schema with top-level plugins
 
@@ -199,7 +199,7 @@ Full support for PrompTrek v3.0 schema with top-level plugin fields.
 - ✅ VSCode-integrated autonomous agent
 - ✅ File creation/editing with user approval
 - ✅ Command execution and browser automation
-- ✅ Bidirectional sync
+- ✅ Round-trip sync
 - ✅ MCP server support (via VSCode settings)
 - ✅ v3.0 schema with top-level plugins
 
@@ -220,7 +220,7 @@ Full support for PrompTrek v3.0 schema with top-level plugin fields.
 **Unique Features**:
 - ✅ Rich markdown context format
 - ✅ Full plugin ecosystem support (MCP, commands, agents, hooks)
-- ✅ Bidirectional sync (v2/v3 lossless format)
+- ✅ Round-trip sync (v2/v3 lossless format)
 - ✅ Dual hooks format (native + PrompTrek)
 - ✅ v3.0 schema with top-level plugins
 - ✅ Autonomous agent support with trust levels
@@ -240,7 +240,7 @@ Full support for PrompTrek v3.0 schema with top-level plugin fields.
 - ✅ Markdown rules format
 - ✅ Technology-specific rules
 - ✅ Modular rule organization
-- ✅ Bidirectional sync
+- ✅ Round-trip sync
 - ✅ MCP server support (system-wide)
 - ✅ v3.0 schema with top-level plugins
 
@@ -259,7 +259,7 @@ Full support for PrompTrek v3.0 schema with top-level plugin fields.
 - ✅ Rules directory support
 - ✅ CLI agents for code review, security, testing
 - ✅ AWS-integrated workflows
-- ✅ Bidirectional sync
+- ✅ Round-trip sync
 - ✅ MCP server support
 - ✅ v3.0 schema with top-level plugins
 
@@ -275,7 +275,7 @@ Full support for PrompTrek v3.0 schema with top-level plugin fields.
 **Unique Features**:
 - ✅ IDE-integrated configuration
 - ✅ Markdown rules format
-- ✅ Bidirectional sync
+- ✅ Round-trip sync
 - ✅ v3.0 schema with top-level plugins
 - ⚠️ MCP/prompts configured via IDE UI
 
@@ -320,5 +320,5 @@ promptrek generate project-v2.promptrek.yaml --all
 
 - [UPF Specification](./upf-specification.html) - Schema documentation
 - [Advanced Features](./advanced-features.html) - Variables and multi-document support
-- [Sync Feature](./sync.html) - Bidirectional sync guide
+- [Sync Feature](./sync.html) - Import Round-trip sync guide sync guide
 - [Getting Started](../quick-start.html) - Quick start guide

@@ -26,7 +26,7 @@ Current stable schema with refined agent model and workflow support.
   - Top-level plugin fields: `mcp_servers`, `commands`, `agents`, `hooks`
   - Plugin marketplace support via `plugins` field
   - Markdown-first content approach
-  - Lossless bidirectional sync with literal block scalar formatting
+  - Lossless round-trip sync with literal block scalar formatting
   - 100% backward compatible with v3.0 (automatic field mapping)
 - **Recommended**: Use this for all new projects
 
@@ -45,7 +45,7 @@ Stable schema with top-level plugin fields and plugin marketplace support.
   - Top-level plugin fields: `mcp_servers`, `commands`, `agents`, `hooks`
   - Plugin marketplace support via `plugins` field
   - Markdown-first content approach
-  - Lossless bidirectional sync
+  - Lossless round-trip sync
 - **Note**: Consider upgrading to v3.1 for workflow support
 
 [Download v3.0.0 Schema](v3.0.0.json){: .btn}
@@ -62,7 +62,7 @@ Legacy schema with nested plugin structure.
 - **Features**:
   - Nested plugin structure: `plugins.mcp_servers`, `plugins.commands`, etc.
   - Markdown-first content approach
-  - Lossless bidirectional sync
+  - Lossless round-trip sync
 - **Note**: Consider migrating to v3.0
 
 [Download v2.1 Schema](v2.1.json){: .btn}
