@@ -285,9 +285,13 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
 
                     # Parse tools - handle both list and comma-separated string
                     tools = frontmatter.get("tools")
-                    if tools and isinstance(tools, str):
-                        # Split comma-separated string into list
-                        tools = [t.strip() for t in tools.split(",")]
+                    if tools:
+                        if isinstance(tools, str):
+                            # Split comma-separated string into list
+                            tools = [t.strip() for t in tools.split(",")]
+                        elif not isinstance(tools, list):
+                            # Convert other types to None for safety
+                            tools = None
 
                     agent = Agent(
                         name=frontmatter.get("name", agent_file.stem),

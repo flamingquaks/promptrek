@@ -8,7 +8,7 @@ validation and serialization capabilities.
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Union
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 class PromptMetadata(BaseModel):
@@ -263,9 +263,7 @@ class Agent(BaseModel):
 
     name: str = Field(..., description="Agent name/identifier")
     prompt: str = Field(
-        ...,
-        description="Full markdown prompt/instructions for the agent",
-        alias="system_prompt",  # Backward compatibility with v2.x
+        ..., description="Full markdown prompt/instructions for the agent"
     )
     description: Optional[str] = Field(
         default=None,
@@ -294,6 +292,19 @@ class Agent(BaseModel):
         if v not in ["full", "partial", "untrusted"]:
             raise ValueError("Trust level must be 'full', 'partial', or 'untrusted'")
         return v
+
+    @model_validator(mode="before")
+    @classmethod
+    def handle_system_prompt_compatibility(cls, values):
+        """Handle backward compatibility for system_prompt field (v3.0.0)."""
+        if isinstance(values, dict):
+            # If system_prompt is provided but prompt is not, use system_prompt for prompt
+            if "system_prompt" in values and "prompt" not in values:
+                values["prompt"] = values.pop("system_prompt")
+            # If both are provided, prefer prompt and ignore system_prompt
+            elif "system_prompt" in values and "prompt" in values:
+                values.pop("system_prompt")
+        return values
 
     model_config = ConfigDict(populate_by_name=True)
 

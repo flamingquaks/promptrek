@@ -174,7 +174,7 @@ body.home-page {
         <div class="feature-badges">
           <span class="feature-badge">📁 Project</span>
           <span class="feature-badge">🔄 Variables</span>
-          <span class="feature-badge">📚 Multi-Doc</span>
+          <span class="feature-badge">↔️ Sync</span>
         </div>
       </div>
 
@@ -188,7 +188,7 @@ body.home-page {
         <div class="feature-badges">
           <span class="feature-badge">📁 Project</span>
           <span class="feature-badge">🔄 Variables</span>
-          <span class="feature-badge">📚 Multi-Doc</span>
+          <span class="feature-badge">↔️ Sync</span>
         </div>
       </div>
 
@@ -198,11 +198,11 @@ body.home-page {
           <span style="display:none;">📝</span>
         </div>
         <h4>Claude Code</h4>
-        <p>Rich context format with project information</p>
+        <p>Rich context format with full plugin ecosystem</p>
         <div class="feature-badges">
           <span class="feature-badge">📁 Project</span>
           <span class="feature-badge">🔄 Variables</span>
-          <span class="feature-badge">📚 Multi-Doc</span>
+          <span class="feature-badge">↔️ Sync</span>
         </div>
       </div>
 
@@ -216,7 +216,7 @@ body.home-page {
         <div class="feature-badges">
           <span class="feature-badge">📁 Project</span>
           <span class="feature-badge">🔄 Variables</span>
-          <span class="feature-badge">📚 Multi-Doc</span>
+          <span class="feature-badge">↔️ Sync</span>
         </div>
       </div>
 
@@ -230,7 +230,7 @@ body.home-page {
         <div class="feature-badges">
           <span class="feature-badge">📁 Project</span>
           <span class="feature-badge">🔄 Variables</span>
-          <span class="feature-badge">🤖 CLI Agents</span>
+          <span class="feature-badge">↔️ Sync</span>
         </div>
       </div>
 
@@ -299,10 +299,10 @@ body.home-page {
     <div class="example-grid">
 
       <div class="example-input">
-        <h3>Universal Configuration (v3.0.0)</h3>
+        <h3>Universal Configuration (v3.1.0)</h3>
         <p>Write your prompt once in PrompTrek format:</p>
         <div class="code-example">
-{% raw %}<pre><code>schema_version: "3.0.0"
+{% raw %}<pre><code>schema_version: "3.1.0"
 metadata:
   title: "Full-Stack Development Assistant"
   description: "Production-ready coding standards"
@@ -333,7 +333,7 @@ content: |
 variables:
   TEAM_NAME: "Engineering Team"</code></pre>{% endraw %}
         </div>
-        <p class="schema-note">✨ <strong>v3.0.0 Schema</strong>: Markdown-first with clean top-level plugins. No <code>targets</code> field needed - works with ALL editors! MCP servers, commands, agents, and hooks at the top level.</p>
+        <p class="schema-note">✨ <strong>v3.1.0 Schema</strong>: Markdown-first with clean top-level plugins and refined agent model. No <code>targets</code> field needed - works with ALL editors! MCP servers, commands, agents, and hooks at the top level.</p>
       </div>
 
       <div class="example-output">
@@ -410,7 +410,7 @@ variables:
       <div class="feature-card-modern">
         <div class="feature-icon">🔄</div>
         <h3>Bidirectional Sync</h3>
-        <p>Sync editor configurations back to PrompTrek format. All 9 supported editors now support seamless two-way updates.</p>
+        <p>Sync editor configurations back to PrompTrek format. 6 editors (GitHub Copilot, Cursor, Continue, Kiro, Cline, Windsurf, Claude Code, Amazon Q) support lossless two-way sync.</p>
       </div>
 
       <div class="feature-card-modern">
@@ -440,7 +440,7 @@ variables:
       <div class="feature-card-modern">
         <div class="feature-icon">📋</div>
         <h3>JSON Schema Support</h3>
-        <p>Published JSON Schemas for v2.0, v2.1, and v3.0. Get autocompletion, validation, and inline documentation in your editor. <a href="schema/">Learn more →</a></p>
+        <p>Published JSON Schemas for v2.0, v2.1, v3.0, and v3.1. Get autocompletion, validation, and inline documentation in your editor. <a href="schema/">Learn more →</a></p>
       </div>
     </div>
   </div>
