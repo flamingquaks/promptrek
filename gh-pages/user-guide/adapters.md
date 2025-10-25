@@ -265,7 +265,13 @@ prompts:
 
 Cline adapter generates markdown-based rules for the Cline VSCode extension - an autonomous AI coding agent with file creation/editing, command execution, and browser automation capabilities.
 
-**Example Output (.clinerules)**:
+**File Generation Behavior**:
+- **With `documents` field**: Generates one `.md` file per document using the document's `name` field
+- **Without `documents` field**: Generates a single `default-rules.md` file containing the main `content`
+
+⚠️ **Important for Sync**: The `default-rules.md` file has special meaning - it maps to the main `content` field during sync. Do not rename this file if you want bidirectional sync to work correctly. All other `.md` files in `.clinerules/` become `documents`.
+
+**Example Output (.clinerules/default-rules.md)**:
 ```markdown
 # My Project
 
