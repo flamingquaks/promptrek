@@ -1260,9 +1260,6 @@ class ClineAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
                 shutil.rmtree(output_file)
                 if verbose:
                     click.echo(f"  🗑️  Removed existing directory: {output_file}")
-                if verbose:
-                    click.echo(f"  🗑️  Removed existing directory: {output_file}")
-
             with open(output_file, "w", encoding="utf-8") as f:
                 f.write(content)
             click.echo(f"✅ Generated: {output_file}")
