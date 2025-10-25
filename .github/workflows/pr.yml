@@ -249,6 +249,36 @@ jobs:
               return `| ${name} | ${emoji} ${status} |`;
             }).join('\n')}`;
 
+            // Find all previous PR Validation Summary comments
+            const comments = await github.rest.issues.listComments({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            });
+
+            const validationComments = comments.data.filter(comment =>
+              comment.body && comment.body.includes('## PR Validation Summary')
+            );
+
+            // Hide previous validation comments as resolved
+            for (const comment of validationComments) {
+              try {
+                await github.graphql(`
+                  mutation MinimizeComment($subjectId: ID!) {
+                    minimizeComment(input: {
+                      subjectId: $subjectId,
+                      classifier: RESOLVED
+                    }) {
+                      clientMutationId
+                    }
+                  }
+                `, { subjectId: comment.node_id });
+                console.log(`Minimized previous validation comment ${comment.id}`);
+              } catch (error) {
+                console.log(`Failed to minimize comment ${comment.id}: ${error.message}`);
+              }
+            }
+
             // Only post comment if there are failures
             if (failed.length > 0) {
               github.rest.issues.createComment({
