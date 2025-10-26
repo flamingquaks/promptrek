@@ -90,7 +90,8 @@ allow_commands: false
         result = runner.invoke(cli, ["--verbose", "refresh"])
 
         # Should complete without errors
-        assert result.exit_code == 0 and "Refresh complete" in result.output
+        assert result.exit_code == 0
+        assert "Refresh complete" in result.output
 
     def test_refresh_with_specific_editor(self, setup_project):
         """Test refresh with specific editor override."""
