@@ -543,10 +543,9 @@ class TestGenerateCommand:
 
         # This test ensures that duplicate files are removed (only unique files are processed).
         # For each unique file, parsing occurs twice: once to check allow_commands, once to generate.
-        assert (
-            mock_parser.parse_file.call_count == 2
-        )  # Each unique file is parsed twice (allow_commands + generation)
-        assert mock_generate.call_count == 1  # but generate is only called once
+        # Each unique file should be parsed twice (allow_commands + generation), but generate should only be called once.
+        assert mock_parser.parse_file.call_count == 2
+        assert mock_generate.call_count == 1
 
     @patch("promptrek.cli.commands.generate._generate_for_editor_multiple")
     @patch("promptrek.cli.commands.generate.UPFParser")
