@@ -11,7 +11,6 @@ import sys
 from pathlib import Path
 from typing import Set
 
-
 # Mapping of file patterns to editor labels
 EDITOR_PATTERNS = {
     "Editor:AmazonQ": [
@@ -130,7 +129,10 @@ def main():
 
     # Output for debugging
     print(f"Changed files: {len(changed_files)}", file=sys.stderr)
-    print(f"Detected labels: {', '.join(sorted(labels)) if labels else 'none'}", file=sys.stderr)
+    print(
+        f"Detected labels: {', '.join(sorted(labels)) if labels else 'none'}",
+        file=sys.stderr,
+    )
 
     # Set output for GitHub Actions
     labels_str = ",".join(sorted(labels))
