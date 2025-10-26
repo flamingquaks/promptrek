@@ -24,7 +24,7 @@ from ...core.models import (
 )
 from ...core.parser import UPFParser
 from ...core.validator import UPFValidator
-from ...utils.variables import VariableSubstitution
+from ...utils.variables import BuiltInVariables, VariableSubstitution
 
 
 def _adapter_supports_headless(adapter: object, method_name: str) -> bool:
@@ -355,6 +355,9 @@ def _save_generation_metadata(
         "GIT_COMMIT_SHORT",
     }
     for key, value in variables.items():
+        # Get built-in variable names dynamically from BuiltInVariables
+        builtin_var_names = set(BuiltInVariables.get_all().keys())
+
         if key not in builtin_var_names and key not in dynamic_vars:
             static_vars[key] = value
 
