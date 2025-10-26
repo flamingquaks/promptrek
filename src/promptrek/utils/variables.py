@@ -83,7 +83,9 @@ class CommandExecutor:
             return output
 
         except subprocess.TimeoutExpired as e:
-            raise TemplateError(f"Command timed out after {self.timeout}s: {command}") from e
+            raise TemplateError(
+                f"Command timed out after {self.timeout}s: {command}"
+            ) from e
         except subprocess.CalledProcessError as e:
             raise TemplateError(
                 f"Command failed with exit code {e.returncode}: {command}\n"
@@ -222,7 +224,11 @@ class BuiltInVariables:
                 )
                 variables["GIT_COMMIT_SHORT"] = commit_result.stdout.strip()
 
-        except (subprocess.CalledProcessError, subprocess.TimeoutExpired, FileNotFoundError):
+        except (
+            subprocess.CalledProcessError,
+            subprocess.TimeoutExpired,
+            FileNotFoundError,
+        ):
             # Not in git repo or git not available
             if verbose:
                 print("  ℹ️  Git variables not available (not in git repository)")

@@ -87,7 +87,7 @@ allow_commands: false
         mock_run.return_value = mock_result
 
         runner = CliRunner()
-        result = runner.invoke(cli, ["refresh", "-v"])
+        result = runner.invoke(cli, ["--verbose", "refresh"])
 
         # Should complete without errors
         assert result.exit_code == 0 or "Refresh complete" in result.output
@@ -115,6 +115,37 @@ allow_commands: false
 
         assert result.exit_code != 0
         assert "Source file not found" in result.output
+
+    @patch("promptrek.utils.variables.subprocess.run")
+    def test_refresh_with_variable_overrides(self, mock_run, setup_project):
+        """Test refresh with CLI variable overrides."""
+        tmp_path, upf_file = setup_project
+
+        # Mock git commands (called by built-in variables)
+        from unittest.mock import Mock
+
+        mock_result = Mock()
+        mock_result.returncode = 1  # Not in git repo
+        mock_result.stdout = ""
+        mock_run.return_value = mock_result
+
+        runner = CliRunner()
+        result = runner.invoke(
+            cli,
+            [
+                "--verbose",
+                "refresh",
+                "-V",
+                "PROJECT_NAME=TestProject",
+                "-V",
+                "VERSION=2.0.0",
+            ],
+        )
+
+        # Should complete without errors and accept variable overrides
+        assert result.exit_code == 0 or "Refresh complete" in result.output
+        # Variables should be properly parsed and not cause errors
+        assert "Variable must be in format KEY=value" not in result.output
 
 
 class TestGenerationMetadataSaving:
@@ -155,7 +186,7 @@ allow_commands: false
 
         runner = CliRunner()
         result = runner.invoke(
-            cli, ["generate", str(upf_file), "--editor", "claude", "-v"]
+            cli, ["--verbose", "generate", str(upf_file), "--editor", "claude"]
         )
 
         # Check that metadata file was created
@@ -244,7 +275,7 @@ allow_commands: true
 
         runner = CliRunner()
         result = runner.invoke(
-            cli, ["generate", str(upf_file), "--editor", "claude", "-v"]
+            cli, ["--verbose", "generate", str(upf_file), "--editor", "claude"]
         )
 
         # Check that command executed

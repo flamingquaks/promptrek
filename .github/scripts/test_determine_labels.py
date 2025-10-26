@@ -9,7 +9,7 @@ from pathlib import Path
 # Add the script directory to the path
 sys.path.insert(0, str(Path(__file__).parent))
 
-from determine_labels import determine_labels
+from determine_labels import determine_labels  # noqa: E402
 
 
 def test_adapter_files():

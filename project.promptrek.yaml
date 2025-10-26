@@ -11,6 +11,8 @@ metadata:
 content: |-
   ## Project Overview
 
+  Today's Date: {{{ CURRENT_DATE }}}
+
   PrompTrek is a universal AI editor prompt management tool that converts `project.promptrek.yaml` files into editor-specific configuration files for various AI coding assistants (GitHub Copilot, Cursor, Continue, Claude Code, Windsurf, Cline, Kiro, Amazon Q, JetBrains AI, Tabnine).
 
   **Key Features**:
@@ -22,6 +24,10 @@ content: |-
   - **Plugin Ecosystem**: Configure MCP servers, custom commands, autonomous agents, and event hooks
 
   **Technology Stack**: Python 3.9+ with Click (CLI), Jinja2 (templating), PyYAML (parsing), Pydantic (validation)
+
+  ## BEFORE YOU BEGIN!
+
+  - Make sure you've refreshed your context documents by running `promptrek refresh --editor claude` if needed. (Replace claude with the editor you're using, if not Claude!)
 
   ## Development Commands
 

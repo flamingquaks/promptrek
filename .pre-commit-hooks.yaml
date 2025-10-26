@@ -11,10 +11,11 @@
 
 - id: promptrek-validate
   name: Validate PrompTrek files
-  description: Validates .promptrek.yaml files for syntax and schema errors
+  description: Validates project.promptrek.yaml files for syntax and schema errors (excludes variables/metadata files)
   entry: promptrek validate
   language: python
   files: \.promptrek\.ya?ml$
+  exclude: '\.promptrek/(variables|last-generation)\.promptrek\.ya?ml$'
   pass_filenames: true
   stages: [pre-commit]
 
@@ -54,6 +55,7 @@
   entry: promptrek check-generated
   language: python
   files: (^variables\.promptrek\.ya?ml$|\.promptrek/(variables\.promptrek\.ya?ml|last-generation\.ya?ml)$)
+  exclude: '^examples/'
   stages: [pre-commit]
   always_run: false
   pass_filenames: true

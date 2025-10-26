@@ -203,7 +203,9 @@ class TestVariableSubstitutionWithDynamicVars:
     """Test VariableSubstitution with dynamic variables."""
 
     @patch("promptrek.utils.variables.subprocess.run")
-    def test_load_and_evaluate_variables_with_builtins(self, mock_run, tmp_path, monkeypatch):
+    def test_load_and_evaluate_variables_with_builtins(
+        self, mock_run, tmp_path, monkeypatch
+    ):
         """Test loading variables with built-ins enabled."""
         monkeypatch.chdir(tmp_path)
 

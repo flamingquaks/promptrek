@@ -49,12 +49,10 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
             # V2/V3: Direct markdown output (lossless!)
             content = prompt.content
 
-            # Merge variables: prompt variables + CLI/local overrides
-            merged_vars = {}
-            if prompt.variables:
-                merged_vars.update(prompt.variables)
-            if variables:
-                merged_vars.update(variables)
+            # Variables are now pre-merged by CLI with correct precedence:
+            # built-in < local < prompt.variables < CLI
+            # So we can use them directly
+            merged_vars = variables or {}
 
             # Apply variable substitution if variables provided
             if merged_vars:
@@ -88,12 +86,8 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
 
         # Generate plugin files for v2.1/v3.0
         if isinstance(prompt, (UniversalPromptV2, UniversalPromptV3)):
-            # Merge variables for plugins too
-            merged_vars = {}
-            if prompt.variables:
-                merged_vars.update(prompt.variables)
-            if variables:
-                merged_vars.update(variables)
+            # Variables are pre-merged by CLI
+            merged_vars = variables or {}
 
             # Check for v3 top-level fields first, then v2.1 nested structure
             plugin_files = self._generate_plugins(

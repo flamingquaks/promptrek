@@ -9,11 +9,32 @@ PrompTrek supports powerful advanced template features that allow you to create 
 
 ## Variable Substitution
 
-Variables allow you to create reusable templates that can be customized for different projects or contexts.
+PrompTrek supports powerful variable substitution to make your prompts dynamic and reusable across different contexts. Variables use the `{{{ VARIABLE_NAME }}}` syntax (triple braces) to distinguish them from Jinja2 template syntax.
 
-### Basic Variable Syntax
+### Variable Types
 
-Use triple braces to define variable placeholders in your UPF files:
+PrompTrek supports three types of variables, loaded in priority order:
+
+1. **Built-in Variables** - Automatically available
+2. **File-based Variables** - Defined in `.promptrek/variables.promptrek.yaml` or inline in your config
+3. **CLI Variables** - Passed via `-V/--variable` flag (highest priority)
+
+### Built-in Variables
+
+PrompTrek provides these variables out-of-the-box:
+
+| Variable | Description | Example Value |
+|----------|-------------|---------------|
+| `CURRENT_DATE` | Current date (YYYY-MM-DD) | `2025-10-26` |
+| `CURRENT_TIME` | Current time (HH:MM:SS) | `14:30:45` |
+| `CURRENT_DATETIME` | ISO 8601 datetime | `2025-10-26T14:30:45Z` |
+| `CURRENT_YEAR` | Current year | `2025` |
+| `CURRENT_MONTH` | Current month (01-12) | `10` |
+| `CURRENT_DAY` | Current day (01-31) | `26` |
+| `PROJECT_NAME` | Current directory name | `promptrek` |
+| `PROJECT_ROOT` | Absolute path to project | `/home/user/promptrek` |
+| `GIT_BRANCH` | Git branch name (if in git repo) | `main` |
+| `GIT_COMMIT_SHORT` | Short commit hash (if in git repo) | `abc1234` |
 
 {% raw %}
 ```yaml
@@ -26,6 +47,9 @@ metadata:
 content: |
   # {{{ PROJECT_NAME }}} Development Guide
 
+  Last updated: {{{ CURRENT_DATE }}} at {{{ CURRENT_TIME }}}
+  Generated on: {{{ CURRENT_DATETIME }}}
+
   Follow {{{ PROJECT_NAME }}} coding standards.
   Contact {{{ AUTHOR_EMAIL }}} for questions.
 
@@ -35,20 +59,9 @@ variables:
 ```
 {% endraw %}
 
-### Environment Variables
+### Basic Variable Syntax
 
-You can also reference environment variables using `${}` syntax:
-
-```yaml
-schema_version: "3.1.0"
-metadata:
-  author: "${AUTHOR_NAME}"
-
-content: |
-  # Project Guidelines
-
-  Deploy to ${ENVIRONMENT} environment.
-```
+Use triple braces to define variable placeholders in your config files. Variables can be defined inline in your config's `variables` section or in a separate local variables file.
 
 ### Local Variables File
 
@@ -96,9 +109,22 @@ You can disable this with `ignore_editor_files: false` in your config.
 
 **Variable Precedence (highest to lowest):**
 
-1. CLI overrides (`-V KEY=value`)
-2. Local variables file (`.promptrek/variables.promptrek.yaml`)
-3. Prompt file variables section
+When the same variable is defined in multiple places:
+
+1. **CLI flags** (highest priority) - `-V KEY=value`
+2. **File-based variables** - `.promptrek/variables.promptrek.yaml`
+3. **Inline variables** - `variables:` section in your `.promptrek.yaml`
+4. **Built-in variables** (lowest priority) - `CURRENT_*`, `PROJECT_*`, `GIT_*`
+
+Example:
+```bash
+# .promptrek/variables.promptrek.yaml contains: ENVIRONMENT="production"
+# project.promptrek.yaml contains: ENVIRONMENT="development"
+
+# This CLI override takes precedence:
+promptrek generate -V ENVIRONMENT=staging
+# Result: ENVIRONMENT = "staging"
+```
 
 **Example usage:**
 
@@ -131,6 +157,116 @@ AUTHOR_EMAIL: "john@example.com"
 **Note:** If you have an old `variables.promptrek.yaml` file in your project root, PrompTrek will automatically offer to migrate it to the new `.promptrek/` directory location when you run any command.
 
 When generating, `AUTHOR_NAME` will be "John Doe" from the local file, overriding the default in the prompt file.
+
+### Command-based Variables
+
+Execute shell commands dynamically to generate variable values:
+
+```yaml
+# .promptrek/variables.promptrek.yaml
+# Git information
+GIT_BRANCH:
+  type: command
+  value: git rev-parse --abbrev-ref HEAD
+  cache: false  # Re-evaluate each time
+
+GIT_COMMIT:
+  type: command
+  value: git rev-parse --short HEAD
+  cache: true  # Cache for generation session
+
+# System information
+CURRENT_USER:
+  type: command
+  value: whoami
+  cache: true
+
+HOSTNAME:
+  type: command
+  value: hostname
+  cache: true
+
+# Development tools
+NODE_VERSION:
+  type: command
+  value: node --version
+  cache: true
+```
+
+Command-based variables are:
+- Executed when `generate` or `refresh` commands run
+- Optional caching (`cache: true` evaluates once, `cache: false` re-evaluates)
+- Platform-aware (work on Unix, Linux, macOS, Windows)
+- Require `allow_commands: true` in your `.promptrek.yaml` file
+
+**Example usage in your config:**
+
+{% raw %}
+```yaml
+# project.promptrek.yaml
+schema_version: "3.1.0"
+metadata:
+  title: "{{{ PROJECT_NAME }}} Assistant"
+
+content: |
+  # {{{ PROJECT_NAME }}} Development Guide
+
+  ## Environment Details
+  - Git Branch: {{{ GIT_BRANCH }}}
+  - Git Commit: {{{ GIT_COMMIT }}}
+  - Developer: {{{ CURRENT_USER }}}
+  - Node Version: {{{ NODE_VERSION }}}
+  - Generated: {{{ CURRENT_DATETIME }}}
+
+variables:
+  PROJECT_NAME: "MyProject"
+
+# Required for command-based variables
+allow_commands: true
+```
+{% endraw %}
+
+When you run `promptrek generate`, PrompTrek will:
+1. Load built-in variables (CURRENT_DATE, CURRENT_DATETIME, etc.)
+2. Execute command-based variables from `.promptrek/variables.promptrek.yaml`
+3. Substitute all variables in the content
+4. Generate editor-specific files with resolved values
+
+**Security Considerations:**
+
+⚠️ **Important**: Command-based variables execute arbitrary shell commands. Follow these best practices:
+
+- Never commit `.promptrek/variables.promptrek.yaml` with untrusted commands
+- Review command-based variables before running `generate`
+- Be cautious with variables from external sources
+- Validate commands are safe and non-destructive
+- Add `.promptrek/` to `.gitignore` (done automatically by `promptrek init`)
+
+**Performance Tips:**
+
+Control caching behavior per variable to optimize performance:
+
+```yaml
+# .promptrek/variables.promptrek.yaml
+# Fast operations - can re-evaluate each time
+GIT_BRANCH:
+  type: command
+  value: git rev-parse --abbrev-ref HEAD
+  cache: false
+
+# Slow operations - cache for the generation session
+EXPENSIVE_METRIC:
+  type: command
+  value: find . -name "*.py" -type f -exec wc -l {} + | tail -1
+  cache: true
+```
+
+Or use static variables for values that rarely change:
+
+```bash
+# Override with static value for specific generation
+promptrek generate -e claude -V API_STATUS=online
+```
 
 ### CLI Variable Overrides
 

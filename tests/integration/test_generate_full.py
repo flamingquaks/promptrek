@@ -23,10 +23,10 @@ metadata:
   version: "1.0.0"
 content: |
   # Claude Instructions
-  
+
   ## Project Context
   This is a test project.
-  
+
   ## Guidelines
   - Follow best practices
   - Write clean code

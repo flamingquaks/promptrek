@@ -21,6 +21,7 @@ def refresh_command(
     all_editors: bool,
     dry_run: bool,
     clear_cache: bool,
+    variables: Optional[dict] = None,
 ) -> None:
     """
     Regenerate editor files with fresh dynamic variables.
@@ -34,6 +35,7 @@ def refresh_command(
         all_editors: Refresh all editors from last generation
         dry_run: Show what would be refreshed without making changes
         clear_cache: Clear cached dynamic variables before refreshing
+        variables: Variable overrides from CLI (-V options)
     """
     verbose = ctx.obj.get("verbose", False)
 
@@ -90,15 +92,9 @@ def refresh_command(
             "The file may have been moved or deleted since last generation."
         )
 
-    # Build variables dict (will be overridden by CLI if user provided any)
-    # The generate command will reload and re-evaluate all variables
-    variables_dict = {}
-    if ctx.params.get("variables"):
-        # Convert CLI variables to dict
-        for var in ctx.params.get("variables"):
-            if "=" in var:
-                key, value = var.split("=", 1)
-                variables_dict[key.strip()] = value.strip()
+    # Use CLI variable overrides if provided
+    # These will be passed to generate_command as cli_overrides to ensure correct precedence
+    variables_dict = variables or {}
 
     if dry_run:
         click.echo("🔍 Dry run mode - showing what would be refreshed:")
@@ -132,6 +128,4 @@ def refresh_command(
                 raise
 
     if not dry_run:
-        click.echo(
-            f"✅ Refresh complete for {len(target_editors)} editor(s)"
-        )
+        click.echo(f"✅ Refresh complete for {len(target_editors)} editor(s)")

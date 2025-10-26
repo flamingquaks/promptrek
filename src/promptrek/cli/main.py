@@ -342,7 +342,10 @@ def generate(
     help="Target editor to refresh (overrides last generation)",
 )
 @click.option(
-    "--all", "all_editors", is_flag=True, help="Refresh all editors from last generation"
+    "--all",
+    "all_editors",
+    is_flag=True,
+    help="Refresh all editors from last generation",
 )
 @click.option(
     "--dry-run",
@@ -354,6 +357,13 @@ def generate(
     is_flag=True,
     help="Clear cached dynamic variables before refreshing",
 )
+@click.option(
+    "--var",
+    "-V",
+    "variables",
+    multiple=True,
+    help="Override variables (e.g., -V KEY=value)",
+)
 @click.pass_context
 def refresh(
     ctx: click.Context,
@@ -361,6 +371,7 @@ def refresh(
     all_editors: bool,
     dry_run: bool,
     clear_cache: bool,
+    variables: tuple,
 ) -> None:
     """Regenerate editor files with fresh dynamic variables.
 
@@ -378,11 +389,31 @@ def refresh(
         # Clear cached variables before refreshing
         promptrek refresh --clear-cache
 
+        # Override specific variables during refresh
+        promptrek refresh -V VERSION=2.0.0 -V ENVIRONMENT=production
+
         # Preview what would be refreshed
         promptrek refresh --dry-run
     """
     try:
-        refresh_command(ctx, editor, all_editors, dry_run, clear_cache)
+        # Parse variable overrides
+        var_dict = {}
+        for var in variables:
+            if "=" not in var:
+                raise click.BadParameter(
+                    f"Variable must be in format KEY=value, got: {var}"
+                )
+            key, value = var.split("=", 1)
+            var_dict[key.strip()] = value.strip()
+
+        refresh_command(
+            ctx,
+            editor,
+            all_editors,
+            dry_run,
+            clear_cache,
+            var_dict if var_dict else None,
+        )
     except PrompTrekError as e:
         click.echo(f"Error: {e}", err=True)
         ctx.exit(1)

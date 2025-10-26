@@ -6,6 +6,7 @@ repos:
     entry: uv run promptrek validate
     language: system
     files: \.promptrek\.ya?ml$
+    exclude: '\.promptrek/(variables|last-generation)\.promptrek\.ya?ml$'
     pass_filenames: true
     stages:
     - pre-commit
@@ -23,6 +24,7 @@ repos:
     entry: uv run promptrek check-generated
     language: system
     files: (^variables\.promptrek\.ya?ml$|\.promptrek/variables\.promptrek\.ya?ml$)
+    exclude: '^examples/'
     stages:
     - pre-commit
     always_run: false
