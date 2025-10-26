@@ -85,21 +85,21 @@ jobs:
         run: |
           echo "Checking for known vulnerabilities in dependencies..."
           set +e
-          uv run safety scan --output json --save-as safety-report.json
+          uv run safety scan --output json > safety-report.json 2>&1
           SAFETY_EXIT_CODE=$?
           set -e
-          
+
           # Display results from JSON output
           if [ -f safety-report.json ]; then
             echo "Safety scan completed. Results saved to safety-report.json"
-            cat safety-report.json | python -m json.tool || true
+            cat safety-report.json | python -m json.tool || cat safety-report.json || true
           fi
 
           # Check if we should fail on issues
-          if [ "${{ inputs.fail-on-issues }}" = "true" ] && [ $SAFETY_EXIT_CODE -ne 0 ]; then
+          if [ "${{ inputs.fail-on-issues || 'false' }}" = "true" ] && [ $SAFETY_EXIT_CODE -ne 0 ]; then
             exit 1
           fi
-        continue-on-error: ${{ !inputs.fail-on-issues }}
+        continue-on-error: ${{ inputs.fail-on-issues == false || inputs.fail-on-issues == '' }}
 
       - name: Upload security reports
         if: always()
@@ -194,21 +194,21 @@ jobs:
         run: |
           echo "Checking for known vulnerabilities in dependencies..."
           set +e
-          uv run safety scan --output json --save-as safety-report.json
+          uv run safety scan --output json > safety-report.json 2>&1
           SAFETY_EXIT_CODE=$?
           set -e
-          
+
           # Display results from JSON output
           if [ -f safety-report.json ]; then
             echo "Safety scan completed. Results saved to safety-report.json"
-            cat safety-report.json | python -m json.tool || true
+            cat safety-report.json | python -m json.tool || cat safety-report.json || true
           fi
 
           # Check if we should fail on issues
-          if [ "${{ inputs.fail-on-issues }}" = "true" ] && [ $SAFETY_EXIT_CODE -ne 0 ]; then
+          if [ "${{ inputs.fail-on-issues || 'false' }}" = "true" ] && [ $SAFETY_EXIT_CODE -ne 0 ]; then
             exit 1
           fi
-        continue-on-error: ${{ !inputs.fail-on-issues }}
+        continue-on-error: ${{ inputs.fail-on-issues == false || inputs.fail-on-issues == '' }}
 
       - name: Upload security reports
         if: always()
