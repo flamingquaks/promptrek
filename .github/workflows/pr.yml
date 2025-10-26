@@ -45,18 +45,17 @@ jobs:
         uses: astral-sh/setup-uv@v6
         with:
           enable-cache: true
-          python-version: "3.11"
           cache-dependency-glob: "pyproject.toml"
 
       - name: Set up Python 3.11
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.11"
+        run: uv python install 3.11
 
       - name: Cache dependencies
         uses: actions/cache@v4
         with:
-          path: ~/.cache/uv
+          path: |
+            ~/.cache/uv
+            .venv
           key: ${{ runner.os }}-uv-pr-${{ hashFiles('pyproject.toml', 'uv.lock') }}
           restore-keys: |
             ${{ runner.os }}-uv-pr-
@@ -64,7 +63,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          uv sync --all-groups --dev
+          uv sync --all-groups
 
       - name: Check code formatting
         id: formatting
