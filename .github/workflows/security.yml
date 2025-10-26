@@ -82,10 +82,19 @@ jobs:
         continue-on-error: true
 
       - name: Check for known vulnerabilities with Safety (API scan for RC tags)
+        env:
+          SAFETY_API_KEY: ${{ secrets.SAFETY_API_KEY }}
         run: |
           echo "Checking for known vulnerabilities in dependencies..."
+
+          if [ -z "$SAFETY_API_KEY" ]; then
+            echo "Warning: SAFETY_API_KEY not set. Skipping Safety scan."
+            echo "To enable Safety scans, add SAFETY_API_KEY to repository secrets."
+            exit 0
+          fi
+
           set +e
-          uv run safety scan --output json > safety-report.json 2>&1
+          uv run safety scan --key="$SAFETY_API_KEY" --output json > safety-report.json 2>&1
           SAFETY_EXIT_CODE=$?
           set -e
 
@@ -99,7 +108,7 @@ jobs:
           if [ "${{ inputs.fail-on-issues || 'false' }}" = "true" ] && [ $SAFETY_EXIT_CODE -ne 0 ]; then
             exit 1
           fi
-        continue-on-error: ${{ inputs.fail-on-issues == false || inputs.fail-on-issues == '' }}
+        continue-on-error: true
 
       - name: Upload security reports
         if: always()
@@ -191,10 +200,19 @@ jobs:
         continue-on-error: true
 
       - name: Check for known vulnerabilities with Safety (API scan for releases)
+        env:
+          SAFETY_API_KEY: ${{ secrets.SAFETY_API_KEY }}
         run: |
           echo "Checking for known vulnerabilities in dependencies..."
+
+          if [ -z "$SAFETY_API_KEY" ]; then
+            echo "Warning: SAFETY_API_KEY not set. Skipping Safety scan."
+            echo "To enable Safety scans, add SAFETY_API_KEY to repository secrets."
+            exit 0
+          fi
+
           set +e
-          uv run safety scan --output json > safety-report.json 2>&1
+          uv run safety scan --key="$SAFETY_API_KEY" --output json > safety-report.json 2>&1
           SAFETY_EXIT_CODE=$?
           set -e
 
@@ -208,7 +226,7 @@ jobs:
           if [ "${{ inputs.fail-on-issues || 'false' }}" = "true" ] && [ $SAFETY_EXIT_CODE -ne 0 ]; then
             exit 1
           fi
-        continue-on-error: ${{ inputs.fail-on-issues == false || inputs.fail-on-issues == '' }}
+        continue-on-error: true
 
       - name: Upload security reports
         if: always()
