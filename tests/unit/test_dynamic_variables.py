@@ -164,11 +164,29 @@ class TestBuiltInVariables:
         # Check CURRENT_YEAR format
         assert vars_dict["CURRENT_YEAR"] == now.strftime("%Y")
 
-    def test_project_name_from_cwd(self):
-        """Test that PROJECT_NAME is derived from current directory."""
-        vars_dict = BuiltInVariables.get_all()
+    @patch("promptrek.utils.variables.subprocess.run")
+    def test_project_name_from_git_repo(self, mock_run):
+        """Test that PROJECT_NAME is derived from git repository name."""
+        # Mock successful git commands returning repository URL
+        mock_run.side_effect = [
+            Mock(returncode=0, stdout="", stderr=""),  # is-inside-work-tree
+            Mock(
+                returncode=0, stdout="https://github.com/user/my-repo.git\n", stderr=""
+            ),  # remote get-url
+        ]
+
+        project_name = BuiltInVariables._get_project_name()
+        assert project_name == "my-repo"
+
+    @patch("promptrek.utils.variables.subprocess.run")
+    def test_project_name_fallback_to_directory(self, mock_run):
+        """Test that PROJECT_NAME falls back to directory name when not in git repo."""
+        # Mock git command failing (not in repo)
+        mock_run.return_value = Mock(returncode=1, stdout="", stderr="")
+
+        project_name = BuiltInVariables._get_project_name()
         expected_name = Path.cwd().name
-        assert vars_dict["PROJECT_NAME"] == expected_name
+        assert project_name == expected_name
 
     @patch("promptrek.utils.variables.subprocess.run")
     def test_get_git_variables_when_in_repo(self, mock_run):

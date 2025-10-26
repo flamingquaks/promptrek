@@ -170,7 +170,7 @@ class BuiltInVariables:
             "CURRENT_MONTH": now.strftime("%m"),
             "CURRENT_DAY": now.strftime("%d"),
             # Project context variables
-            "PROJECT_NAME": Path.cwd().name,
+            "PROJECT_NAME": BuiltInVariables._get_project_name(verbose),
             "PROJECT_ROOT": str(Path.cwd().resolve()),
         }
 
@@ -179,6 +179,74 @@ class BuiltInVariables:
         variables.update(git_vars)
 
         return variables
+
+    @staticmethod
+    def _get_project_name(verbose: bool = False) -> str:
+        """
+        Get project name from git repository or fallback to directory name.
+
+        Tries to get the repository name from git remote URL.
+        Falls back to current directory name if not in git repo.
+
+        Args:
+            verbose: Whether to show verbose output
+
+        Returns:
+            Project name as string
+        """
+        try:
+            # Check if in git repo
+            result = subprocess.run(
+                ["git", "rev-parse", "--is-inside-work-tree"],
+                capture_output=True,
+                text=True,
+                timeout=2,
+                check=False,
+            )
+
+            if result.returncode == 0:
+                # Try to get repository name from remote URL
+                remote_result = subprocess.run(
+                    ["git", "remote", "get-url", "origin"],
+                    capture_output=True,
+                    text=True,
+                    timeout=2,
+                    check=False,
+                )
+
+                if remote_result.returncode == 0:
+                    remote_url = remote_result.stdout.strip()
+                    # Extract repo name from URL
+                    # Examples:
+                    # https://github.com/user/repo.git -> repo
+                    # git@github.com:user/repo.git -> repo
+                    # /path/to/repo.git -> repo
+                    if remote_url:
+                        # Remove .git suffix if present
+                        if remote_url.endswith(".git"):
+                            remote_url = remote_url[:-4]
+                        # Get last path component
+                        repo_name = remote_url.rstrip("/").split("/")[-1]
+                        # Handle git@host:user/repo format
+                        if ":" in repo_name and "/" in repo_name.split(":")[-1]:
+                            repo_name = repo_name.split(":")[-1].split("/")[-1]
+
+                        if repo_name and verbose:
+                            print(f"  📦 Using git repository name: {repo_name}")
+                        return repo_name
+
+        except (
+            subprocess.CalledProcessError,
+            subprocess.TimeoutExpired,
+            FileNotFoundError,
+        ):
+            pass
+
+        # Fallback to current directory name
+        dir_name = Path.cwd().name
+        if verbose:
+            print(f"  📁 Using directory name: {dir_name}")
+        return dir_name
 
     @staticmethod
     def _get_git_variables(verbose: bool = False) -> Dict[str, str]:

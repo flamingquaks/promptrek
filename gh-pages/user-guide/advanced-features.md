@@ -31,10 +31,14 @@ PrompTrek provides these variables out-of-the-box:
 | `CURRENT_YEAR` | Current year | `2025` |
 | `CURRENT_MONTH` | Current month (01-12) | `10` |
 | `CURRENT_DAY` | Current day (01-31) | `26` |
-| `PROJECT_NAME` | Current directory name | `promptrek` |
+| `PROJECT_NAME` | Git repository name (falls back to directory name) | `promptrek` |
 | `PROJECT_ROOT` | Absolute path to project | `/home/user/promptrek` |
 | `GIT_BRANCH` | Git branch name (if in git repo) | `main` |
 | `GIT_COMMIT_SHORT` | Short commit hash (if in git repo) | `abc1234` |
+
+**Note:** All built-in variables can be overridden by defining them in your `variables:` section, `.promptrek/variables.promptrek.yaml` file, or via CLI flags. The variable priority order is: CLI flags (highest) → File-based variables → Inline variables → Built-in variables (lowest).
+
+**Example - Overriding `PROJECT_NAME`:**
 
 {% raw %}
 ```yaml
@@ -54,10 +58,23 @@ content: |
   Contact {{{ AUTHOR_EMAIL }}} for questions.
 
 variables:
-  PROJECT_NAME: "MyProject"
+  # Override the built-in PROJECT_NAME (which would be "promptrek" from git)
+  PROJECT_NAME: "MyCustomProjectName"
+  # Add custom user-defined variables
   AUTHOR_EMAIL: "team@example.com"
 ```
 {% endraw %}
+
+In this example:
+- `PROJECT_NAME` overrides the built-in value (would normally be the git repository name)
+- Built-in variables like `CURRENT_DATE`, `CURRENT_TIME`, and `CURRENT_DATETIME` are used as-is
+- `AUTHOR_EMAIL` is a custom user-defined variable
+
+**Or via CLI:**
+```bash
+# Override PROJECT_NAME for a specific generation
+promptrek generate -V PROJECT_NAME="MyCustomName"
+```
 
 ### Basic Variable Syntax
 

@@ -191,13 +191,16 @@ ignore_editor_files: false
 
 PrompTrek supports powerful dynamic variables to make your prompts adaptive:
 
-**Built-in Variables** (automatically available):
+**Built-in Variables** (automatically available, all can be overridden):
 - `CURRENT_DATE` - Current date (YYYY-MM-DD)
 - `CURRENT_TIME` - Current time (HH:MM:SS)
 - `CURRENT_DATETIME` - ISO 8601 datetime
 - `CURRENT_YEAR`, `CURRENT_MONTH`, `CURRENT_DAY` - Date components
-- `PROJECT_NAME`, `PROJECT_ROOT` - Project context
+- `PROJECT_NAME` - Git repo name (falls back to directory name)
+- `PROJECT_ROOT` - Absolute path to project
 - `GIT_BRANCH`, `GIT_COMMIT_SHORT` - Git info (if in git repo)
+
+💡 **Tip:** You can override any built-in variable by defining it in your variables file or via CLI.
 
 **Command-based Variables** (execute shell commands):
 
@@ -206,6 +209,9 @@ PrompTrek supports powerful dynamic variables to make your prompts adaptive:
 # Static user variables
 AUTHOR_NAME: "Your Name"
 AUTHOR_EMAIL: "your.email@example.com"
+
+# Override built-in PROJECT_NAME (optional)
+PROJECT_NAME: "MyCustomProjectName"
 
 # Dynamic command-based variables
 GIT_BRANCH:
