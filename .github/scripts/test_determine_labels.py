@@ -2,14 +2,13 @@
 """
 Unit tests for the determine_labels.py script.
 """
-
 import sys
 from pathlib import Path
 
+from determine_labels import determine_labels
+
 # Add the script directory to the path
 sys.path.insert(0, str(Path(__file__).parent))
-
-from determine_labels import determine_labels  # noqa: E402
 
 
 def test_adapter_files():
