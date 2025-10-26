@@ -8,7 +8,7 @@ on:
       python-version:
         required: false
         type: string
-        default: '3.11'
+        default: '3.12'
       bandit-severity:
         required: false
         type: string
@@ -39,8 +39,8 @@ jobs:
           enable-cache: true
           cache-dependency-glob: "pyproject.toml"
 
-      - name: Set up Python ${{ inputs.python-version }}
-        run: uv python install ${{ inputs.python-version }}
+      - name: Set up Python ${{ inputs.python-version || '3.12' }}
+        run: uv python install ${{ inputs.python-version || '3.12' }}
 
       - name: Cache dependencies
         uses: actions/cache@v4
@@ -48,9 +48,9 @@ jobs:
           path: |
             ~/.cache/uv
             .venv
-          key: ${{ runner.os }}-uv-security-${{ inputs.python-version }}-${{ hashFiles('pyproject.toml', 'uv.lock') }}
+          key: ${{ runner.os }}-uv-security-${{ inputs.python-version || '3.12' }}-${{ hashFiles('pyproject.toml', 'uv.lock') }}
           restore-keys: |
-            ${{ runner.os }}-uv-security-${{ inputs.python-version }}-
+            ${{ runner.os }}-uv-security-${{ inputs.python-version || '3.12' }}-
             ${{ runner.os }}-uv-security-
 
       - name: Install security tools
@@ -148,8 +148,8 @@ jobs:
           enable-cache: true
           cache-dependency-glob: "pyproject.toml"
 
-      - name: Set up Python ${{ inputs.python-version }}
-        run: uv python install ${{ inputs.python-version }}
+      - name: Set up Python ${{ inputs.python-version || '3.12' }}
+        run: uv python install ${{ inputs.python-version || '3.12' }}
 
       - name: Cache dependencies
         uses: actions/cache@v4
@@ -157,9 +157,9 @@ jobs:
           path: |
             ~/.cache/uv
             .venv
-          key: ${{ runner.os }}-uv-security-${{ inputs.python-version }}-${{ hashFiles('pyproject.toml', 'uv.lock') }}
+          key: ${{ runner.os }}-uv-security-${{ inputs.python-version || '3.12' }}-${{ hashFiles('pyproject.toml', 'uv.lock') }}
           restore-keys: |
-            ${{ runner.os }}-uv-security-${{ inputs.python-version }}-
+            ${{ runner.os }}-uv-security-${{ inputs.python-version || '3.12' }}-
             ${{ runner.os }}-uv-security-
 
       - name: Install security tools
@@ -258,8 +258,8 @@ jobs:
           enable-cache: true
           cache-dependency-glob: "pyproject.toml"
 
-      - name: Set up Python ${{ inputs.python-version }}
-        run: uv python install ${{ inputs.python-version }}
+      - name: Set up Python ${{ inputs.python-version || '3.12' }}
+        run: uv python install ${{ inputs.python-version || '3.12' }}
 
       - name: Cache dependencies
         uses: actions/cache@v4
@@ -267,9 +267,9 @@ jobs:
           path: |
             ~/.cache/uv
             .venv
-          key: ${{ runner.os }}-uv-security-${{ inputs.python-version }}-${{ hashFiles('pyproject.toml', 'uv.lock') }}
+          key: ${{ runner.os }}-uv-security-${{ inputs.python-version || '3.12' }}-${{ hashFiles('pyproject.toml', 'uv.lock') }}
           restore-keys: |
-            ${{ runner.os }}-uv-security-${{ inputs.python-version }}-
+            ${{ runner.os }}-uv-security-${{ inputs.python-version || '3.12' }}-
             ${{ runner.os }}-uv-security-
 
       - name: Install security tools
