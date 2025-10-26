@@ -15,7 +15,7 @@ A universal configuration solution that takes your prompts, MCP servers, custom 
 
 AI coding assistants like GitHub Copilot, Cursor, Continue, and others all use different prompt formats and configuration methods. When working across teams or switching between editors, you have to maintain separate prompt configurations for each tool. PrompTrek solves this by:
 
-- **Universal Format**: Create prompts once in a standardized format (now with **v3.0.0 schema** - cleaner architecture!)
+- **Universal Format**: Create prompts once in a standardized format (now with **schema v3.0.0** - cleaner architecture!)
 - **Multi-Editor Support**: Generate prompts for any supported AI editor automatically (no `targets` field needed!)
 - **Bidirectional Sync**: Parse editor files back to `.promptrek.yaml` without data loss (lossless sync)
 - **Plugin Ecosystem**: Configure MCP servers, custom commands, autonomous agents, and event hooks with clean top-level fields (mcp_servers, commands, agents, hooks)
@@ -23,9 +23,15 @@ AI coding assistants like GitHub Copilot, Cursor, Continue, and others all use d
 - **Team Consistency**: Share prompt configurations across team members regardless of their editor choice
 - **Easy Migration**: Switch between AI editors without losing your prompt configurations
 
+> **Note on Versioning**: PrompTrek has two version numbers:
+> - **Application version** (currently **0.4.0**): The version of the PrompTrek tool itself
+> - **Schema version** (v1.x, v2.x, v3.x): The format version of your `.promptrek.yaml` configuration files
+>
+> Throughout this documentation, version numbers like "v3.0.0" or "v2.1" refer to **schema versions**, not application versions.
+
 ## 🚀 Quick Example
 
-1. Create a universal prompt file (`.promptrek.yaml`) using the **v3.1 format** (recommended):
+1. Create a universal prompt file (`.promptrek.yaml`) using the **schema v3.1 format** (recommended):
 ```yaml
 schema_version: "3.1.0"
 metadata:
@@ -194,17 +200,19 @@ ls .continue/rules/
 
 **Note:** The `--setup-hooks` flag automatically configures pre-commit hooks to validate your `.promptrek.yaml` files and prevent accidental commits of generated files.
 
-### 🆕 Schema v3.1.0 (Current)
+### 🆕 Schema v3.1.0 (Current Configuration Format)
 
-PrompTrek v3.1.0 refines the agent model and adds workflow support while maintaining full backward compatibility with v3.0.x:
+PrompTrek supports schema v3.1.0, which refines the agent model and adds workflow support while maintaining full backward compatibility with schema v3.0.x:
 
-**What's New in v3.1.0:**
+> **Application vs Schema Versions**: PrompTrek application version 0.4.0 supports schema versions v1.x, v2.x, v3.0.x, and v3.1.x. The schema version is specified in your `.promptrek.yaml` file's `schema_version` field.
+
+**What's New in Schema v3.1.0:**
 - ✨ **Refined Agent Model** - `prompt` field replaces `system_prompt` for consistency with commands
 - 🔄 **Workflow Support** - Multi-step workflows with `multi_step`, `tool_calls`, and structured steps
-- ✅ **100% Backward Compatible** - v3.0.x and v2.x files continue to work with automatic migration
-- 📋 **Production Ready** - Latest stable schema for all new projects
+- ✅ **100% Backward Compatible** - schema v3.0.x and v2.x files continue to work with automatic migration
+- 📋 **Production Ready** - Latest stable configuration schema for all new projects
 
-**Before (v2.x) vs After (v3.1):**
+**Before (schema v2.x) vs After (schema v3.1):**
 ```yaml
 # v2.x - Nested structure (legacy)
 schema_version: "2.1.0"
@@ -222,9 +230,9 @@ agents:                     # ✅ Refined model with 'prompt' field
     prompt: "You are a code reviewer..."  # ✅ New field name
 ```
 
-**Migration:**
+**Migration Between Schema Versions:**
 ```bash
-# Auto-migrate v2.x/v3.0 to v3.1
+# Auto-migrate schema v2.x/v3.0 to v3.1
 promptrek migrate project.promptrek.yaml -o project-v3.1.promptrek.yaml
 
 # Migrate in place
@@ -236,24 +244,24 @@ promptrek migrate project.promptrek.yaml --in-place
 - ⚠️ [Deprecation Warnings](./docs/DEPRECATION_WARNINGS.md) - Understanding deprecation messages
 - 🎯 **Recommended for all new projects** - Use v3.1 schema for latest features
 
-### Schema v2.x (Legacy - Deprecated)
+### Schema v2.x (Legacy Configuration Format - Deprecated)
 
-PrompTrek v2.x schema with nested plugin support (superseded by v3.1):
+The schema v2.x format with nested plugin support (superseded by schema v3.1):
 
-**Migration to v3.1:**
-All v2.x features are available in v3.1 with cleaner syntax:
+**Migration to Schema v3.1:**
+All schema v2.x features are available in schema v3.1 with cleaner syntax:
 ```bash
-# Migrate v2.x files to v3.1
+# Migrate schema v2.x files to v3.1
 uv run promptrek migrate old.promptrek.yaml -o new.promptrek.yaml
 
-# Create new v3.1 file (default)
+# Create new schema v3.1 file (default)
 uv run promptrek init
 
-# v2.x files still work but show migration suggestions
+# Schema v2.x files still work but show migration suggestions
 uv run promptrek generate old-v2.promptrek.yaml --all
 ```
 
-**V3.1 Format Example:**
+**Schema v3.1 Format Example:**
 ```yaml
 schema_version: "3.1.0"
 metadata:
@@ -323,9 +331,9 @@ documents:
     # Metadata fields are optional - smart defaults will be used
 ```
 
-####  🔌 Plugin Configuration (v3.0)
+####  🔌 Plugin Configuration (Schema v3.0+)
 
-PrompTrek v3.0 provides MCP server integration with **clean top-level fields** (no `plugins` wrapper):
+PrompTrek supports schema v3.0+ which provides MCP server integration with **clean top-level fields** (no `plugins` wrapper):
 
 **Supported Plugin Types:**
 - **MCP Servers** (`mcp_servers`) - Model Context Protocol servers for external tools (filesystem, GitHub, databases, etc.)

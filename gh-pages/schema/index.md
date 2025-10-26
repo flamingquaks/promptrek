@@ -12,11 +12,11 @@ This page provides JSON Schema files for the Universal Prompt Format (UPF) used 
 <!-- <div class="schema-list"> -->
 
 
-### v3.1.0 (Current Stable)
+### Schema v3.1.0 (Latest Stable Configuration Format)
 
-**Schema Version**: 3.1.0
+**Configuration Schema Version**: 3.1.0
 
-Current stable schema with refined agent model and workflow support.
+Latest stable configuration schema with refined agent model and workflow support.
 
 - **Schema URL**: [`https://promptrek.ai/schema/v3.1.0.json`](v3.1.0.json)
 - **Features**:
@@ -27,18 +27,18 @@ Current stable schema with refined agent model and workflow support.
   - Plugin marketplace support via `plugins` field
   - Markdown-first content approach
   - Lossless round-trip sync with literal block scalar formatting
-  - 100% backward compatible with v3.0 (automatic field mapping)
+  - 100% backward compatible with schema v3.0 (automatic field mapping)
 - **Recommended**: Use this for all new projects
 
 [Download v3.1.0 Schema](v3.1.0.json){: .btn .btn-primary}
 
 ---
 
-### v3.0 (Stable)
+### Schema v3.0 (Stable Configuration Format)
 
-**Schema Version**: 3.0.x
+**Configuration Schema Version**: 3.0.x
 
-Stable schema with top-level plugin fields and plugin marketplace support.
+Stable configuration schema with top-level plugin fields and plugin marketplace support.
 
 - **Schema URL**: [`https://promptrek.ai/schema/v3.0.0.json`](v3.0.0.json)
 - **Features**:
@@ -46,40 +46,40 @@ Stable schema with top-level plugin fields and plugin marketplace support.
   - Plugin marketplace support via `plugins` field
   - Markdown-first content approach
   - Lossless round-trip sync
-- **Note**: Consider upgrading to v3.1 for workflow support
+- **Note**: Consider upgrading to schema v3.1 for workflow support
 
 [Download v3.0.0 Schema](v3.0.0.json){: .btn}
 
 ---
 
-### v2.1 (Legacy)
+### Schema v2.1 (Legacy Configuration Format)
 
-**Schema Version**: 2.1.0
+**Configuration Schema Version**: 2.1.0
 
-Legacy schema with nested plugin structure.
+Legacy configuration schema with nested plugin structure.
 
 - **Schema URL**: [`https://promptrek.ai/schema/v2.1.0.json`](v2.1.0.json)
 - **Features**:
   - Nested plugin structure: `plugins.mcp_servers`, `plugins.commands`, etc.
   - Markdown-first content approach
   - Lossless round-trip sync
-- **Note**: Consider migrating to v3.0
+- **Note**: Consider migrating to schema v3.1
 
 [Download v2.1 Schema](v2.1.json){: .btn}
 
 ---
 
-### v2.0.0 (Legacy)
+### Schema v2.0.0 (Legacy Configuration Format)
 
-**Schema Version**: 2.0.0
+**Configuration Schema Version**: 2.0.0
 
-Simplified markdown-first schema without plugin support.
+Simplified markdown-first configuration schema without plugin support.
 
 - **Schema URL**: [`https://promptrek.ai/schema/v2.0.0.json`](v2.0.0.json)
 - **Features**:
   - Markdown-first content approach
   - No plugin support
-- **Note**: Consider migrating to v3.0
+- **Note**: Consider migrating to schema v3.1
 
 [Download v2.0.0 Schema](v2.0.0.json){: .btn}
 

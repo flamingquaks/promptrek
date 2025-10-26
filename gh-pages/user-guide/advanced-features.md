@@ -17,7 +17,7 @@ Use triple braces to define variable placeholders in your UPF files:
 
 {% raw %}
 ```yaml
-# v3.1 format (recommended)
+# Schema v3.1 format (latest stable - recommended)
 schema_version: "3.1.0"
 metadata:
   title: "{{{ PROJECT_NAME }}} Assistant"
@@ -144,9 +144,9 @@ promptrek generate --editor claude --output ./output project.promptrek.yaml \
 
 CLI overrides have the highest precedence and will override both local variables and prompt file variables.
 
-## Combining Features with v3.0
+## Combining Features with Schema v3.0+
 
-In v3.0, you can combine variable substitution with multiple documents:
+In schema v3.0 and later, you can combine variable substitution with multiple documents:
 
 {% raw %}
 ```yaml
@@ -176,7 +176,7 @@ variables:
 
 ## Document Metadata
 
-Documents in v2.0+ and v3.0 support metadata fields that control how editors like Cursor apply rules:
+Documents in schema v2.0+ and v3.0+ support metadata fields that control how editors like Cursor apply rules:
 
 {% raw %}
 ```yaml
@@ -245,7 +245,7 @@ This provides:
 1. Variable substitution across all content
 2. CLI overrides for customization
 3. Multiple document support for organization
-4. Clean, maintainable v3.0 format
+4. Clean, maintainable schema v3.0+ format
 
 ## .gitignore Management
 

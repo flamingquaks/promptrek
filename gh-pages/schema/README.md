@@ -4,29 +4,29 @@ This directory contains JSON Schema files for the Universal Prompt Format (UPF) 
 
 ## Available Schemas
 
-### v3.1 (Current Stable)
+### Schema v3.1 (Latest Stable)
 - **File**: [`v3.1.0.json`](v3.1.0.json)
-- **Schema Version**: 3.1.x
-- **Description**: Latest stable schema with refined agent model (`prompt` field), workflow support, and top-level plugin fields
+- **Configuration Schema Version**: 3.1.x
+- **Description**: Latest stable configuration schema with refined agent model (`prompt` field), workflow support, and top-level plugin fields
 - **Recommended**: Use this for all new projects
 
-### v3.0 (Stable)
+### Schema v3.0 (Stable)
 - **File**: [`v3.0.0.json`](v3.0.0.json)
-- **Schema Version**: 3.0.x
-- **Description**: Stable schema with top-level plugin fields (`mcp_servers`, `commands`, `agents`, `hooks`)
-- **Note**: Consider migrating to v3.1 for refined agent model and workflows
+- **Configuration Schema Version**: 3.0.x
+- **Description**: Stable configuration schema with top-level plugin fields (`mcp_servers`, `commands`, `agents`, `hooks`)
+- **Note**: Consider migrating to schema v3.1 for refined agent model and workflows
 
-### v2.1 (Legacy)
+### Schema v2.1 (Legacy)
 - **File**: [`v2.1.json`](v2.1.json)
-- **Schema Version**: 2.1.x
-- **Description**: Legacy schema with nested plugin structure (`plugins.mcp_servers`, etc.)
-- **Note**: Consider migrating to v3.1
+- **Configuration Schema Version**: 2.1.x
+- **Description**: Legacy configuration schema with nested plugin structure (`plugins.mcp_servers`, etc.)
+- **Note**: Consider migrating to schema v3.1
 
-### v2.0 (Legacy)
+### Schema v2.0 (Legacy)
 - **File**: [`v2.0.json`](v2.0.json)
-- **Schema Version**: 2.0.x
+- **Configuration Schema Version**: 2.0.x
 - **Description**: Simplified markdown-first schema without plugin support
-- **Note**: Consider migrating to v3.1
+- **Note**: Consider migrating to schema v3.1
 
 ## Using the Schemas
 
@@ -77,17 +77,17 @@ validate(instance=data, schema=schema)
 
 The schemas are accessible at:
 
-- v3.1: `https://promptrek.ai/schema/v3.1.0.json`
-- v3.0: `https://promptrek.ai/schema/v3.0.0.json`
-- v2.1: `https://promptrek.ai/schema/v2.1.json`
-- v2.0: `https://promptrek.ai/schema/v2.0.json`
+- Schema v3.1: `https://promptrek.ai/schema/v3.1.0.json`
+- Schema v3.0: `https://promptrek.ai/schema/v3.0.0.json`
+- Schema v2.1: `https://promptrek.ai/schema/v2.1.json`
+- Schema v2.0: `https://promptrek.ai/schema/v2.0.json`
 
 ## Migration
 
 To migrate between schema versions, use the PrompTrek CLI:
 
 ```bash
-# Migrate from v2.x/v3.0 to v3.1
+# Migrate from schema v2.x/v3.0 to v3.1
 promptrek migrate project.promptrek.yaml -o project.v3.1.promptrek.yaml
 
 # Or migrate in-place

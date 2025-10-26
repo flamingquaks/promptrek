@@ -96,7 +96,7 @@ The sync feature maps editor files to PrompTrek fields:
 | `.continue/rules/general.md` | Main `content` field ⚠️ **Default - do not rename** |
 | `.continue/rules/*.md` (other files) | Each file becomes a `document` entry in the `documents` field |
 
-**Note**: Continue sync creates v3.1 format with modular structure. The `general.md` file is special - it maps to the main `content` field and should not be renamed. All other rule files become documents.
+**Note**: Continue sync creates schema v3.1 format with modular structure. The `general.md` file is special - it maps to the main `content` field and should not be renamed. All other rule files become documents.
 
 #### Kiro Editor
 | Editor File | PrompTrek Field |
@@ -204,14 +204,14 @@ The sync command provides clear error messages for common issues:
 
 The sync command intelligently handles schema versions to ensure compatibility:
 
-**Current Behavior (v3.1.0)**:
+**Current Behavior (Schema v3.1.0)**:
 - Synced files always use the **latest schema version** (`3.1.0`)
-- All adapters produce v3.1.0 format when syncing
+- All adapters produce schema v3.1.0 format when syncing
 - Legacy fields are automatically converted to current format
 
 **Field Name Handling**:
-- **v3.1.0 files**: Agents use `prompt` field (new name)
-- **v3.0.x files**: Agents use `system_prompt` field (backward compatibility)
+- **Schema v3.1.0 files**: Agents use `prompt` field (new name)
+- **Schema v3.0.x files**: Agents use `system_prompt` field (backward compatibility)
 - **Automatic conversion**: Old field names are mapped to new ones during sync
 
 **Example**:
@@ -262,5 +262,5 @@ The sync system ensures complete round-trip compatibility:
 - **Generate → Sync → Generate** maintains data integrity
 - No information loss during the round-trip (PrompTrek → Editor → PrompTrek)
 - User customizations are preserved across sync operations
-- Schema versions are upgraded automatically (v3.0 → v3.1)
+- Schema versions are upgraded automatically (schema v3.0 → v3.1)
 - YAML formatting remains clean and readable

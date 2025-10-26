@@ -35,17 +35,17 @@ promptrek --version
 Create a new universal prompt file using one of our templates:
 
 ```bash
-# Basic initialization with pre-commit hooks (creates v3.0 format by default)
+# Basic initialization with pre-commit hooks (creates schema v3.1 format by default)
 promptrek init --setup-hooks --output my-project.promptrek.yaml
 
-# Use a specific template with hooks (v3.0 format)
+# Use a specific template with hooks (schema v3.1 format)
 promptrek init --template react --setup-hooks --output my-react-app.promptrek.yaml
 promptrek init --template api --setup-hooks --output my-api.promptrek.yaml
 
-# Create v1 format (legacy)
+# Create schema v1 format (legacy)
 promptrek init --v1 --output legacy.promptrek.yaml
 
-# Migrate existing v1 or v2.x file to v3.0
+# Migrate existing schema v1 or v2.x file to v3.1
 promptrek migrate old.promptrek.yaml -o new.promptrek.yaml
 ```
 
@@ -79,7 +79,9 @@ See [examples on GitHub](https://github.com/flamingquaks/promptrek/tree/main/exa
 
 Edit the generated `.promptrek.yaml` file to match your project needs.
 
-**Using v3.1 Format (Recommended - Default)**:
+**Using Schema v3.1 Format (Latest Stable - Default)**:
+
+> **Note on Versioning**: Schema versions (v1.x, v2.x, v3.x) define the configuration file format specified in the `schema_version` field. These are independent of the PrompTrek application version.
 
 {% raw %}
 ```yaml
@@ -127,12 +129,13 @@ variables:
 ```
 {% endraw %}
 
-**Benefits of v3.0**:
+**Benefits of Schema v3.1**:
 - ✅ **No `targets` field** - Works with ALL editors automatically
 - ✅ **Simpler format** - Just markdown content with clean plugin structure
 - ✅ **Lossless sync** - Parse editor files back without data loss
 - ✅ **Editor-friendly** - Matches how AI editors use markdown
-- ✅ **Top-level plugins** - MCP servers, commands, agents, and hooks at the top level (cleaner than v2.x)
+- ✅ **Top-level plugins** - MCP servers, commands, agents, and hooks at the top level (cleaner than schema v2.x)
+- ✅ **Refined agent model** - Consistent `prompt` field instead of `system_prompt`
 
 ### 3. Validate Your Configuration
 
@@ -151,8 +154,8 @@ promptrek validate my-project.promptrek.yaml --strict
 **💡 Editor Integration:** Enable schema validation in your editor for instant feedback while editing `.promptrek.yaml` files. Add this comment at the top of your file:
 
 ```yaml
-# yaml-language-server: $schema=https://promptrek.ai/schema/v3.0.0.json
-schema_version: 3.0.0
+# yaml-language-server: $schema=https://promptrek.ai/schema/v3.1.0.json
+schema_version: 3.1.0
 # ... rest of your configuration
 ```
 
@@ -504,10 +507,10 @@ promptrek <command> --help          # Command-specific help
 ### Deprecated Commands
 ```bash
 # ⚠️ DEPRECATED: Use 'promptrek generate --all' instead
-# promptrek agents                               # Legacy agent generation (v3.1.0+)
+# promptrek agents                               # Legacy agent generation (schema v3.1.0+)
 ```
 
-**Note**: The `agents` command is deprecated as of v3.1.0 and will be removed in a future version. All functionality is available through `promptrek generate --all`.
+**Note**: The `agents` command is deprecated as of schema v3.1.0 and will be removed in a future version. All functionality is available through `promptrek generate --all`.
 
 ## Troubleshooting
 

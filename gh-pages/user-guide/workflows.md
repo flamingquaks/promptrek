@@ -16,7 +16,7 @@ Define complex, automated multi-step procedures that can be triggered with a sin
 
 ## Overview
 
-Workflows allow you to create complex, multi-step automated procedures in your `project.promptrek.yaml` that work across all supported AI coding editors. Introduced in **v3.1.0**, workflows extend the existing `Command` model with optional fields for defining structured, repeatable processes.
+Workflows allow you to create complex, multi-step automated procedures in your `project.promptrek.yaml` that work across all supported AI coding editors. Introduced in **schema v3.1.0**, workflows extend the existing `Command` model with optional fields for defining structured, repeatable processes.
 
 ## Quick Start
 
@@ -423,11 +423,11 @@ examples:
   - "Quick review of PR #456 for style only"
 ```
 
-## Migration from v3.0
+## Migration from Schema v3.0
 
-v3.1.0 is **100% backward compatible** with v3.0. To add workflow features:
+Schema v3.1.0 is **100% backward compatible** with schema v3.0. To add workflow features:
 
-### Before (v3.0)
+### Before (Schema v3.0)
 
 ```yaml
 schema_version: "3.0.0"
@@ -438,7 +438,7 @@ commands:
     prompt: "Instructions here"
 ```
 
-### After (v3.1) - Enhanced
+### After (Schema v3.1) - Enhanced
 
 ```yaml
 schema_version: "3.1.0"

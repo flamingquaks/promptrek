@@ -9,7 +9,7 @@ This document provides a comprehensive comparison of features supported by each 
 
 ## Quick Reference Table
 
-| Editor | Variable Substitution | Multi-Document Support | Sync Support | Project Files | v3.0 Schema |
+| Editor | Variable Substitution | Multi-Document Support | Sync Support | Project Files | Schema v3.0+ |
 |--------|:--------------------:|:----------------------:|:------------------:|:-------------:|:-------------:|
 | **GitHub Copilot** | ✅ | ✅ | ✅ | ✅  | ✅ |
 | **Cursor** | ✅ | ✅ | ✅ | ✅  | ✅ |
@@ -90,8 +90,8 @@ Generates project-level configuration files that can be committed to version con
 - `.cursor/rules/index.mdc`
 - `.clinerules/*.md`
 
-### v3.0 Schema Support
-Full support for PrompTrek v3.0 schema with top-level plugin fields.
+### Schema v3.0+ Support
+Full support for PrompTrek schema v3.0 and later with top-level plugin fields.
 
 **Supported by**: All adapters
 
@@ -101,7 +101,7 @@ Full support for PrompTrek v3.0 schema with top-level plugin fields.
 - Automatic migration for legacy v2.x files
 - Production-ready stable schema
 
-**Learn more**: [v3.0 Schema Specification](./upf-specification.html#schema-v30-stable)
+**Learn more**: [Schema v3.0+ Specification](./upf-specification.html#schema-v30-stable)
 
 ## Detailed Adapter Capabilities
 
@@ -118,7 +118,7 @@ Full support for PrompTrek v3.0 schema with top-level plugin fields.
 - ✅ Round-trip sync (v2 lossless format)
 - ✅ Advanced glob pattern matching
 - ✅ MCP server integration
-- ✅ v3.0 schema with top-level plugins
+- ✅ Schema v3.0+ with top-level plugins
 
 **Best For**: Large teams using GitHub, multi-component projects
 
@@ -141,7 +141,7 @@ Full support for PrompTrek v3.0 schema with top-level plugin fields.
 - ✅ Advanced ignore file support
 - ✅ Round-trip sync
 - ✅ MCP server, commands, and agents support
-- ✅ v3.0 schema with top-level plugins
+- ✅ Schema v3.0+ with top-level plugins
 
 **Best For**: AI-first development workflows, focused coding sessions
 
@@ -162,7 +162,7 @@ Full support for PrompTrek v3.0 schema with top-level plugin fields.
 - ✅ Individual prompt markdown files with frontmatter
 - ✅ Round-trip sync
 - ✅ Advanced rules directory
-- ✅ v3.0 schema with top-level plugins
+- ✅ Schema v3.0+ with top-level plugins
 
 **Best For**: VS Code users, customizable AI workflows, modular configuration management
 
@@ -182,7 +182,7 @@ Full support for PrompTrek v3.0 schema with top-level plugin fields.
 - ✅ Structured guidance approach
 - ✅ Round-trip sync
 - ✅ MCP server support
-- ✅ v3.0 schema with top-level plugins
+- ✅ Schema v3.0+ with top-level plugins
 
 **Best For**: Structured development processes, specification-driven projects
 
@@ -201,7 +201,7 @@ Full support for PrompTrek v3.0 schema with top-level plugin fields.
 - ✅ Command execution and browser automation
 - ✅ Round-trip sync
 - ✅ MCP server support (via VSCode settings)
-- ✅ v3.0 schema with top-level plugins
+- ✅ Schema v3.0+ with top-level plugins
 
 **Best For**: VSCode users wanting autonomous AI assistance, task automation workflows
 
@@ -222,7 +222,7 @@ Full support for PrompTrek v3.0 schema with top-level plugin fields.
 - ✅ Full plugin ecosystem support (MCP, commands, agents, hooks)
 - ✅ Round-trip sync (v2/v3 lossless format)
 - ✅ Dual hooks format (native + PrompTrek)
-- ✅ v3.0 schema with top-level plugins
+- ✅ Schema v3.0+ with top-level plugins
 - ✅ Autonomous agent support with trust levels
 - ✅ Custom slash command support
 
@@ -242,7 +242,7 @@ Full support for PrompTrek v3.0 schema with top-level plugin fields.
 - ✅ Modular rule organization
 - ✅ Round-trip sync
 - ✅ MCP server support (system-wide)
-- ✅ v3.0 schema with top-level plugins
+- ✅ Schema v3.0+ with top-level plugins
 
 **Best For**: Teams using Windsurf, organized AI assistance
 
@@ -261,7 +261,7 @@ Full support for PrompTrek v3.0 schema with top-level plugin fields.
 - ✅ AWS-integrated workflows
 - ✅ Round-trip sync
 - ✅ MCP server support
-- ✅ v3.0 schema with top-level plugins
+- ✅ Schema v3.0+ with top-level plugins
 
 **Best For**: AWS-centric projects, cloud development
 
@@ -276,7 +276,7 @@ Full support for PrompTrek v3.0 schema with top-level plugin fields.
 - ✅ IDE-integrated configuration
 - ✅ Markdown rules format
 - ✅ Round-trip sync
-- ✅ v3.0 schema with top-level plugins
+- ✅ Schema v3.0+ with top-level plugins
 - ⚠️ MCP/prompts configured via IDE UI
 
 **Best For**: JetBrains IDE users (IntelliJ, PyCharm, etc.)
@@ -304,12 +304,12 @@ Generate for all configured editors at once:
 promptrek generate project.promptrek.yaml --all
 ```
 
-### Upgrading to v3.0 Schema
+### Upgrading to Schema v3.0+
 
-All adapters support the v3.0 schema with top-level plugin fields:
+All adapters support schema v3.0 and later with top-level plugin fields:
 
 ```bash
-# Migrate v2.x to v3.0
+# Migrate schema v2.x to v3.1
 promptrek migrate project.promptrek.yaml -o project-v3.promptrek.yaml
 
 # V2.x files still work with automatic migration

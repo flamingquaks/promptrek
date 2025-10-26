@@ -68,7 +68,7 @@ promptrek sync --from copilot
 
 ### Deprecated Commands
 
-**Note**: As of v3.1.0, the following commands are deprecated:
+**Note**: As of schema v3.1.0, the following commands are deprecated:
 - `promptrek agents` - Use `promptrek generate --all` instead
 
 ## Need More Help?

@@ -244,7 +244,7 @@ body.home-page {
     <div class="example-grid">
 
       <div class="example-input">
-        <h3>Universal Configuration (v3.1.0)</h3>
+        <h3>Universal Configuration (Schema v3.1.0)</h3>
         <p>Write your prompt once in PrompTrek format:</p>
         <div class="code-example">
 {% raw %}<pre><code>schema_version: "3.1.0"
@@ -278,7 +278,8 @@ content: |
 variables:
   TEAM_NAME: "Engineering Team"</code></pre>{% endraw %}
         </div>
-        <p class="schema-note">✨ <strong>v3.1.0 Schema</strong>: Markdown-first with clean top-level plugins and refined agent model. No <code>targets</code> field needed - works with ALL editors! MCP servers, commands, agents, and hooks at the top level.</p>
+        <p class="schema-note">✨ <strong>Schema v3.1.0 (Latest Stable)</strong>: Markdown-first with clean top-level plugins and refined agent model. No <code>targets</code> field needed - works with ALL editors! MCP servers, commands, agents, and hooks at the top level.<br><br>
+        <em>Note: Schema versions (v1.x, v2.x, v3.x) define the configuration file format and are independent of the PrompTrek application version.</em></p>
       </div>
 
       <div class="example-output">
@@ -385,7 +386,7 @@ variables:
       <div class="feature-card-modern">
         <div class="feature-icon">≡</div>
         <h3>JSON Schema Support</h3>
-        <p>Published JSON Schemas for v2.0, v2.1, v3.0, and v3.1. Get autocompletion, validation, and inline documentation in your editor. <a href="schema/">Learn more →</a></p>
+        <p>Published JSON Schemas for schema v2.0, v2.1, v3.0, and v3.1. Get autocompletion, validation, and inline documentation in your editor. <a href="schema/">Learn more →</a></p>
       </div>
     </div>
   </div>
