@@ -64,13 +64,13 @@ jobs:
 
       - name: Install dependencies
         run: |
-          uv sync --all-groups
+          uv sync --all-groups --dev
 
       - name: Check code formatting
         id: formatting
         run: |
           echo "Checking black formatting..."
-          if uv run black --check --diff src/ tests/; then
+          if uv run --frozen black --check --diff src/ tests/; then
             echo "formatting_issues=false" >> $GITHUB_OUTPUT
           else
             echo "formatting_issues=true" >> $GITHUB_OUTPUT
@@ -80,20 +80,20 @@ jobs:
         id: imports
         run: |
           echo "Checking import order..."
-          uv run isort --check-only --diff src/ tests/ || echo "import_issues=true" >> $GITHUB_OUTPUT
+          uv run --frozen isort --check-only --diff src/ tests/ || echo "import_issues=true" >> $GITHUB_OUTPUT
 
       - name: Run linter
         id: linter
         run: |
           echo "Running flake8..."
-          uv run flake8 src/ tests/ || echo "lint_issues=true" >> $GITHUB_OUTPUT
+          uv run --frozen flake8 src/ tests/ || echo "lint_issues=true" >> $GITHUB_OUTPUT
         continue-on-error: true
 
       - name: Type checking
         id: typecheck
         run: |
           echo "Running mypy..."
-          uv run mypy src/ || echo "type_issues=true" >> $GITHUB_OUTPUT
+          uv run --frozen mypy src/ || echo "type_issues=true" >> $GITHUB_OUTPUT
         continue-on-error: true
 
       - name: Generate PR comment
