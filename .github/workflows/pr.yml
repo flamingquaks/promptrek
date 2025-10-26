@@ -63,7 +63,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          uv sync --all-groups
+          uv sync --all-groups --extra dev
 
       - name: Check code formatting
         id: formatting
@@ -96,10 +96,41 @@ jobs:
         continue-on-error: true
 
       - name: Generate PR comment
-        if: steps.formatting.outputs.formatting_issues || steps.imports.outputs.import_issues
+        if: always()
         uses: actions/github-script@v8
         with:
           script: |
+            // Find all previous Code Quality Issues comments
+            const comments = await github.rest.issues.listComments({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            });
+
+            const codeQualityComments = comments.data.filter(comment =>
+              comment.body && comment.body.includes('## Code Quality Issues')
+            );
+
+            // Hide previous code quality comments as outdated
+            for (const comment of codeQualityComments) {
+              try {
+                await github.graphql(`
+                  mutation MinimizeComment($subjectId: ID!) {
+                    minimizeComment(input: {
+                      subjectId: $subjectId,
+                      classifier: OUTDATED
+                    }) {
+                      clientMutationId
+                    }
+                  }
+                `, { subjectId: comment.node_id });
+                console.log(`Minimized previous code quality comment ${comment.id}`);
+              } catch (error) {
+                console.log(`Failed to minimize comment ${comment.id}: ${error.message}`);
+              }
+            }
+
+            // Check for current issues
             const issues = [];
             if ('${{ steps.formatting.outputs.formatting_issues }}' === 'true') {
               issues.push('- Code formatting (run `uv run black src/ tests/`)');
@@ -108,6 +139,7 @@ jobs:
               issues.push('- Import sorting (run `uv run isort src/ tests/`)');
             }
 
+            // Only post new comment if there are issues
             if (issues.length > 0) {
               const body = `## Code Quality Issues
 
@@ -120,7 +152,7 @@ jobs:
             uv run isort src/ tests/
             \`\`\``;
 
-              github.rest.issues.createComment({
+              await github.rest.issues.createComment({
                 issue_number: context.issue.number,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
