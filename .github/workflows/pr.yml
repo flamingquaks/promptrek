@@ -45,18 +45,17 @@ jobs:
         uses: astral-sh/setup-uv@v6
         with:
           enable-cache: true
-          python-version: "3.11"
           cache-dependency-glob: "pyproject.toml"
 
       - name: Set up Python 3.11
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.11"
+        run: uv python install 3.11
 
       - name: Cache dependencies
         uses: actions/cache@v4
         with:
-          path: ~/.cache/uv
+          path: |
+            ~/.cache/uv
+            .venv
           key: ${{ runner.os }}-uv-pr-${{ hashFiles('pyproject.toml', 'uv.lock') }}
           restore-keys: |
             ${{ runner.os }}-uv-pr-
@@ -64,13 +63,13 @@ jobs:
 
       - name: Install dependencies
         run: |
-          uv sync --all-groups
+          uv sync --all-groups --extra dev
 
       - name: Check code formatting
         id: formatting
         run: |
           echo "Checking black formatting..."
-          if uv run black --check --diff src/ tests/; then
+          if uv run --frozen black --check --diff src/ tests/; then
             echo "formatting_issues=false" >> $GITHUB_OUTPUT
           else
             echo "formatting_issues=true" >> $GITHUB_OUTPUT
@@ -80,27 +79,62 @@ jobs:
         id: imports
         run: |
           echo "Checking import order..."
-          uv run isort --check-only --diff src/ tests/ || echo "import_issues=true" >> $GITHUB_OUTPUT
+          uv run --frozen isort --check-only --diff src/ tests/ || echo "import_issues=true" >> $GITHUB_OUTPUT
 
       - name: Run linter
         id: linter
         run: |
           echo "Running flake8..."
-          uv run flake8 src/ tests/ || echo "lint_issues=true" >> $GITHUB_OUTPUT
+          uv run --frozen flake8 src/ tests/ || echo "lint_issues=true" >> $GITHUB_OUTPUT
         continue-on-error: true
 
       - name: Type checking
         id: typecheck
         run: |
           echo "Running mypy..."
-          uv run mypy src/ || echo "type_issues=true" >> $GITHUB_OUTPUT
+          uv run --frozen mypy src/ || echo "type_issues=true" >> $GITHUB_OUTPUT
         continue-on-error: true
 
       - name: Generate PR comment
-        if: steps.formatting.outputs.formatting_issues || steps.imports.outputs.import_issues
+        if: success() || failure()
         uses: actions/github-script@v8
         with:
           script: |
+            // Find all previous Code Quality Issues comments
+            const comments = await github.rest.issues.listComments({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            });
+
+            const codeQualityComments = comments.data.filter(comment =>
+              comment.body &&
+              comment.body.includes('## Code Quality Issues') &&
+              comment.user &&
+              comment.user.type === 'Bot' &&
+              comment.user.login === 'github-actions[bot]'
+            );
+
+            // Hide previous code quality comments as outdated
+            for (const comment of codeQualityComments) {
+              try {
+                await github.graphql(`
+                  mutation MinimizeComment($subjectId: ID!) {
+                    minimizeComment(input: {
+                      subjectId: $subjectId,
+                      classifier: OUTDATED
+                    }) {
+                      clientMutationId
+                    }
+                  }
+                `, { subjectId: comment.node_id });
+                console.log(`Minimized previous code quality comment ${comment.id}`);
+              } catch (error) {
+                console.log(`Failed to minimize comment ${comment.id}: ${error.message}`);
+              }
+            }
+
+            // Check for current issues
             const issues = [];
             if ('${{ steps.formatting.outputs.formatting_issues }}' === 'true') {
               issues.push('- Code formatting (run `uv run black src/ tests/`)');
@@ -109,6 +143,7 @@ jobs:
               issues.push('- Import sorting (run `uv run isort src/ tests/`)');
             }
 
+            // Only post new comment if there are issues
             if (issues.length > 0) {
               const body = `## Code Quality Issues
 
@@ -121,7 +156,7 @@ jobs:
             uv run isort src/ tests/
             \`\`\``;
 
-              github.rest.issues.createComment({
+              await github.rest.issues.createComment({
                 issue_number: context.issue.number,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
