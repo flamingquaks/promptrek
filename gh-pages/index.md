@@ -280,7 +280,9 @@ content: |
 
 variables:
   TEAM_NAME: "Engineering Team"
-  GIT_BRANCH: "!command git rev-parse --abbrev-ref HEAD"</code></pre>{% endraw %}
+  GIT_BRANCH:
+    type: command
+    value: git rev-parse --abbrev-ref HEAD</code></pre>{% endraw %}
         </div>
         <p class="schema-note">✨ <strong>Schema v3.1.0 (Latest Stable)</strong>: Markdown-first with clean top-level plugins and refined agent model. No <code>targets</code> field needed - works with ALL editors! MCP servers, commands, agents, and hooks at the top level.<br><br>
         <em>Note: Schema versions (v1.x, v2.x, v3.x) define the configuration file format and are independent of the PrompTrek application version.</em></p>

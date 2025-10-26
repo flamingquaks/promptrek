@@ -90,7 +90,7 @@ allow_commands: false
         result = runner.invoke(cli, ["--verbose", "refresh"])
 
         # Should complete without errors
-        assert result.exit_code == 0 or "Refresh complete" in result.output
+        assert result.exit_code == 0 and "Refresh complete" in result.output
 
     def test_refresh_with_specific_editor(self, setup_project):
         """Test refresh with specific editor override."""
@@ -101,7 +101,11 @@ allow_commands: false
 
         # Should attempt to refresh for cursor
         # (may fail due to missing adapter in test env, but command should parse correctly)
-        assert "cursor" in result.output or result.exit_code in [0, 1]
+        assert (
+            "cursor" in result.output
+            or "No adapter found for editor 'cursor'" in result.output
+        ), f"Expected 'cursor' in output or missing adapter error, got: {result.output}"
+        assert result.exit_code == 0 or result.exit_code == 1
 
     def test_refresh_missing_source_file(self, setup_project):
         """Test refresh fails when source file is missing."""

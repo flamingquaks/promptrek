@@ -155,8 +155,8 @@ class TestBuiltInVariables:
 
     def test_date_format(self):
         """Test that date variables have correct format."""
-        vars_dict = BuiltInVariables.get_all()
         now = datetime.now()
+        vars_dict = BuiltInVariables.get_all()
 
         # Check CURRENT_DATE format (YYYY-MM-DD)
         assert vars_dict["CURRENT_DATE"] == now.strftime("%Y-%m-%d")

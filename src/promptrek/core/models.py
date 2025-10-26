@@ -632,7 +632,7 @@ class GenerationMetadata(BaseModel):
         try:
             datetime.fromisoformat(v)
         except ValueError:
-            raise ValueError("Timestamp must be in ISO 8601 format")
+            raise ValueError(f"Timestamp must be in ISO 8601 format, got: {v}")
         return v
 
     model_config = ConfigDict(validate_assignment=True, extra="allow")
