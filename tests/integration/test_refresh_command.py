@@ -105,7 +105,7 @@ allow_commands: false
         assert (
             "cursor" in result.output
             or "No adapter found for editor 'cursor'" in result.output
-        ), f"Expected 'cursor' in output or missing adapter error, got: {result.output}"
+        ), f"{result.output}"
         assert result.exit_code == 0 or result.exit_code == 1
 
     def test_refresh_missing_source_file(self, setup_project):
