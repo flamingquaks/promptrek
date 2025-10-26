@@ -145,9 +145,8 @@ allow_commands: false
                 "VERSION=2.0.0",
             ],
         )
-
-        # Should complete without errors and accept variable overrides
-        assert result.exit_code == 0 or "Refresh complete" in result.output
+        assert result.exit_code == 0
+        assert "Refresh complete" in result.output
         # Variables should be properly parsed and not cause errors
         assert "Variable must be in format KEY=value" not in result.output
 
