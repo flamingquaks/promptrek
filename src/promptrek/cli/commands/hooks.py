@@ -77,7 +77,9 @@ def check_generated_command(ctx: click.Context, files: List[str]) -> None:
         ".kiro/specs/*.md",
         # Amazon Q files
         ".amazonq/rules/*.md",
+        ".amazonq/prompts/*.md",
         ".amazonq/cli-agents/*.json",
+        ".amazonq/mcp.json",
         # JetBrains AI files
         ".assistant/rules/*.md",
     }

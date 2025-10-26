@@ -1,0 +1,159 @@
+# yaml-language-server: $schema=https://promptrek.ai/schema/v3.1.0.json
+schema_version: 3.1.0
+metadata:
+  title: Amazon Q Full Feature Example
+  description: Demonstrates all Amazon Q features - prompts, agents, and hooks
+  version: 1.0.0
+  author: PrompTrek Team
+  tags: [amazon-q, prompts, agents, hooks, example]
+
+content: |
+  # Project Coding Guidelines
+
+  Follow these coding standards for all development work.
+
+  ## General Rules
+  - Write clean, maintainable code
+  - Add comprehensive tests for all features
+  - Document all public APIs
+  - Follow the project's architectural patterns
+
+  ## Code Quality
+  - Use meaningful variable and function names
+  - Keep functions small and focused
+  - Avoid code duplication
+  - Handle errors gracefully
+
+# Commands: Non-workflow commands become .amazonq/prompts/*.md files
+commands:
+  # Simple prompt - generates .amazonq/prompts/explain-code.md
+  - name: explain-code
+    description: Explain selected code in detail
+    prompt: |
+      Analyze the selected code and provide:
+      1. High-level overview of what it does
+      2. Step-by-step explanation of the logic
+      3. Key concepts and patterns used
+      4. Potential improvements or considerations
+
+  # Prompt for test generation - generates .amazonq/prompts/write-tests.md
+  - name: write-tests
+    description: Generate comprehensive test cases
+    prompt: "Generate unit tests for the selected code, covering normal cases, edge cases, and error conditions. Focus on testing edge cases and error handling. Use mocking for external dependencies."
+
+  # Prompt with variable substitution
+  - name: review-security
+    description: Security review of code
+    prompt: "Review the selected code for security vulnerabilities, especially {{{ SECURITY_FOCUS }}}"
+
+  # Workflow command (has steps) - NOT a prompt, generates workflow file
+  - name: test-and-build
+    description: Run tests and build the project
+    prompt: "Run full test suite and build if tests pass"
+    steps:
+      - name: test
+        action: execute_command
+        params:
+          command: "npm test"
+      - name: build
+        action: execute_command
+        params:
+          command: "npm run build"
+
+# Agents: Generate .amazonq/cli-agents/*.json files
+agents:
+  # Code reviewer agent - gets global hooks + scoped hook
+  - name: code-reviewer
+    prompt: |-
+      You are an expert code reviewer with deep knowledge of software engineering.
+
+      Your responsibilities:
+      1. Review code for quality, maintainability, and readability
+      2. Identify security vulnerabilities and potential bugs
+      3. Suggest performance improvements
+      4. Ensure code follows project conventions and best practices
+      5. Recommend additional test coverage
+
+      Provide constructive feedback with specific examples and explanations.
+    description: Reviews code for quality, security, and best practices
+    tools:
+      - file_read
+      - git_diff
+      - static_analysis
+
+  # Documentation generator agent - gets only global hooks
+  - name: doc-generator
+    prompt: |-
+      You are a documentation specialist focused on creating clear,
+      comprehensive documentation that helps developers understand and use the code.
+
+      Your focus areas:
+      - Clear explanations of functionality
+      - Practical code examples
+      - Common use cases and patterns
+      - API references
+      - Troubleshooting guides
+    description: Generates and updates project documentation
+    tools:
+      - file_read
+      - file_write
+      - analyze_code_structure
+
+  # Test generator agent - custom prompt with variable
+  - name: test-generator
+    prompt: |-
+      You are a test automation expert for {{{ PROJECT_TYPE }}} projects.
+      Generate comprehensive tests that cover normal operations, edge cases,
+      and error conditions. Use mocking for external dependencies.
+    description: Generates comprehensive test suites
+
+# Hooks: Injected into agents based on 'agent' field
+hooks:
+  # Global hook - applies to ALL agents (no 'agent' field)
+  - name: git-status
+    event: prompt-submit
+    command: "git status --porcelain"
+    description: "Show git status before each interaction"
+
+  # Agent-scoped hook - only for code-reviewer
+  - name: current-branch
+    event: agent-spawn
+    command: "git branch --show-current"
+    agent: code-reviewer
+    description: "Show current git branch when code reviewer starts"
+
+  # Agent-scoped hook - only for doc-generator
+  - name: list-docs
+    event: agent-spawn
+    command: "find docs -name '*.md' -type f 2>/dev/null | head -20 || echo 'No docs directory'"
+    agent: doc-generator
+    description: "List existing documentation files when doc generator starts"
+
+  # Agent-scoped hook - only for test-generator
+  - name: test-status
+    event: agent-spawn
+    command: "npm test -- --listTests 2>/dev/null | wc -l || echo '0'"
+    agent: test-generator
+    description: "Show number of existing tests when test generator starts"
+
+# MCP Servers: Generate .amazonq/mcp.json
+mcp_servers:
+  - name: filesystem
+    command: npx
+    args:
+      - "-y"
+      - "@modelcontextprotocol/server-filesystem"
+      - "/path/to/project"
+
+  - name: git
+    command: npx
+    args:
+      - "-y"
+      - "@modelcontextprotocol/server-git"
+      - "--repository"
+      - "."
+
+# Variables for substitution
+variables:
+  SECURITY_FOCUS: "SQL injection and XSS vulnerabilities"
+  PROJECT_TYPE: "TypeScript"

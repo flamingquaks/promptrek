@@ -8,7 +8,7 @@ validation and serialization capabilities.
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Union
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 class PromptMetadata(BaseModel):
@@ -202,8 +202,31 @@ class MCPServer(BaseModel):
     )
 
 
+class WorkflowStep(BaseModel):
+    """Single step in a multi-step workflow."""
+
+    name: str = Field(..., description="Step name/identifier")
+    action: str = Field(
+        ..., description="Action to perform (e.g., 'read_file', 'execute_command')"
+    )
+    description: Optional[str] = Field(
+        default=None, description="Human-readable step description"
+    )
+    params: Optional[Dict[str, Any]] = Field(
+        default=None, description="Parameters for the action"
+    )
+    conditions: Optional[Dict[str, Any]] = Field(
+        default=None, description="Conditions for step execution"
+    )
+
+
 class Command(BaseModel):
-    """Slash command configuration for AI editors."""
+    """
+    Slash command or workflow configuration for AI editors.
+
+    Supports both simple commands (single prompt) and complex workflows
+    (multi-step procedures with tool calls). Use multi_step=True for workflows.
+    """
 
     name: str = Field(..., description="Command name (e.g., 'review-code')")
     description: str = Field(..., description="Command description")
@@ -214,9 +237,6 @@ class Command(BaseModel):
     requires_approval: bool = Field(
         default=False, description="Whether command execution requires approval"
     )
-    system_message: Optional[str] = Field(
-        default=None, description="Optional system message for the command"
-    )
     examples: Optional[List[str]] = Field(
         default=None, description="Example usage of the command"
     )
@@ -224,13 +244,33 @@ class Command(BaseModel):
         default=None, description="Trust and security metadata"
     )
 
+    # Workflow-specific fields (v3.1.0+)
+    multi_step: bool = Field(
+        default=False,
+        description="Whether this is a multi-step workflow (vs simple command)",
+    )
+    steps: Optional[List["WorkflowStep"]] = Field(
+        default=None, description="Structured workflow steps (optional)"
+    )
+    tool_calls: Optional[List[str]] = Field(
+        default=None,
+        description="Tools/commands this workflow uses (e.g., ['gh', 'read_file'])",
+    )
+
 
 class Agent(BaseModel):
     """Autonomous agent configuration."""
 
     name: str = Field(..., description="Agent name/identifier")
-    description: str = Field(..., description="Agent description and purpose")
-    system_prompt: str = Field(..., description="System prompt for the agent")
+    prompt: str = Field(
+        ...,
+        description="Full markdown prompt/instructions for the agent",
+        alias="system_prompt",  # Backward compatibility with v2.x
+    )
+    description: Optional[str] = Field(
+        default=None,
+        description="Optional high-level summary of agent purpose (for documentation)",
+    )
     tools: Optional[List[str]] = Field(
         default=None, description="Available tools for the agent"
     )
@@ -247,6 +287,8 @@ class Agent(BaseModel):
         default=None, description="Trust and security metadata"
     )
 
+    model_config = ConfigDict(populate_by_name=True)
+
     @field_validator("trust_level")
     @classmethod
     def validate_trust_level(cls, v: str) -> str:
@@ -255,6 +297,19 @@ class Agent(BaseModel):
             raise ValueError("Trust level must be 'full', 'partial', or 'untrusted'")
         return v
 
+    @model_validator(mode="before")
+    @classmethod
+    def handle_system_prompt_compatibility(cls, values: Any) -> Any:
+        """Handle backward compatibility for system_prompt field (v3.0.0)."""
+        if isinstance(values, dict):
+            # If system_prompt is provided but prompt is not, use system_prompt for prompt
+            if "system_prompt" in values and "prompt" not in values:
+                values["prompt"] = values.pop("system_prompt")
+            # If both are provided, prefer prompt and ignore system_prompt
+            elif "system_prompt" in values and "prompt" in values:
+                values.pop("system_prompt")
+        return values
+
 
 class Hook(BaseModel):
     """Event-driven automation hook configuration."""
@@ -262,7 +317,7 @@ class Hook(BaseModel):
     name: str = Field(..., description="Hook name/identifier")
     event: str = Field(
         ...,
-        description="Event that triggers the hook (e.g., 'pre-commit', 'post-save')",
+        description="Event that triggers the hook (e.g., 'pre-commit', 'post-save', 'prompt-submit', 'agent-spawn')",
     )
     command: str = Field(..., description="Command to execute")
     conditions: Optional[Dict[str, Any]] = Field(
@@ -272,6 +327,10 @@ class Hook(BaseModel):
         default=True, description="Whether hook requires reapproval after changes"
     )
     description: Optional[str] = Field(default=None, description="Hook description")
+    agent: Optional[str] = Field(
+        default=None,
+        description="Agent name to associate hook with (for editors that support agent-scoped hooks like Amazon Q). If not specified, hook applies to all agents or is project-level.",
+    )
     trust_metadata: Optional[TrustMetadata] = Field(
         default=None, description="Trust and security metadata"
     )

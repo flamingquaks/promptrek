@@ -141,6 +141,7 @@ test-project/
 .amazonq/cli-agents/*.json
 .assistant/rules/*.md
 .kiro/steering/*.md
+.kiro/settings/mcp.json
 .tabnine_commands
 .vscode/mcp.json
 
@@ -152,3 +153,12 @@ test-project/
 
 # PrompTrek user-specific config (not committed)
 .promptrek/
+
+# PrompTrek editor-specific files (generated, not committed)
+.amazonq/prompts/*.md
+.amazonq/mcp.json
+
+# PrompTrek editor-specific files (generated, not committed)
+.continue/config.yaml
+.continue/mcpServers/*.yaml
+.continue/prompts/*.md

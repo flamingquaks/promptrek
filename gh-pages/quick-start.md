@@ -5,6 +5,9 @@ title: Quick Start Guide
 
 # Quick Start Guide
 
+<div style="background: #f0f9ff; border-left: 4px solid #0ea5e9; padding: 1rem; margin-bottom: 2rem;">
+  <strong>📦 Already have editor prompts and rules?</strong> Jump to <a href="#working-with-existing-projects">Working with Existing Projects</a> to learn how to import and consolidate them with PrompTrek.
+</div>
 
 ## Prerequisites
 
@@ -76,11 +79,11 @@ See [examples on GitHub](https://github.com/flamingquaks/promptrek/tree/main/exa
 
 Edit the generated `.promptrek.yaml` file to match your project needs.
 
-**Using v3.0 Format (Recommended - Default)**:
+**Using v3.1 Format (Recommended - Default)**:
 
 {% raw %}
 ```yaml
-schema_version: "3.0.0"
+schema_version: "3.1.0"
 
 metadata:
   title: "My Project Assistant"
@@ -239,7 +242,7 @@ PrompTrek generates sophisticated configuration files for each editor:
 - `.github/copilot-instructions.md` - Repository-wide instructions
 - `.github/instructions/*.instructions.md` - Path-specific instructions with YAML frontmatter
 - `.github/prompts/*.prompt.md` - Reusable prompt templates
-- **Bidirectional sync support**: Changes can be synced back to PrompTrek configuration
+- **Sync support**: Import existing Copilot files or sync generated files back to PrompTrek
 
 ### Cursor
 - `.cursor/rules/index.mdc` - Main project overview with metadata (Always rule)
@@ -268,7 +271,7 @@ PrompTrek generates sophisticated configuration files for each editor:
 - `.claude/commands/*.md` - Custom slash commands
 - `.claude/agents/*.md` - Autonomous agents
 - `.claude/settings.local.json` - Event hooks with tool matchers
-- **Bidirectional sync support**: Full lossless sync including plugins
+- **Sync support**: Lossless round-trip including all plugins (MCP servers, commands, agents, hooks)
 
 ### Windsurf
 - `.windsurf/rules/*.md` - Organized markdown rule files by category and technology
@@ -276,7 +279,7 @@ PrompTrek generates sophisticated configuration files for each editor:
 ### Amazon Q
 - `.amazonq/rules/*.md` - Rules directory for coding guidelines
 - `.amazonq/cli-agents/*.json` - CLI agents for code review, security, and testing
-- **Bidirectional sync support**: Import existing Amazon Q configurations
+- **Sync support**: Import existing Amazon Q configurations or sync generated files back
 
 ### JetBrains AI
 - `.assistant/rules/*.md` - Markdown rules for IDE assistance (prompts/MCP configured via IDE UI)
@@ -311,6 +314,117 @@ promptrek generate --editor continue --input react-app.promptrek.yaml
 - **GitHub Copilot**: The generated instructions will be automatically picked up
 - **Cursor**: Use the generated rules files for enhanced AI assistance
 - **Continue**: Load the generated configuration in your Continue settings
+
+## Working with Existing Projects
+
+Already have editor prompts and rules? PrompTrek makes it easy to consolidate them into a universal format and maintain them across editors.
+
+### Scenario 1: Import Existing Editor Configurations
+
+If you already have `.github/copilot-instructions.md`, `.cursor/rules/*.mdc`, `.claude/CLAUDE.md`, or other editor files, you can sync them into PrompTrek format:
+
+```bash
+# Sync from GitHub Copilot
+promptrek sync --editor copilot # By default this creates project.promptrek.yaml
+
+# Sync from Cursor
+promptrek sync --editor cursor --output project.promptrek.yaml # Specifying output allows you to save to a custom file name
+
+# Sync from Claude Code
+promptrek sync --editor claude 
+
+# Sync from Continue
+promptrek sync --editor continue 
+
+# Preview what would be synced (dry run)
+promptrek sync --editor copilot --dry-run
+```
+
+**Supported editors for sync**: GitHub Copilot, Cursor, Continue, Windsurf, Kiro, Cline, Claude Code, Amazon Q, JetBrains AI
+
+This creates a `project.promptrek.yaml` file from your existing editor configuration. You can then:
+1. Edit this file to refine your prompts
+2. Generate for other editors: `promptrek generate --all`
+3. Keep everything in sync going forward
+
+### Scenario 2: Migrate and Clean Up
+
+If you want to migrate from editor-specific files to PrompTrek as your single source of truth:
+
+```bash
+# Step 1: Sync your existing configuration
+promptrek sync --editor copilot --source-dir . --output project.promptrek.yaml
+
+# Step 2: Validate the imported configuration
+promptrek validate project.promptrek.yaml
+
+# Step 3: Generate for all editors (optional - if your team uses multiple editors)
+promptrek generate --all --input project.promptrek.yaml
+
+# Step 4: Remove old editor files from git and add to .gitignore
+promptrek config-ignores --remove-cached
+
+# Step 5: Commit the PrompTrek configuration
+git add project.promptrek.yaml .gitignore
+git commit -m "chore: migrate to PrompTrek universal prompt format"
+```
+
+**Benefits of this approach**:
+- ✅ Single source of truth for all prompts
+- ✅ Works with any editor your team prefers
+- ✅ Version control only the source (`.promptrek.yaml`)
+- ✅ Auto-generated files are gitignored
+- ✅ Easy to switch editors or add new ones
+
+### Scenario 3: Add PrompTrek to Project with Committed Editor Files
+
+If your project already has editor files committed to git, here's the cleanest migration path:
+
+```bash
+# Step 1: Initialize PrompTrek configuration
+promptrek init --setup-hooks --output project.promptrek.yaml
+
+# Step 2: Import your existing editor configuration
+promptrek sync --editor copilot --source-dir . --output imported.promptrek.yaml
+
+# Step 3: Merge the imported content into your project.promptrek.yaml
+# (Edit project.promptrek.yaml and copy the content from imported.promptrek.yaml)
+
+# Step 4: Clean up committed editor files and update .gitignore
+promptrek config-ignores --remove-cached
+
+# Step 5: Regenerate files from your PrompTrek source
+promptrek generate --all --input project.promptrek.yaml
+
+# Step 6: Commit the new setup
+git add project.promptrek.yaml .gitignore .pre-commit-config.yaml
+git commit -m "chore: migrate to PrompTrek with pre-commit hooks"
+```
+
+**What happens**:
+- Old editor files are removed from git tracking (`git rm --cached`)
+- `.gitignore` is updated to exclude editor files
+- PrompTrek becomes the source of truth
+- Pre-commit hooks ensure no one accidentally commits editor files again
+- Team members can generate for their preferred editor
+
+### Scenario 4: Keep Existing Editor Files (No Migration)
+
+If you want to use PrompTrek alongside your existing editor files:
+
+```bash
+# Step 1: Initialize with --no-gitignore to preserve existing files
+promptrek init --output project.promptrek.yaml
+
+# Step 2: Configure to not ignore editor files
+# Edit project.promptrek.yaml and add:
+# ignore_editor_files: false
+
+# Step 3: Generate without conflicts
+promptrek generate --all --input project.promptrek.yaml --output ./promptrek-generated
+```
+
+This keeps your existing workflow intact while experimenting with PrompTrek.
 
 ## Pre-commit Integration (Recommended)
 
@@ -387,6 +501,14 @@ promptrek --help                    # General help
 promptrek <command> --help          # Command-specific help
 ```
 
+### Deprecated Commands
+```bash
+# ⚠️ DEPRECATED: Use 'promptrek generate --all' instead
+# promptrek agents                               # Legacy agent generation (v3.1.0+)
+```
+
+**Note**: The `agents` command is deprecated as of v3.1.0 and will be removed in a future version. All functionality is available through `promptrek generate --all`.
+
 ## Troubleshooting
 
 ### Common Issues
@@ -405,6 +527,7 @@ promptrek <command> --help          # Command-specific help
 
 ## Next Steps
 
+- Learn about [Multi-Step Workflows](user-guide/workflows.html) for automated task sequences
 - Read the [User Guide](user-guide.html) for comprehensive documentation
 - Explore [Advanced Features](user-guide.html#advanced-features) like variables and conditionals
 - Learn about [Editor-Specific Features](user-guide.html#editor-specific-features)

@@ -427,7 +427,7 @@ jobs:
 
 Enable pre-commit.ci for automatic hook execution on PRs:
 
-1. Visit https://pre-commit.ci
+1. Visit [https://pre-commit.ci](https://pre-commit.ci)
 2. Enable for your repository
 3. Hooks will run automatically on every PR
 
@@ -462,5 +462,5 @@ A: Yes, you can modify the `files` pattern in your `.pre-commit-config.yaml` aft
 ## Support
 
 For issues or questions:
-- GitHub Issues: https://github.com/flamingquaks/promptrek/issues
-- Documentation: https://flamingquaks.github.io/promptrek
+- GitHub Issues: [https://github.com/flamingquaks/promptrek/issues](https://github.com/flamingquaks/promptrek/issues)
+- Documentation: [https://promptrek.ai](https://promptrek.ai)

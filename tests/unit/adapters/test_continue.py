@@ -197,21 +197,20 @@ class TestContinueAdapter(TestAdapterBase):
         assert parsed.documents is not None
         assert len(parsed.documents) > 0
 
-        # Verify all the markdown files were parsed as documents
+        # Verify all the markdown files were parsed as documents (except general.md which becomes main content)
         doc_names = [doc.name for doc in parsed.documents]
         assert "architecture" in doc_names
         assert "code-style" in doc_names
         assert "custom" in doc_names
-        assert "general" in doc_names
         assert "performance" in doc_names
         assert "python-rules" in doc_names
         assert "security" in doc_names
         assert "testing" in doc_names
+        # general.md becomes main content, not a document
+        assert "general" not in doc_names
 
-        # Verify content from specific documents
-        general_doc = next((d for d in parsed.documents if d.name == "general"), None)
-        assert general_doc is not None
-        assert "Use meaningful variable names" in general_doc.content
+        # Verify general.md content is in main content
+        assert "Use meaningful variable names" in parsed.content
 
         testing_doc = next((d for d in parsed.documents if d.name == "testing"), None)
         assert testing_doc is not None
@@ -246,14 +245,13 @@ class TestContinueAdapter(TestAdapterBase):
 
         assert isinstance(parsed, UniversalPromptV3)
 
-        # Check that both documents were parsed
+        # Check that weird was parsed as document, general becomes main content
         doc_names = [doc.name for doc in parsed.documents]
-        assert "general" in doc_names
+        assert "general" not in doc_names  # general.md becomes main content
         assert "weird" in doc_names
 
-        # Verify the general document has the expected content
-        general_doc = next((d for d in parsed.documents if d.name == "general"), None)
-        assert "Valid rule" in general_doc.content
+        # Verify the general content is in main content
+        assert "Valid rule" in parsed.content
 
     def test_build_rules_content(self, adapter):
         """Test building markdown rules content."""

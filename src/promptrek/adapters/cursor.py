@@ -272,7 +272,7 @@ class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
             schemas_dir = cursor_dir / "agent-schemas"
             for agent in agents:
                 # Apply variable substitution
-                agent_prompt = agent.system_prompt
+                agent_prompt = agent.prompt
                 if variables:
                     for var_name, var_value in variables.items():
                         placeholder = "{{{ " + var_name + " }}}"
@@ -281,7 +281,9 @@ class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
                 schema_file = schemas_dir / f"{agent.name}.json"
                 agent_schema = {
                     "name": agent.name,
-                    "description": agent.description,
+                    "description": (
+                        agent.description if agent.description else agent.name
+                    ),
                     "systemPrompt": agent_prompt,
                     "tools": agent.tools or [],
                     "trustLevel": agent.trust_level,
@@ -324,6 +326,32 @@ class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
                     ),
                     "requiresApproval": command.requires_approval,
                 }
+
+                # Add workflow-specific fields
+                # Infer multiStep from presence of steps or tool_calls (or explicit multi_step)
+                if command.multi_step or command.steps or command.tool_calls:
+                    function_schema["multiStep"] = True
+                if command.tool_calls:
+                    function_schema["toolCalls"] = command.tool_calls
+                if command.steps:
+                    function_schema["steps"] = [
+                        {
+                            "name": step.name,
+                            "action": step.action,
+                            **(
+                                {"description": step.description}
+                                if step.description
+                                else {}
+                            ),
+                            **({"params": step.params} if step.params else {}),
+                            **(
+                                {"conditions": step.conditions}
+                                if step.conditions
+                                else {}
+                            ),
+                        }
+                        for step in command.steps
+                    ]
 
                 if dry_run:
                     click.echo(f"  📁 Would create: {function_file}")

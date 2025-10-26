@@ -117,136 +117,81 @@ body.home-page {
 
 <section class="editors-section">
   <div class="container">
-    <h2 class="section-title">9 Supported AI Editors</h2>
+    <h2 class="section-title">9 Supported AI Editors (So far...)</h2>
     <p class="section-description">Generate perfect configurations for all major AI coding assistants from one universal format</p>
 
     <div class="editors-grid">
-      <div class="editor-card">
+      <a href="https://github.com/features/copilot" target="_blank" rel="noopener noreferrer" class="editor-card">
         <div class="editor-icon">
-          <img src="https://github.githubassets.com/images/modules/site/copilot/copilot.png" alt="GitHub Copilot" width="32" height="32" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
-          <span style="display:none;">🐙</span>
+          <img src="https://github.githubassets.com/images/modules/site/copilot/copilot.png" alt="GitHub Copilot" width="64" height="64" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+          <span style="display:none; font-size: 64px;">🐙</span>
         </div>
-        <h4>GitHub Copilot</h4>
-        <p>Repository-wide, path-specific, and agent instructions</p>
-        <div class="feature-badges">
-          <span class="feature-badge">📁 Project</span>
-          <span class="feature-badge">🔄 Variables</span>
-          <span class="feature-badge">↔️ Sync</span>
-        
-        </div>
-      </div>
+        <h3>GitHub Copilot</h3>
+      </a>
 
-      <div class="editor-card">
+      <a href="https://www.cursor.com" target="_blank" rel="noopener noreferrer" class="editor-card">
         <div class="editor-icon">
-          <img src="assets/cursor.png" alt="Cursor" width="32" height="32" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
-          <span style="display:none;">🎯</span>
+          <img src="assets/cursor.png" alt="Cursor" width="64" height="64" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+          <span style="display:none; font-size: 64px;">🎯</span>
         </div>
-        <h4>Cursor</h4>
-        <p>Metadata-driven .mdc rules with Always/Auto Attached</p>
-        <div class="feature-badges">
-          <span class="feature-badge">📁 Project</span>
-          <span class="feature-badge">🔄 Variables</span>
-          <span class="feature-badge">📊 Metadata</span>
-        </div>
-      </div>
+        <h3>Cursor</h3>
+      </a>
 
-      <div class="editor-card">
+      <a href="https://www.continue.dev" target="_blank" rel="noopener noreferrer" class="editor-card">
         <div class="editor-icon">
-          <img src="https://cdn.prod.website-files.com/663e06c56841363663ffbbcf/664c918ec47bacdd3acdc167_favicon%408x.png" alt="Continue" width="32" height="32" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
-          <span style="display:none;">⚡</span>
+          <img src="https://cdn.prod.website-files.com/663e06c56841363663ffbbcf/664c918ec47bacdd3acdc167_favicon%408x.png" alt="Continue" width="64" height="64" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+          <span style="display:none; font-size: 64px;">⚡</span>
         </div>
-        <h4>Continue</h4>
-        <p>Rules directory with markdown guidelines</p>
-        <div class="feature-badges">
-          <span class="feature-badge">📁 Project</span>
-          <span class="feature-badge">🔄 Variables</span>
-          <span class="feature-badge">↔️ Sync</span>
-        </div>
-      </div>
+        <h3>Continue</h3>
+      </a>
 
-      <div class="editor-card">
+      <a href="https://kiro.dev" target="_blank" rel="noopener noreferrer" class="editor-card">
         <div class="editor-icon">
-          <img src="https://kiro.dev/favicon.ico" alt="Kiro" width="32" height="32" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
-          <span style="display:none;">🤖</span>
+          <img src="https://kiro.dev/favicon.ico" alt="Kiro" width="64" height="64" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+          <span style="display:none; font-size: 64px;">🤖</span>
         </div>
-        <h4>Kiro</h4>
-        <p>Steering documents for AI-powered coding</p>
-        <div class="feature-badges">
-          <span class="feature-badge">📁 Project</span>
-          <span class="feature-badge">🔄 Variables</span>
-          <span class="feature-badge">📚 Multi-Doc</span>
-        </div>
-      </div>
+        <h3>Kiro</h3>
+      </a>
 
-      <div class="editor-card">
+      <a href="https://github.com/cline/cline" target="_blank" rel="noopener noreferrer" class="editor-card">
         <div class="editor-icon">
-          <img src="assets/cline-logo.svg" alt="Cline" width="32" height="32" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
-          <span style="display:none;">📝</span>
+          <img src="assets/cline-logo.svg" alt="Cline" width="64" height="64" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+          <span style="display:none; font-size: 64px;">📝</span>
         </div>
-        <h4>Cline</h4>
-        <p>Markdown-based rules configuration</p>
-        <div class="feature-badges">
-          <span class="feature-badge">📁 Project</span>
-          <span class="feature-badge">🔄 Variables</span>
-          <span class="feature-badge">📚 Multi-Doc</span>
-        </div>
-      </div>
+        <h3>Cline</h3>
+      </a>
 
-      <div class="editor-card">
+      <a href="https://docs.claude.com/en/docs/claude-code" target="_blank" rel="noopener noreferrer" class="editor-card">
         <div class="editor-icon">
-          <img src="assets/claude-code.svg" alt="Claude Code" width="32" height="32" onerror="this.style.display='none'; thisnextElementSibling.style.display='inline';">
-          <span style="display:none;">📝</span>
+          <img src="assets/claude-code.svg" alt="Claude Code" width="64" height="64" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+          <span style="display:none; font-size: 64px;">📝</span>
         </div>
-        <h4>Claude Code</h4>
-        <p>Rich context format with project information</p>
-        <div class="feature-badges">
-          <span class="feature-badge">📁 Project</span>
-          <span class="feature-badge">🔄 Variables</span>
-          <span class="feature-badge">📚 Multi-Doc</span>
-        </div>
-      </div>
+        <h3>Claude Code</h3>
+      </a>
 
-      <div class="editor-card">
+      <a href="https://codeium.com/windsurf" target="_blank" rel="noopener noreferrer" class="editor-card">
         <div class="editor-icon">
-          <img src="assets/windsurf.svg" alt="Windsurf" width="32" height="32" onerror="this.style.display='none'; thisnextElementSibling.style.display='inline';">
-          <span style="display:none;">📝</span>
+          <img src="assets/windsurf.svg" alt="Windsurf" width="64" height="64" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+          <span style="display:none; font-size: 64px;">📝</span>
         </div>
-        <h4>Windsurf</h4>
-        <p>Rules directory with markdown guidelines</p>
-        <div class="feature-badges">
-          <span class="feature-badge">📁 Project</span>
-          <span class="feature-badge">🔄 Variables</span>
-          <span class="feature-badge">📚 Multi-Doc</span>
-        </div>
-      </div>
+        <h3>Windsurf</h3>
+      </a>
 
-      <div class="editor-card">
+      <a href="https://aws.amazon.com/q/developer/" target="_blank" rel="noopener noreferrer" class="editor-card">
         <div class="editor-icon">
-          <img src="assets/q-logo.svg" alt="Amazon Q" width="32" height="32" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
-          <span style="display:none;">☁️</span>
+          <img src="assets/q-logo.svg" alt="Amazon Q" width="64" height="64" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+          <span style="display:none; font-size: 64px;">☁️</span>
         </div>
-        <h4>Amazon Q</h4>
-        <p>Rules directory and CLI agents for AWS AI assistance</p>
-        <div class="feature-badges">
-          <span class="feature-badge">📁 Project</span>
-          <span class="feature-badge">🔄 Variables</span>
-          <span class="feature-badge">🤖 CLI Agents</span>
-        </div>
-      </div>
+        <h3>Amazon Q</h3>
+      </a>
 
-      <div class="editor-card">
+      <a href="https://www.jetbrains.com/ai/" target="_blank" rel="noopener noreferrer" class="editor-card">
         <div class="editor-icon">
-          <img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.png" alt="JetBrains AI" width="32" height="32" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
-          <span style="display:none;">🧠</span>
+          <img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.png" alt="JetBrains AI" width="64" height="64" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+          <span style="display:none; font-size: 64px;">🧠</span>
         </div>
-        <h4>JetBrains AI</h4>
-        <p>Rules directory for IDE assistance</p>
-        <div class="feature-badges">
-          <span class="feature-badge">📁 Project</span>
-          <span class="feature-badge">🔄 Variables</span>
-          <span class="feature-badge">📚 Multi-Doc</span>
-        </div>
-      </div>
+        <h3>JetBrains AI</h3>
+      </a>
     </div>
   </div>
 </section>
@@ -299,10 +244,10 @@ body.home-page {
     <div class="example-grid">
 
       <div class="example-input">
-        <h3>Universal Configuration (v3.0.0)</h3>
+        <h3>Universal Configuration (v3.1.0)</h3>
         <p>Write your prompt once in PrompTrek format:</p>
         <div class="code-example">
-{% raw %}<pre><code>schema_version: "3.0.0"
+{% raw %}<pre><code>schema_version: "3.1.0"
 metadata:
   title: "Full-Stack Development Assistant"
   description: "Production-ready coding standards"
@@ -333,7 +278,7 @@ content: |
 variables:
   TEAM_NAME: "Engineering Team"</code></pre>{% endraw %}
         </div>
-        <p class="schema-note">✨ <strong>v3.0.0 Schema</strong>: Markdown-first with clean top-level plugins. No <code>targets</code> field needed - works with ALL editors! MCP servers, commands, agents, and hooks at the top level.</p>
+        <p class="schema-note">✨ <strong>v3.1.0 Schema</strong>: Markdown-first with clean top-level plugins and refined agent model. No <code>targets</code> field needed - works with ALL editors! MCP servers, commands, agents, and hooks at the top level.</p>
       </div>
 
       <div class="example-output">
@@ -396,45 +341,51 @@ variables:
 
     <div class="features-grid">
       <div class="feature-card-modern">
-        <div class="feature-icon">🔄</div>
+        <div class="feature-icon">⚡</div>
+        <h3>Multi-Step Workflows</h3>
+        <p>Define complex, automated workflows with tool requirements and structured steps. Perfect for PR reviews, deployments, and testing pipelines. <a href="user-guide/workflows.html">Learn more →</a></p>
+      </div>
+
+      <div class="feature-card-modern">
+        <div class="feature-icon">◆</div>
         <h3>Variable Substitution</h3>
         <p>Dynamic variables with local file support. Keep sensitive values like API keys in .promptrek/variables.promptrek.yaml (automatically gitignored via .promptrek/ directory).</p>
       </div>
 
       <div class="feature-card-modern">
-        <div class="feature-icon">🔄</div>
-        <h3>Bidirectional Sync</h3>
-        <p>Sync editor configurations back to PrompTrek format. All 9 supported editors now support seamless two-way updates.</p>
+        <div class="feature-icon">⟷</div>
+        <h3>Import & Sync</h3>
+        <p>Import existing editor configurations into PrompTrek format. 9 editors (GitHub Copilot, Cursor, Continue, Kiro, Cline, Windsurf, Claude Code, Amazon Q, JetBrains) support lossless round-trip: generate to editor files, then sync changes back to PrompTrek.</p>
       </div>
 
       <div class="feature-card-modern">
-        <div class="feature-icon">👁️</div>
+        <div class="feature-icon">◉</div>
         <h3>Preview Mode</h3>
         <p>Preview generated output before creating files. Test configurations with variable overrides without making changes.</p>
       </div>
 
       <div class="feature-card-modern">
-        <div class="feature-icon">📚</div>
-        <h3>Rich Examples</h3>
-        <p>8 production-ready templates for monorepos, microservices, mobile apps, ML projects, and more. Get started instantly.</p>
+        <div class="feature-icon">▣</div>
+        <h3>Built-in Templates</h3>
+        <p>Production-ready templates for common project types (basic, React, API). Initialize new projects instantly with best practices baked in.</p>
       </div>
 
       <div class="feature-card-modern">
-        <div class="feature-icon">🎨</div>
+        <div class="feature-icon">◎</div>
         <h3>Multi-Editor Support</h3>
-        <p>Generate prompts for 9 major AI coding assistants from a single source. Never write the same prompt twice.</p>
+        <p>Generate prompts for 9 major AI coding assistants from a single source (GitHub Copilot, Cursor, Continue, Claude Code, Cline, Windsurf, Kiro, Amazon Q, JetBrains). Never write the same prompt twice.</p>
       </div>
 
       <div class="feature-card-modern">
-        <div class="feature-icon">🔒</div>
+        <div class="feature-icon">✓</div>
         <h3>Pre-commit Integration</h3>
         <p>Automatic validation and protection. Pre-commit hooks ensure your .promptrek.yaml files are valid and prevent accidental commits of generated files.</p>
       </div>
 
       <div class="feature-card-modern">
-        <div class="feature-icon">📋</div>
+        <div class="feature-icon">≡</div>
         <h3>JSON Schema Support</h3>
-        <p>Published JSON Schemas for v2.0, v2.1, and v3.0. Get autocompletion, validation, and inline documentation in your editor. <a href="schema/">Learn more →</a></p>
+        <p>Published JSON Schemas for v2.0, v2.1, v3.0, and v3.1. Get autocompletion, validation, and inline documentation in your editor. <a href="schema/">Learn more →</a></p>
       </div>
     </div>
   </div>

@@ -400,7 +400,12 @@ def _write_prompt_file(
     output_file: Path,
 ) -> None:
     """Write prompt to YAML file with proper multi-line formatting."""
-    prompt_data = prompt.model_dump(exclude_none=True, by_alias=True)
+    # For v3.1.0+, use new field names (prompt). For v2.x/v3.0.x, use aliases (system_prompt) for backward compatibility
+    use_aliases = not (
+        isinstance(prompt, UniversalPromptV3)
+        and prompt.schema_version.startswith("3.1")
+    )
+    prompt_data = prompt.model_dump(exclude_none=True, by_alias=use_aliases)
     write_promptrek_yaml(prompt_data, output_file)
 
 

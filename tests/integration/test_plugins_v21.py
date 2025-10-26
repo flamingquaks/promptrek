@@ -87,7 +87,6 @@ plugins:
         - Security issues
       output_format: markdown
       requires_approval: false
-      system_message: "You are an expert code reviewer"
       examples:
         - "review-code --file=main.py"
         - "review-code --pr=123"

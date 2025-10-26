@@ -25,9 +25,9 @@ AI coding assistants like GitHub Copilot, Cursor, Continue, and others all use d
 
 ## 🚀 Quick Example
 
-1. Create a universal prompt file (`.promptrek.yaml`) using the **v3.0 format** (recommended):
+1. Create a universal prompt file (`.promptrek.yaml`) using the **v3.1 format** (recommended):
 ```yaml
-schema_version: "3.0.0"
+schema_version: "3.1.0"
 metadata:
   title: "My Project Assistant"
   description: "AI assistant for React TypeScript project"
@@ -194,17 +194,17 @@ ls .continue/rules/
 
 **Note:** The `--setup-hooks` flag automatically configures pre-commit hooks to validate your `.promptrek.yaml` files and prevent accidental commits of generated files.
 
-### 🆕 Schema v3.0.0 (Stable)
+### 🆕 Schema v3.1.0 (Current)
 
-PrompTrek v3.0.0 introduces a **cleaner architecture** by promoting plugin fields (mcp_servers, commands, agents, hooks) to the top level:
+PrompTrek v3.1.0 refines the agent model and adds workflow support while maintaining full backward compatibility with v3.0.x:
 
-**What's New:**
-- ✨ **Top-Level Plugin Fields** - No `plugins` wrapper (removed entirely), cleaner structure
-- ✅ **100% Backward Compatible** - v2.x files continue to work with automatic migration
-- 🔄 **Automatic Migration** - Built-in tools to convert v2.x → v3.0
-- 📋 **Production Ready** - Stable schema for all new projects
+**What's New in v3.1.0:**
+- ✨ **Refined Agent Model** - `prompt` field replaces `system_prompt` for consistency with commands
+- 🔄 **Workflow Support** - Multi-step workflows with `multi_step`, `tool_calls`, and structured steps
+- ✅ **100% Backward Compatible** - v3.0.x and v2.x files continue to work with automatic migration
+- 📋 **Production Ready** - Latest stable schema for all new projects
 
-**Before (v2.x) vs After (v3.0):**
+**Before (v2.x) vs After (v3.1):**
 ```yaml
 # v2.x - Nested structure (legacy)
 schema_version: "2.1.0"
@@ -212,17 +212,20 @@ plugins:                    # ❌ Wrapper (removed in v3.0)
   mcp_servers: [...]
   commands: [...]
 
-# v3.0 - Flat structure (recommended)
-schema_version: "3.0.0"
+# v3.1 - Flat structure with refined agent model (recommended)
+schema_version: "3.1.0"
 # No plugins wrapper
 mcp_servers: [...]          # ✅ Top-level
 commands: [...]             # ✅ Top-level
+agents:                     # ✅ Refined model with 'prompt' field
+  - name: code-reviewer
+    prompt: "You are a code reviewer..."  # ✅ New field name
 ```
 
 **Migration:**
 ```bash
-# Auto-migrate v2.1 to v3.0
-promptrek migrate project.promptrek.yaml -o project-v3.promptrek.yaml
+# Auto-migrate v2.x/v3.0 to v3.1
+promptrek migrate project.promptrek.yaml -o project-v3.1.promptrek.yaml
 
 # Migrate in place
 promptrek migrate project.promptrek.yaml --in-place
@@ -231,28 +234,28 @@ promptrek migrate project.promptrek.yaml --in-place
 **Documentation:**
 - 📖 [V3 Migration Guide](./docs/V3_MIGRATION_GUIDE.md) - Complete migration instructions
 - ⚠️ [Deprecation Warnings](./docs/DEPRECATION_WARNINGS.md) - Understanding deprecation messages
-- 🎯 **Recommended for all new projects** - Use v3.0 schema for cleaner configuration
+- 🎯 **Recommended for all new projects** - Use v3.1 schema for latest features
 
 ### Schema v2.x (Legacy - Deprecated)
 
-PrompTrek v2.x schema with nested plugin support (superseded by v3.0):
+PrompTrek v2.x schema with nested plugin support (superseded by v3.1):
 
-**Migration to v3.0:**
-All v2.x features are available in v3.0 with cleaner syntax:
+**Migration to v3.1:**
+All v2.x features are available in v3.1 with cleaner syntax:
 ```bash
-# Migrate v2.x files to v3.0
+# Migrate v2.x files to v3.1
 uv run promptrek migrate old.promptrek.yaml -o new.promptrek.yaml
 
-# Create new v3.0 file (default)
+# Create new v3.1 file (default)
 uv run promptrek init
 
 # v2.x files still work but show migration suggestions
 uv run promptrek generate old-v2.promptrek.yaml --all
 ```
 
-**V3.0 Format Example:**
+**V3.1 Format Example:**
 ```yaml
-schema_version: "3.0.0"
+schema_version: "3.1.0"
 metadata:
   title: "My Project"
   description: "AI assistant"
@@ -396,7 +399,7 @@ See [`examples/v21-plugins/`](https://github.com/flamingquaks/promptrek/tree/mai
 - `promptrek plugins generate` - Generate plugin files for a specific editor
 - `promptrek plugins validate` - Validate plugin configuration
 - `promptrek plugins sync` - Sync plugins from editor files
-- `promptrek agents` - Generate agent-specific instructions
+- `promptrek agents` - ⚠️ **[DEPRECATED]** Generate agent-specific instructions (use `promptrek generate --all` instead)
 - `promptrek install-hooks` - Set up pre-commit hooks (use `--activate` to activate automatically)
 - `promptrek list-editors` - Show supported editors and their status
 

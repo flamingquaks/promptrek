@@ -9,10 +9,11 @@ title: UPF Specification
 
 The Universal Prompt Format (UPF) is a standardized YAML-based format for defining AI assistant prompts that can be converted to various editor-specific formats.
 
-PrompTrek supports **three schema versions**:
+PrompTrek supports **four schema versions**:
+- **v3.1.0** (Current): Refined agent model with `prompt` field, workflow support (backward compatible with v3.0.x)
 - **v3.0.0** (Stable): Top-level plugin fields (mcp_servers, commands, agents, hooks), cleaner architecture (backward compatible with v2.x)
 - **v2.1.0** (Legacy): Markdown-first with nested plugin support (superseded by v3.0)
-- **v2.0.0** (Legacy): Markdown-first, simpler format with lossless bidirectional sync
+- **v2.0.0** (Legacy): Markdown-first, simpler format with lossless round-trip sync
 
 ## File Extension
 
@@ -22,6 +23,7 @@ PrompTrek supports **three schema versions**:
 
 JSON Schemas are available for all versions to enable autocompletion and validation in your editor:
 
+- **v3.1**: [`https://promptrek.ai/schema/v3.1.0.json`](https://promptrek.ai/schema/v3.1.0.json)
 - **v3.0**: [`https://promptrek.ai/schema/v3.0.0.json`](https://promptrek.ai/schema/v3.0.0.json)
 - **v2.1**: [`https://promptrek.ai/schema/v2.1.0.json`](https://promptrek.ai/schema/v2.1.0.json)
 - **v2.0**: [`https://promptrek.ai/schema/v2.0.0.json`](https://promptrek.ai/schema/v2.0.0.json)
@@ -29,8 +31,8 @@ JSON Schemas are available for all versions to enable autocompletion and validat
 **Enable in your editor**: Add a schema reference at the top of your `.promptrek.yaml` file:
 
 ```yaml
-# yaml-language-server: $schema=https://promptrek.ai/schema/v3.0.0.json
-schema_version: 3.0.0
+# yaml-language-server: $schema=https://promptrek.ai/schema/v3.1.0.json
+schema_version: 3.1.0
 # ... rest of your configuration
 ```
 
@@ -38,9 +40,221 @@ See the [Schema Documentation](https://promptrek.ai/schema/) for more details.
 
 ## Schema Versions
 
-- **Stable**: `3.0.0` - [Jump to v3.0.0 Specification](#schema-v30-stable)
+- **Current**: `3.1.0` - [Jump to v3.1.0 Specification](#schema-v310-current)
+- **Stable**: `3.0.0` - [Jump to v3.0.0 Specification](#schema-v300-stable)
 - **Legacy**: `2.1.0` - [Jump to v2.1.0 Specification](#schema-v21-legacy)
 - **Legacy**: `2.0.0` - [Jump to v2.0.0 Specification](#schema-v20-legacy)
+
+---
+
+## Schema v3.1.0 (Current)
+
+**v3.1.0**: Refined agent model and enhanced workflow support while maintaining full backward compatibility with v3.0.x.
+
+### What's New in v3.1.0
+
+- ✨ **Agent Field Rename** - `system_prompt` → `prompt` for consistency with commands
+- 🔄 **Workflow Support** - Multi-step workflows with tool orchestration
+- ✅ **100% Backward Compatible** - v3.0.x files work via field aliases
+- 📋 **Lossless Sync** - Synced files preserve literal block scalar formatting (`|-`)
+- 🎯 **Recommended** - Use v3.1.0 for all new projects
+
+### Key Changes from v3.0.0
+
+**Agent Model - Before (v3.0.0):**
+```yaml
+agents:
+  - name: code-reviewer
+    description: "Reviews code for best practices"
+    system_prompt: "You are a code reviewer..."  # ❌ Old field name
+    tools: [Read, Grep, Glob]
+```
+
+**Agent Model - After (v3.1.0):**
+```yaml
+agents:
+  - name: code-reviewer
+    prompt: "You are a code reviewer..."         # ✅ New field name
+    description: "Reviews code for best practices"  # Now optional
+    tools: [Read, Grep, Glob]
+```
+
+**Backward Compatibility**: Files with `system_prompt` can still be read - PrompTrek automatically maps the old field name to the new one.
+
+### Complete v3.1.0 Schema
+
+```yaml
+# Schema version (required)
+schema_version: "3.1.0"
+
+# Metadata about the prompt file (required)
+metadata:
+  title: string                    # Human-readable title (required)
+  description: string              # Brief description of purpose (required)
+  version: string                  # Semantic version of this prompt (optional)
+  author: string                   # Author name or email (optional)
+  created: string                  # ISO 8601 date (YYYY-MM-DD) (optional)
+  updated: string                  # ISO 8601 date (YYYY-MM-DD) (optional)
+  tags: [string]                   # Tags for categorization (optional)
+
+# Main markdown content (required)
+content: string                    # Raw markdown content
+
+# Optional: Main content metadata
+content_metadata:
+  language: string                 # Content language code (optional)
+  format: string                   # Content format hint (optional)
+
+# Optional: Separate documents (for multi-file editors)
+documents:
+  - name: string                   # Document identifier (required)
+    content: string                # Document content (required)
+    description: string            # Document description (optional)
+    metadata: {}                   # Additional metadata (optional)
+
+# Optional: Variable substitution
+variables:
+  KEY: value                       # Variables for {{{ KEY }}} substitution
+
+# MCP servers - TOP-LEVEL in v3.x
+mcp_servers:
+  - name: string                   # Server name (required)
+    command: string                # Executable command (required)
+    args: [string]                 # Command arguments (optional)
+    env: {}                        # Environment variables (optional)
+    description: string            # Server description (optional)
+    trust_metadata: {}             # Trust metadata (optional)
+
+# Custom commands - TOP-LEVEL in v3.x
+commands:
+  - name: string                   # Command name (required)
+    description: string            # Command description (required)
+    prompt: string                 # Command prompt (required)
+    output_format: string          # Expected output format (optional)
+    requires_approval: boolean     # Whether command needs approval (optional)
+    examples: [string]             # Usage examples (optional)
+    trust_metadata: {}             # Trust metadata (optional)
+    # Workflow fields (v3.1.0+)
+    multi_step: boolean            # Whether this is a workflow (optional)
+    tool_calls: [string]           # Required tools for workflow (optional)
+    steps: []                      # Workflow steps (optional)
+
+# Autonomous agents - TOP-LEVEL in v3.x
+agents:
+  - name: string                   # Agent name (required)
+    prompt: string                 # Full markdown prompt (required) ✨ NEW in v3.1.0
+    description: string            # High-level purpose (optional) ✨ Now optional
+    tools: [string]                # Available tools (optional)
+    trust_level: string            # Trust level: 'full', 'partial', 'untrusted'
+    requires_approval: boolean     # Whether actions require approval
+    context: {}                    # Additional context (optional)
+    trust_metadata: {}             # Trust metadata (optional)
+
+# Event-driven hooks - TOP-LEVEL in v3.x
+hooks:
+  - name: string                   # Hook name (required)
+    event: string                  # Trigger event (required, e.g., 'pre-commit')
+    command: string                # Command to execute (required)
+    agent: string                  # Agent to run for this hook (optional) ✨ NEW in v3.1.0
+    conditions: {}                 # Execution conditions (optional)
+    requires_reapproval: boolean   # Whether hook requires reapproval (optional)
+    description: string            # Hook description (optional)
+    trust_metadata: {}             # Trust metadata (optional)
+```
+
+### Complete v3.1.0 Example
+
+{% raw %}
+```yaml
+# yaml-language-server: $schema=https://promptrek.ai/schema/v3.1.0.json
+schema_version: "3.1.0"
+
+metadata:
+  title: "Full Stack TypeScript Project"
+  description: "AI assistant with workflows and agents"
+  version: "1.0.0"
+  author: "dev-team@company.com"
+  tags: ["typescript", "fullstack", "ai-enhanced"]
+
+content: |-
+  # {{{ PROJECT_NAME }}}
+
+  ## Project Overview
+  Modern full-stack application with TypeScript, React, and Node.js.
+
+  **Tech Stack:**
+  - React 18 with TypeScript
+  - Node.js with Express
+  - PostgreSQL database
+  - Jest for testing
+
+  ## Development Guidelines
+
+  ### General Principles
+  - Write type-safe code with strict TypeScript
+  - Use functional programming patterns
+  - Add comprehensive tests for all features
+
+variables:
+  PROJECT_NAME: "FullStack App"
+
+commands:
+  - name: run-tests
+    description: "Run all tests with coverage"
+    prompt: "Run the test suite and generate coverage report"
+    multi_step: true
+    tool_calls: [Bash]
+    steps:
+      - description: "Run tests"
+        action: "uv run pytest --cov"
+
+agents:
+  - name: test-generator
+    prompt: |-
+      You are a test generation expert. Generate comprehensive unit tests for TypeScript code.
+
+      Follow these principles:
+      - Test all edge cases
+      - Use Jest and React Testing Library
+      - Aim for 80%+ coverage
+    tools: [Read, Write, Bash]
+    trust_level: partial
+    requires_approval: true
+
+hooks:
+  - name: validate-schema
+    event: pre-commit
+    command: "uv run promptrek validate"
+    description: "Validate promptrek.yaml before commit"
+```
+{% endraw %}
+
+### Migration from v3.0.0 to v3.1.0
+
+**Option 1: Automatic Migration**
+```bash
+promptrek migrate project.promptrek.yaml --output project.v3.1.promptrek.yaml
+```
+
+**Option 2: Manual Update**
+
+Update your agent definitions to use `prompt` instead of `system_prompt`:
+
+```yaml
+# Before (v3.0.0)
+agents:
+  - name: my-agent
+    description: "Agent description"
+    system_prompt: "You are..."
+
+# After (v3.1.0)
+agents:
+  - name: my-agent
+    prompt: "You are..."
+    description: "Agent description"  # Now optional
+```
+
+**Note**: v3.0.0 files with `system_prompt` continue to work in v3.1.0 via automatic field mapping.
 
 ---
 
@@ -748,7 +962,7 @@ promptrek generate v2.0-file.promptrek.yaml --editor claude
 ### Key Benefits
 
 - ✅ **No `targets` field** - Works with ALL editors automatically
-- ✅ **Lossless bidirectional sync** - Parse editor files back without data loss
+- ✅ **Lossless round-trip sync** - Parse editor files back without data loss
 - ✅ **Simpler format** - Just markdown content, no complex nested structures
 - ✅ **Editor-friendly** - Matches how Claude Code, Copilot, and others use markdown
 - ✅ **Multi-file support** - Use `documents` field for multi-file editors
@@ -998,7 +1212,7 @@ variables:
 **v3.0 offers:**
 - ✅ Simple markdown-first format
 - ✅ Top-level plugin fields (cleaner than v2.x nested structure)
-- ✅ Lossless bidirectional sync
+- ✅ Lossless round-trip sync
 - ✅ Works with ALL editors without `targets`
 - ✅ Matches how AI editors use markdown natively
 

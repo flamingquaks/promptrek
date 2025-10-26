@@ -59,7 +59,6 @@ plugins:
         Provide a structured review with sections for each criterion.
       output_format: markdown
       requires_approval: false
-      system_message: You are an expert code reviewer with years of experience
       examples:
         - "/review-pr #123"
         - "/review-pr https://github.com/org/repo/pull/456"

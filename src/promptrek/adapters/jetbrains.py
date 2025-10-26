@@ -199,7 +199,7 @@ class JetBrainsAdapter(MarkdownSyncMixin, EditorAdapter):
         if all_instructions:
             general_file = rules_dir / "general.md"
             general_content = self._build_rules_content(
-                "General Coding Rules", all_instructions
+                "General Rules", all_instructions
             )
 
             if dry_run:
