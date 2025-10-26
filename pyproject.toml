@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "promptrek"
-version = "0.3.1"
+version = "0.4.0"
 description = "Universal AI coding assistant configuration - manage prompts, MCP servers, plugins, commands, agents, and hooks across all major AI editors"
 readme = "README.md"
 requires-python = ">=3.9"
