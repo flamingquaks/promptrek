@@ -27,8 +27,8 @@ classifiers = [
 dependencies = [
     "click>=8.0.0",
     "PyYAML>=5.4",
-    "Jinja2>=3.1.0",
-    "pydantic>=2.0.0",
+    "jinja2==3.1.6",
+    "pydantic==2.12.3",
 ]
 
 [project.scripts]
@@ -137,7 +137,7 @@ exclude_lines = [
 dev = [
     "pytest>=7.0.0",
     "pytest-cov>=4.0.0",
-    "black>=22.0.0",
+    "black==25.9.0",
     "flake8>=5.0.0",
     "mypy>=1.0.0",
     "isort>=5.0.0",
@@ -150,7 +150,6 @@ dev = [
 dev = [
     "pytest>=7.0.0",
     "pytest-cov>=4.0.0",
-    "black>=22.0.0",
     "flake8>=5.0.0",
     "mypy>=1.0.0",
     "isort>=5.0.0",
