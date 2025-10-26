@@ -342,18 +342,7 @@ def _save_generation_metadata(
 
     # Extract only static variables (exclude dynamic and built-in)
     static_vars = {}
-    builtin_var_names = {
-        "CURRENT_DATE",
-        "CURRENT_TIME",
-        "CURRENT_DATETIME",
-        "CURRENT_YEAR",
-        "CURRENT_MONTH",
-        "CURRENT_DAY",
-        "PROJECT_NAME",
-        "PROJECT_ROOT",
-        "GIT_BRANCH",
-        "GIT_COMMIT_SHORT",
-    }
+
     for key, value in variables.items():
         # Get built-in variable names dynamically from BuiltInVariables
         builtin_var_names = set(BuiltInVariables.get_all().keys())
