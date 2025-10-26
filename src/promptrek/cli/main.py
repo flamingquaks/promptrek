@@ -23,6 +23,7 @@ from .commands.plugins import (
     validate_plugins_command,
 )
 from .commands.preview import preview_command
+from .commands.refresh import refresh_command
 from .commands.sync import sync_command
 from .commands.validate import validate_command
 
@@ -323,6 +324,65 @@ def generate(
             var_dict,
             headless,
         )
+    except PrompTrekError as e:
+        click.echo(f"Error: {e}", err=True)
+        ctx.exit(1)
+    except Exception as e:
+        if ctx.obj.get("verbose"):
+            raise
+        click.echo(f"Unexpected error: {e}", err=True)
+        ctx.exit(1)
+
+
+@cli.command()
+@click.option(
+    "--editor",
+    "-e",
+    type=str,
+    help="Target editor to refresh (overrides last generation)",
+)
+@click.option(
+    "--all", "all_editors", is_flag=True, help="Refresh all editors from last generation"
+)
+@click.option(
+    "--dry-run",
+    is_flag=True,
+    help="Show what would be refreshed without making changes",
+)
+@click.option(
+    "--clear-cache",
+    is_flag=True,
+    help="Clear cached dynamic variables before refreshing",
+)
+@click.pass_context
+def refresh(
+    ctx: click.Context,
+    editor: Optional[str],
+    all_editors: bool,
+    dry_run: bool,
+    clear_cache: bool,
+) -> None:
+    """Regenerate editor files with fresh dynamic variables.
+
+    Uses metadata from the last 'promptrek generate' run to regenerate
+    files with updated variable values. Particularly useful for dynamic
+    variables like dates, git info, and command-based variables.
+
+    Examples:
+        # Refresh using last generation settings
+        promptrek refresh
+
+        # Refresh specific editor
+        promptrek refresh --editor claude
+
+        # Clear cached variables before refreshing
+        promptrek refresh --clear-cache
+
+        # Preview what would be refreshed
+        promptrek refresh --dry-run
+    """
+    try:
+        refresh_command(ctx, editor, all_editors, dry_run, clear_cache)
     except PrompTrekError as e:
         click.echo(f"Error: {e}", err=True)
         ctx.exit(1)

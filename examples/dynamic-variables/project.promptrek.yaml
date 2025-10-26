@@ -1,0 +1,42 @@
+schema_version: 3.0.0
+
+metadata:
+  title: Dynamic Variables Example
+  description: Demonstrates built-in and custom dynamic variables
+  version: 1.0.0
+  author: PrompTrek Team
+  tags: [example, dynamic-variables, date-time, git-context]
+
+content: |
+  # Project Instructions - Dynamic Variables Demo
+
+  ## Document Information
+  Last updated: {{{ CURRENT_DATE }}} at {{{ CURRENT_TIME }}}
+  Generated on: {{{ CURRENT_DATETIME }}}
+
+  ## Project Context
+  - **Project Name**: {{{ PROJECT_NAME }}}
+  - **Project Root**: {{{ PROJECT_ROOT }}}
+  - **Current Year**: {{{ CURRENT_YEAR }}}
+
+  ## Git Context (if in a git repository)
+  - **Branch**: {{{ GIT_BRANCH }}}
+  - **Commit**: {{{ GIT_COMMIT_SHORT }}}
+
+  ## Custom Dynamic Variables
+  You can also use custom command-based variables defined in
+  `.promptrek/variables.promptrek.yaml`.
+
+  ## Development Guidelines
+  Follow the coding standards for this project. All code should be
+  documented and tested before committing.
+
+  ## Variable Refresh
+  To update these variables with current values, run:
+  ```bash
+  promptrek refresh
+  ```
+
+# Enable command execution for user-defined dynamic variables
+# WARNING: Only enable if you trust the commands in variables.promptrek.yaml
+allow_commands: true

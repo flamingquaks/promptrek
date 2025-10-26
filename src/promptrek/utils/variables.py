@@ -2,10 +2,14 @@
 Variable substitution utilities for PromptTrek.
 
 Handles variable replacement in templates and UPF content.
+Supports both static and dynamic (command-based) variables.
 """
 
 import os
 import re
+import subprocess
+import sys
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Match, Optional
 
@@ -13,6 +17,217 @@ import yaml
 
 from ..core.exceptions import TemplateError
 from ..core.models import UniversalPrompt
+
+
+class CommandExecutor:
+    """Executes shell commands with security controls for dynamic variables."""
+
+    def __init__(
+        self, allow_commands: bool = False, timeout: int = 5, verbose: bool = False
+    ) -> None:
+        """
+        Initialize command executor.
+
+        Args:
+            allow_commands: Whether to allow command execution (security control)
+            timeout: Maximum command execution time in seconds
+            verbose: Whether to show verbose output
+        """
+        self.allow_commands = allow_commands
+        self.timeout = timeout
+        self.verbose = verbose
+        self._warned = False
+
+    def execute(self, command: str) -> str:
+        """
+        Execute a shell command and return its output.
+
+        Args:
+            command: Shell command to execute
+
+        Returns:
+            Command output as string (stripped of whitespace)
+
+        Raises:
+            TemplateError: If command execution is disabled or command fails
+        """
+        if not self.allow_commands:
+            raise TemplateError(
+                "Command execution is disabled. "
+                "Set 'allow_commands: true' in project.promptrek.yaml to enable dynamic variables."
+            )
+
+        # Show security warning on first use
+        if not self._warned and sys.stdout.isatty():
+            self._show_warning()
+            self._warned = True
+
+        try:
+            if self.verbose:
+                print(f"  🔧 Executing: {command}")
+
+            result = subprocess.run(
+                command,
+                shell=True,
+                capture_output=True,
+                text=True,
+                timeout=self.timeout,
+                check=True,
+            )
+
+            output = result.stdout.strip()
+
+            if self.verbose and output:
+                print(f"  ✅ Result: {output}")
+
+            return output
+
+        except subprocess.TimeoutExpired as e:
+            raise TemplateError(f"Command timed out after {self.timeout}s: {command}") from e
+        except subprocess.CalledProcessError as e:
+            raise TemplateError(
+                f"Command failed with exit code {e.returncode}: {command}\n"
+                f"Error output: {e.stderr.strip()}"
+            ) from e
+        except Exception as e:
+            raise TemplateError(f"Failed to execute command: {command}\n{e}") from e
+
+    def _show_warning(self) -> None:
+        """Show security warning about command execution."""
+        print(
+            "\n⚠️  WARNING: Dynamic variables with command execution enabled\n"
+            "   Commands defined in .promptrek/variables.promptrek.yaml will be executed.\n"
+            "   Only use trusted variable files. Review all commands before running.\n"
+        )
+
+
+class DynamicVariable:
+    """Represents a dynamic variable that evaluates at runtime via command execution."""
+
+    def __init__(self, name: str, command: str, cache: bool = False) -> None:
+        """
+        Initialize dynamic variable.
+
+        Args:
+            name: Variable name
+            command: Shell command to execute
+            cache: Whether to cache the result (evaluate once)
+        """
+        self.name = name
+        self.command = command
+        self.cache = cache
+        self._cached_value: Optional[str] = None
+
+    def evaluate(self, executor: CommandExecutor) -> str:
+        """
+        Evaluate the variable by executing its command.
+
+        Args:
+            executor: Command executor instance
+
+        Returns:
+            Variable value (command output)
+        """
+        if self.cache and self._cached_value is not None:
+            return self._cached_value
+
+        value = executor.execute(self.command)
+
+        if self.cache:
+            self._cached_value = value
+
+        return value
+
+    def clear_cache(self) -> None:
+        """Clear cached value."""
+        self._cached_value = None
+
+
+class BuiltInVariables:
+    """Provides standard built-in dynamic variables."""
+
+    @staticmethod
+    def get_all(verbose: bool = False) -> Dict[str, str]:
+        """
+        Get all built-in variables with their current values.
+
+        Args:
+            verbose: Whether to show verbose output
+
+        Returns:
+            Dictionary of built-in variable names and values
+        """
+        now = datetime.now()
+
+        variables = {
+            # Date/Time variables
+            "CURRENT_DATE": now.strftime("%Y-%m-%d"),
+            "CURRENT_TIME": now.strftime("%H:%M:%S"),
+            "CURRENT_DATETIME": now.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "CURRENT_YEAR": now.strftime("%Y"),
+            "CURRENT_MONTH": now.strftime("%m"),
+            "CURRENT_DAY": now.strftime("%d"),
+            # Project context variables
+            "PROJECT_NAME": Path.cwd().name,
+            "PROJECT_ROOT": str(Path.cwd().resolve()),
+        }
+
+        # Git variables (only if in git repo)
+        git_vars = BuiltInVariables._get_git_variables(verbose)
+        variables.update(git_vars)
+
+        return variables
+
+    @staticmethod
+    def _get_git_variables(verbose: bool = False) -> Dict[str, str]:
+        """
+        Get git-related variables if in a git repository.
+
+        Args:
+            verbose: Whether to show verbose output
+
+        Returns:
+            Dictionary of git variables (empty if not in git repo)
+        """
+        variables = {}
+
+        try:
+            # Check if in git repo
+            result = subprocess.run(
+                ["git", "rev-parse", "--is-inside-work-tree"],
+                capture_output=True,
+                text=True,
+                timeout=2,
+                check=False,
+            )
+
+            if result.returncode == 0:
+                # Get current branch
+                branch_result = subprocess.run(
+                    ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+                    capture_output=True,
+                    text=True,
+                    timeout=2,
+                    check=True,
+                )
+                variables["GIT_BRANCH"] = branch_result.stdout.strip()
+
+                # Get short commit hash
+                commit_result = subprocess.run(
+                    ["git", "rev-parse", "--short", "HEAD"],
+                    capture_output=True,
+                    text=True,
+                    timeout=2,
+                    check=True,
+                )
+                variables["GIT_COMMIT_SHORT"] = commit_result.stdout.strip()
+
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired, FileNotFoundError):
+            # Not in git repo or git not available
+            if verbose:
+                print("  ℹ️  Git variables not available (not in git repository)")
+
+        return variables
 
 
 class VariableSubstitution:
@@ -198,11 +413,14 @@ class VariableSubstitution:
         Also checks for deprecated location (variables.promptrek.yaml in root) and
         offers to migrate it to the new location.
 
+        NOTE: This method returns static variables only. Use load_and_evaluate_variables()
+        for dynamic variable support.
+
         Args:
             search_dir: Directory to start search from (defaults to current dir)
 
         Returns:
-            Dictionary of variables loaded from file, empty dict if not found
+            Dictionary of static variables loaded from file, empty dict if not found
         """
         start_dir = search_dir if search_dir else Path.cwd()
 
@@ -223,7 +441,12 @@ class VariableSubstitution:
                     with open(new_var_file, "r", encoding="utf-8") as f:
                         data = yaml.safe_load(f)
                         if isinstance(data, dict):
-                            return data
+                            # Extract only static variables (for backward compatibility)
+                            static_vars = {}
+                            for key, value in data.items():
+                                if isinstance(value, str):
+                                    static_vars[key] = value
+                            return static_vars
                         return {}
                 except (OSError, UnicodeDecodeError, yaml.YAMLError):
                     # If file exists but can't be loaded, return empty dict
@@ -237,6 +460,125 @@ class VariableSubstitution:
             current = parent
 
         return {}
+
+    def load_and_evaluate_variables(
+        self,
+        search_dir: Optional[Path] = None,
+        allow_commands: bool = False,
+        include_builtins: bool = True,
+        verbose: bool = False,
+        clear_cache: bool = False,
+    ) -> Dict[str, str]:
+        """
+        Load and evaluate all variables (static, dynamic, and built-in).
+
+        Args:
+            search_dir: Directory to start search from (defaults to current dir)
+            allow_commands: Whether to allow command execution for dynamic variables
+            include_builtins: Whether to include built-in dynamic variables
+            verbose: Whether to show verbose output
+            clear_cache: Whether to clear cached dynamic variables before evaluation
+
+        Returns:
+            Dictionary of all evaluated variables
+        """
+        variables = {}
+
+        # 1. Load built-in variables (if enabled)
+        if include_builtins:
+            if verbose:
+                print("📅 Loading built-in dynamic variables...")
+            builtin_vars = BuiltInVariables.get_all(verbose=verbose)
+            variables.update(builtin_vars)
+            if verbose:
+                print(f"  ✅ Loaded {len(builtin_vars)} built-in variable(s)")
+
+        # 2. Load variables from file
+        start_dir = search_dir if search_dir else Path.cwd()
+        current = start_dir.resolve()
+
+        var_file = None
+        while True:
+            # Check for old location (deprecated)
+            old_var_file = current / "variables.promptrek.yaml"
+            new_var_file = current / self.LOCAL_VARIABLES_FILE
+
+            # Handle migration from old location
+            if old_var_file.exists() and not new_var_file.exists():
+                self._migrate_variables_file(old_var_file, new_var_file)
+
+            # Check if file exists
+            if new_var_file.exists():
+                var_file = new_var_file
+                break
+
+            # Move to parent directory
+            parent = current.parent
+            if parent == current:
+                # Reached root directory
+                break
+            current = parent
+
+        if var_file is None:
+            return variables
+
+        # 3. Parse variable file
+        try:
+            with open(var_file, "r", encoding="utf-8") as f:
+                data = yaml.safe_load(f)
+
+            if not isinstance(data, dict):
+                return variables
+
+            if verbose:
+                print(f"📋 Loading variables from {var_file}...")
+
+            # Create command executor if needed
+            executor = CommandExecutor(
+                allow_commands=allow_commands, timeout=5, verbose=verbose
+            )
+
+            # 4. Process each variable
+            static_count = 0
+            dynamic_count = 0
+
+            for key, value in data.items():
+                # Static variable (string value)
+                if isinstance(value, str):
+                    variables[key] = value
+                    static_count += 1
+
+                # Dynamic variable (dict with type: command)
+                elif isinstance(value, dict) and value.get("type") == "command":
+                    command = value.get("value", "")
+                    cache = value.get("cache", False)
+
+                    dynamic_var = DynamicVariable(
+                        name=key, command=command, cache=cache
+                    )
+
+                    if clear_cache:
+                        dynamic_var.clear_cache()
+
+                    try:
+                        evaluated_value = dynamic_var.evaluate(executor)
+                        variables[key] = evaluated_value
+                        dynamic_count += 1
+                    except TemplateError as e:
+                        if verbose:
+                            print(f"  ⚠️  Failed to evaluate {key}: {e}")
+                        # Continue with other variables
+
+            if verbose:
+                print(
+                    f"  ✅ Loaded {static_count} static and {dynamic_count} dynamic variable(s)"
+                )
+
+        except (OSError, UnicodeDecodeError, yaml.YAMLError) as e:
+            if verbose:
+                print(f"  ⚠️  Failed to load variables file: {e}")
+
+        return variables
 
     def _migrate_variables_file(self, old_path: Path, new_path: Path) -> None:
         """

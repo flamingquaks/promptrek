@@ -5,15 +5,22 @@ Handles generation of editor-specific prompts from universal prompt files.
 """
 
 import inspect
+from datetime import datetime
 from pathlib import Path
 from typing import Optional, Union
 
 import click
+import yaml
 
 from ...adapters import registry
 from ...adapters.registry import AdapterCapability
 from ...core.exceptions import AdapterNotFoundError, CLIError, UPFParsingError
-from ...core.models import UniversalPrompt, UniversalPromptV2, UniversalPromptV3
+from ...core.models import (
+    GenerationMetadata,
+    UniversalPrompt,
+    UniversalPromptV2,
+    UniversalPromptV3,
+)
 from ...core.parser import UPFParser
 from ...core.validator import UPFValidator
 from ...utils.variables import VariableSubstitution
@@ -72,20 +79,7 @@ def generate_command(
     """
     verbose = ctx.obj.get("verbose", False)
 
-    # Load local variables from .promptrek/variables.promptrek.yaml
-    var_sub = VariableSubstitution()
-    local_vars = var_sub.load_local_variables()
-
-    # Merge variables with precedence: CLI > local file > prompt file
-    # Start with local variables, then merge CLI overrides
-    merged_variables = local_vars.copy()
-    if variables:
-        merged_variables.update(variables)
-
-    if verbose and local_vars:
-        click.echo(f"📋 Loaded {len(local_vars)} variable(s) from local variables file")
-
-    # Collect all files to process
+    # Collect all files to process first (we need to check allow_commands from prompts)
     files_to_process: list[Path] = []
 
     # Add explicitly specified files
@@ -125,6 +119,33 @@ def generate_command(
         click.echo(f"Processing {len(unique_files)} file(s):")
         for file_path in unique_files:
             click.echo(f"  - {file_path}")
+
+    # Determine allow_commands setting by checking first file
+    # This is needed before loading variables to know if command execution is allowed
+    allow_commands = False
+    try:
+        first_prompt = _parse_and_validate_file(ctx, unique_files[0])
+        if isinstance(first_prompt, UniversalPromptV3):
+            allow_commands = first_prompt.allow_commands or False
+    except Exception:
+        # If parsing fails, it will be caught again in the main loop
+        pass
+
+    # Load and evaluate variables (including built-in and dynamic variables)
+    var_sub = VariableSubstitution()
+    merged_variables = var_sub.load_and_evaluate_variables(
+        allow_commands=allow_commands,
+        include_builtins=True,
+        verbose=verbose,
+        clear_cache=False,
+    )
+
+    # Merge with CLI variable overrides (CLI has highest precedence)
+    if variables:
+        merged_variables.update(variables)
+
+    if verbose and merged_variables:
+        click.echo(f"✅ Total variables available: {len(merged_variables)}")
 
     # Set default output directory
     if not output:
@@ -237,6 +258,111 @@ def generate_command(
         raise CLIError(
             f"Failed to generate for {first_error_editor}: {first_error_msg}"
         )
+
+    # Save generation metadata for refresh command (skip in dry-run mode)
+    if not dry_run and prompts_by_editor:
+        try:
+            _save_generation_metadata(
+                source_files=unique_files,
+                editors=list(prompts_by_editor.keys()),
+                output_dir=output,
+                variables=merged_variables,
+                allow_commands=allow_commands,
+                verbose=verbose,
+            )
+        except Exception as e:
+            if verbose:
+                click.echo(f"⚠️ Failed to save generation metadata: {e}", err=True)
+            # Don't fail the whole generation if metadata saving fails
+
+
+def _save_generation_metadata(
+    source_files: list[Path],
+    editors: list[str],
+    output_dir: Path,
+    variables: dict[str, str],
+    allow_commands: bool,
+    verbose: bool = False,
+) -> None:
+    """Save generation metadata for refresh command."""
+    # Create .promptrek directory if it doesn't exist
+    promptrek_dir = Path.cwd() / ".promptrek"
+    promptrek_dir.mkdir(parents=True, exist_ok=True)
+
+    metadata_file = promptrek_dir / "last-generation.yaml"
+
+    # Load current variables file to extract dynamic variable configs
+    var_sub = VariableSubstitution()
+    dynamic_vars = {}
+
+    var_file = None
+    current = Path.cwd().resolve()
+    while True:
+        test_file = current / ".promptrek/variables.promptrek.yaml"
+        if test_file.exists():
+            var_file = test_file
+            break
+        parent = current.parent
+        if parent == current:
+            break
+        current = parent
+
+    if var_file:
+        try:
+            with open(var_file, "r", encoding="utf-8") as f:
+                data = yaml.safe_load(f)
+                if isinstance(data, dict):
+                    for key, value in data.items():
+                        if isinstance(value, dict) and value.get("type") == "command":
+                            dynamic_vars[key] = {
+                                "type": "command",
+                                "value": value.get("value", ""),
+                                "cache": value.get("cache", False),
+                            }
+        except Exception:
+            pass  # Ignore errors loading variable file
+
+    # Extract only static variables (exclude dynamic and built-in)
+    static_vars = {}
+    builtin_var_names = {
+        "CURRENT_DATE",
+        "CURRENT_TIME",
+        "CURRENT_DATETIME",
+        "CURRENT_YEAR",
+        "CURRENT_MONTH",
+        "CURRENT_DAY",
+        "PROJECT_NAME",
+        "PROJECT_ROOT",
+        "GIT_BRANCH",
+        "GIT_COMMIT_SHORT",
+    }
+    for key, value in variables.items():
+        if key not in builtin_var_names and key not in dynamic_vars:
+            static_vars[key] = value
+
+    # Create metadata
+    metadata = GenerationMetadata(
+        timestamp=datetime.now().isoformat(),
+        source_file=str(source_files[0]) if source_files else "",
+        editors=editors,
+        output_dir=str(output_dir),
+        variables=static_vars,
+        dynamic_variables=dynamic_vars,
+        builtin_variables_enabled=True,
+        allow_commands=allow_commands,
+    )
+
+    # Save to file
+    with open(metadata_file, "w", encoding="utf-8") as f:
+        yaml.dump(
+            metadata.model_dump(by_alias=True),
+            f,
+            default_flow_style=False,
+            sort_keys=False,
+        )
+
+    if verbose:
+        click.echo(f"💾 Saved generation metadata to {metadata_file}")
 
 
 def _parse_and_validate_file(

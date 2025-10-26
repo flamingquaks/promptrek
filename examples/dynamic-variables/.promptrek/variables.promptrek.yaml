@@ -1,0 +1,68 @@
+# PrompTrek Dynamic Variables Example
+# This file demonstrates static and dynamic (command-based) variables
+
+# ==========================================
+# STATIC VARIABLES (Traditional approach)
+# ==========================================
+# These are simple string values
+
+API_VERSION: v1.2.3
+ENVIRONMENT: development
+TEAM_NAME: Engineering
+
+
+# ==========================================
+# DYNAMIC VARIABLES (Command-based)
+# ==========================================
+# These execute shell commands at generation time
+# Requires: allow_commands: true in project.promptrek.yaml
+
+# Example 1: Generate a unique build ID (UUID)
+BUILD_ID:
+  type: command
+  value: uuidgen
+  cache: true  # Cache result for entire generation session
+
+# Example 2: Get current timestamp (Unix format)
+BUILD_TIMESTAMP:
+  type: command
+  value: date +%s
+  cache: true
+
+# Example 3: Count lines of Python code in project
+PYTHON_LOC:
+  type: command
+  value: find . -name "*.py" -type f -exec wc -l {} + | tail -1 | awk '{print $1}'
+  cache: false  # Re-evaluate each time
+
+# Example 4: Get git branch name (alternative to built-in)
+CUSTOM_BRANCH:
+  type: command
+  value: git rev-parse --abbrev-ref HEAD
+  cache: false
+
+# Example 5: Get current username
+USER_NAME:
+  type: command
+  value: whoami
+  cache: true
+
+# Example 6: Custom date format
+CUSTOM_DATE:
+  type: command
+  value: date +"%B %d, %Y"
+  cache: false
+
+
+# ==========================================
+# NOTES
+# ==========================================
+# - Built-in variables are always available (no commands needed):
+#   CURRENT_DATE, CURRENT_TIME, CURRENT_DATETIME, CURRENT_YEAR,
+#   CURRENT_MONTH, CURRENT_DAY, PROJECT_NAME, PROJECT_ROOT,
+#   GIT_BRANCH, GIT_COMMIT_SHORT
+#
+# - Command variables execute in shell with 5-second timeout
+# - Set cache: true to evaluate once per session
+# - Set cache: false to re-evaluate each time
+# - Security: Only use trusted commands!
