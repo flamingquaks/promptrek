@@ -96,7 +96,7 @@ jobs:
         continue-on-error: true
 
       - name: Generate PR comment
-        if: always()
+        if: success() || failure()
         uses: actions/github-script@v8
         with:
           script: |
@@ -108,7 +108,11 @@ jobs:
             });
 
             const codeQualityComments = comments.data.filter(comment =>
-              comment.body && comment.body.includes('## Code Quality Issues')
+              comment.body &&
+              comment.body.includes('## Code Quality Issues') &&
+              comment.user &&
+              comment.user.type === 'Bot' &&
+              comment.user.login === 'github-actions[bot]'
             );
 
             // Hide previous code quality comments as outdated
