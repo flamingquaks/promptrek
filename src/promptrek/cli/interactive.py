@@ -184,7 +184,7 @@ def workflow_generate_config(ctx: click.Context) -> None:
 
     # Create choices for editor selection
     editor_choices = [
-        questionary.Choice(f"{name.capitalize()}", value=name)
+        questionary.Choice(name.capitalize(), value=name)
         for name in sorted(project_file_adapters)
     ]
 
