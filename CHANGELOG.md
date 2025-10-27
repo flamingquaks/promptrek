@@ -1,3 +1,41 @@
+# [](https://github.com/flamingquaks/promptrek/compare/v0.4.0...v) (2025-10-27)
+
+
+### Features
+
+* add dynamic variables with built-in and command-based support ([#100](https://github.com/flamingquaks/promptrek/issues/100)) ([d5b70d4](https://github.com/flamingquaks/promptrek/commit/d5b70d43154e9698b84f713a9c6ffe5f3bafd7c3))
+
+
+
+# [0.4.0](https://github.com/flamingquaks/promptrek/compare/v0.3.1...v0.4.0) (2025-10-26)
+
+
+### Bug Fixes
+
+* add SAFETY_API_KEY environment variable for Safety scans and improve handling of missing key ([cfd41e4](https://github.com/flamingquaks/promptrek/commit/cfd41e42ce8e57582f8f7d2b3023067395dd0251))
+* Claude missing project agents ([#91](https://github.com/flamingquaks/promptrek/issues/91)) ([95f2a74](https://github.com/flamingquaks/promptrek/commit/95f2a7478c2075c9ca156f13f75a44c56605f7c5))
+* Cursor adapter and UPF models with metadata support ([#84](https://github.com/flamingquaks/promptrek/issues/84)) ([60e5372](https://github.com/flamingquaks/promptrek/commit/60e5372ee5b90ca25dd6bef063a9680c2aac5d18))
+* improve all adapters to be more inline with their editors ([703836e](https://github.com/flamingquaks/promptrek/commit/703836e4ca47550db130555a8f66ae7c24f96fd2))
+* improve Continue IDE file generation and docs ([#86](https://github.com/flamingquaks/promptrek/issues/86)) ([3f1a03b](https://github.com/flamingquaks/promptrek/commit/3f1a03bf8f56f3c8939c3e56c62ad349ef5d1f59))
+* Improve layout and responsiveness for benefits and CTA sections ([b6bdefa](https://github.com/flamingquaks/promptrek/commit/b6bdefa0b05ff0451d062b22d59cbac3fa3e2cd1))
+* improve safety scan output handling and error management ([aef4bad](https://github.com/flamingquaks/promptrek/commit/aef4baddc45d7088c253234a75d80558302e7a78))
+* update default Python version to 3.12 in security workflow ([8c76ab9](https://github.com/flamingquaks/promptrek/commit/8c76ab9e9d68927d9ee80bff78c16aff40b93504))
+* yaml schemas updated to include major, minor AND patch in URL. ([#85](https://github.com/flamingquaks/promptrek/issues/85)) ([17d9894](https://github.com/flamingquaks/promptrek/commit/17d98943623138c82f58f4405ebded09f4bd021c))
+
+
+### Features
+
+* Add automatic PR labeling based on changed files ([#94](https://github.com/flamingquaks/promptrek/issues/94)) ([7ca9266](https://github.com/flamingquaks/promptrek/commit/7ca9266b6909394763d5551fc6fed5277a93c2ea))
+* Add Claude-specific patterns to .gitignore and corresponding tests ([#87](https://github.com/flamingquaks/promptrek/issues/87)) ([cda170b](https://github.com/flamingquaks/promptrek/commit/cda170b1492680d6afb0fd650b75ae3c7ed8116a))
+* Add new logo assets and update site configuration ([b333388](https://github.com/flamingquaks/promptrek/commit/b33338825c549705d52fca6bdf2e6c99fa824d61))
+* Cline MCP improvements and variable refactoring ([#90](https://github.com/flamingquaks/promptrek/issues/90)) ([47637c4](https://github.com/flamingquaks/promptrek/commit/47637c4d2bf811a5230748a7087510d62e105466))
+* **docs:** Publish JSON Schema files for UPF v2.0, v2.1, and v3.0 ([#79](https://github.com/flamingquaks/promptrek/issues/79)) ([50eb6fa](https://github.com/flamingquaks/promptrek/commit/50eb6faeab00ce255f4b8c7954d9a331e8983bd0))
+* Update Cline adapter to support VSCode integration and enhance documentation ([#75](https://github.com/flamingquaks/promptrek/issues/75)) ([33f2c0b](https://github.com/flamingquaks/promptrek/commit/33f2c0b3f286f15e40bc5b0abb3dd573a89ad276))
+* Update Continue Adapter to support modular configuration and enhance sync functionality ([#92](https://github.com/flamingquaks/promptrek/issues/92)) ([8793730](https://github.com/flamingquaks/promptrek/commit/87937303cee765a24158398f7d0cfaa4a3770324))
+* Update Universal Prompt Format schemas to enhance content handling and descriptions ([be37516](https://github.com/flamingquaks/promptrek/commit/be375161d0cf0bff042ebfc96a0d4b42f534169b))
+
+
+
 # [](https://github.com/flamingquaks/promptrek/compare/v0.3.1...v) (2025-10-26)
 
 
