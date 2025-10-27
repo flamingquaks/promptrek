@@ -26,12 +26,12 @@ metadata:
   tags: ["test", "ai"]
 content: |
   # Test Project
-  
+
   ## Guidelines
   - Write clean code
   - Add tests
   - Follow best practices
-  
+
   ## Examples
   ```python
   def example():

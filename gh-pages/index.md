@@ -256,6 +256,9 @@ metadata:
 content: |
   # Full-Stack Development Assistant
 
+  Last updated: {{{ CURRENT_DATE }}} at {{{ CURRENT_TIME }}}
+  Current Branch: {{{ GIT_BRANCH }}}
+
   ## General Guidelines
   - Write clean, maintainable code with proper error handling
   - Use TypeScript with strict mode for all new code
@@ -276,7 +279,10 @@ content: |
   - Write integration tests for all endpoints
 
 variables:
-  TEAM_NAME: "Engineering Team"</code></pre>{% endraw %}
+  TEAM_NAME: "Engineering Team"
+  GIT_BRANCH:
+    type: command
+    value: git rev-parse --abbrev-ref HEAD</code></pre>{% endraw %}
         </div>
         <p class="schema-note">✨ <strong>Schema v3.1.0 (Latest Stable)</strong>: Markdown-first with clean top-level plugins and refined agent model. No <code>targets</code> field needed - works with ALL editors! MCP servers, commands, agents, and hooks at the top level.<br><br>
         <em>Note: Schema versions (v1.x, v2.x, v3.x) define the configuration file format and are independent of the PrompTrek application version.</em></p>
@@ -349,8 +355,8 @@ variables:
 
       <div class="feature-card-modern">
         <div class="feature-icon">◆</div>
-        <h3>Variable Substitution</h3>
-        <p>Dynamic variables with local file support. Keep sensitive values like API keys in .promptrek/variables.promptrek.yaml (automatically gitignored via .promptrek/ directory).</p>
+        <h3>Dynamic Variables</h3>
+        <p>Built-in variables (version, timestamp, date), command-based variables (git info, system details), and file-based variables. Keep sensitive values in .promptrek/variables.promptrek.yaml (automatically gitignored). <a href="user-guide/advanced-features.html#variable-substitution">Learn more →</a></p>
       </div>
 
       <div class="feature-card-modern">

@@ -1,6 +1,18 @@
 # [](https://github.com/flamingquaks/promptrek/compare/v0.3.1...v) (2025-10-26)
 
 
+### Features
+
+* **variables:** Add dynamic variables with built-in date/time/git variables and command execution support ([#TBD](https://github.com/flamingquaks/promptrek/issues/TBD))
+  - Add built-in dynamic variables: CURRENT_DATE, CURRENT_TIME, CURRENT_DATETIME, CURRENT_YEAR, CURRENT_MONTH, CURRENT_DAY, PROJECT_NAME, PROJECT_ROOT, GIT_BRANCH, GIT_COMMIT_SHORT
+  - Add support for user-defined command-based dynamic variables in .promptrek/variables.promptrek.yaml
+  - Add `allow_commands` field to UniversalPromptV3 for security control
+  - Add variable caching mechanism for command-based variables
+  - Add `promptrek refresh` command to regenerate files with updated dynamic variables
+  - Add generation metadata (.promptrek/last-generation.yaml) to support refresh workflow
+  - Update .gitignore and pre-commit hooks to prevent committing metadata files
+
+
 ### Bug Fixes
 
 * add SAFETY_API_KEY environment variable for Safety scans and improve handling of missing key ([cfd41e4](https://github.com/flamingquaks/promptrek/commit/cfd41e42ce8e57582f8f7d2b3023067395dd0251))

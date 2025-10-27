@@ -11,10 +11,11 @@
 
 - id: promptrek-validate
   name: Validate PrompTrek files
-  description: Validates .promptrek.yaml files for syntax and schema errors
+  description: Validates project.promptrek.yaml files for syntax and schema errors (excludes variables/metadata files)
   entry: promptrek validate
   language: python
   files: \.promptrek\.ya?ml$
+  exclude: '\.promptrek/(variables|last-generation)\.promptrek\.ya?ml$'
   pass_filenames: true
   stages: [pre-commit]
 
@@ -49,11 +50,12 @@
   pass_filenames: true
 
 - id: promptrek-check-local-vars
-  name: Prevent committing local variables
-  description: Blocks commits of variables.promptrek.yaml containing user-specific variables
+  name: Prevent committing local variables and metadata
+  description: Blocks commits of user-specific files (variables.promptrek.yaml, last-generation.yaml)
   entry: promptrek check-generated
   language: python
-  files: (^variables\.promptrek\.ya?ml$|\.promptrek/variables\.promptrek\.ya?ml$)
+  files: (^variables\.promptrek\.ya?ml$|\.promptrek/(variables\.promptrek\.ya?ml|last-generation\.ya?ml)$)
+  exclude: '^examples/'
   stages: [pre-commit]
   always_run: false
   pass_filenames: true

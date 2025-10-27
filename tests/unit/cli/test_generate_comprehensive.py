@@ -500,17 +500,14 @@ class TestGenerateCommand:
             False,
         )
 
-        # Should pass variables to generate function
-        # _generate_for_editor_multiple is called with positional and keyword args
+        # Should pass variables to generate function as cli_overrides
+        # _generate_for_editor_multiple is called with keyword args
         assert mock_generate.called
-        # variables is the 6th parameter
         call_args = mock_generate.call_args
-        if len(call_args[0]) > 5:
-            # Positional argument
-            assert call_args[0][5] == variables
-        else:
-            # Keyword argument
-            assert call_args[1].get("variables") == variables
+        # Check that cli_overrides contains the variables we passed
+        assert call_args[1].get("cli_overrides") == variables
+        # Check that base_variables contains built-in variables
+        assert "CURRENT_DATE" in call_args[1].get("base_variables", {})
 
     @patch("promptrek.cli.commands.generate._generate_for_editor_multiple")
     @patch("promptrek.cli.commands.generate.UPFParser")
@@ -544,8 +541,11 @@ class TestGenerateCommand:
             False,
         )
 
-        # Should only process file once
-        assert mock_parser.parse_file.call_count == 1
+        # This test ensures that duplicate files are removed (only unique files are processed).
+        # For each unique file, parsing occurs twice: once to check allow_commands, once to generate.
+        # Each unique file should be parsed twice (allow_commands + generation), but generate should only be called once.
+        assert mock_parser.parse_file.call_count == 2
+        assert mock_generate.call_count == 1
 
     @patch("promptrek.cli.commands.generate._generate_for_editor_multiple")
     @patch("promptrek.cli.commands.generate.UPFParser")

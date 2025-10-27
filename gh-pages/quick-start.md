@@ -187,20 +187,68 @@ You can control this behavior in your `.promptrek.yaml`:
 ignore_editor_files: false
 ```
 
-### 5. (Optional) Create Local Variables File
+### 5. (Optional) Use Dynamic Variables
 
-For user-specific variables like names, emails, or API keys that should NOT be committed:
+PrompTrek supports powerful dynamic variables to make your prompts adaptive:
+
+**Built-in Variables** (automatically available, all can be overridden):
+- `CURRENT_DATE` - Current date (YYYY-MM-DD)
+- `CURRENT_TIME` - Current time (HH:MM:SS)
+- `CURRENT_DATETIME` - ISO 8601 datetime
+- `CURRENT_YEAR`, `CURRENT_MONTH`, `CURRENT_DAY` - Date components
+- `PROJECT_NAME` - Extracted from git remote URL (supports HTTPS/SSH formats), falls back to directory name
+- `PROJECT_ROOT` - Absolute path to project
+- `GIT_BRANCH`, `GIT_COMMIT_SHORT` - Git info (if in git repo)
+
+💡 **Tip:** You can override any built-in variable by defining it in your variables file or via CLI.
+
+**Command-based Variables** (execute shell commands):
 
 ```yaml
 # .promptrek/variables.promptrek.yaml (automatically gitignored via .promptrek/ directory)
+# Static user variables
 AUTHOR_NAME: "Your Name"
 AUTHOR_EMAIL: "your.email@example.com"
-API_KEY: "your-secret-key"
+
+# Override built-in PROJECT_NAME (optional)
+PROJECT_NAME: "MyCustomProjectName"
+
+# Dynamic command-based variables
+GIT_BRANCH:
+  type: command
+  value: git rev-parse --abbrev-ref HEAD
+  cache: false
+
+GIT_COMMIT:
+  type: command
+  value: git rev-parse --short HEAD
+  cache: true
+
+CURRENT_USER:
+  type: command
+  value: whoami
+  cache: true
 ```
+
+Add `allow_commands: true` to your `.promptrek.yaml` to enable command-based variables.
+
+**CLI Overrides** (highest priority):
+
+```bash
+# Override variables for specific generations
+promptrek generate -e claude -V ENVIRONMENT=staging
+promptrek generate --all -V PROJECT_NAME=MyApp -V DEBUG=true
+```
+
+**Variable Priority Order:**
+1. CLI flags (`-V`) - highest priority
+2. File-based (`.promptrek/variables.promptrek.yaml`)
+3. Inline (`variables:` in your `.promptrek.yaml`)
+4. Built-in (`CURRENT_*`, `PROJECT_*`, `GIT_*`) - lowest priority
 
 **Note:** The `.promptrek/` directory is automatically added to `.gitignore` when you run `promptrek init`, so all files in this directory (including `variables.promptrek.yaml`) will not be committed to version control.
 
-Variables from this file override defaults in your `.promptrek.yaml` file. See [Local Variables](user-guide.html#local-variables-file) for details.
+See [Variable Substitution](user-guide/advanced-features.html#variable-substitution) for complete documentation.
 
 ### 6. Preview Generated Output (Optional)
 

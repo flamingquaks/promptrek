@@ -5,18 +5,26 @@ Handles generation of editor-specific prompts from universal prompt files.
 """
 
 import inspect
+from datetime import datetime
 from pathlib import Path
 from typing import Optional, Union
 
 import click
+import yaml
 
 from ...adapters import registry
 from ...adapters.registry import AdapterCapability
 from ...core.exceptions import AdapterNotFoundError, CLIError, UPFParsingError
-from ...core.models import UniversalPrompt, UniversalPromptV2, UniversalPromptV3
+from ...core.models import (
+    DynamicVariableConfig,
+    GenerationMetadata,
+    UniversalPrompt,
+    UniversalPromptV2,
+    UniversalPromptV3,
+)
 from ...core.parser import UPFParser
 from ...core.validator import UPFValidator
-from ...utils.variables import VariableSubstitution
+from ...utils.variables import BuiltInVariables, VariableSubstitution
 
 
 def _adapter_supports_headless(adapter: object, method_name: str) -> bool:
@@ -72,20 +80,7 @@ def generate_command(
     """
     verbose = ctx.obj.get("verbose", False)
 
-    # Load local variables from .promptrek/variables.promptrek.yaml
-    var_sub = VariableSubstitution()
-    local_vars = var_sub.load_local_variables()
-
-    # Merge variables with precedence: CLI > local file > prompt file
-    # Start with local variables, then merge CLI overrides
-    merged_variables = local_vars.copy()
-    if variables:
-        merged_variables.update(variables)
-
-    if verbose and local_vars:
-        click.echo(f"📋 Loaded {len(local_vars)} variable(s) from local variables file")
-
-    # Collect all files to process
+    # Collect all files to process first (we need to check allow_commands from prompts)
     files_to_process: list[Path] = []
 
     # Add explicitly specified files
@@ -125,6 +120,41 @@ def generate_command(
         click.echo(f"Processing {len(unique_files)} file(s):")
         for file_path in unique_files:
             click.echo(f"  - {file_path}")
+
+    # Determine allow_commands setting by checking first file
+    # This is needed before loading variables to know if command execution is allowed
+    allow_commands = False
+    try:
+        first_prompt = _parse_and_validate_file(ctx, unique_files[0])
+        if isinstance(first_prompt, UniversalPromptV3):
+            allow_commands = first_prompt.allow_commands or False
+    except (UPFParsingError, CLIError):
+        # If parsing fails, it will be caught again in the main loop
+        pass
+    except Exception as exc:
+        if verbose:
+            click.echo(
+                f"Unexpected error while parsing {unique_files[0]}: {exc}", err=True
+            )
+
+    # Load and evaluate variables (including built-in and dynamic variables)
+    # These are: built-in + local file variables (without CLI overrides yet)
+    var_sub = VariableSubstitution()
+    base_variables = var_sub.load_and_evaluate_variables(
+        allow_commands=allow_commands,
+        include_builtins=True,
+        verbose=verbose,
+        clear_cache=False,
+    )
+
+    # Keep CLI overrides separate for now to ensure correct precedence
+    # Precedence: built-in < local < prompt.variables < CLI
+    cli_overrides = variables or {}
+
+    if verbose and base_variables:
+        click.echo(
+            f"✅ Loaded {len(base_variables)} base variable(s) (built-in + local)"
+        )
 
     # Set default output directory
     if not output:
@@ -219,8 +249,10 @@ def generate_command(
                 output,
                 dry_run,
                 verbose,
-                merged_variables,
-                headless,
+                variables=None,  # Deprecated param
+                headless=headless,
+                base_variables=base_variables,
+                cli_overrides=cli_overrides,
             )
         except AdapterNotFoundError:
             click.echo(f"⚠️ Editor '{target_editor}' not yet implemented - skipping")
@@ -237,6 +269,121 @@ def generate_command(
         raise CLIError(
             f"Failed to generate for {first_error_editor}: {first_error_msg}"
         )
+
+    # Save generation metadata for refresh command (skip in dry-run mode)
+    if not dry_run and prompts_by_editor:
+        try:
+            # Merge base + CLI for metadata (not including prompt.variables)
+            metadata_vars = {}
+            if base_variables:
+                metadata_vars.update(base_variables)
+            if cli_overrides:
+                metadata_vars.update(cli_overrides)
+
+            _save_generation_metadata(
+                source_files=unique_files,
+                editors=list(prompts_by_editor.keys()),
+                output_dir=output,
+                variables=metadata_vars,
+                allow_commands=allow_commands,
+                verbose=verbose,
+            )
+        except Exception as e:
+            if verbose:
+                click.echo(f"⚠️ Failed to save generation metadata: {e}", err=True)
+            # Don't fail the whole generation if metadata saving fails
+
+
+def _save_generation_metadata(
+    source_files: list[Path],
+    editors: list[str],
+    output_dir: Path,
+    variables: dict[str, str],
+    allow_commands: bool,
+    verbose: bool = False,
+) -> None:
+    """Save generation metadata for refresh command."""
+    # Create .promptrek directory if it doesn't exist
+    promptrek_dir = Path.cwd() / ".promptrek"
+    promptrek_dir.mkdir(parents=True, exist_ok=True)
+
+    metadata_file = promptrek_dir / "last-generation.yaml"
+
+    # Load current variables file to extract dynamic variable configs
+    var_sub = VariableSubstitution()
+    dynamic_vars = {}
+
+    var_file = None
+    current = Path.cwd().resolve()
+    while True:
+        test_file = current / ".promptrek/variables.promptrek.yaml"
+        if test_file.exists():
+            var_file = test_file
+            break
+        parent = current.parent
+        if parent == current:
+            break
+        current = parent
+
+    if var_file:
+        try:
+            with open(var_file, "r", encoding="utf-8") as f:
+                data = yaml.safe_load(f)
+                if isinstance(data, dict):
+                    for key, value in data.items():
+                        if isinstance(value, dict) and value.get("type") == "command":
+                            dynamic_vars[key] = DynamicVariableConfig(
+                                type="command",
+                                value=value.get("value", ""),
+                                cache=value.get("cache", False),
+                            )
+        except Exception:
+            pass  # Ignore errors loading variable file
+
+    # Extract only static variables (exclude dynamic and built-in)
+    static_vars = {}
+    # Get built-in variable names dynamically from BuiltInVariables (once)
+    builtin_var_names = set(BuiltInVariables.get_all().keys())
+
+    for key, value in variables.items():
+        if key not in builtin_var_names and key not in dynamic_vars:
+            static_vars[key] = value
+
+    # Create metadata
+    metadata = GenerationMetadata(
+        timestamp=datetime.now().isoformat(),
+        source_file=str(source_files[0]) if source_files else "",
+        editors=editors,
+        output_dir=str(output_dir),
+        variables=static_vars,
+        dynamic_variables=dynamic_vars,
+        builtin_variables_enabled=True,
+        allow_commands=allow_commands,
+    )
+
+    # Save to file
+    try:
+        with open(metadata_file, "w", encoding="utf-8") as f:
+            yaml.dump(
+                metadata.model_dump(by_alias=True),
+                f,
+                default_flow_style=False,
+                sort_keys=False,
+            )
+
+        if verbose:
+            click.echo(f"💾 Saved generation metadata to {metadata_file}")
+    except (OSError, PermissionError) as e:
+        click.echo(
+            f"⚠️  Warning: Failed to save generation metadata to {metadata_file}: {e}",
+            err=True,
+        )
+        if verbose:
+            click.echo(
+                "   Metadata is used for tracking generation history. "
+                "Generation will continue without it.",
+                err=True,
+            )
 
 
 def _parse_and_validate_file(
@@ -277,36 +424,76 @@ def _generate_for_editor_multiple(
     verbose: bool,
     variables: Optional[dict] = None,
     headless: bool = False,
+    base_variables: Optional[dict] = None,
+    cli_overrides: Optional[dict] = None,
 ) -> None:
-    """Generate prompts for a specific editor from multiple UPF files."""
+    """Generate prompts for a specific editor from multiple UPF files.
+
+    Args:
+        prompt_files: List of (prompt, source_file) tuples
+        editor: Target editor name
+        output_dir: Output directory
+        dry_run: Dry run mode
+        verbose: Verbose output
+        variables: DEPRECATED - use base_variables and cli_overrides instead
+        headless: Headless mode
+        base_variables: Built-in + local file variables
+        cli_overrides: CLI variable overrides (-V options)
+    """
 
     try:
         adapter = registry.get(editor)
 
         if len(prompt_files) == 1:
-            # Single file - use existing logic
+            # Single file - merge variables with correct precedence
             prompt, source_file = prompt_files[0]
+
+            # Merge variables: base < prompt.variables < CLI
+            merged_vars = {}
+            if base_variables:
+                merged_vars.update(base_variables)
+            if hasattr(prompt, "variables") and prompt.variables:
+                merged_vars.update(prompt.variables)
+            if cli_overrides:
+                merged_vars.update(cli_overrides)
+            # Fallback to old 'variables' param for backward compatibility
+            if variables and not (base_variables or cli_overrides):
+                merged_vars = variables
+
             # Check if adapter supports headless parameter
             if _adapter_supports_headless(adapter, "generate"):
                 adapter.generate(
-                    prompt, output_dir, dry_run, verbose, variables, headless=headless
+                    prompt, output_dir, dry_run, verbose, merged_vars, headless=headless
                 )
             else:
                 if headless:
                     click.echo(
                         f"Warning: {editor} adapter does not support headless mode, ignoring --headless flag"
                     )
-                adapter.generate(prompt, output_dir, dry_run, verbose, variables)
+                adapter.generate(prompt, output_dir, dry_run, verbose, merged_vars)
             if verbose:
                 click.echo(f"✅ Generated {editor} files from {source_file}")
         else:
+            # Multiple files - for merged generation, we'll use the last prompt's variables
+            # TODO: In future, support merging variables from multiple prompts
+            last_prompt = prompt_files[-1][0]
+            merged_vars = {}
+            if base_variables:
+                merged_vars.update(base_variables)
+            if hasattr(last_prompt, "variables") and last_prompt.variables:
+                merged_vars.update(last_prompt.variables)
+            if cli_overrides:
+                merged_vars.update(cli_overrides)
+            if variables and not (base_variables or cli_overrides):
+                merged_vars = variables
+
             # Multiple files - check adapter capabilities
             if hasattr(adapter, "generate_multiple") and registry.has_capability(
                 editor, AdapterCapability.MULTIPLE_FILE_GENERATION
             ):
                 # Adapter supports generating separate files for each prompt
                 adapter.generate_multiple(
-                    prompt_files, output_dir, dry_run, verbose, variables
+                    prompt_files, output_dir, dry_run, verbose, merged_vars
                 )
                 click.echo(f"Generated separate {editor} files")
             elif hasattr(adapter, "generate_merged"):
@@ -319,7 +506,7 @@ def _generate_for_editor_multiple(
                             output_dir,
                             dry_run,
                             verbose,
-                            variables,
+                            merged_vars,
                             headless=headless,
                         )
                     else:
@@ -328,7 +515,7 @@ def _generate_for_editor_multiple(
                                 f"Warning: {editor} adapter does not support headless mode in merged generation, ignoring --headless flag"
                             )
                         adapter.generate_merged(
-                            prompt_files, output_dir, dry_run, verbose, variables
+                            prompt_files, output_dir, dry_run, verbose, merged_vars
                         )
                     if verbose:
                         source_files = [str(pf[1]) for pf in prompt_files]
@@ -338,6 +525,17 @@ def _generate_for_editor_multiple(
                 except NotImplementedError:
                     # Adapter doesn't actually support merging - fall back to single file generation
                     prompt, source_file = prompt_files[-1]
+                    # Re-merge variables for this specific prompt
+                    fallback_vars = {}
+                    if base_variables:
+                        fallback_vars.update(base_variables)
+                    if hasattr(prompt, "variables") and prompt.variables:
+                        fallback_vars.update(prompt.variables)
+                    if cli_overrides:
+                        fallback_vars.update(cli_overrides)
+                    if variables and not (base_variables or cli_overrides):
+                        fallback_vars = variables
+
                     # Check if adapter supports headless parameter
                     if _adapter_supports_headless(adapter, "generate"):
                         adapter.generate(
@@ -345,7 +543,7 @@ def _generate_for_editor_multiple(
                             output_dir,
                             dry_run,
                             verbose,
-                            variables,
+                            fallback_vars,
                             headless=headless,
                         )
                     else:
@@ -354,7 +552,7 @@ def _generate_for_editor_multiple(
                                 f"Warning: {editor} adapter does not support headless mode, ignoring --headless flag"
                             )
                         adapter.generate(
-                            prompt, output_dir, dry_run, verbose, variables
+                            prompt, output_dir, dry_run, verbose, fallback_vars
                         )
                     source_files = [str(pf[1]) for pf in prompt_files]
                     click.echo(
@@ -363,6 +561,16 @@ def _generate_for_editor_multiple(
             else:
                 # Fallback: generate from last file with warning
                 prompt, source_file = prompt_files[-1]
+                fallback_vars = {}
+                if base_variables:
+                    fallback_vars.update(base_variables)
+                if hasattr(prompt, "variables") and prompt.variables:
+                    fallback_vars.update(prompt.variables)
+                if cli_overrides:
+                    fallback_vars.update(cli_overrides)
+                if variables and not (base_variables or cli_overrides):
+                    fallback_vars = variables
+
                 # Check if adapter supports headless parameter
                 if _adapter_supports_headless(adapter, "generate"):
                     adapter.generate(
@@ -370,7 +578,7 @@ def _generate_for_editor_multiple(
                         output_dir,
                         dry_run,
                         verbose,
-                        variables,
+                        fallback_vars,
                         headless=headless,
                     )
                 else:
@@ -378,7 +586,9 @@ def _generate_for_editor_multiple(
                         click.echo(
                             f"Warning: {editor} adapter does not support headless mode, ignoring --headless flag"
                         )
-                    adapter.generate(prompt, output_dir, dry_run, verbose, variables)
+                    adapter.generate(
+                        prompt, output_dir, dry_run, verbose, fallback_vars
+                    )
                 source_files = [str(pf[1]) for pf in prompt_files]
                 click.echo(
                     f"⚠️ {editor} adapter doesn't support merging. Generated from {source_file}, other files ignored: {', '.join(source_files[:-1])}"

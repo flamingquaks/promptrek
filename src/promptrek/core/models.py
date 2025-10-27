@@ -453,6 +453,11 @@ class UniversalPromptV3(BaseModel):
         description="Automatically add editor-specific files to .gitignore (default: True)",
     )
 
+    allow_commands: Optional[bool] = Field(
+        default=False,
+        description="Allow dynamic variables to execute shell commands (security control)",
+    )
+
     @field_validator("schema_version")
     @classmethod
     def validate_schema_version(cls, v: str) -> str:
@@ -560,6 +565,76 @@ class UserConfig(BaseModel):
         """Validate schema version format."""
         if not v.count(".") == 2:
             raise ValueError("Schema version must be in format 'x.y.z'")
+        return v
+
+    model_config = ConfigDict(validate_assignment=True, extra="allow")
+
+
+# Dynamic Variables Configuration
+
+
+class DynamicVariableConfig(BaseModel):
+    """
+    Configuration for a dynamic variable that evaluates at generation time.
+
+    Used in .promptrek/variables.promptrek.yaml for command-based variables.
+    """
+
+    type: str = Field(..., description="Variable type (must be 'command')")
+    value: str = Field(..., description="Shell command to execute")
+    cache: bool = Field(
+        default=False,
+        description="Whether to cache the result (evaluate once per session)",
+    )
+
+    @field_validator("type")
+    @classmethod
+    def validate_type(cls, v: str) -> str:
+        """Validate variable type."""
+        if v != "command":
+            raise ValueError("Only 'command' type is currently supported")
+        return v
+
+    model_config = ConfigDict(validate_assignment=True, extra="forbid")
+
+
+# Generation Metadata (for refresh command)
+
+
+class GenerationMetadata(BaseModel):
+    """
+    Metadata about a generation run, saved to .promptrek/last-generation.yaml.
+
+    Used by the 'promptrek refresh' command to regenerate files with updated variables.
+    """
+
+    timestamp: str = Field(..., description="ISO 8601 timestamp of generation")
+    source_file: str = Field(..., description="Source UPF file path")
+    editors: List[str] = Field(..., description="Editors that were generated for")
+    output_dir: str = Field(..., description="Output directory path")
+    variables: Dict[str, str] = Field(
+        default_factory=dict, description="Static variables used"
+    )
+    dynamic_variables: Dict[str, DynamicVariableConfig] = Field(
+        default_factory=dict, description="Dynamic variable configurations"
+    )
+    builtin_variables_enabled: bool = Field(
+        default=True, description="Whether built-in variables were enabled"
+    )
+    allow_commands: bool = Field(
+        default=False, description="Whether command execution was allowed"
+    )
+
+    @field_validator("timestamp")
+    @classmethod
+    def validate_timestamp(cls, v: str) -> str:
+        """Validate timestamp format."""
+        try:
+            datetime.fromisoformat(v)
+        except ValueError:
+            raise ValueError(
+                f"Timestamp must be in ISO 8601 format (e.g., '2025-10-26T14:30:45'), got: {v}"
+            )
         return v
 
     model_config = ConfigDict(validate_assignment=True, extra="allow")
