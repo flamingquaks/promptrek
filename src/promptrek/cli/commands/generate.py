@@ -342,11 +342,10 @@ def _save_generation_metadata(
 
     # Extract only static variables (exclude dynamic and built-in)
     static_vars = {}
+    # Get built-in variable names dynamically from BuiltInVariables (once)
+    builtin_var_names = set(BuiltInVariables.get_all().keys())
 
     for key, value in variables.items():
-        # Get built-in variable names dynamically from BuiltInVariables
-        builtin_var_names = set(BuiltInVariables.get_all().keys())
-
         if key not in builtin_var_names and key not in dynamic_vars:
             static_vars[key] = value
 
