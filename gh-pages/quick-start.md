@@ -28,6 +28,68 @@ Verify the installation:
 promptrek --version
 ```
 
+## Interactive CLI Wizard (New!)
+
+**New in v0.4.0**: PrompTrek now includes an interactive CLI wizard that guides you through all common workflows!
+
+### Launch Interactive Mode
+
+Simply run `promptrek` without any arguments:
+
+```bash
+promptrek
+```
+
+You'll see a beautiful ASCII banner and a menu-driven interface:
+
+```
+ ____                       _____         _
+|  _ \ _ __ ___  _ __ ___  |_   _| __ ___| | __
+| |_) | '__/ _ \| '_ ` _ \   | || '__/ _ \ |/ /
+|  __/| | | (_) | | | | | |  | || | |  __/   <
+|_|   |_|  \___/|_| |_| |_|  |_||_|  \___|_|\_\
+
+Universal AI Editor Prompt Management (v0.4.0)
+
+? What would you like to do?
+  ❯ 🚀 Initialize new project
+    ⚙️  Generate editor configurations
+    🔌 Configure plugins (MCP servers, commands, agents)
+    🔄 Migrate schema version
+    🔍 Validate configuration
+    📤 Sync from editor files
+    ❓ Help & Documentation
+    👋 Exit
+```
+
+The wizard will guide you through:
+- **Project initialization** with schema selection and pre-commit hooks
+- **Editor configuration** with multi-select and variable overrides
+- **Plugin management** for MCP servers, commands, and agents
+- **Schema migration** with backup options
+- **Validation and sync** workflows
+
+**Benefits:**
+- No need to memorize command syntax
+- Step-by-step guidance reduces errors
+- Perfect for beginners and experienced users alike
+- All traditional commands still work as before
+
+### Traditional CLI Mode
+
+If you prefer traditional commands or are in a CI/CD environment, all commands continue to work:
+
+```bash
+# Initialize project (traditional way)
+promptrek init --setup-hooks --output project.promptrek.yaml
+
+# Generate configurations
+promptrek generate --editor cursor
+
+# Force interactive mode
+promptrek --interactive
+```
+
 ## Your First Universal Prompt
 
 ### 1. Initialize a New Project
