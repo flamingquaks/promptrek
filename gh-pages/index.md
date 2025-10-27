@@ -217,9 +217,9 @@ body.home-page {
         <div class="step-content">
           <h3>Create Universal Prompt</h3>
           <div class="code-block">
-            <code>promptrek init --setup-hooks --output my-project.promptrek.yaml</code>
+            <code>promptrek</code>
           </div>
-          <p>Initialize your first universal prompt with pre-commit hooks and auto .gitignore setup</p>
+          <p><strong>New!</strong> Interactive wizard guides you through setup, or use:<br><code>promptrek init --setup-hooks</code> for traditional CLI</p>
         </div>
       </div>
 
