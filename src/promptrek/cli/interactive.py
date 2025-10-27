@@ -412,7 +412,7 @@ def workflow_sync(ctx: click.Context) -> None:
     editor = questionary.select(
         "Select editor to sync from:",
         choices=[
-            questionary.Choice(f"{name.capitalize()}", value=name)
+            questionary.Choice(name.capitalize(), value=name)
             for name in sorted(project_file_adapters)
         ],
     ).ask()
