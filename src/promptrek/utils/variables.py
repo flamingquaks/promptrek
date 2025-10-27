@@ -713,7 +713,6 @@ class VariableSubstitution:
             new_path: New file location (.promptrek/variables.promptrek.yaml)
         """
         import shutil
-        import sys
 
         try:
             # Only show interactive prompt if running in an interactive terminal
