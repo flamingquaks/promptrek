@@ -31,7 +31,7 @@ PrompTrek provides these variables out-of-the-box:
 | `CURRENT_YEAR` | Current year | `2025` |
 | `CURRENT_MONTH` | Current month (01-12) | `10` |
 | `CURRENT_DAY` | Current day (01-31) | `26` |
-| `PROJECT_NAME` | Git repository name (falls back to directory name) | `promptrek` |
+| `PROJECT_NAME` | Extracted from git remote URL (e.g., `git@github.com:user/repo.git` → `repo`), falls back to directory name if not in git repo or no remote configured | `promptrek` |
 | `PROJECT_ROOT` | Absolute path to project | `/home/user/promptrek` |
 | `GIT_BRANCH` | Git branch name (if in git repo) | `main` |
 | `GIT_COMMIT_SHORT` | Short commit hash (if in git repo) | `abc1234` |
@@ -66,7 +66,7 @@ variables:
 {% endraw %}
 
 In this example:
-- `PROJECT_NAME` overrides the built-in value (would normally be the git repository name)
+- `PROJECT_NAME` overrides the built-in value (which would be extracted from git remote URL like `git@github.com:user/promptrek.git` → `promptrek`, or fall back to directory name)
 - Built-in variables like `CURRENT_DATE`, `CURRENT_TIME`, and `CURRENT_DATETIME` are used as-is
 - `AUTHOR_EMAIL` is a custom user-defined variable
 

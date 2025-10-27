@@ -9,7 +9,7 @@ import os
 import re
 import subprocess
 import sys
-from datetime import datetime
+from datetime import date, datetime
 from pathlib import Path
 from typing import Any, Dict, List, Match, Optional
 
@@ -41,6 +41,10 @@ class CommandExecutor:
     def execute(self, command: str) -> str:
         """
         Execute a shell command and return its output.
+
+        WARNING: This executes user-defined commands. Only use with trusted input.
+        Commands are executed via shell to support pipes, redirects, and environment variables.
+        The allow_commands flag provides an additional security control.
 
         Args:
             command: Shell command to execute
@@ -87,9 +91,14 @@ class CommandExecutor:
                 f"Command timed out after {self.timeout}s: {command}"
             ) from e
         except subprocess.CalledProcessError as e:
+            error_msg = f"Command failed with exit code {e.returncode}: {command}"
+            if e.stderr:
+                error_msg += f"\nError output: {e.stderr.strip()}"
+            raise TemplateError(error_msg) from e
+        except FileNotFoundError as e:
             raise TemplateError(
-                f"Command failed with exit code {e.returncode}: {command}\n"
-                f"Error output: {e.stderr.strip()}"
+                f"Command not found: {command}\n"
+                "Ensure the command is installed and available in PATH."
             ) from e
         except Exception as e:
             raise TemplateError(f"Failed to execute command: {command}\n{e}") from e
@@ -104,7 +113,14 @@ class CommandExecutor:
 
 
 class DynamicVariable:
-    """Represents a dynamic variable that evaluates at runtime via command execution."""
+    """
+    Represents a dynamic variable that evaluates at runtime via command execution.
+
+    SECURITY WARNING: This class executes shell commands defined in variable files.
+    Only use with trusted input. Commands are executed with shell=True to support
+    shell features (pipes, environment variables, etc.). The CommandExecutor provides
+    protection via the allow_commands flag (disabled by default) and user warnings.
+    """
 
     def __init__(self, name: str, command: str, cache: bool = False) -> None:
         """
@@ -112,8 +128,12 @@ class DynamicVariable:
 
         Args:
             name: Variable name
-            command: Shell command to execute
+            command: Shell command to execute (ensure this comes from trusted source)
             cache: Whether to cache the result (evaluate once)
+
+        Security Note:
+            The command will be executed via shell. Only use commands from trusted
+            variable files under your control.
         """
         self.name = name
         self.command = command
@@ -125,10 +145,17 @@ class DynamicVariable:
         Evaluate the variable by executing its command.
 
         Args:
-            executor: Command executor instance
+            executor: Command executor instance (controls security via allow_commands)
 
         Returns:
             Variable value (command output)
+
+        Raises:
+            TemplateError: If command execution fails or is disabled
+
+        Security Note:
+            This method executes the shell command associated with this variable.
+            Ensure the command comes from a trusted source.
         """
         if self.cache and self._cached_value is not None:
             return self._cached_value
@@ -518,8 +545,8 @@ class VariableSubstitution:
                             # Extract only static variables (for backward compatibility)
                             static_vars = {}
                             for key, value in data.items():
-                                if isinstance(value, str):
-                                    static_vars[key] = value
+                                if self._is_static_variable_value(value):
+                                    static_vars[key] = str(value)
                             return static_vars
                         return {}
                 except (OSError, UnicodeDecodeError, yaml.YAMLError):
@@ -555,6 +582,10 @@ class VariableSubstitution:
 
         Returns:
             Dictionary of all evaluated variables
+
+        Notes:
+            Evaluation failures for dynamic variables are always printed to stdout,
+            regardless of the verbose parameter.
         """
         variables = {}
 
@@ -617,9 +648,9 @@ class VariableSubstitution:
             dynamic_count = 0
 
             for key, value in data.items():
-                # Static variable (string value)
-                if isinstance(value, str):
-                    variables[key] = value
+                # Static variable (string value, number, bool, or YAML date)
+                if self._is_static_variable_value(value):
+                    variables[key] = str(value)
                     static_count += 1
 
                 # Dynamic variable (dict with type: command)
@@ -639,8 +670,8 @@ class VariableSubstitution:
                         variables[key] = evaluated_value
                         dynamic_count += 1
                     except TemplateError as e:
-                        if verbose:
-                            print(f"  ⚠️  Failed to evaluate {key}: {e}")
+                        # Always report evaluation failures (not just in verbose mode)
+                        print(f"  ⚠️  Failed to evaluate dynamic variable '{key}': {e}")
                         # Continue with other variables
 
             if verbose:
@@ -650,9 +681,28 @@ class VariableSubstitution:
 
         except (OSError, UnicodeDecodeError, yaml.YAMLError) as e:
             if verbose:
-                print(f"  ⚠️  Failed to load variables file: {e}")
+                print(f"  ⚠️  Failed to load variables from {var_file}: {e}")
 
         return variables
+
+    def _is_static_variable_value(self, value: Any) -> bool:
+        """
+        Determine if a value is considered a static variable value.
+
+        Static variables include str, int, float, bool, and YAML date/datetime objects.
+
+        Args:
+            value: The value to check
+
+        Returns:
+            True if value is static, False otherwise
+        """
+        if isinstance(value, (str, int, float, bool)):
+            return True
+        # Handle YAML date/datetime objects precisely
+        if isinstance(value, (datetime, date)):
+            return True
+        return False
 
     def _migrate_variables_file(self, old_path: Path, new_path: Path) -> None:
         """
@@ -662,9 +712,10 @@ class VariableSubstitution:
             old_path: Old file location (variables.promptrek.yaml in root)
             new_path: New file location (.promptrek/variables.promptrek.yaml)
         """
-        try:
-            import sys
+        import shutil
+        import sys
 
+        try:
             # Only show interactive prompt if running in an interactive terminal
             if sys.stdout.isatty():
                 print(
@@ -683,8 +734,6 @@ class VariableSubstitution:
                     new_path.parent.mkdir(parents=True, exist_ok=True)
 
                     # Move the file
-                    import shutil
-
                     shutil.move(str(old_path), str(new_path))
                     print(f"   ✅ Migrated {old_path.name} to {new_path}")
                     print(
@@ -697,10 +746,9 @@ class VariableSubstitution:
             else:
                 # Non-interactive: auto-migrate silently
                 new_path.parent.mkdir(parents=True, exist_ok=True)
-                import shutil
-
                 shutil.move(str(old_path), str(new_path))
 
-        except Exception:
-            # If migration fails, silently continue - file will be loaded from old location
+        except (OSError, PermissionError, shutil.Error):
+            # If migration fails due to file system errors, silently continue
+            # File will be loaded from old location
             pass

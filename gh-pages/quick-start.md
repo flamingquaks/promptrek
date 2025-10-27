@@ -196,7 +196,7 @@ PrompTrek supports powerful dynamic variables to make your prompts adaptive:
 - `CURRENT_TIME` - Current time (HH:MM:SS)
 - `CURRENT_DATETIME` - ISO 8601 datetime
 - `CURRENT_YEAR`, `CURRENT_MONTH`, `CURRENT_DAY` - Date components
-- `PROJECT_NAME` - Git repo name (falls back to directory name)
+- `PROJECT_NAME` - Extracted from git remote URL (supports HTTPS/SSH formats), falls back to directory name
 - `PROJECT_ROOT` - Absolute path to project
 - `GIT_BRANCH`, `GIT_COMMIT_SHORT` - Git info (if in git repo)
 

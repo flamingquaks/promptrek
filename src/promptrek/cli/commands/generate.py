@@ -363,16 +363,28 @@ def _save_generation_metadata(
     )
 
     # Save to file
-    with open(metadata_file, "w", encoding="utf-8") as f:
-        yaml.dump(
-            metadata.model_dump(by_alias=True),
-            f,
-            default_flow_style=False,
-            sort_keys=False,
-        )
+    try:
+        with open(metadata_file, "w", encoding="utf-8") as f:
+            yaml.dump(
+                metadata.model_dump(by_alias=True),
+                f,
+                default_flow_style=False,
+                sort_keys=False,
+            )
 
-    if verbose:
-        click.echo(f"💾 Saved generation metadata to {metadata_file}")
+        if verbose:
+            click.echo(f"💾 Saved generation metadata to {metadata_file}")
+    except (OSError, PermissionError) as e:
+        click.echo(
+            f"⚠️  Warning: Failed to save generation metadata to {metadata_file}: {e}",
+            err=True,
+        )
+        if verbose:
+            click.echo(
+                "   Metadata is used for tracking generation history. "
+                "Generation will continue without it.",
+                err=True,
+            )
 
 
 def _parse_and_validate_file(
