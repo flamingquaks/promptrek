@@ -26,21 +26,34 @@ from .commands.preview import preview_command
 from .commands.refresh import refresh_command
 from .commands.sync import sync_command
 from .commands.validate import validate_command
+from .interactive import run_interactive_mode
 
 
-@click.group()
+@click.group(invoke_without_command=True)
 @click.version_option(version=__version__)
 @click.option("--verbose", "-v", is_flag=True, help="Enable verbose output")
+@click.option(
+    "--interactive",
+    "-i",
+    is_flag=True,
+    help="Force interactive mode (default when no command is provided)",
+)
 @click.pass_context
-def cli(ctx: click.Context, verbose: bool) -> None:
+def cli(ctx: click.Context, verbose: bool, interactive: bool) -> None:
     """
     PrompTrek - Universal AI editor prompt management.
 
     PrompTrek allows you to create prompts in a universal format and generate
     editor-specific prompts for GitHub Copilot, Cursor, Continue, and more.
+
+    Run 'promptrek' without any command to enter interactive mode.
     """
     ctx.ensure_object(dict)
     ctx.obj["verbose"] = verbose
+
+    # If no subcommand was invoked, run interactive mode
+    if ctx.invoked_subcommand is None or interactive:
+        run_interactive_mode(ctx)
 
 
 @cli.command()
