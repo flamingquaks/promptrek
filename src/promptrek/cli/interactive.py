@@ -326,7 +326,7 @@ def workflow_migrate(ctx: click.Context) -> None:
         migrate_command(
             ctx,
             input_file=existing_config,
-            output=Path(output_path) if output_path else None,
+            output_file=Path(output_path) if output_path else None,
             force=False,
         )
 
@@ -432,12 +432,12 @@ def workflow_sync(ctx: click.Context) -> None:
         return
 
     # Output file
-    output = questionary.text(
+    output_path = questionary.text(
         "Output PrompTrek file:",
         default="project.promptrek.yaml",
     ).ask()
 
-    if not output:
+    if not output_path:
         click.echo("Cancelled.")
         return
 
@@ -454,7 +454,7 @@ def workflow_sync(ctx: click.Context) -> None:
             ctx,
             source_dir=Path(source_dir),
             editor=editor,
-            output=Path(output),
+            output_file=Path(output_path) if output_path else None,
             dry_run=dry_run,
             force=False,
         )
@@ -525,7 +525,7 @@ def workflow_plugins(ctx: click.Context) -> None:
             choices=[
                 Choice("All editors", value="all"),
                 *[
-                    Choice(f"{name.capitalize()}", value=name)
+                    Choice(name.capitalize(), value=name)
                     for name in sorted(project_file_adapters)
                 ],
             ],
@@ -544,9 +544,6 @@ def workflow_plugins(ctx: click.Context) -> None:
         click.echo()
 
         try:
-            ctx.obj["force_system_wide"] = False
-            ctx.obj["auto_confirm"] = False
-
             generate_plugins_command(
                 ctx,
                 prompt_file=existing_config,
@@ -554,7 +551,7 @@ def workflow_plugins(ctx: click.Context) -> None:
                 output_dir=None,
                 dry_run=dry_run,
                 force_system_wide=False,
-                yes=False,
+                auto_confirm=False,
             )
 
             click.echo()
