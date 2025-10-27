@@ -39,6 +39,7 @@ class TestCheckExistingConfig:
     def test_check_existing_config_not_found(self, tmp_path: Path) -> None:
         """Test when no config file exists."""
         import os
+
         os.chdir(tmp_path)
         result = check_existing_config()
         assert result is None
@@ -46,6 +47,7 @@ class TestCheckExistingConfig:
     def test_check_existing_config_found_project_yaml(self, tmp_path: Path) -> None:
         """Test when project.promptrek.yaml exists."""
         import os
+
         os.chdir(tmp_path)
         config_file = tmp_path / "project.promptrek.yaml"
         config_file.touch()
@@ -56,6 +58,7 @@ class TestCheckExistingConfig:
     def test_check_existing_config_found_project_yml(self, tmp_path: Path) -> None:
         """Test when project.promptrek.yml exists."""
         import os
+
         os.chdir(tmp_path)
         config_file = tmp_path / "project.promptrek.yml"
         config_file.touch()
@@ -66,6 +69,7 @@ class TestCheckExistingConfig:
     def test_check_existing_config_found_dotfile(self, tmp_path: Path) -> None:
         """Test when .promptrek.yaml exists."""
         import os
+
         os.chdir(tmp_path)
         config_file = tmp_path / ".promptrek.yaml"
         config_file.touch()

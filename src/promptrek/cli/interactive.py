@@ -14,9 +14,8 @@ from questionary import Choice
 
 from .. import __version__
 from ..core.exceptions import PrompTrekError
-from .commands.init import init_command
 from .commands.generate import generate_command
-
+from .commands.init import init_command
 
 BANNER = r"""
  ____                       _____         _
@@ -77,7 +76,9 @@ def workflow_init_project(ctx: click.Context) -> None:
             click.echo("Cancelled.")
             return
     else:
-        click.echo(click.style("✓ No existing project.promptrek.yaml found", fg="green"))
+        click.echo(
+            click.style("✓ No existing project.promptrek.yaml found", fg="green")
+        )
 
     click.echo()
 
@@ -213,9 +214,7 @@ def workflow_generate_config(ctx: click.Context) -> None:
             if not var_input:
                 break
             if "=" not in var_input:
-                click.echo(
-                    click.style("Invalid format. Use KEY=VALUE", fg="yellow")
-                )
+                click.echo(click.style("Invalid format. Use KEY=VALUE", fg="yellow"))
                 continue
             key, value = var_input.split("=", 1)
             variables_dict[key.strip()] = value.strip()
@@ -336,7 +335,10 @@ def workflow_migrate(ctx: click.Context) -> None:
 
         if backup:
             import shutil
-            backup_path = existing_config.with_suffix(existing_config.suffix + ".backup")
+
+            backup_path = existing_config.with_suffix(
+                existing_config.suffix + ".backup"
+            )
             shutil.copy2(existing_config, backup_path)
             click.echo(click.style(f"✅ Backup saved to {backup_path}", fg="green"))
 
@@ -403,6 +405,7 @@ def workflow_sync(ctx: click.Context) -> None:
 
     # Get available editors
     from ..adapters import registry
+
     project_file_adapters = registry.get_project_file_adapters()
 
     # Select editor
@@ -514,6 +517,7 @@ def workflow_plugins(ctx: click.Context) -> None:
 
         # Select editor
         from ..adapters import registry
+
         project_file_adapters = registry.get_project_file_adapters()
 
         editor = questionary.select(
@@ -554,9 +558,7 @@ def workflow_plugins(ctx: click.Context) -> None:
             )
 
             click.echo()
-            click.echo(
-                click.style("✅ Plugin generation completed", fg="green")
-            )
+            click.echo(click.style("✅ Plugin generation completed", fg="green"))
 
         except PrompTrekError as e:
             click.echo(click.style(f"\n❌ Error: {e}", fg="red"), err=True)
@@ -598,7 +600,10 @@ def run_interactive_mode(ctx: click.Context) -> None:
             choices=[
                 Choice("🚀 Initialize new project", value="init"),
                 Choice("⚙️  Generate editor configurations", value="generate"),
-                Choice("🔌 Configure plugins (MCP servers, commands, agents)", value="plugins"),
+                Choice(
+                    "🔌 Configure plugins (MCP servers, commands, agents)",
+                    value="plugins",
+                ),
                 Choice("🔄 Migrate schema version", value="migrate"),
                 Choice("🔍 Validate configuration", value="validate"),
                 Choice("📤 Sync from editor files", value="sync"),
