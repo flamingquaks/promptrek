@@ -147,7 +147,7 @@ The wizard guides you through:
 - **Guided workflows** - Step-by-step prompts reduce errors
 - **Fast onboarding** - New users can start without reading docs
 - **Power user friendly** - All CLI commands still work as before
-- **CI/CD compatible** - Use `--yes` flag to skip interactive prompts
+- **CI/CD compatible** - Easily integrates with automation and CI/CD pipelines
 
 ### Backward Compatibility
 
