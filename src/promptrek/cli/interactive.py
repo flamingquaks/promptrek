@@ -120,13 +120,12 @@ def workflow_init_project(ctx: click.Context) -> None:
 
     # Execute init command
     try:
-        use_v2 = schema_version != "v1"
         init_command(
             ctx,
             template=None,
             output="project.promptrek.yaml",
             setup_hooks=setup_hooks,
-            use_v2=use_v2,
+            schema_version=schema_version,
         )
 
         click.echo()
