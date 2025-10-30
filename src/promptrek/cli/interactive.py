@@ -6,7 +6,7 @@ Provides an interactive menu-driven interface for common PrompTrek workflows.
 
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Dict, Optional
 
 import click
 import questionary
@@ -210,6 +210,9 @@ def workflow_generate_config(ctx: click.Context) -> None:
         click.echo("\nEnter variable overrides (KEY=VALUE). Leave blank to finish:")
         while True:
             var_input = questionary.text("Variable (or press Enter to finish):").ask()
+            if var_input is None:
+                click.echo("Cancelled.")
+                return
             if not var_input:
                 break
             if "=" not in var_input:

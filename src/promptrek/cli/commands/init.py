@@ -19,7 +19,7 @@ def init_command(
     template: Optional[str],
     output: str,
     setup_hooks: bool,
-    use_v2: bool = True,
+    schema_version: str = "v3",
 ) -> None:
     """
     Initialize a new universal prompt file.
@@ -29,7 +29,7 @@ def init_command(
         template: Optional template name to use
         output: Output file path
         setup_hooks: Whether to set up pre-commit hooks after initialization
-        use_v2: Use v2 schema (default True)
+        schema_version: Schema version to use (v1, v2, or v3, default v3)
     """
     output_path = Path(output)
 
@@ -44,11 +44,13 @@ def init_command(
 
     # Create basic template
     if template:
-        upf_data = _get_template(template, use_v2)
+        upf_data = _get_template(template, schema_version)
     else:
-        if use_v2:
+        if schema_version == "v3":
+            upf_data = _get_basic_template_v2()  # v2 and v3 use same template structure
+        elif schema_version == "v2":
             upf_data = _get_basic_template_v2()
-        else:
+        else:  # v1
             upf_data = _get_basic_template()
 
     # Create output directory if needed
@@ -216,13 +218,13 @@ def calculate_total(items: list[float]) -> float:
     }
 
 
-def _get_template(template_name: str, use_v2: bool = True) -> dict:
+def _get_template(template_name: str, schema_version: str = "v3") -> dict:
     """
     Get a specific template by name.
 
     Args:
         template_name: Name of the template to use
-        use_v2: Use v2 schema format (default True)
+        schema_version: Schema version to use (v1, v2, or v3, default v3)
 
     Returns:
         Template data dictionary
@@ -230,13 +232,13 @@ def _get_template(template_name: str, use_v2: bool = True) -> dict:
     Raises:
         CLIError: If template is not found
     """
-    if use_v2:
+    if schema_version in ("v2", "v3"):
         templates = {
             "basic": _get_basic_template_v2(),
             "react": _get_react_template_v2(),
             "api": _get_api_template_v2(),
         }
-    else:
+    else:  # v1
         templates = {
             "basic": _get_basic_template(),
             "react": _get_react_template(),

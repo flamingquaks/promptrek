@@ -2,7 +2,7 @@
 Tests for interactive CLI wizard.
 """
 
-import sys
+import os
 from pathlib import Path
 from unittest.mock import MagicMock, Mock, patch
 
@@ -38,8 +38,6 @@ class TestCheckExistingConfig:
 
     def test_check_existing_config_not_found(self, tmp_path: Path) -> None:
         """Test when no config file exists."""
-        import os
-
         os.chdir(tmp_path)
         result = check_existing_config()
         assert result is None
@@ -316,6 +314,38 @@ class TestWorkflowGenerateConfig:
 
         workflow_generate_config(ctx)
         # Should return early
+
+    @patch("click.echo")
+    @patch("promptrek.cli.interactive.questionary.text")
+    @patch("promptrek.cli.interactive.questionary.confirm")
+    @patch("promptrek.cli.interactive.questionary.checkbox")
+    def test_workflow_generate_config_cancel_on_variable_input(
+        self, mock_checkbox, mock_confirm, mock_text, mock_echo, tmp_path: Path
+    ) -> None:
+        """Test generate workflow when user cancels variable input."""
+        import os
+
+        os.chdir(tmp_path)
+
+        # Create existing config
+        config_file = tmp_path / "project.promptrek.yaml"
+        config_file.write_text("schema_version: 3.0.0\ncontent: test")
+
+        # Mock editor selection
+        mock_checkbox.return_value.ask.return_value = ["claude"]
+
+        # Mock variable confirmation (yes to entering variables)
+        # Then cancel on the text input (return None)
+        mock_confirm.return_value.ask.return_value = True
+        mock_text.return_value.ask.return_value = None  # User cancels
+
+        ctx = Mock()
+        ctx.obj = {"verbose": False}
+
+        from promptrek.cli.interactive import workflow_generate_config
+
+        workflow_generate_config(ctx)
+        # Should return early with "Cancelled." message
 
 
 class TestWorkflowMigrate:

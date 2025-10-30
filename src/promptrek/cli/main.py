@@ -54,6 +54,7 @@ def cli(ctx: click.Context, verbose: bool, interactive: bool) -> None:
     # If no subcommand was invoked, run interactive mode
     if ctx.invoked_subcommand is None or interactive:
         run_interactive_mode(ctx)
+        return
 
 
 @cli.command()
@@ -72,23 +73,46 @@ def cli(ctx: click.Context, verbose: bool, interactive: bool) -> None:
 )
 @click.option(
     "--v1",
-    is_flag=True,
-    help="Use v1 schema format (default is v2)",
+    "schema_version_flag",
+    flag_value="v1",
+    help="Use v1 schema format (legacy)",
+)
+@click.option(
+    "--v2",
+    "schema_version_flag",
+    flag_value="v2",
+    help="Use v2 schema format (legacy)",
+)
+@click.option(
+    "--v3",
+    "schema_version_flag",
+    flag_value="v3",
+    help="Use v3 schema format (default, recommended)",
 )
 @click.pass_context
 def init(
-    ctx: click.Context, template: str, output: str, setup_hooks: bool, v1: bool
+    ctx: click.Context,
+    template: str,
+    output: str,
+    setup_hooks: bool,
+    schema_version_flag: str,
 ) -> None:
     """Initialize a new universal prompt file.
 
-    Creates a v2 format file by default (markdown-first approach).
-    Use --v1 for legacy v1 format with structured fields.
+    Creates a v3 format file by default (markdown-first with top-level plugin fields).
+    Use --v2 for legacy v2 format or --v1 for v1 structured format.
 
     Use --setup-hooks to automatically configure pre-commit hooks after
     creating the file, making your project ready for development.
     """
+    # Default to v3 if no version flag specified
+    if schema_version_flag is None:
+        schema_version_flag = "v3"
+
     try:
-        init_command(ctx, template, output, setup_hooks, use_v2=not v1)
+        init_command(
+            ctx, template, output, setup_hooks, schema_version=schema_version_flag
+        )
     except PrompTrekError as e:
         click.echo(f"Error: {e}", err=True)
         ctx.exit(1)
