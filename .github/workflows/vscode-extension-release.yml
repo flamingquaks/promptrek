@@ -1,0 +1,300 @@
+name: VSCode Extension Release
+
+on:
+  push:
+    tags:
+      - 'vscode-v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., 0.1.0)'
+        required: true
+        type: string
+      publish_marketplace:
+        description: 'Publish to VSCode Marketplace'
+        required: true
+        type: boolean
+        default: false
+
+jobs:
+  validate-version:
+    name: Validate Version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get-version.outputs.version }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get version from tag or input
+        id: get-version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            VERSION="${GITHUB_REF#refs/tags/vscode-v}"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Releasing version: $VERSION"
+
+      - name: Validate version format
+        run: |
+          VERSION="${{ steps.get-version.outputs.version }}"
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Invalid version format: $VERSION"
+            echo "Expected format: X.Y.Z (e.g., 0.1.0)"
+            exit 1
+          fi
+          echo "✓ Version format is valid: $VERSION"
+
+      - name: Check package.json version matches
+        working-directory: vscode-extension
+        run: |
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          RELEASE_VERSION="${{ steps.get-version.outputs.version }}"
+          echo "Package.json version: $PACKAGE_VERSION"
+          echo "Release version: $RELEASE_VERSION"
+          if [ "$PACKAGE_VERSION" != "$RELEASE_VERSION" ]; then
+            echo "⚠️  Warning: Version mismatch!"
+            echo "Update package.json version to match release version"
+          fi
+
+  build-release:
+    name: Build Release Artifacts
+    runs-on: ${{ matrix.os }}
+    needs: validate-version
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+          cache-dependency-path: vscode-extension/package-lock.json
+
+      - name: Install dependencies
+        working-directory: vscode-extension
+        run: npm ci
+
+      - name: Compile TypeScript
+        working-directory: vscode-extension
+        run: npm run compile
+
+      - name: Install vsce
+        run: npm install -g @vscode/vsce
+
+      - name: Package extension
+        working-directory: vscode-extension
+        run: |
+          vsce package --out promptrek-vscode-${{ needs.validate-version.outputs.version }}-${{ matrix.os }}.vsix
+
+      - name: Upload VSIX artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vsix-${{ matrix.os }}
+          path: vscode-extension/*.vsix
+          retention-days: 90
+
+  create-github-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: [validate-version, build-release]
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Display artifact structure
+        run: |
+          echo "Artifact structure:"
+          ls -R artifacts/
+
+      - name: Generate release notes
+        id: release-notes
+        run: |
+          VERSION="${{ needs.validate-version.outputs.version }}"
+
+          # Extract changelog for this version
+          echo "## PrompTrek VSCode Extension v${VERSION}" > release-notes.md
+          echo "" >> release-notes.md
+
+          # Try to extract from CHANGELOG.md
+          if [ -f "vscode-extension/CHANGELOG.md" ]; then
+            echo "### Changes" >> release-notes.md
+            # Extract content between version markers
+            awk "/## \[${VERSION}\]/,/## \[/" vscode-extension/CHANGELOG.md | head -n -1 | tail -n +2 >> release-notes.md
+          fi
+
+          echo "" >> release-notes.md
+          echo "### Installation" >> release-notes.md
+          echo "" >> release-notes.md
+          echo "Download the appropriate VSIX file for your platform:" >> release-notes.md
+          echo "- \`promptrek-vscode-${VERSION}-ubuntu-latest.vsix\` - Linux" >> release-notes.md
+          echo "- \`promptrek-vscode-${VERSION}-windows-latest.vsix\` - Windows" >> release-notes.md
+          echo "- \`promptrek-vscode-${VERSION}-macos-latest.vsix\` - macOS" >> release-notes.md
+          echo "" >> release-notes.md
+          echo "Install with:" >> release-notes.md
+          echo "\`\`\`bash" >> release-notes.md
+          echo "code --install-extension promptrek-vscode-${VERSION}-<platform>.vsix" >> release-notes.md
+          echo "\`\`\`" >> release-notes.md
+          echo "" >> release-notes.md
+          echo "### Requirements" >> release-notes.md
+          echo "- Visual Studio Code 1.85.0 or higher" >> release-notes.md
+          echo "- PrompTrek CLI installed and in PATH" >> release-notes.md
+          echo "" >> release-notes.md
+          echo "### Documentation" >> release-notes.md
+          echo "- [Extension README](https://github.com/flamingquaks/promptrek/blob/main/vscode-extension/README.md)" >> release-notes.md
+          echo "- [Installation Guide](https://github.com/flamingquaks/promptrek/blob/main/vscode-extension/INSTALLATION.md)" >> release-notes.md
+          echo "- [PrompTrek Documentation](https://flamingquaks.github.io/promptrek)" >> release-notes.md
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: vscode-v${{ needs.validate-version.outputs.version }}
+          name: VSCode Extension v${{ needs.validate-version.outputs.version }}
+          body_path: release-notes.md
+          draft: false
+          prerelease: false
+          files: |
+            artifacts/vsix-ubuntu-latest/*.vsix
+            artifacts/vsix-windows-latest/*.vsix
+            artifacts/vsix-macos-latest/*.vsix
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  publish-marketplace:
+    name: Publish to VSCode Marketplace
+    runs-on: ubuntu-latest
+    needs: [validate-version, build-release]
+    if: |
+      github.event_name == 'workflow_dispatch' &&
+      github.event.inputs.publish_marketplace == 'true' &&
+      secrets.VSCE_PAT != ''
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+          cache-dependency-path: vscode-extension/package-lock.json
+
+      - name: Install dependencies
+        working-directory: vscode-extension
+        run: npm ci
+
+      - name: Compile TypeScript
+        working-directory: vscode-extension
+        run: npm run compile
+
+      - name: Install vsce
+        run: npm install -g @vscode/vsce
+
+      - name: Publish to VSCode Marketplace
+        working-directory: vscode-extension
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+        run: |
+          vsce publish -p $VSCE_PAT
+
+      - name: Publish success notification
+        if: success()
+        run: |
+          echo "🎉 Successfully published to VSCode Marketplace!" >> $GITHUB_STEP_SUMMARY
+          echo "Version: ${{ needs.validate-version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The extension should be available at:" >> $GITHUB_STEP_SUMMARY
+          echo "https://marketplace.visualstudio.com/items?itemName=flamingquaks.promptrek-vscode" >> $GITHUB_STEP_SUMMARY
+
+  publish-open-vsx:
+    name: Publish to Open VSX
+    runs-on: ubuntu-latest
+    needs: [validate-version, build-release]
+    if: |
+      github.event_name == 'workflow_dispatch' &&
+      github.event.inputs.publish_marketplace == 'true' &&
+      secrets.OPEN_VSX_TOKEN != ''
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+          cache-dependency-path: vscode-extension/package-lock.json
+
+      - name: Install dependencies
+        working-directory: vscode-extension
+        run: npm ci
+
+      - name: Compile TypeScript
+        working-directory: vscode-extension
+        run: npm run compile
+
+      - name: Install ovsx
+        run: npm install -g ovsx
+
+      - name: Package extension
+        working-directory: vscode-extension
+        run: |
+          npm install -g @vscode/vsce
+          vsce package
+
+      - name: Publish to Open VSX
+        working-directory: vscode-extension
+        env:
+          OVSX_PAT: ${{ secrets.OPEN_VSX_TOKEN }}
+        run: |
+          ovsx publish -p $OVSX_PAT
+
+      - name: Publish success notification
+        if: success()
+        run: |
+          echo "🎉 Successfully published to Open VSX!" >> $GITHUB_STEP_SUMMARY
+          echo "Version: ${{ needs.validate-version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+
+  release-summary:
+    name: Release Summary
+    runs-on: ubuntu-latest
+    needs: [validate-version, create-github-release, publish-marketplace, publish-open-vsx]
+    if: always()
+
+    steps:
+      - name: Generate release summary
+        run: |
+          echo "## 🚀 VSCode Extension Release Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Version: ${{ needs.validate-version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Release Status" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ GitHub Release: ${{ needs.create-github-release.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- 📦 VSCode Marketplace: ${{ needs.publish-marketplace.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- 🌐 Open VSX: ${{ needs.publish-open-vsx.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Platform Builds" >> $GITHUB_STEP_SUMMARY
+          echo "- Linux (Ubuntu)" >> $GITHUB_STEP_SUMMARY
+          echo "- Windows" >> $GITHUB_STEP_SUMMARY
+          echo "- macOS" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Links" >> $GITHUB_STEP_SUMMARY
+          echo "- [GitHub Release](https://github.com/flamingquaks/promptrek/releases/tag/vscode-v${{ needs.validate-version.outputs.version }})" >> $GITHUB_STEP_SUMMARY
+          echo "- [Extension README](https://github.com/flamingquaks/promptrek/blob/main/vscode-extension/README.md)" >> $GITHUB_STEP_SUMMARY

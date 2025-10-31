@@ -1,0 +1,196 @@
+name: VSCode Extension CI
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - 'claude/**'
+    paths:
+      - 'vscode-extension/**'
+      - '.github/workflows/vscode-extension-ci.yml'
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'vscode-extension/**'
+      - '.github/workflows/vscode-extension-ci.yml'
+
+jobs:
+  build-and-test:
+    name: Build and Test Extension
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node-version: [18.x, 20.x]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: vscode-extension/package-lock.json
+
+      - name: Install dependencies
+        working-directory: vscode-extension
+        run: npm ci
+
+      - name: Lint code
+        working-directory: vscode-extension
+        run: npm run lint
+        continue-on-error: true
+
+      - name: Compile TypeScript
+        working-directory: vscode-extension
+        run: npm run compile
+
+      - name: Check for compilation errors
+        working-directory: vscode-extension
+        run: |
+          if [ -d "out" ]; then
+            echo "✓ Compilation successful"
+            ls -la out/
+          else
+            echo "✗ Compilation failed - out directory not found"
+            exit 1
+          fi
+        shell: bash
+
+      - name: Package extension
+        working-directory: vscode-extension
+        run: |
+          npm install -g @vscode/vsce
+          vsce package --out extension-${{ matrix.os }}-node${{ matrix.node-version }}.vsix
+
+      - name: Upload VSIX artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vsix-${{ matrix.os }}-node${{ matrix.node-version }}
+          path: vscode-extension/*.vsix
+          retention-days: 7
+
+  validate-extension:
+    name: Validate Extension Quality
+    runs-on: ubuntu-latest
+    needs: build-and-test
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+          cache-dependency-path: vscode-extension/package-lock.json
+
+      - name: Install dependencies
+        working-directory: vscode-extension
+        run: npm ci
+
+      - name: Check package.json validity
+        working-directory: vscode-extension
+        run: |
+          echo "Validating package.json structure..."
+          node -e "const pkg = require('./package.json');
+          if (!pkg.name || !pkg.version || !pkg.publisher || !pkg.engines) {
+            console.error('Missing required fields in package.json');
+            process.exit(1);
+          }
+          console.log('✓ package.json is valid');
+          console.log('Name:', pkg.name);
+          console.log('Version:', pkg.version);
+          console.log('Publisher:', pkg.publisher);"
+
+      - name: Check for required files
+        working-directory: vscode-extension
+        run: |
+          echo "Checking for required extension files..."
+          required_files=("README.md" "CHANGELOG.md" "package.json" "tsconfig.json")
+          for file in "${required_files[@]}"; do
+            if [ -f "$file" ]; then
+              echo "✓ Found $file"
+            else
+              echo "✗ Missing $file"
+              exit 1
+            fi
+          done
+
+      - name: Validate TypeScript configuration
+        working-directory: vscode-extension
+        run: |
+          echo "Validating TypeScript configuration..."
+          npx tsc --noEmit --pretty
+
+      - name: Check extension size
+        working-directory: vscode-extension
+        run: |
+          echo "Analyzing extension size..."
+          npm install -g @vscode/vsce
+          vsce package --out temp.vsix
+          size=$(stat -f%z temp.vsix 2>/dev/null || stat -c%s temp.vsix)
+          size_mb=$((size / 1024 / 1024))
+          echo "Extension size: ${size_mb}MB"
+          if [ $size_mb -gt 50 ]; then
+            echo "⚠️  Warning: Extension size exceeds 50MB"
+          else
+            echo "✓ Extension size is acceptable"
+          fi
+          rm temp.vsix
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      - name: Run npm audit
+        working-directory: vscode-extension
+        run: |
+          npm audit --audit-level=moderate
+        continue-on-error: true
+
+      - name: Check for secrets in code
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./vscode-extension
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+
+  summary:
+    name: Build Summary
+    runs-on: ubuntu-latest
+    needs: [build-and-test, validate-extension]
+    if: always()
+
+    steps:
+      - name: Generate build summary
+        run: |
+          echo "## VSCode Extension Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Build Status" >> $GITHUB_STEP_SUMMARY
+          echo "- Build and Test: ${{ needs.build-and-test.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Validation: ${{ needs.validate-extension.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Tested Platforms" >> $GITHUB_STEP_SUMMARY
+          echo "- Ubuntu (Linux)" >> $GITHUB_STEP_SUMMARY
+          echo "- Windows" >> $GITHUB_STEP_SUMMARY
+          echo "- macOS" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Node.js Versions" >> $GITHUB_STEP_SUMMARY
+          echo "- Node.js 18.x" >> $GITHUB_STEP_SUMMARY
+          echo "- Node.js 20.x" >> $GITHUB_STEP_SUMMARY

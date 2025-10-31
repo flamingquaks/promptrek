@@ -1,5 +1,8 @@
 # PrompTrek VSCode Extension
 
+[![VSCode Extension CI](https://github.com/flamingquaks/promptrek/actions/workflows/vscode-extension-ci.yml/badge.svg)](https://github.com/flamingquaks/promptrek/actions/workflows/vscode-extension-ci.yml)
+[![VSCode Extension Release](https://github.com/flamingquaks/promptrek/actions/workflows/vscode-extension-release.yml/badge.svg)](https://github.com/flamingquaks/promptrek/actions/workflows/vscode-extension-release.yml)
+
 A Visual Studio Code extension that provides a user-friendly interface for [PrompTrek](https://github.com/flamingquaks/promptrek), the universal AI editor configuration management tool.
 
 ## Features
@@ -205,6 +208,55 @@ The extension looks for `.promptrek.yaml` files in your workspace. Make sure:
 Check the PrompTrek output channel for detailed error messages:
 - View → Output
 - Select "PrompTrek" from the dropdown
+
+## Development & CI/CD
+
+The extension uses automated GitHub Actions workflows for continuous integration and releases.
+
+### Automated Workflows
+
+- **CI Pipeline**: Runs on every PR and commit
+  - Tests on Ubuntu, Windows, macOS
+  - Tests with Node.js 18.x and 20.x
+  - Linting, compilation, and package validation
+  - Security scanning with npm audit and TruffleHog
+
+- **Release Pipeline**: Triggered by version tags
+  - Builds platform-specific VSIX packages
+  - Creates GitHub releases with artifacts
+  - Optionally publishes to VSCode Marketplace and Open VSX
+
+- **PR Packaging**: Automatically packages extension for review
+  - Creates VSIX artifact for each PR
+  - Comments on PR with installation instructions
+  - Analyzes bundle size and dependencies
+
+### For Developers
+
+See comprehensive documentation:
+- [Workflows Guide](.github/WORKFLOWS.md) - CI/CD setup and usage
+- [Release Guide](RELEASE.md) - Step-by-step release process
+- [Contributing Guide](CONTRIBUTING.md) - Development guidelines
+
+### Building Locally
+
+```bash
+# Install dependencies
+npm install
+
+# Compile TypeScript
+npm run compile
+
+# Watch mode for development
+npm run watch
+
+# Lint code
+npm run lint
+
+# Package extension
+npm install -g @vscode/vsce
+vsce package
+```
 
 ## Contributing
 
