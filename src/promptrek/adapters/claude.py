@@ -20,7 +20,7 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
     """Adapter for Claude Code."""
 
     _description = "Claude Code (context-based)"
-    _file_patterns = ["CLAUDE.md", ".claude/CLAUDE.md", ".claude-context.md"]
+    _file_patterns = [".claude/CLAUDE.md", "CLAUDE.md", ".claude-context.md"]
 
     def __init__(self) -> None:
         super().__init__(
