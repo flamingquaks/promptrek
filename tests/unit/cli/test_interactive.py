@@ -4,7 +4,7 @@ Tests for interactive CLI wizard.
 
 import os
 from pathlib import Path
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import pytest
 from click.testing import CliRunner
