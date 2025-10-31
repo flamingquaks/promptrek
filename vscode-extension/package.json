@@ -1,0 +1,266 @@
+{
+  "name": "promptrek-vscode",
+  "displayName": "PrompTrek",
+  "description": "Universal AI editor configuration management - Visual interface for PrompTrek",
+  "version": "0.1.0",
+  "publisher": "flamingquaks",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other",
+    "Programming Languages"
+  ],
+  "keywords": [
+    "ai",
+    "prompts",
+    "copilot",
+    "cursor",
+    "claude",
+    "configuration"
+  ],
+  "activationEvents": [
+    "onStartupFinished",
+    "workspaceContains:**/*.promptrek.yaml"
+  ],
+  "main": "./out/extension.js",
+  "icon": "media/logo.png",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "promptrek-explorer",
+          "title": "PrompTrek",
+          "icon": "media/icons/logo.svg"
+        }
+      ]
+    },
+    "views": {
+      "promptrek-explorer": [
+        {
+          "id": "promptrek-config",
+          "name": "Configuration",
+          "contextualTitle": "PrompTrek Configuration"
+        },
+        {
+          "id": "promptrek-editors",
+          "name": "Supported Editors",
+          "contextualTitle": "Editor Status"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "promptrek.init",
+        "title": "Initialize Configuration",
+        "category": "PrompTrek",
+        "icon": "$(add)"
+      },
+      {
+        "command": "promptrek.validate",
+        "title": "Validate Configuration",
+        "category": "PrompTrek",
+        "icon": "$(check)"
+      },
+      {
+        "command": "promptrek.generate",
+        "title": "Generate for Editor...",
+        "category": "PrompTrek",
+        "icon": "$(play)"
+      },
+      {
+        "command": "promptrek.generateAll",
+        "title": "Generate for All Editors",
+        "category": "PrompTrek",
+        "icon": "$(play-circle)"
+      },
+      {
+        "command": "promptrek.preview",
+        "title": "Preview Output...",
+        "category": "PrompTrek",
+        "icon": "$(eye)"
+      },
+      {
+        "command": "promptrek.sync",
+        "title": "Sync from Editor Files...",
+        "category": "PrompTrek",
+        "icon": "$(sync)"
+      },
+      {
+        "command": "promptrek.migrate",
+        "title": "Migrate Schema Version...",
+        "category": "PrompTrek",
+        "icon": "$(arrow-right)"
+      },
+      {
+        "command": "promptrek.refresh",
+        "title": "Refresh View",
+        "category": "PrompTrek",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "promptrek.openConfig",
+        "title": "Open Configuration File",
+        "category": "PrompTrek",
+        "icon": "$(file)"
+      },
+      {
+        "command": "promptrek.openConfigEditor",
+        "title": "Open Configuration Editor",
+        "category": "PrompTrek",
+        "icon": "$(edit)"
+      },
+      {
+        "command": "promptrek.installHooks",
+        "title": "Install Pre-commit Hooks",
+        "category": "PrompTrek",
+        "icon": "$(gear)"
+      },
+      {
+        "command": "promptrek.configIgnores",
+        "title": "Configure .gitignore",
+        "category": "PrompTrek",
+        "icon": "$(file-binary)"
+      },
+      {
+        "command": "promptrek.listPlugins",
+        "title": "List Plugins",
+        "category": "PrompTrek",
+        "icon": "$(list-unordered)"
+      },
+      {
+        "command": "promptrek.generatePlugins",
+        "title": "Generate Plugins for Editor...",
+        "category": "PrompTrek",
+        "icon": "$(extensions)"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "promptrek.init",
+          "when": "true"
+        },
+        {
+          "command": "promptrek.validate",
+          "when": "resourceExtname == .yaml && resourceFilename =~ /\\.promptrek\\.yaml$/"
+        },
+        {
+          "command": "promptrek.generate",
+          "when": "resourceExtname == .yaml && resourceFilename =~ /\\.promptrek\\.yaml$/"
+        },
+        {
+          "command": "promptrek.generateAll",
+          "when": "resourceExtname == .yaml && resourceFilename =~ /\\.promptrek\\.yaml$/"
+        },
+        {
+          "command": "promptrek.preview",
+          "when": "resourceExtname == .yaml && resourceFilename =~ /\\.promptrek\\.yaml$/"
+        },
+        {
+          "command": "promptrek.sync",
+          "when": "true"
+        },
+        {
+          "command": "promptrek.migrate",
+          "when": "resourceExtname == .yaml && resourceFilename =~ /\\.promptrek\\.yaml$/"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "promptrek.validate",
+          "when": "resourceExtname == .yaml && resourceFilename =~ /\\.promptrek\\.yaml$/",
+          "group": "promptrek@1"
+        },
+        {
+          "command": "promptrek.generate",
+          "when": "resourceExtname == .yaml && resourceFilename =~ /\\.promptrek\\.yaml$/",
+          "group": "promptrek@2"
+        },
+        {
+          "command": "promptrek.generateAll",
+          "when": "resourceExtname == .yaml && resourceFilename =~ /\\.promptrek\\.yaml$/",
+          "group": "promptrek@3"
+        },
+        {
+          "command": "promptrek.openConfigEditor",
+          "when": "resourceExtname == .yaml && resourceFilename =~ /\\.promptrek\\.yaml$/",
+          "group": "promptrek@4"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "promptrek.init",
+          "when": "view == promptrek-config",
+          "group": "navigation@1"
+        },
+        {
+          "command": "promptrek.refresh",
+          "when": "view == promptrek-config || view == promptrek-editors",
+          "group": "navigation@2"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "promptrek.openConfig",
+          "when": "view == promptrek-config && viewItem == configFile",
+          "group": "inline"
+        },
+        {
+          "command": "promptrek.validate",
+          "when": "view == promptrek-config && viewItem == configFile",
+          "group": "promptrek@1"
+        },
+        {
+          "command": "promptrek.generate",
+          "when": "view == promptrek-editors && viewItem == editor",
+          "group": "inline"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "PrompTrek",
+      "properties": {
+        "promptrek.cliPath": {
+          "type": "string",
+          "default": "promptrek",
+          "description": "Path to the PrompTrek CLI executable"
+        },
+        "promptrek.autoValidate": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically validate .promptrek.yaml files on save"
+        },
+        "promptrek.defaultSchemaVersion": {
+          "type": "string",
+          "default": "3.1.0",
+          "enum": ["1.0.0", "2.0.0", "2.1.0", "3.0.0", "3.1.0"],
+          "description": "Default schema version for new configurations"
+        },
+        "promptrek.showStatusBar": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show PrompTrek status in the status bar"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/node": "^18.x",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^6.13.0",
+    "@typescript-eslint/parser": "^6.13.0",
+    "eslint": "^8.54.0",
+    "typescript": "^5.3.2"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.0"
+  }
+}

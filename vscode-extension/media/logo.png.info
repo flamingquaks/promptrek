@@ -1,0 +1,16 @@
+# Logo Placeholder
+
+The media/logo.png file should be created with the following specifications:
+- Size: 128x128 pixels
+- Format: PNG
+- Background: Blue gradient (#0078D4)
+- Text: "PT" in white, bold font
+- Or use the PrompTrek logo from the main repo
+
+To create the logo, you can:
+1. Use the SVG in media/logo.svg and convert it to PNG
+2. Use the existing PrompTrek logo from gh-pages/assets/
+3. Create a custom icon using any image editor
+
+Command to convert SVG to PNG (requires ImageMagick):
+convert media/logo.svg -resize 128x128 media/logo.png
