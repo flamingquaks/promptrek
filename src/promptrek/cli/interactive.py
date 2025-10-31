@@ -586,7 +586,9 @@ def show_help() -> None:
 def run_interactive_mode(ctx: click.Context) -> None:
     """Run the interactive CLI wizard."""
     # Check if we're in a terminal
-    if not (sys.stdin and sys.stdin.isatty()) or not (sys.stdout and sys.stdout.isatty()):
+    if not (sys.stdin and sys.stdin.isatty()) or not (
+        sys.stdout and sys.stdout.isatty()
+    ):
         # Non-interactive mode, show help
         click.echo(ctx.get_help())
         return
