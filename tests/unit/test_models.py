@@ -623,3 +623,94 @@ class TestModelValidationErrors:
                 metadata=PromptMetadata(title="Test", description="Test"),
                 content="",  # Empty content
             )
+
+    def test_schema_version_invalid_format(self):
+        """Test schema version with invalid format."""
+        from promptrek.core.models import UniversalPromptV2
+
+        with pytest.raises(ValidationError, match="Schema version must be in format"):
+            UniversalPromptV2(
+                schema_version="2.0",  # Missing patch version
+                metadata=PromptMetadata(title="Test", description="Test"),
+                content="# Test",
+            )
+
+
+class TestAgentModel:
+    """Tests for Agent model."""
+
+    def test_agent_with_both_system_prompt_and_prompt(self):
+        """Test Agent with both system_prompt and prompt (should prefer prompt)."""
+        from promptrek.core.models import Agent
+
+        # When both are provided, prompt should be kept and system_prompt ignored
+        agent = Agent(
+            name="test-agent",
+            prompt="This is the prompt",
+            system_prompt="This is the system prompt",
+            tools=["tool1"],
+        )
+
+        assert agent.prompt == "This is the prompt"
+        # system_prompt should not be in the model
+        assert not hasattr(agent, "system_prompt")
+
+    def test_agent_with_only_system_prompt(self):
+        """Test Agent with only system_prompt (should become prompt)."""
+        from promptrek.core.models import Agent
+
+        # When only system_prompt is provided, it should become prompt
+        agent = Agent(
+            name="test-agent",
+            system_prompt="This is the system prompt",
+            tools=["tool1"],
+        )
+
+        assert agent.prompt == "This is the system prompt"
+
+
+class TestPluginIntegration:
+    """Tests for plugin integration in prompt models."""
+
+    def test_universal_prompt_v2_with_mcp_servers(self):
+        """Test V2 with MCP servers plugin (nested in plugins field)."""
+        from promptrek.core.models import MCPServer, PluginConfig, UniversalPromptV2
+
+        mcp_server = MCPServer(
+            name="test-server",
+            command="npx",
+            args=["-y", "@test/server"],
+        )
+
+        plugins = PluginConfig(mcp_servers=[mcp_server])
+
+        prompt = UniversalPromptV2(
+            schema_version="2.1.0",
+            metadata=PromptMetadata(title="Test", description="Test"),
+            content="# Test",
+            plugins=plugins,
+        )
+
+        assert prompt.plugins is not None
+        assert len(prompt.plugins.mcp_servers) == 1
+        assert prompt.plugins.mcp_servers[0].name == "test-server"
+
+    def test_universal_prompt_v3_with_agents(self):
+        """Test V3 with agents plugin."""
+        from promptrek.core.models import Agent, UniversalPromptV3
+
+        agent = Agent(
+            name="test-agent",
+            prompt="Test prompt",
+            tools=["tool1", "tool2"],
+        )
+
+        prompt = UniversalPromptV3(
+            schema_version="3.0.0",
+            metadata=PromptMetadata(title="Test", description="Test"),
+            content="# Test",
+            agents=[agent],
+        )
+
+        assert len(prompt.agents) == 1
+        assert prompt.agents[0].name == "test-agent"

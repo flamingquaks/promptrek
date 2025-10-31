@@ -73,6 +73,99 @@ promptrek generate --all
 
 3. Use the generated prompts in your preferred editor!
 
+## 🧙 Interactive CLI Wizard
+
+**New in v0.4.0!** PrompTrek now features an interactive CLI mode that guides you through common workflows without memorizing commands.
+
+### Launch Interactive Mode
+
+Simply run `promptrek` without any command:
+
+```bash
+promptrek
+```
+
+You'll see a beautiful ASCII banner and an interactive menu:
+
+```
+ ____                       _____         _
+|  _ \ _ __ ___  _ __ ___  |_   _| __ ___| | __
+| |_) | '__/ _ \| '_ ` _ \   | || '__/ _ \ |/ /
+|  __/| | | (_) | | | | | |  | || | |  __/   <
+|_|   |_|  \___/|_| |_| |_|  |_||_|  \___|_|\_\
+
+Universal AI Editor Prompt Management (v0.4.0)
+
+? What would you like to do?
+  ❯ 🚀 Initialize new project
+    ⚙️  Generate editor configurations
+    🔌 Configure plugins (MCP servers, commands, agents)
+    🔄 Migrate schema version
+    🔍 Validate configuration
+    📤 Sync from editor files
+    ❓ Help & Documentation
+    👋 Exit
+```
+
+### Interactive Workflows
+
+The wizard guides you through:
+
+1. **🚀 Project Initialization**
+   - Detects existing configurations
+   - Helps you choose schema version (v3.0 recommended)
+   - Sets up pre-commit hooks automatically
+   - Configures .gitignore for editor files
+
+2. **⚙️ Editor Configuration**
+   - Auto-detects your PrompTrek config
+   - Interactive editor selection (multi-select)
+   - Variable override prompts
+   - Headless mode option for autonomous agents
+   - Preview mode before generating files
+
+3. **🔌 Plugin Management**
+   - List configured MCP servers, commands, agents, and hooks
+   - Generate plugin files for selected editors
+   - Auto-confirm options for batch operations
+
+4. **🔄 Schema Migration**
+   - Guides through v1 → v2 → v3 migration
+   - Shows what will change before migrating
+   - Optional backup of original files
+   - Validates migrated output
+
+5. **🔍 Validation & Sync**
+   - Interactive configuration validation
+   - Strict mode option
+   - Sync editor files back to PrompTrek config
+   - Preview changes before applying
+
+### Benefits
+
+- **No memorization required** - Discover features through the interface
+- **Guided workflows** - Step-by-step prompts reduce errors
+- **Fast onboarding** - New users can start without reading docs
+- **Power user friendly** - All CLI commands still work as before
+- **CI/CD compatible** - Easily integrates with automation and CI/CD pipelines
+
+### Backward Compatibility
+
+All existing CLI commands continue to work exactly as before:
+
+```bash
+# Traditional commands still work
+promptrek init --template react
+promptrek generate --editor cursor
+promptrek validate config.yaml
+
+# Force interactive mode with flag
+promptrek --interactive
+promptrek -i
+```
+
+The interactive mode automatically detects if you're in a CI/CD environment (non-TTY) and falls back to showing help text.
+
 ## 🔐 Automatic .gitignore Management
 
 PrompTrek automatically manages `.gitignore` to prevent committing generated editor files:

@@ -196,7 +196,7 @@ class TestInitCommand:
                 template=None,
                 output=str(output_file),
                 setup_hooks=False,
-                use_v2=False,
+                schema_version="v1",
             )
 
         # File should be created
@@ -242,7 +242,7 @@ class TestInitCommand:
                 template="react",
                 output=str(output_file),
                 setup_hooks=False,
-                use_v2=False,
+                schema_version="v1",
             )
 
         assert output_file.exists()
@@ -266,7 +266,7 @@ class TestInitCommand:
                 template="api",
                 output=str(output_file),
                 setup_hooks=False,
-                use_v2=False,
+                schema_version="v1",
             )
 
         assert output_file.exists()
