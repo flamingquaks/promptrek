@@ -20,6 +20,7 @@ def init_command(
     output: str,
     setup_hooks: bool,
     schema_version: str = "v3",
+    config_gitignore: bool = True,
 ) -> None:
     """
     Initialize a new universal prompt file.
@@ -30,6 +31,7 @@ def init_command(
         output: Output file path
         setup_hooks: Whether to set up pre-commit hooks after initialization
         schema_version: Schema version to use (v1, v2, or v3, default v3)
+        config_gitignore: Whether to configure .gitignore with editor files (default True)
     """
     output_path = Path(output)
 
@@ -67,8 +69,11 @@ def init_command(
     # Add variables.promptrek.yaml and editor files to .gitignore
     _add_to_gitignore(output_path.parent)
 
-    # Also configure editor files in .gitignore by default
-    configure_gitignore(output_path.parent, add_editor_files=True, remove_cached=False)
+    # Configure editor files in .gitignore if requested
+    if config_gitignore:
+        configure_gitignore(
+            output_path.parent, add_editor_files=True, remove_cached=False
+        )
 
     click.echo("📝 Edit the file to customize your prompt configuration")
     click.echo(f"🔍 Run 'promptrek validate {output_path}' to check your configuration")

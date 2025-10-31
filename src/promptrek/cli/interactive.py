@@ -126,6 +126,7 @@ def workflow_init_project(ctx: click.Context) -> None:
             output="project.promptrek.yaml",
             setup_hooks=setup_hooks,
             schema_version=schema_version,
+            config_gitignore=config_gitignore,
         )
 
         click.echo()
