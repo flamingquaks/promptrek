@@ -32,6 +32,13 @@ fi
 print_info "Pulling latest changes from origin/main..."
 git pull origin main
 
+# Check if uv is installed
+if ! command -v uv &> /dev/null; then
+    print_error "uv is required but not installed. Please install it first."
+    print_info "Visit: https://github.com/astral-sh/uv"
+    exit 1
+fi
+
 # Get current version from pyproject.toml
 CURRENT_VERSION=$(grep '^version = ' pyproject.toml | cut -d '"' -f 2)
 print_info "Current version: $CURRENT_VERSION"
@@ -81,6 +88,14 @@ else
 fi
 print_success "Updated pyproject.toml"
 
+# Update lock file with new version
+print_info "Updating uv.lock with new version..."
+if ! uv lock; then
+    print_error "Failed to update uv.lock"
+    exit 1
+fi
+print_success "Updated uv.lock"
+
 # Check if conventional-changelog is installed
 if ! command -v conventional-changelog &> /dev/null; then
     print_info "Installing conventional-changelog-cli..."
@@ -129,7 +144,7 @@ print_success "Generated changelog"
 
 # Stage changes
 print_info "Staging changes..."
-git add pyproject.toml CHANGELOG.md
+git add pyproject.toml uv.lock CHANGELOG.md
 
 # Show what will be committed
 echo ""
@@ -142,6 +157,7 @@ print_info "Creating release commit..."
 git commit -m "release: v$NEW_VERSION
 
 - Update version in pyproject.toml to $NEW_VERSION
+- Update uv.lock with new version
 - Update CHANGELOG.md with latest changes"
 print_success "Created release commit"
 
