@@ -228,7 +228,7 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
         preferring the root location if both exist.
         """
         # Check for CLAUDE.md in root first, then .claude/ subdirectory
-        # Prefer root location to match generation behavior
+        # Support both locations for backward compatibility (root is legacy)
         file_path = None
         if (source_dir / "CLAUDE.md").exists():
             file_path = "CLAUDE.md"
