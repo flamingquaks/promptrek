@@ -163,3 +163,6 @@ test-project/
 .continue/config.yaml
 .continue/mcpServers/*.yaml
 .continue/prompts/*.md
+
+
+vscode-extension/out/
