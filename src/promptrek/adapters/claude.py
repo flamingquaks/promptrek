@@ -229,7 +229,6 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
         """
         # Check for CLAUDE.md in root first, then .claude/ subdirectory
         # Support both locations for backward compatibility (root is legacy)
-        file_path = None
         if (source_dir / "CLAUDE.md").exists():
             file_path = "CLAUDE.md"
         elif (source_dir / ".claude" / "CLAUDE.md").exists():
