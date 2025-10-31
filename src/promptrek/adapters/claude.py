@@ -20,7 +20,7 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
     """Adapter for Claude Code."""
 
     _description = "Claude Code (context-based)"
-    _file_patterns = [".claude/CLAUDE.md", ".claude-context.md"]
+    _file_patterns = [".claude/CLAUDE.md", "CLAUDE.md", ".claude-context.md"]
 
     def __init__(self) -> None:
         super().__init__(
@@ -223,8 +223,21 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
 
         Uses v3.0 format for lossless sync with clean top-level plugin structure.
         Parses main CLAUDE.md plus any plugin files (agents, commands, hooks, MCP).
+
+        Checks for CLAUDE.md in both .claude/ subdirectory (recommended) and root directory (legacy).
+        Prefers .claude/CLAUDE.md if both exist for consistency with current conventions.
         """
-        file_path = ".claude/CLAUDE.md"
+        # Check for CLAUDE.md in root first, then .claude/ subdirectory
+        # Support both locations for backward compatibility (root is legacy)
+        if (source_dir / ".claude" / "CLAUDE.md").exists():
+            file_path = ".claude/CLAUDE.md"
+        elif (source_dir / "CLAUDE.md").exists():
+            file_path = "CLAUDE.md"
+        else:
+            raise FileNotFoundError(
+                f"CLAUDE.md not found in {source_dir} or {source_dir / '.claude'}"
+            )
+
         # Use v3 sync for lossless roundtrip with clean top-level plugins
         prompt = self.parse_single_markdown_file_v3(
             source_dir=source_dir,
