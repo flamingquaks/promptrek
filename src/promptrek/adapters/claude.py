@@ -224,8 +224,8 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
         Uses v3.0 format for lossless sync with clean top-level plugin structure.
         Parses main CLAUDE.md plus any plugin files (agents, commands, hooks, MCP).
 
-        Checks for CLAUDE.md in both the root directory and .claude/ subdirectory,
-        preferring the root location if both exist.
+        Checks for CLAUDE.md in both .claude/ subdirectory (recommended) and root directory (legacy).
+        Prefers .claude/CLAUDE.md if both exist for consistency with current conventions.
         """
         # Check for CLAUDE.md in root first, then .claude/ subdirectory
         # Support both locations for backward compatibility (root is legacy)
