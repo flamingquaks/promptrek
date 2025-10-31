@@ -234,7 +234,13 @@
         "promptrek.defaultSchemaVersion": {
           "type": "string",
           "default": "3.1.0",
-          "enum": ["1.0.0", "2.0.0", "2.1.0", "3.0.0", "3.1.0"],
+          "enum": [
+            "1.0.0",
+            "2.0.0",
+            "2.1.0",
+            "3.0.0",
+            "3.1.0"
+          ],
           "description": "Default schema version for new configurations"
         },
         "promptrek.showStatusBar": {
@@ -253,6 +259,7 @@
     "test": "node ./out/test/runTest.js"
   },
   "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
     "@types/node": "^18.x",
     "@types/vscode": "^1.85.0",
     "@typescript-eslint/eslint-plugin": "^6.13.0",

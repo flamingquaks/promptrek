@@ -412,7 +412,7 @@ class ConfigItem extends vscode.TreeItem {
     super(label, collapsibleState);
     this.description = description;
     this.contextValue = contextValue;
-    this.iconId = new vscode.ThemeIcon(iconName);
+    this.iconPath = new vscode.ThemeIcon(iconName);
 
     // Make config file clickable
     if (contextValue === 'configFile') {
