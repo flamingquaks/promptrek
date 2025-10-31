@@ -1,3 +1,27 @@
+# [](https://github.com/flamingquaks/promptrek/compare/v0.5.0...v) (2025-10-31)
+
+
+### Bug Fixes
+
+* Claude editor sync command bug ([#104](https://github.com/flamingquaks/promptrek/issues/104)) ([8ef250e](https://github.com/flamingquaks/promptrek/commit/8ef250e20d7a38e84bdafd8394116d782ded7694))
+
+
+### Features
+
+* Add interactive CLI wizard with guided workflows ([#101](https://github.com/flamingquaks/promptrek/issues/101)) ([29b80a3](https://github.com/flamingquaks/promptrek/commit/29b80a3e206041b8dceba8f7fb30e66eac9a3497))
+* Update release script to include uv.lock versioning ([#105](https://github.com/flamingquaks/promptrek/issues/105)) ([1b1ebc3](https://github.com/flamingquaks/promptrek/commit/1b1ebc39786b62a20731a2426c6cfceca7942f7e))
+
+
+
+# [0.5.0](https://github.com/flamingquaks/promptrek/compare/v0.4.0...v0.5.0) (2025-10-27)
+
+
+### Features
+
+* add dynamic variables with built-in and command-based support ([#100](https://github.com/flamingquaks/promptrek/issues/100)) ([d5b70d4](https://github.com/flamingquaks/promptrek/commit/d5b70d43154e9698b84f713a9c6ffe5f3bafd7c3))
+
+
+
 # [](https://github.com/flamingquaks/promptrek/compare/v0.4.0...v) (2025-10-27)
 
 
