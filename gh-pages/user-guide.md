@@ -50,6 +50,10 @@ uv sync
 ### Basic Usage
 
 ```bash
+# Interactive mode (recommended for beginners)
+promptrek
+
+# Or use traditional CLI commands
 # Initialize a new configuration
 promptrek init
 
@@ -65,6 +69,8 @@ promptrek validate
 # Sync from editor-specific files back to UPF
 promptrek sync --from copilot
 ```
+
+💡 **New in v0.6.0**: PrompTrek now includes an interactive CLI wizard! Simply run `promptrek` without arguments to launch the guided interface. Perfect for discovering features without memorizing commands. See the [Quick Start Guide](quick-start.html#interactive-cli-wizard-new) for details.
 
 ### Deprecated Commands
 

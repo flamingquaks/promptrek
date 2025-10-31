@@ -12,6 +12,9 @@ This document explains how to use PrompTrek with `uv` and `uvx` for streamlined 
 Run PrompTrek commands directly without installing:
 
 ```bash
+# Interactive mode (recommended)
+uvx promptrek
+
 # Run PrompTrek CLI directly
 uvx promptrek --help
 uvx promptrek init
@@ -20,6 +23,8 @@ uvx promptrek generate config.yaml --editor copilot
 # Run with specific version
 uvx promptrek@0.1.0 --help
 ```
+
+💡 **Tip**: The interactive CLI wizard (new in v0.4.0) is perfect for development workflows. It guides you through all common tasks without memorizing command syntax.
 
 ## Development Setup with uv
 
@@ -38,6 +43,10 @@ uv sync --extra dev
 
 #### Core PrompTrek Commands
 ```bash
+# Interactive mode (recommended for development)
+uv run promptrek
+uv run promptrek --interactive
+
 # Main CLI (after sync)
 uv run promptrek --help
 uv run promptrek init
@@ -46,7 +55,8 @@ uv run promptrek validate config.yaml
 uv run promptrek list-editors
 
 # Or using uvx (no sync required)
-uvx --from . promptrek --help
+uvx --from . promptrek              # Interactive mode
+uvx --from . promptrek --help       # Traditional CLI
 ```
 
 #### Development Commands
