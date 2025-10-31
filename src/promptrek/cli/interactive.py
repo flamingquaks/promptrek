@@ -206,6 +206,10 @@ def workflow_generate_config(ctx: click.Context) -> None:
         default=False,
     ).ask()
 
+    if use_variables is None:
+        click.echo("Cancelled.")
+        return
+
     variables_dict: Dict[str, str] = {}
     if use_variables:
         click.echo("\nEnter variable overrides (KEY=VALUE). Leave blank to finish:")
@@ -228,11 +232,19 @@ def workflow_generate_config(ctx: click.Context) -> None:
         default=False,
     ).ask()
 
+    if headless is None:
+        click.echo("Cancelled.")
+        return
+
     # Preview mode
     dry_run = questionary.confirm(
         "Preview mode (show what will be generated)?",
         default=False,
     ).ask()
+
+    if dry_run is None:
+        click.echo("Cancelled.")
+        return
 
     click.echo()
 
