@@ -46,15 +46,35 @@ Right-click on `.promptrek.yaml` files for quick access to:
 - **Variable Overrides**: Interactive prompts for variable customization
 - **Plugin Management**: Easy management of MCP servers, commands, agents, and hooks
 
-## Requirements
+## ⚠️ Requirements - READ THIS FIRST!
 
-- Visual Studio Code 1.85.0 or higher
-- PrompTrek CLI installed and available in PATH
-  ```bash
-  git clone https://github.com/flamingquaks/promptrek.git
-  cd promptrek
-  uv sync  # or pip install -e .
-  ```
+**IMPORTANT:** This extension is a **graphical wrapper** around the PrompTrek CLI. You **MUST** install the CLI first!
+
+### 1. Visual Studio Code 1.85.0 or higher
+
+### 2. PrompTrek CLI **REQUIRED**
+
+The extension will **NOT work** without the PrompTrek CLI installed and available in your PATH.
+
+**Quick Install:**
+```bash
+git clone https://github.com/flamingquaks/promptrek.git
+cd promptrek
+uv sync  # or: pip install -e .
+source .venv/bin/activate  # Unix/Mac
+# OR: .venv\Scripts\activate  # Windows
+```
+
+**Verify it's installed:**
+```bash
+promptrek --version
+# Should output: PrompTrek version 0.6.0
+```
+
+**If you get "command not found" errors in the extension:**
+- See [CLI-SETUP.md](CLI-SETUP.md) for detailed installation instructions
+- Make sure `promptrek` command works in your terminal first
+- You may need to configure the CLI path in VSCode settings
 
 ## Installation
 
