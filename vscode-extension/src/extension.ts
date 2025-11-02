@@ -7,6 +7,7 @@
 import * as vscode from 'vscode';
 import { PrompTrekCli } from './utils/promptrekCli';
 import { YamlParser } from './utils/yamlParser';
+import { CliInstaller } from './utils/cliInstaller';
 import { ConfigExplorerProvider } from './views/configExplorer';
 import { EditorStatusProvider } from './views/editorStatusView';
 import { initCommand } from './commands/init';
@@ -17,6 +18,7 @@ import { syncCommand } from './commands/sync';
 
 let outputChannel: vscode.OutputChannel;
 let cli: PrompTrekCli;
+let cliInstaller: CliInstaller;
 let configExplorer: ConfigExplorerProvider;
 let editorStatusProvider: EditorStatusProvider;
 let statusBarItem: vscode.StatusBarItem;
@@ -28,8 +30,14 @@ export function activate(context: vscode.ExtensionContext) {
   outputChannel = vscode.window.createOutputChannel('PrompTrek');
   context.subscriptions.push(outputChannel);
 
-  // Initialize CLI wrapper
-  cli = new PrompTrekCli(outputChannel);
+  // Initialize CLI installer
+  cliInstaller = new CliInstaller(context, outputChannel);
+
+  // Initialize CLI wrapper with auto-install resolver
+  cli = new PrompTrekCli(outputChannel, () => cliInstaller.getCliPath());
+
+  // Check CLI availability on activation and offer to install if missing
+  checkAndOfferInstallation();
 
   // Create tree view providers
   configExplorer = new ConfigExplorerProvider();
@@ -285,6 +293,46 @@ export function activate(context: vscode.ExtensionContext) {
       });
 
     context.globalState.update('promptrek.firstActivation', false);
+  }
+}
+
+async function checkAndOfferInstallation() {
+  const check = await cliInstaller.checkCliAvailable();
+
+  if (!check.available) {
+    outputChannel.appendLine('PrompTrek CLI not found. Offering installation...');
+    const installed = await cliInstaller.promptInstallation();
+
+    if (installed) {
+      outputChannel.appendLine('PrompTrek CLI installed successfully!');
+      vscode.window.showInformationMessage(
+        'PrompTrek CLI installed successfully! You can now use all extension features.'
+      );
+    } else {
+      outputChannel.appendLine('PrompTrek CLI installation declined or failed.');
+      vscode.window.showWarningMessage(
+        'PrompTrek CLI is not installed. Some features may not work. See Output panel for details.',
+        'View Setup Guide'
+      ).then(async selection => {
+        if (selection === 'View Setup Guide') {
+          // Try to open local CLI-SETUP.md if available, otherwise open online
+          try {
+            const docUri = vscode.Uri.file(
+              vscode.workspace.workspaceFolders?.[0]?.uri.fsPath + '/CLI-SETUP.md'
+            );
+            const doc = await vscode.workspace.openTextDocument(docUri);
+            await vscode.window.showTextDocument(doc);
+          } catch (error) {
+            // If local file doesn't exist, open online documentation
+            vscode.env.openExternal(
+              vscode.Uri.parse('https://github.com/flamingquaks/promptrek/blob/main/vscode-extension/CLI-SETUP.md')
+            );
+          }
+        }
+      });
+    }
+  } else {
+    outputChannel.appendLine(`PrompTrek CLI found: ${check.path} (v${check.version})`);
   }
 }
 

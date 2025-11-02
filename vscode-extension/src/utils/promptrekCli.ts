@@ -18,18 +18,42 @@ export interface CliResult {
 export class PrompTrekCli {
   private cliPath: string;
   private outputChannel: vscode.OutputChannel;
+  private cliPathResolver?: () => Promise<string | null>;
 
-  constructor(outputChannel: vscode.OutputChannel) {
+  constructor(outputChannel: vscode.OutputChannel, cliPathResolver?: () => Promise<string | null>) {
     this.outputChannel = outputChannel;
+    this.cliPathResolver = cliPathResolver;
     const config = vscode.workspace.getConfiguration('promptrek');
     this.cliPath = config.get<string>('cliPath') || 'promptrek';
+  }
+
+  /**
+   * Set a custom CLI path resolver (for auto-installation)
+   */
+  setCliPathResolver(resolver: () => Promise<string | null>): void {
+    this.cliPathResolver = resolver;
+  }
+
+  /**
+   * Get the current CLI path, resolving if necessary
+   */
+  private async getCliPath(): Promise<string> {
+    // If we have a resolver, use it to check/install CLI
+    if (this.cliPathResolver) {
+      const resolvedPath = await this.cliPathResolver();
+      if (resolvedPath) {
+        this.cliPath = resolvedPath;
+      }
+    }
+    return this.cliPath;
   }
 
   /**
    * Execute a PrompTrek CLI command
    */
   private async execute(args: string[], cwd?: string): Promise<CliResult> {
-    const command = `${this.cliPath} ${args.join(' ')}`;
+    const cliPath = await this.getCliPath();
+    const command = `${cliPath} ${args.join(' ')}`;
     this.outputChannel.appendLine(`> ${command}`);
 
     try {
