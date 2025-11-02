@@ -1,0 +1,44 @@
+schema_version: "3.1.0"
+metadata:
+  title: "VSCode Extension Test Project"
+  description: "A test project to verify the PrompTrek VSCode extension works"
+  version: "1.0.0"
+  author: "Extension Tester"
+  tags: [test, demo, vscode]
+
+content: |
+  # VSCode Extension Test Project
+
+  ## Welcome!
+  This is a test configuration for the PrompTrek VSCode extension.
+
+  ## Project Details
+  **Technologies:** React, TypeScript, Node.js
+
+  ## Development Guidelines
+
+  ### General Principles
+  - Write clean, maintainable code
+  - Follow TypeScript best practices
+  - Write comprehensive tests
+  - Document your code
+
+  ### Code Style
+  - Use functional components with hooks
+  - Prefer const over let
+  - Use meaningful variable names
+  - Keep functions small and focused
+
+  ## Testing the Extension
+  Try these features:
+  1. View this configuration in the sidebar
+  2. Generate files for different editors
+  3. Validate this configuration
+  4. Preview the output
+  5. Check the status bar
+
+variables:
+  PROJECT_NAME: "vscode-extension-test"
+  VERSION: "1.0.0"
+  AUTHOR: "Test User"
+  GITHUB_REPO: "https://github.com/test/repo"
