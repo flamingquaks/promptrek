@@ -93,14 +93,19 @@ export class CliInstaller {
    */
   async promptInstallation(): Promise<boolean> {
     const choice = await vscode.window.showInformationMessage(
-      'PrompTrek CLI is not installed. Would you like to install it automatically?',
+      'PrompTrek CLI is not installed. Would you like to install it automatically? (Installation logs will appear in the Output panel)',
       'Install Now',
       'Install Manually',
       'Cancel'
     );
 
     if (choice === 'Install Now') {
-      return await this.autoInstall();
+      const result = await this.autoInstall();
+      if (!result) {
+        // Show output panel if installation failed
+        this.outputChannel.show(true);
+      }
+      return result;
     } else if (choice === 'Install Manually') {
       this.showManualInstallInstructions();
       return false;
@@ -113,6 +118,9 @@ export class CliInstaller {
    * Automatically install PrompTrek CLI
    */
   private async autoInstall(): Promise<boolean> {
+    // Show output channel so users can see what's happening
+    this.outputChannel.show(true);
+
     return await vscode.window.withProgress(
       {
         location: vscode.ProgressLocation.Notification,
@@ -121,11 +129,18 @@ export class CliInstaller {
       },
       async (progress) => {
         try {
+          this.outputChannel.appendLine('\n========================================');
+          this.outputChannel.appendLine('PrompTrek CLI Auto-Installation Started');
+          this.outputChannel.appendLine('========================================\n');
+
           // Check if Python is available
           progress.report({ message: 'Checking Python installation...' });
+          this.outputChannel.appendLine('Step 1: Checking Python installation...');
+
           const hasPython = await this.checkPython();
 
           if (!hasPython) {
+            this.outputChannel.appendLine('✗ Python 3.9+ not found');
             vscode.window.showErrorMessage(
               'Python 3.9+ is required to install PrompTrek. Please install Python first.',
               'Download Python'
@@ -137,10 +152,15 @@ export class CliInstaller {
             return false;
           }
 
+          this.outputChannel.appendLine('✓ Python 3.9+ found\n');
+
           // Install using pip
           progress.report({ message: 'Installing PrompTrek CLI via pip...', increment: 30 });
+          this.outputChannel.appendLine('Step 2: Installing PrompTrek CLI via pip...');
 
           const installPath = this.getUserCliPath();
+          this.outputChannel.appendLine(`Target installation path: ${installPath}\n`);
+
           await fs.promises.mkdir(path.dirname(installPath), { recursive: true });
 
           // Try installing from the bundled source or PyPI
@@ -217,42 +237,124 @@ export class CliInstaller {
    */
   private async installViaPip(targetPath: string): Promise<boolean> {
     try {
+      this.outputChannel.appendLine('=== Starting PrompTrek Installation ===');
+
+      // Determine platform-specific paths
+      const isWindows = process.platform === 'win32';
+      const binDir = isWindows ? 'Scripts' : 'bin';
+      const pipExe = isWindows ? 'pip.exe' : 'pip';
+      const promptrekExe = isWindows ? 'promptrek.exe' : 'promptrek';
+      const pythonCmd = isWindows ? 'python' : 'python3';
+
       // Try to find the PrompTrek source directory
+      this.outputChannel.appendLine(`Extension path: ${this.extensionPath}`);
       const possiblePaths = [
         path.join(this.extensionPath, '..', '..'),  // Parent of vscode-extension
+        path.join(this.extensionPath, '..'),  // Try one level up too
         path.join(this.extensionPath, 'bundled', 'promptrek-source'),
       ];
 
       let sourcePath: string | null = null;
       for (const p of possiblePaths) {
-        if (fs.existsSync(path.join(p, 'pyproject.toml'))) {
-          sourcePath = p;
+        const resolvedPath = path.resolve(p);
+        const pyprojectPath = path.join(resolvedPath, 'pyproject.toml');
+        this.outputChannel.appendLine(`Checking: ${pyprojectPath}`);
+
+        if (fs.existsSync(pyprojectPath)) {
+          sourcePath = resolvedPath;
+          this.outputChannel.appendLine(`✓ Found PrompTrek source at: ${sourcePath}`);
           break;
         }
       }
 
-      if (sourcePath) {
-        this.outputChannel.appendLine(`Installing from source: ${sourcePath}`);
-
-        // Create a virtual environment
-        const venvPath = path.join(path.dirname(targetPath), '.venv');
-        await execAsync(`python3 -m venv ${venvPath}`, { timeout: 30000 });
-
-        // Activate and install
-        const pip = path.join(venvPath, 'bin', 'pip');
-        await execAsync(`${pip} install -e "${sourcePath}"`, { timeout: 60000 });
-
-        // Create wrapper script
-        const promptrekPath = path.join(venvPath, 'bin', 'promptrek');
-        await fs.promises.copyFile(promptrekPath, targetPath);
-        await fs.promises.chmod(targetPath, 0o755);
-
-        return true;
+      if (!sourcePath) {
+        this.outputChannel.appendLine('✗ Could not find PrompTrek source directory (no pyproject.toml found)');
+        this.outputChannel.appendLine('Checked paths:');
+        possiblePaths.forEach(p => this.outputChannel.appendLine(`  - ${path.resolve(p)}`));
+        return false;
       }
 
-      return false;
+      // Create installation directory
+      const installDir = path.dirname(targetPath);
+      this.outputChannel.appendLine(`Installation directory: ${installDir}`);
+
+      if (!fs.existsSync(installDir)) {
+        this.outputChannel.appendLine('Creating installation directory...');
+        await fs.promises.mkdir(installDir, { recursive: true });
+      }
+
+      // Create a virtual environment
+      const venvPath = path.join(installDir, '.venv');
+      this.outputChannel.appendLine(`Creating virtual environment at: ${venvPath}`);
+
+      try {
+        const { stdout: venvOut, stderr: venvErr } = await execAsync(
+          `${pythonCmd} -m venv "${venvPath}"`,
+          { timeout: 30000 }
+        );
+        if (venvOut) this.outputChannel.appendLine(venvOut);
+        if (venvErr) this.outputChannel.appendLine(venvErr);
+        this.outputChannel.appendLine('✓ Virtual environment created');
+      } catch (venvError: any) {
+        this.outputChannel.appendLine(`✗ Failed to create venv: ${venvError.message}`);
+        if (venvError.stdout) this.outputChannel.appendLine(`stdout: ${venvError.stdout}`);
+        if (venvError.stderr) this.outputChannel.appendLine(`stderr: ${venvError.stderr}`);
+        throw venvError;
+      }
+
+      // Install PrompTrek
+      const pip = path.join(venvPath, binDir, pipExe);
+      this.outputChannel.appendLine(`Installing PrompTrek using: ${pip}`);
+      this.outputChannel.appendLine(`Install command: ${pip} install -e "${sourcePath}"`);
+
+      try {
+        const { stdout: installOut, stderr: installErr } = await execAsync(
+          `"${pip}" install -e "${sourcePath}"`,
+          { timeout: 120000 }  // Increased timeout for installation
+        );
+        if (installOut) this.outputChannel.appendLine(installOut);
+        if (installErr) this.outputChannel.appendLine(installErr);
+        this.outputChannel.appendLine('✓ PrompTrek installed');
+      } catch (installError: any) {
+        this.outputChannel.appendLine(`✗ Failed to install PrompTrek: ${installError.message}`);
+        if (installError.stdout) this.outputChannel.appendLine(`stdout: ${installError.stdout}`);
+        if (installError.stderr) this.outputChannel.appendLine(`stderr: ${installError.stderr}`);
+        throw installError;
+      }
+
+      // Find the promptrek executable
+      const promptrekPath = path.join(venvPath, binDir, promptrekExe);
+      this.outputChannel.appendLine(`Looking for PrompTrek CLI at: ${promptrekPath}`);
+
+      if (!fs.existsSync(promptrekPath)) {
+        this.outputChannel.appendLine(`✗ PrompTrek CLI not found at expected location`);
+        this.outputChannel.appendLine(`Checking venv ${binDir} directory contents:`);
+        const binContents = await fs.promises.readdir(path.join(venvPath, binDir));
+        binContents.forEach(file => this.outputChannel.appendLine(`  - ${file}`));
+        return false;
+      }
+
+      this.outputChannel.appendLine('✓ PrompTrek CLI found');
+
+      // Copy to target location
+      this.outputChannel.appendLine(`Copying CLI to: ${targetPath}`);
+      await fs.promises.copyFile(promptrekPath, targetPath);
+
+      if (!isWindows) {
+        await fs.promises.chmod(targetPath, 0o755);
+      }
+
+      this.outputChannel.appendLine('✓ Installation complete!');
+      this.outputChannel.appendLine('=== Installation Summary ===');
+      this.outputChannel.appendLine(`Source: ${sourcePath}`);
+      this.outputChannel.appendLine(`CLI installed at: ${targetPath}`);
+
+      return true;
     } catch (error: any) {
-      this.outputChannel.appendLine(`pip install error: ${error.message}`);
+      this.outputChannel.appendLine(`✗ Installation failed: ${error.message}`);
+      if (error.stack) {
+        this.outputChannel.appendLine(`Stack trace: ${error.stack}`);
+      }
       return false;
     }
   }
