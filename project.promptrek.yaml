@@ -6,14 +6,16 @@ metadata:
   version: 1.0.0
   author: PrompTrek Sync
   created: '2025-10-25T09:02:24.919388'
-  updated: '2025-10-25T09:25:20.898771'
+  updated: '2025-11-02T15:05:22.853633'
   tags: [claude-code, synced]
 content: |-
   ## Project Overview
 
-  Today's Date: {{{ CURRENT_DATE }}}
+  Today's Date: 2025-11-02
 
   PrompTrek is a universal AI editor prompt management tool that converts `project.promptrek.yaml` files into editor-specific configuration files for various AI coding assistants (GitHub Copilot, Cursor, Continue, Claude Code, Windsurf, Cline, Kiro, Amazon Q, JetBrains AI, Tabnine).
+
+  The project includes both a **Python CLI** and a **VSCode Extension** for visual management.
 
   **Key Features**:
   - **Schema v3.0.0 (Current)**: Top-level plugin fields (mcp_servers, commands, agents, hooks) for cleaner structure
@@ -25,6 +27,68 @@ content: |-
 
   **Technology Stack**: Python 3.9+ with Click (CLI), Jinja2 (templating), PyYAML (parsing), Pydantic (validation)
 
+  ## VSCode Extension
+
+  PrompTrek includes a **Visual Studio Code extension** that provides a user-friendly interface for managing PrompTrek configurations.
+
+  **Key Features**:
+  - **Visual Configuration Management**: Tree view explorer for browsing PrompTrek configurations
+  - **Editor Status View**: See which editors have generated configurations with one-click generation
+  - **Auto-installation**: Automatically detects and offers to install the PrompTrek CLI
+  - **Quick Actions**: All PrompTrek CLI commands accessible through VSCode (init, generate, validate, preview, sync, migrate)
+  - **Context Menus**: Right-click `.promptrek.yaml` files for quick access to common actions
+  - **Auto-validation**: Automatically validate on save (configurable)
+  - **Status Bar Integration**: Shows current configuration and schema version
+  - **File Watcher**: Automatically refreshes views when files change
+
+  **Location**: `vscode-extension/` directory in the repository
+
+  **Technology**: TypeScript, VSCode Extension API, js-yaml
+
+  ### VSCode Extension Development
+
+  **Setup**:
+  ```bash
+  cd vscode-extension
+  npm install
+  npm run compile
+  ```
+
+  **Development**:
+  ```bash
+  # Watch mode for development
+  npm run watch
+
+  # Lint code
+  npm run lint
+
+  # Package extension
+  npm install -g @vscode/vsce
+  vsce package
+  ```
+
+  **Testing**:
+  - Press F5 in VSCode to launch Extension Development Host
+  - Test features in the development instance
+
+  **Architecture** (`vscode-extension/src/`):
+  - `extension.ts`: Main extension entry point and activation
+  - `commands/`: CLI command wrappers (init, generate, validate, sync, preview, migrate)
+  - `views/`: Tree view providers for configuration explorer and editor status
+  - `utils/`: YAML parsing and CLI interaction utilities
+  - `types/`: TypeScript type definitions for PrompTrek schemas
+
+  **CI/CD**:
+  - `.github/workflows/vscode-extension-ci.yml`: Runs tests on Ubuntu, Windows, macOS with Node.js 18.x and 20.x
+  - `.github/workflows/vscode-extension-release.yml`: Builds platform-specific VSIX packages for releases
+  - Automated security scanning with npm audit and TruffleHog
+
+  **Key Extension Files**:
+  - `package.json`: Extension manifest with commands, views, and configuration (vscode-extension/package.json:1)
+  - `README.md`: User-facing extension documentation (vscode-extension/README.md:1)
+  - `CONTRIBUTING.md`: Development guidelines for contributors (vscode-extension/CONTRIBUTING.md:1)
+  - `CHANGELOG.md`: Version history and release notes (vscode-extension/CHANGELOG.md:1)
+
   ## BEFORE YOU BEGIN!
 
   - Make sure you've refreshed your context documents by running `promptrek refresh --editor claude` if needed. (Replace claude with the editor you're using, if not Claude!)
@@ -32,6 +96,8 @@ content: |-
   ## Development Commands
 
   ### Testing
+
+  **Python CLI Tests:**
   ```bash
   # Run all tests with coverage
   make test
@@ -58,7 +124,26 @@ content: |-
   uv run python -m pytest -k "v3" -v  # Run all v3-related tests
   ```
 
+  **VSCode Extension Tests:**
+  ```bash
+  # Navigate to extension directory
+  cd vscode-extension
+
+  # Run tests
+  npm test
+
+  # Lint TypeScript
+  npm run lint
+
+  # Compile TypeScript
+  npm run compile
+
+  # Manual testing: Press F5 in VSCode to launch Extension Development Host
+  ```
+
   ### Code Quality
+
+  **Python CLI:**
   ```bash
   # Format code (black + isort)
   make format
@@ -69,6 +154,17 @@ content: |-
   # Type checking
   make typecheck
   # or: uv run mypy src/
+  ```
+
+  **VSCode Extension:**
+  ```bash
+  cd vscode-extension
+
+  # Lint TypeScript
+  npm run lint
+
+  # Type checking is done automatically during compilation
+  npm run compile
   ```
 
   ### Pre-commit Hooks
@@ -111,6 +207,32 @@ content: |-
   uv run promptrek plugins generate project.promptrek.yaml -e claude
   uv run promptrek plugins list project.promptrek.yaml
   uv run promptrek plugins validate project.promptrek.yaml
+  ```
+
+  ## Repository Structure
+
+  ```
+  promptrek/
+  ├── src/promptrek/          # Python CLI source code
+  │   ├── cli/                # CLI commands and entry points
+  │   ├── core/               # Core models, parser, validator
+  │   ├── adapters/           # Editor-specific adapters
+  │   └── utils/              # Utility functions
+  ├── tests/                  # Python CLI tests
+  │   ├── unit/               # Unit tests
+  │   └── integration/        # Integration tests
+  ├── vscode-extension/       # VSCode extension
+  │   ├── src/                # TypeScript source code
+  │   │   ├── commands/       # Command implementations
+  │   │   ├── views/          # Tree view providers
+  │   │   ├── utils/          # Utilities and CLI interaction
+  │   │   └── types/          # TypeScript type definitions
+  │   ├── media/              # Extension icons and assets
+  │   └── package.json        # Extension manifest
+  ├── templates/              # Project templates
+  ├── .github/workflows/      # CI/CD workflows
+  ├── pyproject.toml          # Python project configuration
+  └── README.md               # Main project documentation
   ```
 
   ## Architecture
@@ -164,6 +286,30 @@ content: |-
   - `conditionals.py`: Legacy v1 conditional processing (deprecated, not functional)
   - `imports.py`: Legacy v1 import system (deprecated, not functional)
 
+  **5. VSCode Extension** (`vscode-extension/`)
+  - `src/extension.ts`: Main extension activation and command registration
+  - `src/commands/`: Command implementations that wrap PrompTrek CLI calls
+    - `init.ts`: Initialize new configurations with interactive wizard
+    - `generate.ts`: Generate editor-specific files
+    - `validate.ts`: Validate configuration files
+    - `sync.ts`: Sync from editor files back to PrompTrek format
+    - `preview.ts`: Preview generated output
+  - `src/views/`: Tree view providers for visual exploration
+    - `configExplorerView.ts`: Browse PrompTrek configuration structure
+    - `editorStatusView.ts`: Show editor generation status
+  - `src/utils/`: Utility functions
+    - `cli.ts`: Execute PrompTrek CLI commands and parse output
+    - `yamlParser.ts`: Parse and validate YAML configuration files
+  - `src/types/`: TypeScript type definitions matching PrompTrek schemas
+
+  **VSCode Extension CLI Interaction**:
+  The extension communicates with the PrompTrek CLI via child process execution:
+  - Detects CLI installation at activation
+  - Auto-installs CLI to `~/.promptrek/cli` if not found
+  - Executes CLI commands with proper argument formatting
+  - Parses CLI output (stdout/stderr) for user feedback
+  - Handles CLI errors gracefully with user-friendly messages
+
   ### Key Patterns
 
   **Adapter Interface**: All adapters inherit from `EditorAdapter` and must implement:
@@ -213,6 +359,8 @@ content: |-
 
   ## Testing
 
+  ### Python CLI Testing
+
   **Test Structure**:
   - `tests/unit/`: Unit tests for individual modules
     - `tests/unit/test_models.py`: Model tests for v1, v2, and v3 schemas
@@ -241,6 +389,19 @@ content: |-
   uv run python -m pytest tests/unit/test_parser.py::test_parse_valid_yaml -v
   ```
 
+  ### VSCode Extension Testing
+
+  **Test Structure**:
+  - `vscode-extension/src/test/`: Extension tests
+  - Tests run in Extension Development Host
+
+  **Running Tests**:
+  ```bash
+  cd vscode-extension
+  npm test  # Runs automated tests
+  # Or press F5 in VSCode for manual testing
+  ```
+
   ## Pre-commit Hooks
 
   PrompTrek uses pre-commit hooks for validation and preventing accidental commits of generated files:
@@ -253,6 +414,8 @@ content: |-
   **Implementation**: Hooks are implemented via CLI commands in `src/promptrek/cli/commands/hooks.py`
 
   ## Code Conventions
+
+  ### Python CLI Conventions
 
   **Python Style**:
   - Follow PEP 8 (enforced by black and flake8)
@@ -274,6 +437,28 @@ content: |-
   **Error Handling**:
   - Use custom exceptions from `core/exceptions.py`
   - Hierarchy: `PrompTrekError` (base) → `ValidationError`, `ParserError`, `AdapterError`, etc.
+
+  ### VSCode Extension Conventions
+
+  **TypeScript Style**:
+  - Follow standard TypeScript/ESLint conventions
+  - Type annotations required for all function signatures
+  - Use interfaces for object shapes
+  - Prefer const over let, avoid var
+  - Use async/await over raw promises
+
+  **Naming**:
+  - Classes/Interfaces: PascalCase
+  - Functions/methods: camelCase
+  - Constants: UPPER_SNAKE_CASE
+  - Private members: _leadingUnderscore (TypeScript convention)
+
+  **File Organization**:
+  - One primary class/interface per file
+  - Related utilities can be grouped
+  - Commands in `commands/` directory
+  - Views in `views/` directory
+  - Types in `types/` directory
 
   ## Adding New Editor Adapters
 
@@ -344,6 +529,91 @@ content: |-
 
   4. Add tests in `tests/unit/adapters/test_youreditor.py`
 
+  ## Adding VSCode Extension Features
+
+  When adding new features to the VSCode extension:
+
+  **1. Add Commands** (`vscode-extension/src/commands/`):
+  ```typescript
+  import * as vscode from 'vscode';
+  import { executePrompTrekCommand } from '../utils/cli';
+
+  export async function yourCommand() {
+    const result = await executePrompTrekCommand(['your', 'args']);
+    vscode.window.showInformationMessage(result);
+  }
+  ```
+
+  **2. Register in extension.ts**:
+  ```typescript
+  context.subscriptions.push(
+    vscode.commands.registerCommand('promptrek.yourCommand', yourCommand)
+  );
+  ```
+
+  **3. Add to package.json**:
+  ```json
+  {
+    "commands": [{
+      "command": "promptrek.yourCommand",
+      "title": "Your Command",
+      "category": "PrompTrek"
+    }]
+  }
+  ```
+
+  **4. Add menu items** (optional):
+  ```json
+  {
+    "menus": {
+      "commandPalette": [{
+        "command": "promptrek.yourCommand",
+        "when": "true"
+      }]
+    }
+  }
+  ```
+
+  **5. Test the feature**:
+  - Press F5 to launch Extension Development Host
+  - Test in the development instance
+  - Add automated tests in `vscode-extension/src/test/`
+
+  ## VSCode Extension Debugging & Troubleshooting
+
+  **Debugging the Extension**:
+  1. Open `vscode-extension/` in VSCode
+  2. Set breakpoints in TypeScript files
+  3. Press F5 to launch Extension Development Host
+  4. Extension runs with debugger attached
+  5. View debug console for logs and errors
+
+  **Common Issues**:
+
+  *CLI Not Found*:
+  - Extension shows "PrompTrek CLI not found" notification
+  - Click "Install Now" for automatic installation
+  - Or manually set `promptrek.cliPath` in settings
+
+  *Extension Not Activating*:
+  - Check "Extension Host" output panel for errors
+  - Verify `package.json` activation events
+  - Ensure workspace contains `.promptrek.yaml` files
+
+  *Commands Not Working*:
+  - Check "PrompTrek" output channel for CLI errors
+  - Verify CLI is accessible: `promptrek --version`
+  - Check that commands are registered in `extension.ts`
+
+  **Viewing Logs**:
+  ```
+  View → Output → Select "PrompTrek" from dropdown
+  ```
+
+  **Reloading Extension**:
+  - In Extension Development Host: Cmd+R (Mac) or Ctrl+R (Windows/Linux)
+  - Or: Developer: Reload Window from Command Palette
+
   ## Schema Version Comparison
 
   | Feature | v1.x.x (Legacy) | v2.x.x (Legacy) | v3.0.0 (Current) |
@@ -369,16 +639,25 @@ content: |-
   ## CI/CD
 
   **GitHub Actions Workflows**:
+
+  *Python CLI:*
   - `ci.yml`: Runs tests, linting, type checking across Python 3.9-3.12
   - `pr.yml`: PR validation (commit message format, changelog check)
 
+  *VSCode Extension:*
+  - `vscode-extension-ci.yml`: Runs tests, linting, compilation across Ubuntu, Windows, macOS with Node.js 18.x and 20.x
+  - `vscode-extension-release.yml`: Builds platform-specific VSIX packages and creates GitHub releases
+  - `vscode-extension-pr-package.yml`: Automatically packages extension for PR review with installation instructions
+
   **Commit Format**: Conventional Commits (enforced in CI)
   - Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`, `ci`, `build`, `perf`
-  - Scopes: `cli`, `core`, `adapters`, `templates`, `docs`, `parser`, `validator`, `utils`, `tests`, `deps`, `changelog`
+  - Scopes: `cli`, `core`, `adapters`, `templates`, `docs`, `parser`, `validator`, `utils`, `tests`, `deps`, `changelog`, `vscode`
   - Example: `feat(adapters): add support for new editor`
+  - VSCode Extension Example: `feat(vscode): add automatic CLI installation`
 
   ## Build and Release
 
+  **Python CLI:**
   ```bash
   # Build package
   uv build
@@ -388,19 +667,44 @@ content: |-
   make clean
   ```
 
-  **Version**: Defined in `pyproject.toml` under `[project]` section (currently 0.2.0)
+  **VSCode Extension:**
+  ```bash
+  # Navigate to extension directory
+  cd vscode-extension
+
+  # Install dependencies
+  npm install
+
+  # Package extension (creates .vsix file)
+  npm install -g @vscode/vsce
+  vsce package
+
+  # The resulting .vsix file can be installed in VSCode or published to marketplace
+  ```
+
+  **Versions**:
+  - CLI: Defined in `pyproject.toml` under `[project]` section (currently 0.2.0)
+  - VSCode Extension: Defined in `vscode-extension/package.json` under `version` field (currently 0.1.0)
 
   ## Important Notes
 
+  **Schema & CLI:**
   - **V3 Schema is Stable**: Top-level plugin fields, production-ready
   - **V3.0 is the Default**: `promptrek init` creates v3.0 format by default
   - **V2.x Schema is Legacy**: All 10 adapters support v2.x with automatic migration to v3.0
   - **Migration Available**: Use `promptrek migrate` to convert v1 → v2 → v3
   - **Generated files should NOT be committed**: Pre-commit hooks prevent this
-  - **Use uv for all operations**: Project uses uv for dependency management
+  - **Use uv for all operations**: Python CLI uses uv for dependency management
   - **Test coverage is enforced**: Minimum 80% coverage required for CI
   - **Type hints are required**: mypy configured with strict settings
   - **Adapter capabilities matter**: Check capabilities when adding features
+
+  **VSCode Extension:**
+  - **Auto-installs CLI**: Extension automatically offers to install PrompTrek CLI if not found
+  - **npm for extension**: VSCode extension uses npm (not uv) for package management
+  - **TypeScript required**: All extension code must be TypeScript with proper type definitions
+  - **Multi-platform testing**: CI tests on Ubuntu, Windows, and macOS
+  - **VSIX packaging**: Extension distributed as .vsix files through GitHub releases
 
   ## Schema Quick Reference
 
@@ -852,3 +1156,4 @@ agents:
     </example>
   trust_level: untrusted
   requires_approval: true
+allow_commands: false
