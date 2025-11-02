@@ -33,6 +33,7 @@ venv.bak/
 
 # IDE
 .vscode/
+!vscode-extension/.vscode/  # Exception: VSCode extension needs .vscode configs for F5 debugging
 .idea/
 *.swp
 *.swo
