@@ -40,23 +40,31 @@ Right-click on `.promptrek.yaml` files for quick access to:
 
 ### 🔧 Smart Features
 
+- **Auto-installation**: Automatically detects and offers to install the PrompTrek CLI
 - **Auto-validation**: Automatically validate on save (configurable)
 - **Status Bar**: Shows current configuration and schema version
 - **File Watcher**: Automatically refreshes views when files change
 - **Variable Overrides**: Interactive prompts for variable customization
 - **Plugin Management**: Easy management of MCP servers, commands, agents, and hooks
 
-## ⚠️ Requirements - READ THIS FIRST!
-
-**IMPORTANT:** This extension is a **graphical wrapper** around the PrompTrek CLI. You **MUST** install the CLI first!
+## ⚠️ Requirements
 
 ### 1. Visual Studio Code 1.85.0 or higher
 
-### 2. PrompTrek CLI **REQUIRED**
+### 2. PrompTrek CLI
 
-The extension will **NOT work** without the PrompTrek CLI installed and available in your PATH.
+**Good News!** The extension can now **automatically install** the PrompTrek CLI for you!
 
-**Quick Install:**
+When you first activate the extension, it will:
+1. Check if the PrompTrek CLI is installed
+2. If not found, offer to install it automatically via `pip`
+3. Install to `~/.promptrek/cli` with an isolated virtual environment
+4. Configure itself to use the installed CLI
+
+**Manual Installation (Optional):**
+
+If you prefer to install manually or the auto-install fails:
+
 ```bash
 git clone https://github.com/flamingquaks/promptrek.git
 cd promptrek
@@ -71,10 +79,10 @@ promptrek --version
 # Should output: PrompTrek version 0.6.0
 ```
 
-**If you get "command not found" errors in the extension:**
-- See [CLI-SETUP.md](CLI-SETUP.md) for detailed installation instructions
-- Make sure `promptrek` command works in your terminal first
-- You may need to configure the CLI path in VSCode settings
+**Troubleshooting:**
+- See [CLI-SETUP.md](CLI-SETUP.md) for detailed manual installation instructions
+- Check the "PrompTrek" output panel in VSCode for installation logs
+- You can manually configure the CLI path in VSCode settings if needed
 
 ## Installation
 
