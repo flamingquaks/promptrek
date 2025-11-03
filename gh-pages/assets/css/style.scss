@@ -435,7 +435,7 @@ html, body {
     backdrop-filter: blur(10px);
   }
 
-  .nav-trigger:checked + label + .trigger {
+  .site-nav .nav-trigger:checked ~ .trigger {
     display: flex;
   }
 
