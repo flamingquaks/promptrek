@@ -263,14 +263,17 @@ html, body {
   min-width: 0; /* Allow shrinking */
 }
 
-.site-nav .trigger {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem; /* Reduced gap to prevent wrapping */
-  flex-wrap: nowrap;
-  white-space: nowrap;
-  min-width: 0; /* Allow shrinking */
-  flex-shrink: 1; /* Allow nav to shrink */
+/* Desktop navigation - show menu items by default */
+@media (min-width: 769px) {
+  .site-nav .trigger {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem; /* Reduced gap to prevent wrapping */
+    flex-wrap: nowrap;
+    white-space: nowrap;
+    min-width: 0; /* Allow shrinking */
+    flex-shrink: 1; /* Allow nav to shrink */
+  }
 }
 
 .site-nav .page-link {
@@ -436,7 +439,7 @@ html, body {
   }
 
   .site-nav .nav-trigger:checked ~ .trigger {
-    display: flex;
+    display: flex !important;
   }
 
   .site-nav .page-link {
