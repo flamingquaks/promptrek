@@ -424,8 +424,9 @@ def _restore_variables_in_parsed(
                         verbose=verbose,
                     )
 
-                        line.rstrip()
-                        for line in restored_content.split("\n")
+                    # Split back into list
+                    parsed_instructions[category] = [
+                        line.strip()
                         for line in restored_content.split("\n")
                         if line.strip()
                     ]
