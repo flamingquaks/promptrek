@@ -553,7 +553,9 @@ class VariableSubstitution:
 
                 # Replace only the first N occurrences (where N is the count in original)
                 # Replace only the first N occurrences (where N is the count in original)
-                restored_content = restored_content.replace(value, placeholder, original_placeholder_count)
+                restored_content = restored_content.replace(
+                    value, placeholder, original_placeholder_count
+                )
                 count = original_placeholder_count if value in restored_content else 0
 
                 # Track what we restored for verbose output
