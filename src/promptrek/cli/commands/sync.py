@@ -425,11 +425,7 @@ def _restore_variables_in_parsed(
                     )
 
                     # Split back into list
-                    parsed_instructions[category] = [
-                        line.strip()
-                        for line in restored_content.split("\n")
-                        if line.strip()
-                    ]
+                    parsed_instructions[category] = restored_content.split("\n")
 
             # Update the parsed prompt's instructions
             parsed.instructions = Instructions.model_validate(parsed_instructions)
