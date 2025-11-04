@@ -454,6 +454,116 @@ class VariableSubstitution:
 
         return list(set(variables))
 
+    def restore_variables_in_content(
+        self,
+        original_content: str,
+        parsed_content: str,
+        source_dir: Optional[Path] = None,
+        verbose: bool = False,
+    ) -> str:
+        """
+        Restore variable references in parsed content by comparing with original.
+
+        During generation, variables like {{{ PROJECT_NAME }}} are replaced with
+        their values. During sync, we want to restore these variable references
+        to prevent variable loss.
+
+        Algorithm:
+        1. Extract variables from original content
+        2. Evaluate those variables to get their current values
+        3. Replace values in parsed content with variable placeholders,
+           but only if the placeholder existed in the original
+
+        Args:
+            original_content: Original content with variable placeholders
+            parsed_content: Parsed content with evaluated variable values
+            source_dir: Source directory for loading variables (defaults to cwd)
+            verbose: Whether to print restoration details
+
+        Returns:
+            Content with variables restored
+        """
+        if not original_content or not parsed_content:
+            return parsed_content
+
+        # Extract variable placeholders from original
+        var_names = self.extract_variables(original_content)
+
+        if not var_names:
+            return parsed_content
+
+        # Load and evaluate variables
+        try:
+            all_variables = self.load_and_evaluate_variables(
+                search_dir=source_dir,
+                allow_commands=True,
+                include_builtins=True,
+                verbose=False,
+                clear_cache=False,
+            )
+        except Exception:
+            # If we can't load variables, return parsed content as-is
+            return parsed_content
+
+        # Build replacement list: (value, placeholder, var_name)
+        replacements = []
+
+        for var_name in var_names:
+            # Check if it's an environment variable
+            if var_name.startswith("${") and var_name.endswith("}"):
+                # Environment variable like ${HOME}
+                env_var_name = var_name[2:-1]  # Extract HOME from ${HOME}
+                env_value = os.getenv(env_var_name)
+                if env_value:
+                    replacements.append((env_value, var_name, var_name))
+            else:
+                # Template variable like {{{ PROJECT_NAME }}}
+                if var_name in all_variables:
+                    value = str(all_variables[var_name])
+                    placeholder = f"{{{{{ {var_name} }}}}}"
+                    replacements.append((value, placeholder, var_name))
+
+        if not replacements:
+            return parsed_content
+
+        # Sort by value length (longest first) to handle overlapping values
+        # This prevents "My Project" from being replaced before "My Project Name"
+        replacements.sort(key=lambda x: len(x[0]), reverse=True)
+
+        # Apply replacements
+        restored_content = parsed_content
+        restored_vars = []
+
+        for value, placeholder, var_name in replacements:
+            if not value:  # Skip empty values
+                continue
+
+            # Only restore if:
+            # 1. The placeholder exists in original content
+            # 2. The value exists in parsed content
+            # 3. The placeholder doesn't already exist in parsed content
+            if (
+                placeholder in original_content
+                and value in restored_content
+                and placeholder not in restored_content
+            ):
+                count = restored_content.count(value)
+                restored_content = restored_content.replace(value, placeholder)
+
+                # Track what we restored for verbose output
+                if count > 0:
+                    restored_vars.append((var_name, count))
+
+        # Print restoration summary if verbose
+        if verbose and restored_vars:
+            import click
+
+            click.echo("  Variables restored in content:")
+            for var_name, count in restored_vars:
+                click.echo(f"    {var_name}: {count} occurrence(s)")
+
+        return restored_content
+
     def _substitute_template_variables(
         self, content: str, variables: Dict[str, Any], strict: bool
     ) -> str:
