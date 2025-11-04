@@ -21,6 +21,10 @@ body.home-page {
   margin: 0 !important;
   overflow-x: hidden !important;
 }
+/* Allow header wrapper to show dropdown menu */
+.home-page .site-header .wrapper {
+  overflow: visible !important;
+}
 .home-page .page-content {
   padding: 0 !important;
 }

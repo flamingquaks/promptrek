@@ -225,7 +225,7 @@ html, body {
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.08);
   padding: 1rem 0;
   margin: 0;
-  overflow: hidden;
+  overflow: visible;
   box-sizing: border-box;
 }
 
@@ -240,7 +240,7 @@ html, body {
   margin: 0 !important;
   box-sizing: border-box !important;
   min-width: 0 !important;
-  overflow: hidden !important;
+  overflow: visible !important;
 }
 
 /* Ensure header wrapper consistency across page types */
@@ -371,9 +371,7 @@ html, body {
     overflow: visible;
   }
 
-  /* Aggressively remove all borders and containers */
-  .site-nav,
-  .site-nav *,
+  /* Aggressively remove all borders and containers - but exclude .trigger */
   .site-nav label,
   .site-nav label *,
   label[for="nav-trigger"],
@@ -398,17 +396,18 @@ html, body {
 
   .menu-icon {
     display: flex !important;
-    padding: 0.5rem !important;
+    padding: 0 !important;
     margin: 0 !important;
-    margin-top: -0.25rem !important;
-    width: 44px;
-    height: 44px;
+    margin-top: 0 !important;
+    width: auto;
+    height: auto;
     align-items: center;
     justify-content: center;
     box-sizing: border-box;
   }
 
   .menu-icon svg {
+    margin-top: 10px;
     width: 28px;
     height: 28px;
     fill: var(--text-primary);
@@ -420,23 +419,25 @@ html, body {
 
   .site-nav .trigger {
     display: none;
-    position: absolute;
-    top: calc(100% + 8px);
-    right: 0;
+    position: fixed;
+    top: 3.25rem;
+    right: 0.5rem;
+    left: auto;
     background: #ffffff !important;
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-lg) !important;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25) !important;
-    padding: 0.75rem;
+    padding: 0.75rem !important;
     flex-direction: column;
     gap: 0.25rem;
     min-width: 200px;
+    max-width: calc(100vw - 1rem);
     border: 1px solid #e2e8f0 !important;
     z-index: 1001;
     backdrop-filter: blur(10px);
   }
 
   .site-nav .nav-trigger:checked ~ .trigger {
-    display: flex;
+    display: flex !important;
   }
 
   .site-nav .page-link {
@@ -510,17 +511,25 @@ html, body {
   .site-header .wrapper {
     padding: 0 0.5rem !important;
     max-width: 100% !important;
-    overflow: hidden !important;
+    overflow: visible !important;
   }
 
   .site-nav .trigger {
     display: none;
+    position: fixed;
+    top: 3rem;
+    right: 0.5rem;
+    left: auto;
     min-width: 160px;
-    right: 0;
+    max-width: calc(100vw - 1rem);
     padding: 0.5rem;
     background: #ffffff !important;
     border: 1px solid #e2e8f0 !important;
+    border-radius: var(--radius-lg) !important;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25) !important;
+    flex-direction: column;
+    gap: 0.25rem;
+    z-index: 1001;
   }
 
   .site-nav .nav-trigger:checked ~ .trigger {
