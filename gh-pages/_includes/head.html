@@ -19,6 +19,12 @@
 
       promptLines.forEach((line, index) => {
         const text = line.getAttribute('data-text');
+
+        // Skip if no text attribute is present
+        if (!text) {
+          return;
+        }
+
         let displayText = '';
         let charIndex = 0;
 
