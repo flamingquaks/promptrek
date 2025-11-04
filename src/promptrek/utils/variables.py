@@ -547,8 +547,21 @@ class VariableSubstitution:
                 and value in restored_content
                 and placeholder not in restored_content
             ):
-                count = restored_content.count(value)
-                restored_content = restored_content.replace(value, placeholder)
+                # Position-based replacement: only restore at positions where the placeholder existed in original_content
+                count = 0
+                restored_content_list = list(restored_content)
+                placeholder_len = len(placeholder)
+                value_len = len(value)
+                # Find all positions of the placeholder in original_content
+                for match in re.finditer(re.escape(placeholder), original_content):
+                    start = match.start()
+                    end = start + placeholder_len
+                    # Check if the corresponding substring in restored_content matches value
+                    if restored_content[start:start+value_len] == value:
+                        # Replace in the list
+                        restored_content_list[start:start+value_len] = list(placeholder)
+                        count += 1
+                restored_content = ''.join(restored_content_list)
 
                 # Track what we restored for verbose output
                 if count > 0:
