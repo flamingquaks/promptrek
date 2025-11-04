@@ -23,6 +23,7 @@ from ...core.models import (
 )
 from ...core.parser import UPFParser
 from ...utils.gitignore import configure_gitignore
+from ...utils.variables import VariableSubstitution
 from ..yaml_writer import write_promptrek_yaml
 
 
@@ -80,6 +81,13 @@ def sync_command(
 
     # Merge with existing configuration if present
     if existing_prompt:
+        # Restore variables in parsed content before merging
+        parsed_prompt = _restore_variables_in_parsed(
+            existing=existing_prompt,
+            parsed=parsed_prompt,
+            source_dir=source_dir,
+            verbose=ctx.obj.get("verbose", False) if ctx.obj else False,
+        )
         merged_prompt = _merge_prompts(existing_prompt, parsed_prompt, editor)
     else:
         merged_prompt = parsed_prompt
@@ -218,6 +226,211 @@ def _merge_context(existing_data: dict, parsed: UniversalPrompt) -> dict:
 
     existing_data["context"] = existing_context
     return existing_data
+
+
+def _restore_variables_in_parsed(
+    existing: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3],
+    parsed: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3],
+    source_dir: Path,
+    verbose: bool = False,
+) -> Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3]:
+    """
+    Restore variable references in parsed prompt by comparing with existing.
+
+    When variables are used in PrompTrek files, they get replaced with their
+    values during generation. During sync, we want to restore these variable
+    references to prevent variable loss.
+
+    Args:
+        existing: Existing PrompTrek configuration (with variables)
+        parsed: Newly parsed data from editor files (with values)
+        source_dir: Source directory for loading variables
+        verbose: Whether to print restoration details
+
+    Returns:
+        Parsed prompt with variables restored
+    """
+    var_sub = VariableSubstitution()
+
+    # V3 schema - restore in content and documents
+    if isinstance(parsed, UniversalPromptV3) and isinstance(
+        existing, UniversalPromptV3
+    ):
+        # Restore variables in metadata fields
+        if parsed.metadata and existing.metadata:
+            if existing.metadata.title and parsed.metadata.title:
+                parsed.metadata.title = var_sub.restore_variables_in_content(
+                    original_content=existing.metadata.title,
+                    parsed_content=parsed.metadata.title,
+                    source_dir=source_dir,
+                    verbose=False,
+                )
+            if existing.metadata.description and parsed.metadata.description:
+                parsed.metadata.description = var_sub.restore_variables_in_content(
+                    original_content=existing.metadata.description,
+                    parsed_content=parsed.metadata.description,
+                    source_dir=source_dir,
+                    verbose=False,
+                )
+            if existing.metadata.author and parsed.metadata.author:
+                parsed.metadata.author = var_sub.restore_variables_in_content(
+                    original_content=existing.metadata.author,
+                    parsed_content=parsed.metadata.author,
+                    source_dir=source_dir,
+                    verbose=False,
+                )
+
+        # Restore variables in main content
+        if parsed.content and existing.content:
+            if verbose:
+                click.echo("🔄 Restoring variables in content...")
+            parsed.content = var_sub.restore_variables_in_content(
+                original_content=existing.content,
+                parsed_content=parsed.content,
+                source_dir=source_dir,
+                verbose=verbose,
+            )
+
+        # Restore variables in documents
+        if parsed.documents and existing.documents:
+            # Create a map of existing documents by name for quick lookup
+            existing_docs = {doc.name: doc for doc in existing.documents}
+
+            for parsed_doc in parsed.documents:
+                if parsed_doc.name in existing_docs:
+                    existing_doc = existing_docs[parsed_doc.name]
+                    if parsed_doc.content and existing_doc.content:
+                        if verbose:
+                            click.echo(
+                                f"🔄 Restoring variables in document: {parsed_doc.name}"
+                            )
+                        parsed_doc.content = var_sub.restore_variables_in_content(
+                            original_content=existing_doc.content,
+                            parsed_content=parsed_doc.content,
+                            source_dir=source_dir,
+                            verbose=verbose,
+                        )
+
+    # V2 schema - restore in content and documents
+    elif isinstance(parsed, UniversalPromptV2) and isinstance(
+        existing, UniversalPromptV2
+    ):
+        # Restore variables in metadata fields
+        if parsed.metadata and existing.metadata:
+            if existing.metadata.title and parsed.metadata.title:
+                parsed.metadata.title = var_sub.restore_variables_in_content(
+                    original_content=existing.metadata.title,
+                    parsed_content=parsed.metadata.title,
+                    source_dir=source_dir,
+                    verbose=False,
+                )
+            if existing.metadata.description and parsed.metadata.description:
+                parsed.metadata.description = var_sub.restore_variables_in_content(
+                    original_content=existing.metadata.description,
+                    parsed_content=parsed.metadata.description,
+                    source_dir=source_dir,
+                    verbose=False,
+                )
+            if existing.metadata.author and parsed.metadata.author:
+                parsed.metadata.author = var_sub.restore_variables_in_content(
+                    original_content=existing.metadata.author,
+                    parsed_content=parsed.metadata.author,
+                    source_dir=source_dir,
+                    verbose=False,
+                )
+
+        # Restore variables in main content
+        if parsed.content and existing.content:
+            if verbose:
+                click.echo("🔄 Restoring variables in content...")
+            parsed.content = var_sub.restore_variables_in_content(
+                original_content=existing.content,
+                parsed_content=parsed.content,
+                source_dir=source_dir,
+                verbose=verbose,
+            )
+
+        # Restore variables in documents
+        if parsed.documents and existing.documents:
+            # Create a map of existing documents by name for quick lookup
+            existing_docs = {doc.name: doc for doc in existing.documents}
+
+            for parsed_doc in parsed.documents:
+                if parsed_doc.name in existing_docs:
+                    existing_doc = existing_docs[parsed_doc.name]
+                    if parsed_doc.content and existing_doc.content:
+                        if verbose:
+                            click.echo(
+                                f"🔄 Restoring variables in document: {parsed_doc.name}"
+                            )
+                        parsed_doc.content = var_sub.restore_variables_in_content(
+                            original_content=existing_doc.content,
+                            parsed_content=parsed_doc.content,
+                            source_dir=source_dir,
+                            verbose=verbose,
+                        )
+
+    # V1 schema - restore in instructions
+    elif isinstance(parsed, UniversalPrompt) and isinstance(existing, UniversalPrompt):
+        # Restore variables in metadata fields
+        if parsed.metadata and existing.metadata:
+            if existing.metadata.title and parsed.metadata.title:
+                parsed.metadata.title = var_sub.restore_variables_in_content(
+                    original_content=existing.metadata.title,
+                    parsed_content=parsed.metadata.title,
+                    source_dir=source_dir,
+                    verbose=False,
+                )
+            if existing.metadata.description and parsed.metadata.description:
+                parsed.metadata.description = var_sub.restore_variables_in_content(
+                    original_content=existing.metadata.description,
+                    parsed_content=parsed.metadata.description,
+                    source_dir=source_dir,
+                    verbose=False,
+                )
+            if existing.metadata.author and parsed.metadata.author:
+                parsed.metadata.author = var_sub.restore_variables_in_content(
+                    original_content=existing.metadata.author,
+                    parsed_content=parsed.metadata.author,
+                    source_dir=source_dir,
+                    verbose=False,
+                )
+
+        if parsed.instructions and existing.instructions:
+            # For V1, instructions are structured as categories of string lists
+            # We need to restore variables in each instruction string
+            parsed_instructions = parsed.instructions.model_dump(exclude_none=True)
+            existing_instructions = existing.instructions.model_dump(exclude_none=True)
+
+            for category in parsed_instructions:
+                if (
+                    category in existing_instructions
+                    and parsed_instructions[category]
+                    and existing_instructions[category]
+                ):
+                    # Join instructions to create content blocks for comparison
+                    existing_content = "\n".join(existing_instructions[category])
+                    parsed_content = "\n".join(parsed_instructions[category])
+
+                    if verbose:
+                        click.echo(
+                            f"🔄 Restoring variables in {category} instructions..."
+                        )
+
+                    restored_content = var_sub.restore_variables_in_content(
+                        original_content=existing_content,
+                        parsed_content=parsed_content,
+                        source_dir=source_dir,
+                        verbose=verbose,
+                    )
+
+                    # Split back into list
+                    parsed_instructions[category] = restored_content.split("\n")
+
+            # Update the parsed prompt's instructions
+            parsed.instructions = Instructions.model_validate(parsed_instructions)
+
+    return parsed
 
 
 def _merge_prompts(

@@ -223,3 +223,199 @@ class TestVariableSubstitution:
 
         result = vs.substitute(content, {}, env_variables=True, strict=False)
         assert result == "Path: ${UNDEFINED_ENV_VAR}"
+
+    def test_restore_variables_basic(self, tmp_path):
+        """Test basic variable restoration in content."""
+        vs = VariableSubstitution()
+
+        # Create a variables file
+        var_file = tmp_path / ".promptrek" / "variables.promptrek.yaml"
+        var_file.parent.mkdir(parents=True, exist_ok=True)
+        var_file.write_text("PROJECT_NAME: My Project\nAUTHOR: Developer")
+
+        # Original content with variables
+        original = "Welcome to {{{ PROJECT_NAME }}} by {{{ AUTHOR }}}"
+
+        # Parsed content with values (simulating what sync would get)
+        parsed = "Welcome to My Project by Developer"
+
+        # Restore variables
+        result = vs.restore_variables_in_content(
+            original_content=original,
+            parsed_content=parsed,
+            source_dir=tmp_path,
+            verbose=False,
+        )
+
+        # Should restore the variable placeholders
+        assert result == "Welcome to {{{ PROJECT_NAME }}} by {{{ AUTHOR }}}"
+
+    def test_restore_variables_partial_match(self, tmp_path):
+        """Test variable restoration when only some values were substituted."""
+        vs = VariableSubstitution()
+
+        # Create a variables file
+        var_file = tmp_path / ".promptrek" / "variables.promptrek.yaml"
+        var_file.parent.mkdir(parents=True, exist_ok=True)
+        var_file.write_text("PROJECT_NAME: My Project")
+
+        # Original has variable, but also mentions "My Project" naturally
+        original = "{{{ PROJECT_NAME }}} is about My Project"
+
+        # After substitution, both become "My Project"
+        parsed = "My Project is about My Project"
+
+        # Restore - should restore the variable
+        result = vs.restore_variables_in_content(
+            original_content=original,
+            parsed_content=parsed,
+            source_dir=tmp_path,
+            verbose=False,
+        )
+
+        # Should restore the variable placeholder
+        assert result == "{{{ PROJECT_NAME }}} is about My Project"
+
+    def test_restore_variables_no_change_if_no_variables(self, tmp_path):
+        """Test that content without variables is unchanged."""
+        vs = VariableSubstitution()
+
+        original = "This is plain text"
+        parsed = "This is plain text with edits"
+
+        result = vs.restore_variables_in_content(
+            original_content=original,
+            parsed_content=parsed,
+            source_dir=tmp_path,
+            verbose=False,
+        )
+
+        # Should keep the edited content since no variables
+        assert result == "This is plain text with edits"
+
+    def test_restore_variables_with_overlapping_values(self, tmp_path):
+        """Test variable restoration with overlapping values."""
+        vs = VariableSubstitution()
+
+        # Create a variables file with overlapping values
+        var_file = tmp_path / ".promptrek" / "variables.promptrek.yaml"
+        var_file.parent.mkdir(parents=True, exist_ok=True)
+        var_file.write_text("SHORT: My\nLONG: My Project")
+
+        # Original content
+        original = "{{{ LONG }}} and {{{ SHORT }}}"
+
+        # Parsed (after substitution)
+        parsed = "My Project and My"
+
+        # Restore variables
+        result = vs.restore_variables_in_content(
+            original_content=original,
+            parsed_content=parsed,
+            source_dir=tmp_path,
+            verbose=False,
+        )
+
+        # Should restore both variables (longest first prevents substring issues)
+        assert result == "{{{ LONG }}} and {{{ SHORT }}}"
+
+    def test_restore_variables_with_env_vars(self, tmp_path):
+        """Test variable restoration with environment variables."""
+        vs = VariableSubstitution()
+
+        # Set env variable
+        os.environ["TEST_VAR"] = "test_value"
+
+        try:
+            # Original content with env variable
+            original = "Value: ${TEST_VAR}"
+
+            # Parsed (after substitution)
+            parsed = "Value: test_value"
+
+            # Restore
+            result = vs.restore_variables_in_content(
+                original_content=original,
+                parsed_content=parsed,
+                source_dir=tmp_path,
+                verbose=False,
+            )
+
+            # Should restore the env variable placeholder
+            assert result == "Value: ${TEST_VAR}"
+        finally:
+            # Clean up
+            del os.environ["TEST_VAR"]
+
+    def test_restore_variables_no_restoration_if_value_in_original(self, tmp_path):
+        """Test that values appearing naturally in content aren't replaced."""
+        vs = VariableSubstitution()
+
+        # Create a variables file
+        var_file = tmp_path / ".promptrek" / "variables.promptrek.yaml"
+        var_file.parent.mkdir(parents=True, exist_ok=True)
+        var_file.write_text("PROJECT_NAME: My Project")
+
+        # Original already contains "My Project" without the variable
+        original = "My Project is the name"
+
+        # Parsed is the same
+        parsed = "My Project is the name"
+
+        # Restore
+        result = vs.restore_variables_in_content(
+            original_content=original,
+            parsed_content=parsed,
+            source_dir=tmp_path,
+            verbose=False,
+        )
+
+        assert result == "My Project is the name"
+
+    def test_restore_variables_empty_content(self, tmp_path):
+        """Test variable restoration with empty content."""
+        vs = VariableSubstitution()
+
+        # Test empty original
+        result = vs.restore_variables_in_content(
+            original_content="",
+            parsed_content="Some content",
+            source_dir=tmp_path,
+            verbose=False,
+        )
+        assert result == "Some content"
+
+        # Test empty parsed
+        result = vs.restore_variables_in_content(
+            original_content="Some {{{ VAR }}}",
+            parsed_content="",
+            source_dir=tmp_path,
+            verbose=False,
+        )
+        assert result == ""
+
+    def test_restore_variables_multiple_occurrences(self, tmp_path):
+        """Test variable restoration with multiple occurrences."""
+        vs = VariableSubstitution()
+
+        # Create a variables file
+        var_file = tmp_path / ".promptrek" / "variables.promptrek.yaml"
+        var_file.parent.mkdir(parents=True, exist_ok=True)
+        var_file.write_text("NAME: John")
+
+        # Original with multiple variable occurrences
+        original = "Hi {{{ NAME }}}, welcome {{{ NAME }}}! Mr. {{{ NAME }}}"
+
+        # Parsed (after substitution)
+        parsed = "Hi John, welcome John! Mr. John"
+
+        # Restore
+        result = vs.restore_variables_in_content(
+            original_content=original,
+            parsed_content=parsed,
+            source_dir=tmp_path,
+            verbose=False,
+        )
+
+        # Should restore all occurrences
+        assert result == "Hi {{{ NAME }}}, welcome {{{ NAME }}}! Mr. {{{ NAME }}}"
