@@ -274,7 +274,7 @@ class TestVariableSubstitution:
         )
 
         # Should restore the variable placeholder
-        assert result == "{{{ PROJECT_NAME }}} is about {{{ PROJECT_NAME }}}"
+        assert result == "{{{ PROJECT_NAME }}} is about My Project"
 
     def test_restore_variables_no_change_if_no_variables(self, tmp_path):
         """Test that content without variables is unchanged."""
