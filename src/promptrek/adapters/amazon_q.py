@@ -410,8 +410,10 @@ class AmazonQAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
             if agent.tools:
                 agent_config["tools"] = agent.tools
 
-            # Always add resources pointing to rules
-            agent_config["resources"] = ["file://.amazonq/rules/**/*.md"]
+            # Add resources pointing to rules (using relative path from agent config location)
+            # Agent configs are in .amazonq/cli-agents/, rules are in .amazonq/rules/
+            # So we need to go up one level: ../rules/**/*.md
+            agent_config["resources"] = ["file://../rules/**/*.md"]
 
             # Inject hooks scoped to this agent
             if hooks:
@@ -481,7 +483,7 @@ class AmazonQAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
             "name": "default",
             "description": "Default assistant with project hooks",
             "prompt": "You are a helpful AI assistant.",
-            "resources": ["file://.amazonq/rules/**/*.md"],
+            "resources": ["file://../rules/**/*.md"],
             "hooks": hooks_config,
         }
 

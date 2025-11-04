@@ -243,7 +243,7 @@ class TestAmazonQAdapterV3:
         assert reviewer_data["description"] == "Reviews code"
         assert reviewer_data["prompt"] == "You are a code reviewer"
         assert reviewer_data["tools"] == ["file_read", "git_diff"]
-        assert reviewer_data["resources"] == ["file://.amazonq/rules/**/*.md"]
+        assert reviewer_data["resources"] == ["file://../rules/**/*.md"]
 
         # Check doc-generator agent
         doc_file = tmp_path / ".amazonq" / "cli-agents" / "doc-generator.json"
@@ -421,6 +421,33 @@ class TestAmazonQAdapterV3:
         agent_data = json.loads(agent_file.read_text())
 
         assert agent_data["prompt"] == "You are a code review assistant"
+
+    def test_agent_resources_use_relative_path(
+        self, adapter, sample_v3_prompt, tmp_path
+    ):
+        """Test that agent resources use correct relative path from agent config location.
+
+        Amazon Q agents are in .amazonq/cli-agents/ and rules are in .amazonq/rules/
+        So resources must use ../rules/**/*.md (relative to agent config file)
+        not .amazonq/rules/**/*.md (which would resolve to .amazonq/cli-agents/.amazonq/rules/)
+
+        This is the fix for issue #111.
+        """
+        files = adapter.generate(sample_v3_prompt, tmp_path)
+
+        # Check that agent was generated
+        reviewer_file = tmp_path / ".amazonq" / "cli-agents" / "code-reviewer.json"
+        assert reviewer_file.exists()
+
+        # Verify resources use correct relative path
+        reviewer_data = json.loads(reviewer_file.read_text())
+        assert "resources" in reviewer_data
+        assert reviewer_data["resources"] == ["file://../rules/**/*.md"]
+
+        # Verify the path would resolve correctly
+        # Agent is at: .amazonq/cli-agents/code-reviewer.json
+        # Rules are at: .amazonq/rules/*.md
+        # So ../rules/**/*.md from agent location resolves to .amazonq/rules/**/*.md ✓
 
     def test_mixed_scoped_and_global_hooks(self, adapter, tmp_path):
         """Test mixing scoped and global hooks correctly."""
