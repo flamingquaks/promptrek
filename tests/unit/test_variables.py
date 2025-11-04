@@ -370,10 +370,6 @@ class TestVariableSubstitution:
             verbose=False,
         )
 
-        # Should NOT restore since "My Project" appears naturally
-        # Wait - my implementation checks if placeholder is in original
-        # If placeholder is not in original, it won't restore
-        # This is the correct behavior!
         assert result == "My Project is the name"
 
     def test_restore_variables_empty_content(self, tmp_path):
