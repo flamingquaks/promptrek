@@ -514,12 +514,17 @@ html, body {
   }
 
   .site-nav .trigger {
+    display: none;
     min-width: 160px;
     right: 0;
     padding: 0.5rem;
     background: #ffffff !important;
     border: 1px solid #e2e8f0 !important;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25) !important;
+  }
+
+  .site-nav .nav-trigger:checked ~ .trigger {
+    display: flex;
   }
 
   .site-nav .page-link {
