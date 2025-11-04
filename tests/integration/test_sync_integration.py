@@ -149,6 +149,8 @@ class TestSyncIntegration:
 
     def test_sync_preserves_variables(self):
         """Test that sync preserves variable references from original PrompTrek file."""
+        import os
+
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
 
@@ -176,22 +178,29 @@ class TestSyncIntegration:
             with open(promptrek_file, "w") as f:
                 yaml.dump(original_content, f)
 
-            # Generate to Claude format (this will replace variables with values)
-            runner = CliRunner()
-            result = runner.invoke(
-                cli,
-                [
-                    "generate",
-                    "--editor",
-                    "claude",
-                    "--source",
-                    str(promptrek_file),
-                    "--target-dir",
-                    str(temp_path),
-                ],
-            )
+            # Save current directory and change to temp directory
+            # This is needed so that variables.promptrek.yaml is found
+            original_cwd = os.getcwd()
+            try:
+                os.chdir(temp_path)
 
-            assert result.exit_code == 0
+                # Generate to Claude format (this will replace variables with values)
+                runner = CliRunner()
+                result = runner.invoke(
+                    cli,
+                    [
+                        "generate",
+                        "--editor",
+                        "claude",
+                        "--output",
+                        str(temp_path),
+                        str(promptrek_file),
+                    ],
+                )
+
+                assert result.exit_code == 0, f"Generate failed: {result.output}"
+            finally:
+                os.chdir(original_cwd)
 
             # Check that generated file has values, not variables
             claude_file = temp_path / ".claude" / "CLAUDE.md"
@@ -203,21 +212,32 @@ class TestSyncIntegration:
             assert "{{{ PROJECT_NAME }}}" not in claude_content  # Variables replaced
 
             # Now sync back from Claude to PrompTrek
-            synced_file = temp_path / "synced.promptrek.yaml"
-            result = runner.invoke(
-                cli,
-                [
-                    "sync",
-                    "--source-dir",
-                    str(temp_path),
-                    "--editor",
-                    "claude",
-                    "--output",
-                    str(synced_file),
-                ],
-            )
+            # Sync to the original file so that variable restoration can compare
+            # with the existing content
+            synced_file = promptrek_file
 
-            assert result.exit_code == 0
+            # Change back to temp directory for sync (to find variables file)
+            original_cwd = os.getcwd()
+            try:
+                os.chdir(temp_path)
+
+                result = runner.invoke(
+                    cli,
+                    [
+                        "sync",
+                        "--source-dir",
+                        str(temp_path),
+                        "--editor",
+                        "claude",
+                        "--output",
+                        str(synced_file),
+                        "--force",  # Don't prompt for confirmation
+                    ],
+                )
+
+                assert result.exit_code == 0, f"Sync failed: {result.output}"
+            finally:
+                os.chdir(original_cwd)
 
             # Check that synced file has variables restored, not concrete values
             with open(synced_file, "r") as f:

@@ -520,7 +520,7 @@ class VariableSubstitution:
                 # Template variable like {{{ PROJECT_NAME }}}
                 if var_name in all_variables:
                     value = str(all_variables[var_name])
-                    placeholder = f"{{{{{ {var_name} }}}}}"
+                    placeholder = f"{{{{{{ {var_name} }}}}}}"
                     replacements.append((value, placeholder, var_name))
 
         if not replacements:
