@@ -16,6 +16,7 @@ from ..core.models import (
     UniversalPromptV2,
     UniversalPromptV3,
 )
+from ..utils.headless import generate_bootstrap_content
 from .base import EditorAdapter
 from .mcp_mixin import MCPGenerationMixin
 from .sync_mixin import MarkdownSyncMixin
@@ -58,18 +59,20 @@ class KiroAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
         # V3: Always use plugin generation (handles steering docs + plugins)
         if isinstance(prompt, UniversalPromptV3):
             return self._generate_plugins(
-                prompt, output_dir, dry_run, verbose, variables
+                prompt, output_dir, dry_run, verbose, variables, headless
             )
 
         # V2.1: Handle plugins if present
         if isinstance(prompt, UniversalPromptV2) and prompt.plugins:
             return self._generate_plugins(
-                prompt, output_dir, dry_run, verbose, variables
+                prompt, output_dir, dry_run, verbose, variables, headless
             )
 
         # V2: Use documents field for multi-file steering (no plugins)
         if isinstance(prompt, UniversalPromptV2):
-            return self._generate_v2(prompt, output_dir, dry_run, verbose, variables)
+            return self._generate_v2(
+                prompt, output_dir, dry_run, verbose, variables, headless
+            )
 
         # V1: Apply variable substitution if supported
         processed_prompt = self.substitute_variables(prompt, variables)
@@ -94,6 +97,7 @@ class KiroAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
         dry_run: bool,
         verbose: bool,
         variables: Optional[Dict[str, Any]] = None,
+        headless: bool = False,
     ) -> List[Path]:
         """Generate Kiro files from v2/v3 schema (using documents for steering docs)."""
         steering_dir = output_dir / ".kiro" / "steering"
@@ -152,6 +156,14 @@ class KiroAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
                 click.echo(f"✅ Generated: {output_file}")
                 created_files.append(output_file)
 
+        # Generate bootstrap file if headless mode is enabled
+        if headless:
+            bootstrap_file = self._generate_bootstrap_file(
+                prompt, steering_dir, created_files, dry_run, verbose
+            )
+            if bootstrap_file:
+                created_files.append(bootstrap_file)
+
         return created_files
 
     def _generate_plugins(
@@ -161,13 +173,14 @@ class KiroAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
         dry_run: bool,
         verbose: bool,
         variables: Optional[Dict[str, Any]] = None,
+        headless: bool = False,
     ) -> List[Path]:
         """Generate Kiro files from v2.1/v3.0 schema with plugin support."""
         created_files = []
 
         # First, generate the regular v2/v3 steering docs
         steering_files = self._generate_v2(
-            prompt, output_dir, dry_run, verbose, variables
+            prompt, output_dir, dry_run, verbose, variables, headless
         )
         created_files.extend(steering_files)
 
@@ -477,3 +490,48 @@ class KiroAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
             documents=documents if documents else None,
             variables={},
         )
+
+    def _generate_bootstrap_file(
+        self,
+        prompt: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3],
+        steering_dir: Path,
+        created_files: List[Path],
+        dry_run: bool = False,
+        verbose: bool = False,
+    ) -> Optional[Path]:
+        """Generate bootstrap file for headless/managed agents."""
+        bootstrap_file = steering_dir / "_bootstrap.md"
+
+        custom_message = None
+        if isinstance(prompt, UniversalPromptV3):
+            if prompt.headless and prompt.headless.custom_message:
+                custom_message = prompt.headless.custom_message
+
+        generated_files = [
+            str(f.relative_to(steering_dir.parent.parent)) for f in created_files
+        ]
+
+        bootstrap_content = generate_bootstrap_content(
+            editor_name="kiro",
+            editor_display_name="Kiro",
+            generated_file_paths=generated_files,
+            custom_message=custom_message,
+            promptrek_version="0.6.0",
+        )
+
+        if dry_run:
+            click.echo(f"  📁 Would create: {bootstrap_file}")
+            if verbose:
+                preview = (
+                    bootstrap_content[:300] + "..."
+                    if len(bootstrap_content) > 300
+                    else bootstrap_content
+                )
+                click.echo(f"    {preview}")
+            return None
+        else:
+            steering_dir.mkdir(parents=True, exist_ok=True)
+            with open(bootstrap_file, "w", encoding="utf-8") as f:
+                f.write(bootstrap_content)
+            click.echo(f"✅ Generated bootstrap file: {bootstrap_file}")
+            return bootstrap_file

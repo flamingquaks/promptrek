@@ -10,6 +10,7 @@ import click
 
 from ..core.exceptions import DeprecationWarnings, ValidationError
 from ..core.models import UniversalPrompt, UniversalPromptV2, UniversalPromptV3
+from ..utils.headless import generate_bootstrap_content
 from .base import EditorAdapter
 from .sync_mixin import MarkdownSyncMixin
 
@@ -40,7 +41,9 @@ class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
 
         # V2/V3: Use documents field for multi-file rules or main content for single file
         if isinstance(prompt, (UniversalPromptV2, UniversalPromptV3)):
-            return self._generate_v2(prompt, output_dir, dry_run, verbose, variables)
+            return self._generate_v2(
+                prompt, output_dir, dry_run, verbose, variables, headless
+            )
 
         # V1: Apply variable substitution if supported
         processed_prompt = self.substitute_variables(prompt, variables)
@@ -80,6 +83,7 @@ class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
         dry_run: bool,
         verbose: bool,
         variables: Optional[Dict[str, Any]] = None,
+        headless: bool = False,
     ) -> List[Path]:
         """Generate Cursor files from v2/v3 schema (using documents for rules or content for single file)."""
         rules_dir = output_dir / ".cursor" / "rules"
@@ -188,6 +192,18 @@ class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
                 merged_vars if merged_vars else None,
             )
             created_files.extend(plugin_files)
+
+        # Generate bootstrap file if headless mode is enabled
+        if headless:
+            bootstrap_file = self._generate_bootstrap_file(
+                prompt,
+                rules_dir,
+                created_files,
+                dry_run,
+                verbose,
+            )
+            if bootstrap_file:
+                created_files.append(bootstrap_file)
 
         return created_files
 
@@ -1366,6 +1382,53 @@ class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
                     config["globs"] = tech_patterns[main_tech]
 
         return config
+
+    def _generate_bootstrap_file(
+        self,
+        prompt: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3],
+        rules_dir: Path,
+        created_files: List[Path],
+        dry_run: bool = False,
+        verbose: bool = False,
+    ) -> Optional[Path]:
+        """Generate bootstrap file for headless/managed agents."""
+        bootstrap_file = rules_dir / "_bootstrap.md"
+
+        # Get custom message if provided in schema
+        custom_message = None
+        if isinstance(prompt, UniversalPromptV3):
+            if prompt.headless and prompt.headless.custom_message:
+                custom_message = prompt.headless.custom_message
+
+        # Convert file paths to relative paths
+        generated_files = [
+            str(f.relative_to(rules_dir.parent.parent)) for f in created_files
+        ]
+
+        bootstrap_content = generate_bootstrap_content(
+            editor_name="cursor",
+            editor_display_name="Cursor",
+            generated_file_paths=generated_files,
+            custom_message=custom_message,
+            promptrek_version="0.6.0",
+        )
+
+        if dry_run:
+            click.echo(f"  📁 Would create: {bootstrap_file}")
+            if verbose:
+                preview = (
+                    bootstrap_content[:300] + "..."
+                    if len(bootstrap_content) > 300
+                    else bootstrap_content
+                )
+                click.echo(f"    {preview}")
+            return None
+        else:
+            rules_dir.mkdir(parents=True, exist_ok=True)
+            with open(bootstrap_file, "w", encoding="utf-8") as f:
+                f.write(bootstrap_content)
+            click.echo(f"✅ Generated bootstrap file: {bootstrap_file}")
+            return bootstrap_file
 
     def parse_files(
         self, source_dir: Path

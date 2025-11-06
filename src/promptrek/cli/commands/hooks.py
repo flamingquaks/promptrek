@@ -130,8 +130,17 @@ def check_generated_command(ctx: click.Context, files: List[str]) -> None:
 
         return False
 
+    # Filter out bootstrap files - these are meant to be committed for headless agents
+    def is_bootstrap_file(file_path: str) -> bool:
+        """Check if file is a bootstrap file that should be allowed."""
+        return Path(file_path).name == "_bootstrap.md"
+
     generated_files = []
     for file_path in files:
+        # Skip bootstrap files - they're intended to be committed
+        if is_bootstrap_file(file_path):
+            continue
+
         for pattern in generated_file_patterns:
             if matches_pattern(file_path, pattern):
                 generated_files.append(file_path)

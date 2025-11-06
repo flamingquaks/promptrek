@@ -353,6 +353,25 @@ class PluginConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
+class HeadlessConfig(BaseModel):
+    """Configuration for headless/managed agent bootstrap files."""
+
+    enabled: bool = Field(
+        default=False,
+        description="Enable headless mode - generates bootstrap files for managed agents",
+    )
+    custom_message: Optional[str] = Field(
+        default=None,
+        description="Custom instructions to include in bootstrap files for this project",
+    )
+    auto_execute: bool = Field(
+        default=True,
+        description="Whether agents should automatically execute generation commands",
+    )
+
+    model_config = ConfigDict(extra="forbid")
+
+
 class UniversalPromptV2(BaseModel):
     """
     Simplified UPF v2 schema - markdown-first approach.
@@ -446,6 +465,11 @@ class UniversalPromptV3(BaseModel):
     )
     hooks: Optional[List[Hook]] = Field(
         default=None, description="Hook configurations (top-level in v3.0+)"
+    )
+
+    headless: Optional[HeadlessConfig] = Field(
+        default=None,
+        description="Headless mode configuration for managed/remote agents",
     )
 
     ignore_editor_files: Optional[bool] = Field(

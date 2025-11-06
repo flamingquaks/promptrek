@@ -19,6 +19,7 @@ from ..core.models import (
     UniversalPromptV2,
     UniversalPromptV3,
 )
+from ..utils.headless import generate_bootstrap_content
 from .base import EditorAdapter
 from .mcp_mixin import MCPGenerationMixin
 from .sync_mixin import SingleFileMarkdownSyncMixin
@@ -210,6 +211,23 @@ class CopilotAdapter(MCPGenerationMixin, SingleFileMarkdownSyncMixin, EditorAdap
             )
             created_files.extend(mcp_files)
 
+        # Generate bootstrap file if headless mode is enabled
+        if headless:
+            github_dir = output_dir / ".github"
+            bootstrap_file = self._generate_bootstrap_file(
+                prompt,
+                github_dir,
+                (
+                    created_files[0]
+                    if created_files
+                    else github_dir / "copilot-instructions.md"
+                ),
+                dry_run,
+                verbose,
+            )
+            if bootstrap_file:
+                created_files.append(bootstrap_file)
+
         return created_files
 
     def _generate_mcp_config(
@@ -253,6 +271,77 @@ class CopilotAdapter(MCPGenerationMixin, SingleFileMarkdownSyncMixin, EditorAdap
                 created_files.append(project_config_path)
 
         return created_files
+
+    def _generate_bootstrap_file(
+        self,
+        prompt: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3],
+        github_dir: Path,
+        main_output_file: Path,
+        dry_run: bool = False,
+        verbose: bool = False,
+    ) -> Optional[Path]:
+        """Generate bootstrap file for headless/managed agents.
+
+        Args:
+            prompt: The prompt configuration
+            github_dir: Directory where GitHub files are generated
+            main_output_file: Path to the main copilot-instructions.md file
+            dry_run: Whether this is a dry run
+            verbose: Whether to output verbose messages
+
+        Returns:
+            Path to the generated bootstrap file, or None if dry run
+        """
+        bootstrap_file = github_dir / "_bootstrap.md"
+
+        # Get custom message if provided in schema
+        custom_message = None
+        if isinstance(prompt, UniversalPromptV3):
+            if prompt.headless and prompt.headless.custom_message:
+                custom_message = prompt.headless.custom_message
+
+        # Generate list of files that will be created
+        generated_files = [str(main_output_file.relative_to(github_dir.parent))]
+
+        # Add MCP config if it exists
+        if isinstance(prompt, (UniversalPromptV2, UniversalPromptV3)):
+            if isinstance(prompt, UniversalPromptV3):
+                mcp_servers = prompt.mcp_servers
+            else:
+                mcp_servers = prompt.plugins.mcp_servers if prompt.plugins else None
+
+            if mcp_servers:
+                generated_files.append(".vscode/mcp.json")
+
+        bootstrap_content = generate_bootstrap_content(
+            editor_name="copilot",
+            editor_display_name="GitHub Copilot",
+            generated_file_paths=generated_files,
+            custom_message=custom_message,
+            promptrek_version="0.6.0",  # TODO: Get from package version
+        )
+
+        if dry_run:
+            click.echo(f"  📁 Would create: {bootstrap_file}")
+            if verbose:
+                click.echo("  📄 Bootstrap file content preview:")
+                preview = (
+                    bootstrap_content[:300] + "..."
+                    if len(bootstrap_content) > 300
+                    else bootstrap_content
+                )
+                click.echo(f"    {preview}")
+            return None
+        else:
+            # Create directory if needed (should already exist)
+            github_dir.mkdir(exist_ok=True)
+
+            # Write bootstrap file
+            with open(bootstrap_file, "w", encoding="utf-8") as f:
+                f.write(bootstrap_content)
+
+            click.echo(f"✅ Generated bootstrap file: {bootstrap_file}")
+            return bootstrap_file
 
     def _generate_copilot_instructions(
         self,

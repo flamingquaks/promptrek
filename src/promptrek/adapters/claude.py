@@ -12,6 +12,7 @@ import yaml
 
 from ..core.exceptions import DeprecationWarnings, ValidationError
 from ..core.models import Agent, UniversalPrompt, UniversalPromptV2, UniversalPromptV3
+from ..utils.headless import generate_bootstrap_content
 from .base import EditorAdapter
 from .sync_mixin import SingleFileMarkdownSyncMixin
 
@@ -98,6 +99,18 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
                 merged_vars if merged_vars else None,
             )
             generated_files.extend(plugin_files)
+
+        # Generate bootstrap file if headless mode is enabled
+        if headless:
+            bootstrap_file = self._generate_bootstrap_file(
+                prompt,
+                claude_dir,
+                output_file,
+                dry_run,
+                verbose,
+            )
+            if bootstrap_file:
+                generated_files.append(bootstrap_file)
 
         return generated_files
 
@@ -1190,3 +1203,97 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
             lines.append(f"- Leverage {tech_list} best practices and idioms")
 
         return "\n".join(lines)
+
+    def _generate_bootstrap_file(
+        self,
+        prompt: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3],
+        claude_dir: Path,
+        main_output_file: Path,
+        dry_run: bool = False,
+        verbose: bool = False,
+    ) -> Optional[Path]:
+        """Generate bootstrap file for headless/managed agents.
+
+        Args:
+            prompt: The prompt configuration
+            claude_dir: Directory where Claude files are generated
+            main_output_file: Path to the main CLAUDE.md file
+            dry_run: Whether this is a dry run
+            verbose: Whether to output verbose messages
+
+        Returns:
+            Path to the generated bootstrap file, or None if dry run
+        """
+        bootstrap_file = claude_dir / "_bootstrap.md"
+
+        # Get custom message if provided in schema
+        custom_message = None
+        if isinstance(prompt, UniversalPromptV3):
+            if prompt.headless and prompt.headless.custom_message:
+                custom_message = prompt.headless.custom_message
+
+        # Generate bootstrap content
+        generated_files = [str(main_output_file.relative_to(claude_dir.parent))]
+
+        # Add plugin files to the list if they exist
+        if isinstance(prompt, (UniversalPromptV2, UniversalPromptV3)):
+            # Add agent files
+            if isinstance(prompt, UniversalPromptV3):
+                agents = prompt.agents
+            else:
+                agents = prompt.plugins.agents if prompt.plugins else None
+
+            if agents:
+                for agent in agents:
+                    agent_file = f".claude/agents/{agent.name}.md"
+                    generated_files.append(agent_file)
+
+            # Add command files
+            if isinstance(prompt, UniversalPromptV3):
+                commands = prompt.commands
+            else:
+                commands = prompt.plugins.commands if prompt.plugins else None
+
+            if commands:
+                for command in commands:
+                    command_file = f".claude/commands/{command.name}.md"
+                    generated_files.append(command_file)
+
+            # Add MCP config
+            if isinstance(prompt, UniversalPromptV3):
+                mcp_servers = prompt.mcp_servers
+            else:
+                mcp_servers = prompt.plugins.mcp_servers if prompt.plugins else None
+
+            if mcp_servers:
+                generated_files.append(".mcp.json")
+
+        bootstrap_content = generate_bootstrap_content(
+            editor_name="claude",
+            editor_display_name="Claude Code",
+            generated_file_paths=generated_files,
+            custom_message=custom_message,
+            promptrek_version="0.6.0",  # TODO: Get from package version
+        )
+
+        if dry_run:
+            click.echo(f"  📁 Would create: {bootstrap_file}")
+            if verbose:
+                click.echo("  📄 Bootstrap file content preview:")
+                preview = (
+                    bootstrap_content[:300] + "..."
+                    if len(bootstrap_content) > 300
+                    else bootstrap_content
+                )
+                click.echo(f"    {preview}")
+            return None
+        else:
+            # Create directory if needed (should already exist)
+            claude_dir.mkdir(exist_ok=True)
+
+            # Write bootstrap file
+            with open(bootstrap_file, "w", encoding="utf-8") as f:
+                f.write(bootstrap_content)
+
+            click.echo(f"✅ Generated bootstrap file: {bootstrap_file}")
+            return bootstrap_file

@@ -460,13 +460,24 @@ def _generate_for_editor_multiple(
             if variables and not (base_variables or cli_overrides):
                 merged_vars = variables
 
+            # Check if headless should be enabled (CLI flag OR schema config)
+            effective_headless = headless
+            if isinstance(prompt, (UniversalPromptV2, UniversalPromptV3)):
+                if prompt.headless and prompt.headless.enabled:
+                    effective_headless = True
+
             # Check if adapter supports headless parameter
             if _adapter_supports_headless(adapter, "generate"):
                 adapter.generate(
-                    prompt, output_dir, dry_run, verbose, merged_vars, headless=headless
+                    prompt,
+                    output_dir,
+                    dry_run,
+                    verbose,
+                    merged_vars,
+                    headless=effective_headless,
                 )
             else:
-                if headless:
+                if effective_headless:
                     click.echo(
                         f"Warning: {editor} adapter does not support headless mode, ignoring --headless flag"
                     )
@@ -486,6 +497,12 @@ def _generate_for_editor_multiple(
                 merged_vars.update(cli_overrides)
             if variables and not (base_variables or cli_overrides):
                 merged_vars = variables
+
+            # Check if headless should be enabled (CLI flag OR schema config)
+            effective_headless = headless
+            if isinstance(last_prompt, (UniversalPromptV2, UniversalPromptV3)):
+                if last_prompt.headless and last_prompt.headless.enabled:
+                    effective_headless = True
 
             # Multiple files - check adapter capabilities
             if hasattr(adapter, "generate_multiple") and registry.has_capability(
@@ -507,10 +524,10 @@ def _generate_for_editor_multiple(
                             dry_run,
                             verbose,
                             merged_vars,
-                            headless=headless,
+                            headless=effective_headless,
                         )
                     else:
-                        if headless:
+                        if effective_headless:
                             click.echo(
                                 f"Warning: {editor} adapter does not support headless mode in merged generation, ignoring --headless flag"
                             )
@@ -544,10 +561,10 @@ def _generate_for_editor_multiple(
                             dry_run,
                             verbose,
                             fallback_vars,
-                            headless=headless,
+                            headless=effective_headless,
                         )
                     else:
-                        if headless:
+                        if effective_headless:
                             click.echo(
                                 f"Warning: {editor} adapter does not support headless mode, ignoring --headless flag"
                             )
@@ -579,10 +596,10 @@ def _generate_for_editor_multiple(
                         dry_run,
                         verbose,
                         fallback_vars,
-                        headless=headless,
+                        headless=effective_headless,
                     )
                 else:
-                    if headless:
+                    if effective_headless:
                         click.echo(
                             f"Warning: {editor} adapter does not support headless mode, ignoring --headless flag"
                         )
@@ -719,13 +736,25 @@ def _generate_for_editor(
 
     try:
         adapter = registry.get(editor)
+
+        # Check if headless should be enabled (CLI flag OR schema config)
+        effective_headless = headless
+        if isinstance(prompt, (UniversalPromptV2, UniversalPromptV3)):
+            if prompt.headless and prompt.headless.enabled:
+                effective_headless = True
+
         # Check if adapter supports headless parameter
         if _adapter_supports_headless(adapter, "generate"):
             adapter.generate(
-                prompt, output_dir, dry_run, verbose, variables, headless=headless
+                prompt,
+                output_dir,
+                dry_run,
+                verbose,
+                variables,
+                headless=effective_headless,
             )
         else:
-            if headless:
+            if effective_headless:
                 click.echo(
                     f"Warning: {editor} adapter does not support headless mode, ignoring --headless flag"
                 )
