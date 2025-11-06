@@ -14,6 +14,7 @@ import yaml
 
 from ...adapters import registry
 from ...adapters.registry import AdapterCapability
+from ...commands.spec_commands import get_spec_commands
 from ...core.exceptions import AdapterNotFoundError, CLIError, UPFParsingError
 from ...core.models import (
     DynamicVariableConfig,
@@ -24,6 +25,7 @@ from ...core.models import (
 )
 from ...core.parser import UPFParser
 from ...core.validator import UPFValidator
+from ...utils.spec_manager import SpecManager
 from ...utils.variables import BuiltInVariables, VariableSubstitution
 
 
@@ -386,6 +388,60 @@ def _save_generation_metadata(
             )
 
 
+def _inject_spec_commands(
+    prompt: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3],
+    output_dir: Path,
+) -> Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3]:
+    """
+    Inject spec-driven project document commands into the prompt.
+
+    This ensures the spec management commands are available in all editors.
+
+    Args:
+        prompt: The prompt to inject commands into
+        output_dir: Output directory (used to determine project root)
+
+    Returns:
+        Modified prompt with spec commands injected
+    """
+    # Only inject for V2 and V3 prompts (they support commands)
+    if not isinstance(prompt, (UniversalPromptV2, UniversalPromptV3)):
+        return prompt
+
+    # Initialize spec manager to ensure directory exists
+    spec_manager = SpecManager(output_dir)
+    spec_manager.ensure_specs_directory()
+
+    # Get spec commands
+    spec_commands = get_spec_commands()
+
+    # For V3, inject into top-level commands field
+    if isinstance(prompt, UniversalPromptV3):
+        if prompt.commands is None:
+            prompt.commands = []
+        # Only add commands that don't already exist
+        existing_names = {cmd.name for cmd in prompt.commands}
+        for spec_cmd in spec_commands:
+            if spec_cmd.name not in existing_names:
+                prompt.commands.append(spec_cmd)
+
+    # For V2, inject into nested plugins.commands field
+    elif isinstance(prompt, UniversalPromptV2):
+        if prompt.plugins is None:
+            from ...core.models import PluginConfig
+
+            prompt.plugins = PluginConfig()
+        if prompt.plugins.commands is None:
+            prompt.plugins.commands = []
+        # Only add commands that don't already exist
+        existing_names = {cmd.name for cmd in prompt.plugins.commands}
+        for spec_cmd in spec_commands:
+            if spec_cmd.name not in existing_names:
+                prompt.plugins.commands.append(spec_cmd)
+
+    return prompt
+
+
 def _parse_and_validate_file(
     ctx: click.Context, file_path: Path
 ) -> Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3]:
@@ -448,6 +504,9 @@ def _generate_for_editor_multiple(
             # Single file - merge variables with correct precedence
             prompt, source_file = prompt_files[0]
 
+            # Inject spec commands into prompt
+            prompt = _inject_spec_commands(prompt, output_dir)
+
             # Merge variables: base < prompt.variables < CLI
             merged_vars = {}
             if base_variables:
@@ -474,7 +533,13 @@ def _generate_for_editor_multiple(
             if verbose:
                 click.echo(f"✅ Generated {editor} files from {source_file}")
         else:
-            # Multiple files - for merged generation, we'll use the last prompt's variables
+            # Multiple files - inject spec commands into all prompts
+            prompt_files = [
+                (_inject_spec_commands(prompt, output_dir), source_file)
+                for prompt, source_file in prompt_files
+            ]
+
+            # For merged generation, we'll use the last prompt's variables
             # TODO: In future, support merging variables from multiple prompts
             last_prompt = prompt_files[-1][0]
             merged_vars = {}

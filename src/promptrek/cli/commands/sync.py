@@ -23,6 +23,7 @@ from ...core.models import (
 )
 from ...core.parser import UPFParser
 from ...utils.gitignore import configure_gitignore
+from ...utils.spec_manager import SpecManager
 from ...utils.variables import VariableSubstitution
 from ..yaml_writer import write_promptrek_yaml
 
@@ -102,6 +103,9 @@ def sync_command(
 
         # Check and apply ignore_editor_files configuration
         _apply_gitignore_config(merged_prompt, output_file.parent)
+
+        # Sync spec files from .promptrek/specs/ directory
+        _sync_spec_files(output_file.parent, ctx.obj.get("verbose", False) if ctx.obj else False)
 
 
 def _merge_metadata(existing_data: dict, parsed: UniversalPrompt) -> dict:
@@ -642,3 +646,30 @@ def _apply_gitignore_config(
 
     if ignore_editor_files:
         configure_gitignore(project_dir, add_editor_files=True, remove_cached=False)
+
+
+def _sync_spec_files(project_dir: Path, verbose: bool = False) -> None:
+    """
+    Sync spec files from .promptrek/specs/ directory.
+
+    Detects new markdown files in the specs directory and registers them
+    in the .promptrek/specs.yaml registry.
+
+    Args:
+        project_dir: Project directory
+        verbose: Whether to show verbose output
+    """
+    try:
+        spec_manager = SpecManager(project_dir)
+        new_specs = spec_manager.sync_specs_from_disk()
+
+        if new_specs:
+            click.echo(f"📋 Registered {len(new_specs)} new spec file(s):")
+            for spec in new_specs:
+                click.echo(f"   - {spec.title} ({spec.id})")
+        elif verbose:
+            click.echo("📋 No new spec files to register")
+
+    except Exception as e:
+        if verbose:
+            click.echo(f"⚠️  Failed to sync spec files: {e}", err=True)

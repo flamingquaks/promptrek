@@ -24,6 +24,7 @@ from .commands.plugins import (
 )
 from .commands.preview import preview_command
 from .commands.refresh import refresh_command
+from .commands.specs import list_specs_command, spec_export_command
 from .commands.sync import sync_command
 from .commands.validate import validate_command
 from .interactive import run_interactive_mode
@@ -879,6 +880,88 @@ def config_ignores(
     """
     try:
         config_ignores_command(ctx, config, remove_cached, dry_run)
+    except PrompTrekError as e:
+        click.echo(f"Error: {e}", err=True)
+        ctx.exit(1)
+    except Exception as e:
+        if ctx.obj.get("verbose"):
+            raise
+        click.echo(f"Unexpected error: {e}", err=True)
+        ctx.exit(1)
+
+
+@cli.command("list-specs")
+@click.pass_context
+def list_specs(ctx: click.Context) -> None:
+    """List all registered spec-driven project documents.
+
+    Shows all specs registered in .promptrek/specs.yaml with their metadata.
+
+    Examples:
+        # List all specs
+        promptrek list-specs
+    """
+    try:
+        list_specs_command(ctx)
+    except PrompTrekError as e:
+        click.echo(f"Error: {e}", err=True)
+        ctx.exit(1)
+    except Exception as e:
+        if ctx.obj.get("verbose"):
+            raise
+        click.echo(f"Unexpected error: {e}", err=True)
+        ctx.exit(1)
+
+
+@cli.group()
+@click.pass_context
+def spec(ctx: click.Context) -> None:
+    """Manage spec-driven project documents.
+
+    Commands for working with specification documents created via
+    /promptrek.spec.create and related slash commands in your editor.
+    """
+    pass
+
+
+@spec.command("export")
+@click.argument("spec_id", type=str)
+@click.option(
+    "--output",
+    "-o",
+    type=click.Path(path_type=Path),
+    help="Output file path (default: <spec-name>-export.md)",
+)
+@click.option(
+    "--clean",
+    is_flag=True,
+    default=True,
+    help="Remove metadata header from export (default: true)",
+)
+@click.pass_context
+def spec_export(
+    ctx: click.Context,
+    spec_id: str,
+    output: Optional[Path],
+    clean: bool,
+) -> None:
+    """Export a spec to a cleaned markdown file.
+
+    Exports a spec document to a standalone markdown file, optionally
+    removing the metadata header for cleaner presentation.
+
+    Examples:
+        # Export spec by ID
+        promptrek spec export a1b2c3d4
+
+        # Export to specific file
+        promptrek spec export a1b2c3d4 --output docs/api-spec.md
+
+        # Export with metadata header
+        promptrek spec export a1b2c3d4 --no-clean
+    """
+    try:
+        spec_export_command(ctx, spec_id, output, clean)
     except PrompTrekError as e:
         click.echo(f"Error: {e}", err=True)
         ctx.exit(1)

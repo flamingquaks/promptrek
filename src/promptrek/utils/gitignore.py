@@ -56,6 +56,8 @@ def get_editor_file_patterns() -> List[str]:
         ".kiro/steering/*.md",
         # MCP configs
         ".vscode/mcp.json",
+        # Spec-driven project documents (ephemeral, not committed)
+        ".promptrek/specs/",
     ]
 
 

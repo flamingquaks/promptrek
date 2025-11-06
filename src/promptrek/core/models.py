@@ -638,3 +638,76 @@ class GenerationMetadata(BaseModel):
         return v
 
     model_config = ConfigDict(validate_assignment=True, extra="allow")
+
+
+# Universal Spec Format (USF) - Spec-driven project documents
+
+
+class SpecMetadata(BaseModel):
+    """
+    Metadata for a single spec file in the Universal Spec Format.
+
+    Stored in .promptrek/specs.yaml as part of the spec registry.
+    """
+
+    id: str = Field(..., description="Unique identifier for the spec")
+    title: str = Field(..., description="Human-readable title")
+    path: str = Field(..., description="Relative path to spec file in .promptrek/specs/")
+    source_command: str = Field(
+        ..., description="Command that created this spec (e.g., '/promptrek.spec.create')"
+    )
+    created: str = Field(..., description="ISO 8601 timestamp of creation")
+    updated: Optional[str] = Field(
+        default=None, description="ISO 8601 timestamp of last update"
+    )
+    summary: Optional[str] = Field(
+        default=None, description="Brief summary of spec content"
+    )
+    linked_specs: Optional[List[str]] = Field(
+        default=None, description="IDs of related/linked specs"
+    )
+    tags: Optional[List[str]] = Field(
+        default=None, description="Tags for categorization"
+    )
+
+    @field_validator("created", "updated")
+    @classmethod
+    def validate_timestamps(cls, v: Optional[str]) -> Optional[str]:
+        """Validate timestamp format."""
+        if v is None:
+            return v
+        try:
+            datetime.fromisoformat(v)
+        except ValueError:
+            raise ValueError(
+                f"Timestamp must be in ISO 8601 format, got: {v}"
+            )
+        return v
+
+    model_config = ConfigDict(validate_assignment=True, extra="forbid")
+
+
+class UniversalSpecFormat(BaseModel):
+    """
+    Universal Spec Format (USF) - Registry of spec-driven project documents.
+
+    Stored in .promptrek/specs.yaml as the canonical source of spec metadata.
+    Actual spec content files are stored in .promptrek/specs/ directory.
+    """
+
+    schema_version: str = Field(
+        default="1.0.0", description="USF schema version"
+    )
+    specs: List[SpecMetadata] = Field(
+        default_factory=list, description="List of registered specs"
+    )
+
+    @field_validator("schema_version")
+    @classmethod
+    def validate_schema_version(cls, v: str) -> str:
+        """Validate schema version format."""
+        if not v.count(".") == 2:
+            raise ValueError("Schema version must be in format 'x.y.z'")
+        return v
+
+    model_config = ConfigDict(validate_assignment=True, extra="forbid")
