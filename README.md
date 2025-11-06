@@ -185,6 +185,9 @@ promptrek config-ignores --remove-cached
 - Generated editor configurations (`.github/copilot-instructions.md`, `.cursor/rules/*.mdc`, etc.)
 - User-specific configuration directory (`.promptrek/`) containing `variables.promptrek.yaml` and `user-config.promptrek.yaml`
 
+**What gets committed:**
+- Team-shared spec files (`promptrek/specs/` and `promptrek/specs.yaml`) for collaborative specifications
+
 **Configuration option:**
 ```yaml
 # Disable automatic .gitignore management
@@ -197,7 +200,7 @@ PrompTrek includes a powerful spec-driven project documents feature that enables
 
 ### Overview
 
-Create, manage, and implement specifications using AI-powered slash commands that work across all supported editors. Specs are stored in `.promptrek/specs/` and tracked in a Universal Spec Format (USF) registry.
+Create, manage, and implement specifications using AI-powered slash commands that work across all supported editors. Specs are stored in `promptrek/specs/` (committed, team-shared) and tracked in a Universal Spec Format (USF) registry.
 
 ### Automatic Slash Commands
 
@@ -216,7 +219,7 @@ When you run `promptrek generate`, five spec management commands are automatical
 promptrek generate project.promptrek.yaml --editor claude
 
 # 2. Use /promptrek.spec.create in your editor to create specs
-#    AI will name the file and save to .promptrek/specs/
+#    AI will name the file and save to promptrek/specs/
 
 # 3. List all registered specs
 promptrek list-specs
@@ -230,7 +233,7 @@ promptrek sync --editor claude
 
 ### Universal Spec Format (USF)
 
-Specs are tracked in `.promptrek/specs.yaml`:
+Specs are tracked in `promptrek/specs.yaml` (committed to version control):
 
 ```yaml
 schema_version: "1.0.0"
@@ -258,22 +261,22 @@ specs:
 - **Linked Specifications** - Plans and tasks link back to original specs
 - **Automatic Sync** - Manually created spec files are auto-registered
 - **Export Capability** - Clean markdown export for documentation
-- **Automatic .gitignore** - Spec files excluded from version control by default
+- **Team Collaboration** - Spec files are committed to version control for team sharing and CI/CD use
 
 ### Workflow Example
 
 ```bash
 # In your AI editor (Claude, Cursor, etc.):
 # /promptrek.spec.create
-# → Creates: .promptrek/specs/api-auth-flow-a1b2c3d4.md
-# → Registers in .promptrek/specs.yaml
+# → Creates: promptrek/specs/api-auth-flow-a1b2c3d4.md
+# → Registers in promptrek/specs.yaml
 
 # /promptrek.spec.plan
-# → Creates: .promptrek/specs/api-auth-flow-plan-e5f6g7h8.md
+# → Creates: promptrek/specs/api-auth-flow-plan-e5f6g7h8.md
 # → Links to original spec
 
 # /promptrek.spec.tasks
-# → Creates: .promptrek/specs/api-auth-flow-tasks-i9j0k1l2.md
+# → Creates: promptrek/specs/api-auth-flow-tasks-i9j0k1l2.md
 # → Breaks plan into actionable checklist
 
 # /promptrek.spec.implement

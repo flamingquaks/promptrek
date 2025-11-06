@@ -152,7 +152,9 @@ test-project/
 .mcp.json
 
 # PrompTrek user-specific config (not committed)
-# Includes: variables.promptrek.yaml, last-generation.yaml, .variable-cache/
+# Includes: variables.promptrek.yaml, user-config.promptrek.yaml, last-generation.yaml, .variable-cache/
+# NOTE: .promptrek/ (with dot) is gitignored - user-specific files only
+#       promptrek/ (without dot) is COMMITTED - shared specs and team files
 .promptrek/
 
 # PrompTrek editor-specific files (generated, not committed)

@@ -30,11 +30,11 @@ def get_spec_commands():
    - Requirements or specifications
    - Technical details
    - Examples or use cases (if applicable)
-4. **Save to Registry**: Save the spec to `.promptrek/specs/` and register it in `.promptrek/specs.yaml`
+4. **Save to Registry**: Save the spec to `promptrek/specs/` and register it in `promptrek/specs.yaml`
 
 ## Output Format
 
-The spec should be saved as a markdown file in `.promptrek/specs/` with:
+The spec should be saved as a markdown file in `promptrek/specs/` with:
 - Auto-generated filename based on title and unique ID
 - Metadata header (ID, created date, source command, summary, tags)
 - Separator (`---`)

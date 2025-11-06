@@ -647,14 +647,12 @@ class SpecMetadata(BaseModel):
     """
     Metadata for a single spec file in the Universal Spec Format.
 
-    Stored in .promptrek/specs.yaml as part of the spec registry.
+    Stored in promptrek/specs.yaml as part of the spec registry.
     """
 
     id: str = Field(..., description="Unique identifier for the spec")
     title: str = Field(..., description="Human-readable title")
-    path: str = Field(
-        ..., description="Relative path to spec file in .promptrek/specs/"
-    )
+    path: str = Field(..., description="Relative path to spec file in promptrek/specs/")
     source_command: str = Field(
         ...,
         description="Command that created this spec (e.g., '/promptrek.spec.create')",
@@ -692,8 +690,8 @@ class UniversalSpecFormat(BaseModel):
     """
     Universal Spec Format (USF) - Registry of spec-driven project documents.
 
-    Stored in .promptrek/specs.yaml as the canonical source of spec metadata.
-    Actual spec content files are stored in .promptrek/specs/ directory.
+    Stored in promptrek/specs.yaml as the canonical source of spec metadata.
+    Actual spec content files are stored in promptrek/specs/ directory (COMMITTED).
     """
 
     schema_version: str = Field(default="1.0.0", description="USF schema version")

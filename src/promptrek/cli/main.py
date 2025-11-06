@@ -895,7 +895,7 @@ def config_ignores(
 def list_specs(ctx: click.Context) -> None:
     """List all registered spec-driven project documents.
 
-    Shows all specs registered in .promptrek/specs.yaml with their metadata.
+    Shows all specs registered in promptrek/specs.yaml with their metadata.
 
     Examples:
         # List all specs

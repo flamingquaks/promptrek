@@ -104,7 +104,7 @@ def sync_command(
         # Check and apply ignore_editor_files configuration
         _apply_gitignore_config(merged_prompt, output_file.parent)
 
-        # Sync spec files from .promptrek/specs/ directory
+        # Sync spec files from promptrek/specs/ directory
         _sync_spec_files(
             output_file.parent, ctx.obj.get("verbose", False) if ctx.obj else False
         )
@@ -652,10 +652,10 @@ def _apply_gitignore_config(
 
 def _sync_spec_files(project_dir: Path, verbose: bool = False) -> None:
     """
-    Sync spec files from .promptrek/specs/ directory.
+    Sync spec files from promptrek/specs/ directory.
 
     Detects new markdown files in the specs directory and registers them
-    in the .promptrek/specs.yaml registry.
+    in the promptrek/specs.yaml registry.
 
     Args:
         project_dir: Project directory
