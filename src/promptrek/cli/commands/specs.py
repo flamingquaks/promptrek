@@ -28,7 +28,9 @@ def list_specs_command(ctx: click.Context) -> None:
 
         if not specs:
             click.echo("📋 No specs registered yet.")
-            click.echo("\nUse /promptrek.spec.create in your editor to create a new spec.")
+            click.echo(
+                "\nUse /promptrek.spec.create in your editor to create a new spec."
+            )
             return
 
         click.echo(f"📋 Found {len(specs)} spec(s):\n")

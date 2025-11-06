@@ -652,9 +652,12 @@ class SpecMetadata(BaseModel):
 
     id: str = Field(..., description="Unique identifier for the spec")
     title: str = Field(..., description="Human-readable title")
-    path: str = Field(..., description="Relative path to spec file in .promptrek/specs/")
+    path: str = Field(
+        ..., description="Relative path to spec file in .promptrek/specs/"
+    )
     source_command: str = Field(
-        ..., description="Command that created this spec (e.g., '/promptrek.spec.create')"
+        ...,
+        description="Command that created this spec (e.g., '/promptrek.spec.create')",
     )
     created: str = Field(..., description="ISO 8601 timestamp of creation")
     updated: Optional[str] = Field(
@@ -679,9 +682,7 @@ class SpecMetadata(BaseModel):
         try:
             datetime.fromisoformat(v)
         except ValueError:
-            raise ValueError(
-                f"Timestamp must be in ISO 8601 format, got: {v}"
-            )
+            raise ValueError(f"Timestamp must be in ISO 8601 format, got: {v}")
         return v
 
     model_config = ConfigDict(validate_assignment=True, extra="forbid")
@@ -695,9 +696,7 @@ class UniversalSpecFormat(BaseModel):
     Actual spec content files are stored in .promptrek/specs/ directory.
     """
 
-    schema_version: str = Field(
-        default="1.0.0", description="USF schema version"
-    )
+    schema_version: str = Field(default="1.0.0", description="USF schema version")
     specs: List[SpecMetadata] = Field(
         default_factory=list, description="List of registered specs"
     )

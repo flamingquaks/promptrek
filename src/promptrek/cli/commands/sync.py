@@ -105,7 +105,9 @@ def sync_command(
         _apply_gitignore_config(merged_prompt, output_file.parent)
 
         # Sync spec files from .promptrek/specs/ directory
-        _sync_spec_files(output_file.parent, ctx.obj.get("verbose", False) if ctx.obj else False)
+        _sync_spec_files(
+            output_file.parent, ctx.obj.get("verbose", False) if ctx.obj else False
+        )
 
 
 def _merge_metadata(existing_data: dict, parsed: UniversalPrompt) -> dict:

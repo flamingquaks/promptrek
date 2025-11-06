@@ -191,6 +191,102 @@ promptrek config-ignores --remove-cached
 ignore_editor_files: false
 ```
 
+## 📋 Spec-Driven Project Documents
+
+PrompTrek includes a powerful spec-driven project documents feature that enables AI-assisted specification development and implementation workflows inspired by tools like GitHub Spec Kit.
+
+### Overview
+
+Create, manage, and implement specifications using AI-powered slash commands that work across all supported editors. Specs are stored in `.promptrek/specs/` and tracked in a Universal Spec Format (USF) registry.
+
+### Automatic Slash Commands
+
+When you run `promptrek generate`, five spec management commands are automatically injected into your editor configuration:
+
+- **`/promptrek.spec.create`** - Create a new spec document with AI-driven naming
+- **`/promptrek.spec.plan`** - Generate an implementation plan from a spec
+- **`/promptrek.spec.tasks`** - Break down a plan into actionable tasks
+- **`/promptrek.spec.implement`** - Implement code based on specs and tasks
+- **`/promptrek.spec.analyze`** - Validate spec consistency and completeness
+
+### Quick Start
+
+```bash
+# 1. Generate editor config (spec commands auto-injected)
+promptrek generate project.promptrek.yaml --editor claude
+
+# 2. Use /promptrek.spec.create in your editor to create specs
+#    AI will name the file and save to .promptrek/specs/
+
+# 3. List all registered specs
+promptrek list-specs
+
+# 4. Export a spec to clean markdown
+promptrek spec export <spec-id> --output docs/spec.md --clean
+
+# 5. Sync manually created specs from disk
+promptrek sync --editor claude
+```
+
+### Universal Spec Format (USF)
+
+Specs are tracked in `.promptrek/specs.yaml`:
+
+```yaml
+schema_version: "1.0.0"
+specs:
+  - id: a1b2c3d4
+    title: "User Authentication Specification"
+    path: user-authentication-a1b2c3d4.md
+    source_command: "/promptrek.spec.create"
+    created: "2025-11-06T10:30:00"
+    summary: "OAuth 2.0 implementation for API endpoints"
+    tags: ["api", "auth", "oauth"]
+
+  - id: e5f6g7h8
+    title: "User Authentication Implementation Plan"
+    path: user-authentication-implementation-plan-e5f6g7h8.md
+    source_command: "/promptrek.spec.plan"
+    created: "2025-11-06T11:00:00"
+    linked_specs: ["a1b2c3d4"]
+    tags: ["plan", "api", "auth"]
+```
+
+### Features
+
+- **AI-Driven Naming** - Specs are automatically named based on their content
+- **Linked Specifications** - Plans and tasks link back to original specs
+- **Automatic Sync** - Manually created spec files are auto-registered
+- **Export Capability** - Clean markdown export for documentation
+- **Automatic .gitignore** - Spec files excluded from version control by default
+
+### Workflow Example
+
+```bash
+# In your AI editor (Claude, Cursor, etc.):
+# /promptrek.spec.create
+# → Creates: .promptrek/specs/api-auth-flow-a1b2c3d4.md
+# → Registers in .promptrek/specs.yaml
+
+# /promptrek.spec.plan
+# → Creates: .promptrek/specs/api-auth-flow-plan-e5f6g7h8.md
+# → Links to original spec
+
+# /promptrek.spec.tasks
+# → Creates: .promptrek/specs/api-auth-flow-tasks-i9j0k1l2.md
+# → Breaks plan into actionable checklist
+
+# /promptrek.spec.implement
+# → Implements code following the task breakdown
+# → Updates task checkboxes as work progresses
+
+# View all specs
+promptrek list-specs
+
+# Export for documentation
+promptrek spec export a1b2c3d4 --output docs/auth-spec.md --clean
+```
+
 ## 📖 Documentation
 
 **📚 Complete documentation is available on our [GitHub Pages site](https://flamingquaks.github.io/promptrek):**
