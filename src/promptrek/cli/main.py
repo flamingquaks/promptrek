@@ -919,7 +919,7 @@ def spec(ctx: click.Context) -> None:
     """Manage spec-driven project documents.
 
     Commands for working with specification documents created via
-    /promptrek.spec.create and related slash commands in your editor.
+    /promptrek.spec.specify and related slash commands in your editor.
     """
     pass
 

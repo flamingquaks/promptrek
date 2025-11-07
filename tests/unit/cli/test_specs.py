@@ -151,7 +151,9 @@ class TestListSpecsCommand:
             os.chdir(tmp_path)
 
             # In verbose mode, the original exception should be raised
-            with pytest.raises(ValueError):
+            from promptrek.core.exceptions import SpecRegistryError
+
+            with pytest.raises(SpecRegistryError):
                 list_specs_command(ctx)
 
 

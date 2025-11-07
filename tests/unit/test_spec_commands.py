@@ -40,11 +40,14 @@ class TestGetSpecCommands:
         command_names = {cmd.name for cmd in commands}
 
         expected_names = {
-            "promptrek.spec.create",
+            "promptrek.spec.constitution",
+            "promptrek.spec.specify",
             "promptrek.spec.plan",
             "promptrek.spec.tasks",
             "promptrek.spec.implement",
             "promptrek.spec.analyze",
+            "promptrek.spec.history",
+            "promptrek.spec.feedback",
         }
 
         assert command_names == expected_names
@@ -68,18 +71,18 @@ class TestGetSpecCommands:
             assert hasattr(cmd, "requires_approval")
             assert isinstance(cmd.requires_approval, bool)
 
-    def test_spec_create_command(self):
-        """Test promptrek.spec.create command details."""
+    def test_spec_specify_command(self):
+        """Test promptrek.spec.specify command details."""
         commands = get_spec_commands()
-        create_cmd = next(
-            cmd for cmd in commands if cmd.name == "promptrek.spec.create"
+        specify_cmd = next(
+            cmd for cmd in commands if cmd.name == "promptrek.spec.specify"
         )
 
-        assert create_cmd.description == "Create a new spec-driven project document"
-        assert create_cmd.output_format == "markdown"
-        assert create_cmd.requires_approval is False
-        assert ".promptrek/specs/" in create_cmd.prompt
-        assert "AI-driven naming" in create_cmd.prompt
+        assert specify_cmd.description == "Create a structured software specification"
+        assert specify_cmd.output_format == "markdown"
+        assert specify_cmd.requires_approval is False
+        assert "{{ topic }}" in specify_cmd.prompt
+        assert specify_cmd.supports_arguments is True
 
     def test_spec_plan_command(self):
         """Test promptrek.spec.plan command details."""
@@ -88,7 +91,9 @@ class TestGetSpecCommands:
 
         assert "implementation plan" in plan_cmd.description.lower()
         assert plan_cmd.output_format == "markdown"
-        assert "Architecture overview" in plan_cmd.prompt
+        assert "## Approach" in plan_cmd.prompt
+        assert "{{ topic }}" in plan_cmd.prompt
+        assert plan_cmd.supports_arguments is True
 
     def test_spec_tasks_command(self):
         """Test promptrek.spec.tasks command details."""
@@ -96,8 +101,10 @@ class TestGetSpecCommands:
         tasks_cmd = next(cmd for cmd in commands if cmd.name == "promptrek.spec.tasks")
 
         assert "tasks" in tasks_cmd.description.lower()
-        assert "actionable" in tasks_cmd.prompt.lower()
-        assert "Task Breakdown" in tasks_cmd.prompt
+        assert "checklist" in tasks_cmd.prompt.lower()
+        assert "atomic task items" in tasks_cmd.prompt
+        assert "{{ topic }}" in tasks_cmd.prompt
+        assert tasks_cmd.supports_arguments is True
 
     def test_spec_implement_command(self):
         """Test promptrek.spec.implement command details."""
@@ -108,7 +115,9 @@ class TestGetSpecCommands:
 
         assert "implement" in impl_cmd.description.lower()
         assert impl_cmd.output_format == "code"
-        assert "production-quality" in impl_cmd.prompt
+        assert "production-ready" in impl_cmd.prompt
+        assert "{{ topic }}" in impl_cmd.prompt
+        assert impl_cmd.supports_arguments is True
 
     def test_spec_analyze_command(self):
         """Test promptrek.spec.analyze command details."""
@@ -119,7 +128,71 @@ class TestGetSpecCommands:
 
         assert "analyze" in analyze_cmd.description.lower()
         assert "consistency" in analyze_cmd.prompt.lower()
-        assert "completeness" in analyze_cmd.prompt.lower()
+        assert "inconsistencies" in analyze_cmd.prompt.lower()
+        assert "{{ topic }}" in analyze_cmd.prompt
+        assert analyze_cmd.supports_arguments is True
+
+    def test_all_spec_commands_have_argument_support(self):
+        """Test that all spec commands support arguments."""
+        commands = get_spec_commands()
+
+        for cmd in commands:
+            assert (
+                cmd.supports_arguments is True
+            ), f"{cmd.name} should support arguments"
+            assert (
+                cmd.argument_description is not None
+            ), f"{cmd.name} should have argument description"
+            assert (
+                len(cmd.argument_description) > 0
+            ), f"{cmd.name} argument description should not be empty"
+
+    def test_all_spec_commands_have_topic_placeholder(self):
+        """Test that all spec command prompts contain {{ topic }} placeholder."""
+        commands = get_spec_commands()
+
+        for cmd in commands:
+            assert (
+                "{{ topic }}" in cmd.prompt
+            ), f"{cmd.name} prompt should contain '{{{{ topic }}}}' placeholder"
+
+    def test_spec_command_with_required_argument(self):
+        """Test commands that require arguments (not optional)."""
+        commands = get_spec_commands()
+
+        # These commands have required {{ topic }} argument
+        required_commands = [
+            "promptrek.spec.specify",
+            "promptrek.spec.plan",
+            "promptrek.spec.tasks",
+            "promptrek.spec.implement",
+            "promptrek.spec.feedback",
+        ]
+
+        for cmd_name in required_commands:
+            cmd = next(c for c in commands if c.name == cmd_name)
+            # Should NOT say "optional" in the prompt comments
+            assert (
+                "(optional)" not in cmd.prompt.lower()
+            ), f"{cmd_name} should not have optional argument"
+
+    def test_spec_command_with_optional_argument(self):
+        """Test commands that have optional arguments."""
+        commands = get_spec_commands()
+
+        # These commands have optional {{ topic }} argument
+        optional_commands = [
+            "promptrek.spec.constitution",
+            "promptrek.spec.analyze",
+            "promptrek.spec.history",
+        ]
+
+        for cmd_name in optional_commands:
+            cmd = next(c for c in commands if c.name == cmd_name)
+            # Should say "optional" in the prompt comments
+            assert (
+                "(optional)" in cmd.prompt.lower()
+            ), f"{cmd_name} should have optional argument indication"
 
 
 class TestInjectSpecCommandsV1:
@@ -165,7 +238,7 @@ class TestInjectSpecCommandsV2:
         assert result.plugins is not None
         assert isinstance(result.plugins, PluginConfig)
         assert result.plugins.commands is not None
-        assert len(result.plugins.commands) == 5
+        assert len(result.plugins.commands) == 8
 
     def test_inject_v2_adds_to_existing_plugins(self, tmp_path):
         """Test injecting into V2 prompt with existing plugins."""
@@ -189,12 +262,12 @@ class TestInjectSpecCommandsV2:
 
         result = _inject_spec_commands(prompt, tmp_path)
 
-        assert len(result.plugins.commands) == 6  # 1 existing + 5 spec commands
+        assert len(result.plugins.commands) == 9  # 1 existing + 8 spec commands
 
         # Check existing command is preserved
         names = {cmd.name for cmd in result.plugins.commands}
         assert "existing.command" in names
-        assert "promptrek.spec.create" in names
+        assert "promptrek.spec.specify" in names
 
     def test_inject_v2_no_duplicates(self, tmp_path):
         """Test that duplicate commands are not added."""
@@ -214,16 +287,16 @@ class TestInjectSpecCommandsV2:
 
         result = _inject_spec_commands(prompt, tmp_path)
 
-        # Should still have 5 commands (no duplicates)
-        assert len(result.plugins.commands) == 5
+        # Should still have 8 commands (no duplicates)
+        assert len(result.plugins.commands) == 8
 
     def test_inject_v2_partial_overlap(self, tmp_path):
         """Test injecting with partial overlap of commands."""
         from promptrek.core.models import PromptMetadata
 
-        existing_create = Command(
-            name="promptrek.spec.create",
-            description="Custom create",
+        existing_specify = Command(
+            name="promptrek.spec.specify",
+            description="Custom specify",
             prompt="Custom prompt",
         )
 
@@ -234,21 +307,21 @@ class TestInjectSpecCommandsV2:
                 description="Test",
             ),
             content="Test content",
-            plugins=PluginConfig(commands=[existing_create]),
+            plugins=PluginConfig(commands=[existing_specify]),
         )
 
         result = _inject_spec_commands(prompt, tmp_path)
 
-        # Should add 4 new commands (create already exists)
-        assert len(result.plugins.commands) == 5
+        # Should add 7 new commands (specify already exists)
+        assert len(result.plugins.commands) == 8
 
-        # Existing create command should be preserved (not replaced)
-        create_cmd = next(
+        # Existing specify command should be preserved (not replaced)
+        specify_cmd = next(
             cmd
             for cmd in result.plugins.commands
-            if cmd.name == "promptrek.spec.create"
+            if cmd.name == "promptrek.spec.specify"
         )
-        assert create_cmd.description == "Custom create"
+        assert specify_cmd.description == "Custom specify"
 
 
 class TestInjectSpecCommandsV3:
@@ -271,15 +344,18 @@ class TestInjectSpecCommandsV3:
 
         assert isinstance(result, UniversalPromptV3)
         assert result.commands is not None
-        assert len(result.commands) == 5
+        assert len(result.commands) == 8
 
         # Check all spec commands are present
         names = {cmd.name for cmd in result.commands}
-        assert "promptrek.spec.create" in names
+        assert "promptrek.spec.constitution" in names
+        assert "promptrek.spec.specify" in names
         assert "promptrek.spec.plan" in names
         assert "promptrek.spec.tasks" in names
         assert "promptrek.spec.implement" in names
         assert "promptrek.spec.analyze" in names
+        assert "promptrek.spec.history" in names
+        assert "promptrek.spec.feedback" in names
 
     def test_inject_v3_adds_to_existing_commands(self, tmp_path):
         """Test injecting into V3 prompt with existing commands."""
@@ -303,11 +379,11 @@ class TestInjectSpecCommandsV3:
 
         result = _inject_spec_commands(prompt, tmp_path)
 
-        assert len(result.commands) == 6  # 1 existing + 5 spec commands
+        assert len(result.commands) == 9  # 1 existing + 8 spec commands
 
         names = {cmd.name for cmd in result.commands}
         assert "existing.command" in names
-        assert "promptrek.spec.create" in names
+        assert "promptrek.spec.specify" in names
 
     def test_inject_v3_no_duplicates(self, tmp_path):
         """Test that duplicate commands are not added in V3."""
@@ -327,8 +403,8 @@ class TestInjectSpecCommandsV3:
 
         result = _inject_spec_commands(prompt, tmp_path)
 
-        # Should still have 5 commands (no duplicates)
-        assert len(result.commands) == 5
+        # Should still have 8 commands (no duplicates)
+        assert len(result.commands) == 8
 
     def test_inject_v3_partial_overlap(self, tmp_path):
         """Test injecting with partial overlap in V3."""
@@ -352,8 +428,8 @@ class TestInjectSpecCommandsV3:
 
         result = _inject_spec_commands(prompt, tmp_path)
 
-        # Should add 4 new commands (plan already exists)
-        assert len(result.commands) == 5
+        # Should add 7 new commands (plan already exists)
+        assert len(result.commands) == 8
 
         # Existing plan command should be preserved
         plan_cmd = next(
@@ -366,7 +442,7 @@ class TestInjectSpecCommandsDirectory:
     """Tests for spec directory creation during injection."""
 
     def test_inject_creates_specs_directory(self, tmp_path):
-        """Test that injection creates .promptrek/specs/ directory."""
+        """Test that injection creates promptrek/specs/ directory."""
         from promptrek.core.models import PromptMetadata
 
         prompt = UniversalPromptV3(
@@ -378,7 +454,7 @@ class TestInjectSpecCommandsDirectory:
             content="Test content",
         )
 
-        specs_dir = tmp_path / ".promptrek" / "specs"
+        specs_dir = tmp_path / "promptrek" / "specs"
         assert not specs_dir.exists()
 
         _inject_spec_commands(prompt, tmp_path)
@@ -403,5 +479,5 @@ class TestInjectSpecCommandsDirectory:
         _inject_spec_commands(prompt, tmp_path)
         _inject_spec_commands(prompt, tmp_path)
 
-        specs_dir = tmp_path / ".promptrek" / "specs"
+        specs_dir = tmp_path / "promptrek" / "specs"
         assert specs_dir.exists()

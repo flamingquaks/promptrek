@@ -352,6 +352,12 @@ variables:
 
     <div class="features-grid">
       <div class="feature-card-modern">
+        <div class="feature-icon">📋</div>
+        <h3>Spec-Driven Development</h3>
+        <p>Complete 8-command workflow from project values to production code. Constitution, specifications, implementation plans, task breakdowns, code generation, consistency analysis, change tracking, and PR feedback. Inspired by GitHub's Spec-Kit. <a href="user-guide/spec-driven-development.html">Learn more →</a></p>
+      </div>
+
+      <div class="feature-card-modern">
         <div class="feature-icon">⚡</div>
         <h3>Multi-Step Workflows</h3>
         <p>Define complex, automated workflows with tool requirements and structured steps. Perfect for PR reviews, deployments, and testing pipelines. <a href="user-guide/workflows.html">Learn more →</a></p>

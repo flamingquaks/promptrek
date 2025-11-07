@@ -428,6 +428,55 @@ promptrek generate --editor continue --input react-app.promptrek.yaml
 - **Cursor**: Use the generated rules files for enhanced AI assistance
 - **Continue**: Load the generated configuration in your Continue settings
 
+## Spec-Driven Development Workflow
+
+PrompTrek includes a complete spec-driven development system with eight specialized commands that take you from project values to production code. This workflow is inspired by GitHub's Spec-Kit methodology and is automatically available in all supported editors after generation.
+
+### The 8-Command Workflow
+
+1. **Constitution** (`/promptrek.spec.constitution`) - Define project-wide values and working agreements
+2. **Specify** (`/promptrek.spec.specify <topic>`) - Create structured feature specifications
+3. **Plan** (`/promptrek.spec.plan <topic>`) - Generate technical implementation plans
+4. **Tasks** (`/promptrek.spec.tasks <topic>`) - Break plans into actionable checklists
+5. **Implement** (`/promptrek.spec.implement <topic>`) - Generate production-ready code
+6. **Analyze** (`/promptrek.spec.analyze [topic]`) - Review consistency across artifacts
+7. **History** (`/promptrek.spec.history [topic]`) - Track changes and evolution
+8. **Feedback** (`/promptrek.spec.feedback <topic>`) - Provide structured PR reviews
+
+### Quick Example
+
+```bash
+# After running promptrek generate, use these commands in your AI editor:
+
+# 1. Establish project values (once per project)
+/promptrek.spec.constitution
+
+# 2. Create a feature specification
+/promptrek.spec.specify user-authentication
+
+# 3. Generate implementation plan
+/promptrek.spec.plan user-authentication
+
+# 4. Break down into tasks
+/promptrek.spec.tasks user-authentication
+
+# 5. Check consistency before coding
+/promptrek.spec.analyze user-authentication
+
+# 6. Implement specific tasks
+/promptrek.spec.implement JWT token generation
+
+# 7. Track changes
+/promptrek.spec.history user-authentication
+
+# 8. Review implementation
+/promptrek.spec.feedback auth PR #42
+```
+
+All spec artifacts are stored in `promptrek/specs/` (committed to git) with a registry at `promptrek/specs.yaml`. The constitution lives at `promptrek/constitution.md`.
+
+**📋 Learn More:** See the complete [Spec-Driven Development Guide](user-guide/spec-driven-development.html) for detailed examples, best practices, and command reference.
+
 ## Working with Existing Projects
 
 Already have editor prompts and rules? PrompTrek makes it easy to consolidate them into a universal format and maintain them across editors.

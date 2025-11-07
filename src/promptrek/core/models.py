@@ -257,6 +257,25 @@ class Command(BaseModel):
         description="Tools/commands this workflow uses (e.g., ['gh', 'read_file'])",
     )
 
+    # Argument template support (Spec-Kit alignment)
+    supports_arguments: bool = Field(
+        default=False,
+        description="Whether this command accepts {{ topic }} template arguments",
+    )
+    argument_description: Optional[str] = Field(
+        default=None,
+        description="Description of what the argument represents (e.g., 'Topic or module name')",
+    )
+
+    @model_validator(mode="after")
+    def validate_argument_fields(self) -> "Command":
+        """Validate argument_description is provided when supports_arguments is True."""
+        if self.supports_arguments and not self.argument_description:
+            raise ValueError(
+                f"Command '{self.name}': argument_description is required when supports_arguments=True"
+            )
+        return self
+
 
 class Agent(BaseModel):
     """Autonomous agent configuration."""
@@ -301,13 +320,17 @@ class Agent(BaseModel):
     @classmethod
     def handle_system_prompt_compatibility(cls, values: Any) -> Any:
         """Handle backward compatibility for system_prompt field (v3.0.0)."""
-        if isinstance(values, dict):
-            # If system_prompt is provided but prompt is not, use system_prompt for prompt
-            if "system_prompt" in values and "prompt" not in values:
-                values["prompt"] = values.pop("system_prompt")
-            # If both are provided, prefer prompt and ignore system_prompt
-            elif "system_prompt" in values and "prompt" in values:
-                values.pop("system_prompt")
+        if not isinstance(values, dict):
+            return values
+
+        if "system_prompt" not in values:
+            return values
+
+        if "prompt" not in values:
+            values["prompt"] = values.pop("system_prompt")
+        else:
+            values.pop("system_prompt")
+
         return values
 
 
@@ -655,7 +678,7 @@ class SpecMetadata(BaseModel):
     path: str = Field(..., description="Relative path to spec file in promptrek/specs/")
     source_command: str = Field(
         ...,
-        description="Command that created this spec (e.g., '/promptrek.spec.create')",
+        description="Command that created this spec (e.g., '/promptrek.spec.specify')",
     )
     created: str = Field(..., description="ISO 8601 timestamp of creation")
     updated: Optional[str] = Field(
@@ -665,10 +688,12 @@ class SpecMetadata(BaseModel):
         default=None, description="Brief summary of spec content"
     )
     linked_specs: Optional[List[str]] = Field(
-        default=None, description="IDs of related/linked specs"
+        default=None,
+        description="IDs of related/linked specs (e.g., ['user-auth-spec', 'api-design-spec'] to link plan back to specs)",
     )
     tags: Optional[List[str]] = Field(
-        default=None, description="Tags for categorization"
+        default=None,
+        description="Tags for categorization (e.g., ['api', 'auth', 'oauth', 'security'])",
     )
 
     @field_validator("created", "updated")

@@ -196,21 +196,26 @@ ignore_editor_files: false
 
 ## 📋 Spec-Driven Project Documents
 
-PrompTrek includes a powerful spec-driven project documents feature that enables AI-assisted specification development and implementation workflows inspired by tools like GitHub Spec Kit.
+PrompTrek implements a complete Spec-Kit inspired workflow for AI-assisted specification development and implementation. This feature enables structured, traceable development from problem definition to code implementation.
 
 ### Overview
 
-Create, manage, and implement specifications using AI-powered slash commands that work across all supported editors. Specs are stored in `promptrek/specs/` (committed, team-shared) and tracked in a Universal Spec Format (USF) registry.
+Create, manage, and implement specifications using AI-powered slash commands that work across all supported editors. Specs are stored in `promptrek/specs/` (committed to git, team-shared) and tracked in a Universal Spec Format (USF) registry.
 
 ### Automatic Slash Commands
 
-When you run `promptrek generate`, five spec management commands are automatically injected into your editor configuration:
+When you run `promptrek generate`, eight spec management commands are automatically injected into your editor configuration:
 
-- **`/promptrek.spec.create`** - Create a new spec document with AI-driven naming
-- **`/promptrek.spec.plan`** - Generate an implementation plan from a spec
-- **`/promptrek.spec.tasks`** - Break down a plan into actionable tasks
-- **`/promptrek.spec.implement`** - Implement code based on specs and tasks
-- **`/promptrek.spec.analyze`** - Validate spec consistency and completeness
+- **`/promptrek.spec.constitution`** [topic] - Define project-wide values, anti-patterns, and working agreements (optional argument)
+- **`/promptrek.spec.specify`** <topic> - Create a structured problem specification (title, problem, goals, non-goals, assumptions) **[required argument]**
+- **`/promptrek.spec.plan`** <topic> - Generate technical implementation plan (approach, stack, milestones) **[required argument]**
+- **`/promptrek.spec.tasks`** <topic> - Break down plan into actionable task checklist **[required argument]**
+- **`/promptrek.spec.implement`** <topic> - Generate production code from tasks and specs **[required argument]**
+- **`/promptrek.spec.analyze`** [topic] - Review consistency across spec, plan, and tasks (optional argument)
+- **`/promptrek.spec.history`** [topic] - Summarize changes and evolution across all specs (optional argument)
+- **`/promptrek.spec.feedback`** <topic> - Generate structured PR feedback on diffs **[required argument]**
+
+**Argument notation**: `<required>` indicates mandatory argument, `[optional]` indicates optional argument. All commands support argument passing using `{{ topic }}` templates.
 
 ### Quick Start
 
@@ -218,16 +223,19 @@ When you run `promptrek generate`, five spec management commands are automatical
 # 1. Generate editor config (spec commands auto-injected)
 promptrek generate project.promptrek.yaml --editor claude
 
-# 2. Use /promptrek.spec.create in your editor to create specs
-#    AI will name the file and save to promptrek/specs/
+# 2. Define project values (optional but recommended)
+#    In your editor: /promptrek.spec.constitution
 
-# 3. List all registered specs
+# 3. Create specifications
+#    In your editor: /promptrek.spec.specify auth-flow
+
+# 4. List all registered specs
 promptrek list-specs
 
-# 4. Export a spec to clean markdown
+# 5. Export a spec to clean markdown
 promptrek spec export <spec-id> --output docs/spec.md --clean
 
-# 5. Sync manually created specs from disk
+# 6. Sync manually created specs from disk
 promptrek sync --editor claude
 ```
 
@@ -241,7 +249,7 @@ specs:
   - id: a1b2c3d4
     title: "User Authentication Specification"
     path: user-authentication-a1b2c3d4.md
-    source_command: "/promptrek.spec.create"
+    source_command: "/promptrek.spec.specify"
     created: "2025-11-06T10:30:00"
     summary: "OAuth 2.0 implementation for API endpoints"
     tags: ["api", "auth", "oauth"]
@@ -266,22 +274,39 @@ specs:
 ### Workflow Example
 
 ```bash
-# In your AI editor (Claude, Cursor, etc.):
-# /promptrek.spec.create
+# Complete Spec-Kit workflow in your AI editor (Claude, Cursor, etc.):
+
+# Step 1: Define project constitution (optional, but recommended)
+# /promptrek.spec.constitution
+# → Creates: promptrek/constitution.md
+# → Defines values, anti-patterns, working agreements
+
+# Step 2: Create specification with argument
+# /promptrek.spec.specify api-auth-flow
 # → Creates: promptrek/specs/api-auth-flow-a1b2c3d4.md
 # → Registers in promptrek/specs.yaml
 
-# /promptrek.spec.plan
+# Step 3: Generate implementation plan
+# /promptrek.spec.plan api-auth-flow
 # → Creates: promptrek/specs/api-auth-flow-plan-e5f6g7h8.md
 # → Links to original spec
+# → References constitution for architectural guidance
 
-# /promptrek.spec.tasks
+# Step 4: Break down into tasks
+# /promptrek.spec.tasks api-auth-flow
 # → Creates: promptrek/specs/api-auth-flow-tasks-i9j0k1l2.md
 # → Breaks plan into actionable checklist
 
-# /promptrek.spec.implement
+# Step 5: Implement code from tasks
+# /promptrek.spec.implement api-auth-flow
 # → Implements code following the task breakdown
 # → Updates task checkboxes as work progresses
+# → Follows patterns from constitution
+
+# Step 6: Analyze consistency
+# /promptrek.spec.analyze api-auth-flow
+# → Reviews spec, plan, and tasks for consistency
+# → Identifies gaps or contradictions
 
 # View all specs
 promptrek list-specs

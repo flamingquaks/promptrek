@@ -15,6 +15,9 @@ PrompTrek is a universal AI editor prompt storage solution that allows you to wr
 
 Explore the following sections to learn everything about PrompTrek:
 
+### 📋 [Spec-Driven Development](user-guide/spec-driven-development.html)
+Master PrompTrek's complete spec-driven development workflow. Learn the 8-command system for taking projects from constitution to production code: establish values, create specifications, generate plans, break down tasks, implement features, analyze consistency, track history, and provide feedback. Inspired by GitHub's Spec-Kit methodology.
+
 ### 📘 [UPF Specification](user-guide/upf-specification.html)
 Learn about the Universal Prompt Format (UPF) - the standardized YAML-based format at the heart of PrompTrek. Understand the schema, structure, and how to create your own universal prompts.
 

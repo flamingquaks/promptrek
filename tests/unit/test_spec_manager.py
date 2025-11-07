@@ -1,8 +1,6 @@
 """Tests for SpecManager utility."""
 
-import uuid
 from datetime import datetime
-from pathlib import Path
 
 import pytest
 import yaml
@@ -19,8 +17,8 @@ class TestSpecManagerInit:
         manager = SpecManager(tmp_path)
 
         assert manager.project_root == tmp_path
-        assert manager.specs_dir == tmp_path / ".promptrek" / "specs"
-        assert manager.registry_path == tmp_path / ".promptrek" / "specs.yaml"
+        assert manager.specs_dir == tmp_path / "promptrek" / "specs"
+        assert manager.registry_path == tmp_path / "promptrek" / "specs.yaml"
 
     def test_ensure_specs_directory(self, tmp_path):
         """Test creating specs directory."""
@@ -87,6 +85,8 @@ class TestSpecManagerRegistry:
 
     def test_load_registry_malformed_yaml(self, tmp_path):
         """Test loading registry with malformed YAML."""
+        from promptrek.core.exceptions import SpecRegistryError
+
         manager = SpecManager(tmp_path)
         manager.ensure_specs_directory()
 
@@ -94,7 +94,7 @@ class TestSpecManagerRegistry:
         with open(manager.registry_path, "w") as f:
             f.write("{ invalid yaml ][")
 
-        with pytest.raises(ValueError) as exc_info:
+        with pytest.raises(SpecRegistryError) as exc_info:
             manager.load_registry()
 
         assert "Failed to parse specs.yaml" in str(exc_info.value)
@@ -284,9 +284,11 @@ class TestSpecManagerUpdate:
 
     def test_update_nonexistent_spec(self, tmp_path):
         """Test updating a spec that doesn't exist."""
+        from promptrek.core.exceptions import SpecNotFoundError
+
         manager = SpecManager(tmp_path)
 
-        with pytest.raises(ValueError) as exc_info:
+        with pytest.raises(SpecNotFoundError) as exc_info:
             manager.update_spec(
                 spec_id="nonexistent",
                 content="New content",
@@ -373,15 +375,19 @@ class TestSpecManagerQuery:
 
     def test_get_spec_content_nonexistent(self, tmp_path):
         """Test getting content of nonexistent spec."""
+        from promptrek.core.exceptions import SpecNotFoundError
+
         manager = SpecManager(tmp_path)
 
-        with pytest.raises(ValueError) as exc_info:
+        with pytest.raises(SpecNotFoundError) as exc_info:
             manager.get_spec_content("nonexistent")
 
         assert "not found" in str(exc_info.value)
 
     def test_get_spec_content_missing_file(self, tmp_path):
         """Test getting content when file is missing."""
+        from promptrek.core.exceptions import SpecFileError
+
         manager = SpecManager(tmp_path)
 
         # Create spec then delete file
@@ -394,7 +400,7 @@ class TestSpecManagerQuery:
         spec_file = manager.specs_dir / spec.path
         spec_file.unlink()
 
-        with pytest.raises(FileNotFoundError):
+        with pytest.raises(SpecFileError):
             manager.get_spec_content(spec.id)
 
 
@@ -445,11 +451,13 @@ class TestSpecManagerExport:
 
     def test_export_nonexistent_spec(self, tmp_path):
         """Test exporting nonexistent spec."""
+        from promptrek.core.exceptions import SpecNotFoundError
+
         manager = SpecManager(tmp_path)
 
         output_path = tmp_path / "exported.md"
 
-        with pytest.raises(ValueError) as exc_info:
+        with pytest.raises(SpecNotFoundError) as exc_info:
             manager.export_spec("nonexistent", output_path, clean=True)
 
         assert "not found" in str(exc_info.value)
@@ -582,3 +590,306 @@ class TestSpecManagerFilenameGeneration:
         content = "# First Title\n\n## Second Title\n\nContent."
         title = manager._extract_title_from_content(content)
         assert title == "First Title"
+
+
+class TestSpecManagerConstitution:
+    """Tests for constitution management."""
+
+    def test_create_constitution(self, tmp_path):
+        """Test creating a constitution file."""
+        manager = SpecManager(tmp_path)
+
+        content = """## Values
+
+- Code quality
+- Team collaboration
+
+## Anti-Patterns
+
+- Avoid monolithic functions
+- Don't skip tests
+
+## Working Agreements
+
+- Code reviews required
+- Test coverage > 80%"""
+
+        constitution_path = manager.create_or_update_constitution(content)
+
+        assert constitution_path.exists()
+        assert constitution_path == tmp_path / "promptrek" / "constitution.md"
+        assert content in constitution_path.read_text()
+
+    def test_update_constitution(self, tmp_path):
+        """Test updating an existing constitution."""
+        manager = SpecManager(tmp_path)
+
+        # Create initial
+        original = "## Values\n- Original value"
+        manager.create_or_update_constitution(original)
+
+        # Update
+        updated = "## Values\n- Updated value"
+        constitution_path = manager.create_or_update_constitution(updated)
+
+        content = constitution_path.read_text()
+        assert "Updated value" in content
+        assert "Original value" not in content
+
+    def test_get_constitution_content(self, tmp_path):
+        """Test getting constitution content."""
+        manager = SpecManager(tmp_path)
+
+        # No constitution yet
+        content = manager.get_constitution_content()
+        assert content is None
+
+        # Create constitution
+        constitution_text = "## Values\n- Test value"
+        manager.create_or_update_constitution(constitution_text)
+
+        # Get content
+        content = manager.get_constitution_content()
+        assert content is not None
+        assert "Test value" in content
+
+    def test_constitution_exists(self, tmp_path):
+        """Test checking if constitution exists."""
+        manager = SpecManager(tmp_path)
+
+        # Should not exist initially
+        assert manager.constitution_exists() is False
+
+        # Create constitution
+        manager.create_or_update_constitution("## Values\n- Test")
+
+        # Should exist now
+        assert manager.constitution_exists() is True
+
+    def test_constitution_not_in_registry(self, tmp_path):
+        """Test that constitution is not added to specs registry."""
+        manager = SpecManager(tmp_path)
+
+        # Create constitution
+        manager.create_or_update_constitution("## Values\n- Test")
+
+        # Create a regular spec
+        manager.create_spec(
+            title="Regular Spec",
+            content="Regular content",
+            source_command="/promptrek.spec.specify",
+        )
+
+        # Load registry
+        usf = manager.load_registry()
+
+        # Should only have the regular spec, not constitution
+        assert len(usf.specs) == 1
+        assert usf.specs[0].title == "Regular Spec"
+
+    def test_constitution_accessible_during_spec_workflow(self, tmp_path):
+        """Test that constitution is accessible when creating specs."""
+        manager = SpecManager(tmp_path)
+
+        # Create constitution first
+        constitution_content = """## Values
+- Code quality over speed
+- Comprehensive testing
+
+## Anti-Patterns
+- Skipping tests
+- No documentation"""
+
+        constitution_path = manager.create_or_update_constitution(constitution_content)
+
+        # Verify constitution exists and is accessible
+        assert manager.constitution_exists()
+        retrieved_content = manager.get_constitution_content()
+        assert retrieved_content == constitution_content
+
+        # Create a spec - constitution should still be accessible
+        spec_path = manager.create_spec(
+            title="Feature Spec",
+            content="Spec content",
+            source_command="/promptrek.spec.specify",
+        )
+
+        # Constitution should still be accessible after spec creation
+        assert manager.constitution_exists()
+        assert manager.get_constitution_content() == constitution_content
+
+    def test_constitution_with_invalid_utf8(self, tmp_path):
+        """Test handling of constitution with encoding issues."""
+        manager = SpecManager(tmp_path)
+
+        # Create constitution with valid UTF-8
+        valid_content = "## Values\n- Quality 质量\n- Excellence 优秀"
+        manager.create_or_update_constitution(valid_content)
+
+        # Should read back correctly
+        retrieved = manager.get_constitution_content()
+        assert retrieved == valid_content
+
+    def test_constitution_overwrite_behavior(self, tmp_path):
+        """Test that constitution is completely replaced, not appended."""
+        manager = SpecManager(tmp_path)
+
+        # Create initial constitution
+        initial_content = "## Values\n- Initial value"
+        manager.create_or_update_constitution(initial_content)
+
+        # Update with new content
+        new_content = "## Values\n- New value\n- Another value"
+        manager.create_or_update_constitution(new_content)
+
+        # Should only have new content, not both
+        retrieved = manager.get_constitution_content()
+        assert retrieved == new_content
+        assert "Initial value" not in retrieved
+        assert "New value" in retrieved
+
+    def test_constitution_with_empty_content(self, tmp_path):
+        """Test creating constitution with empty content."""
+        manager = SpecManager(tmp_path)
+
+        # Create constitution with empty content
+        manager.create_or_update_constitution("")
+
+        # Should exist but be empty
+        assert manager.constitution_exists()
+        assert manager.get_constitution_content() == ""
+
+    def test_get_constitution_when_none_exists(self, tmp_path):
+        """Test getting constitution content when file doesn't exist."""
+        manager = SpecManager(tmp_path)
+
+        # No constitution created yet
+        assert not manager.constitution_exists()
+        assert manager.get_constitution_content() is None
+
+
+class TestSpecManagerRegistryIntegrity:
+    """Tests for registry corruption and data integrity."""
+
+    def test_load_registry_with_duplicate_ids(self, tmp_path):
+        """Test handling of duplicate spec IDs in registry."""
+        from promptrek.core.models import SpecMetadata, UniversalSpecFormat
+
+        manager = SpecManager(tmp_path)
+
+        # Create registry with duplicate IDs
+        now = datetime.now().isoformat()
+        usf = UniversalSpecFormat(
+            schema_version="1.0.0",
+            specs=[
+                SpecMetadata(
+                    id="duplicate",
+                    title="First Spec",
+                    path="first.md",
+                    source_command="/promptrek.spec.specify",
+                    summary="First",
+                    created=now,
+                ),
+                SpecMetadata(
+                    id="duplicate",  # Same ID
+                    title="Second Spec",
+                    path="second.md",
+                    source_command="/promptrek.spec.specify",
+                    summary="Second",
+                    created=now,
+                ),
+            ],
+        )
+
+        # Save the corrupted registry
+        manager.save_registry(usf)
+
+        # Load should handle gracefully (last wins or first wins is acceptable)
+        loaded = manager.load_registry()
+        assert len(loaded.specs) == 2  # Both entries preserved
+
+        # Get by ID should return one of them (implementation-dependent)
+        spec = manager.get_spec_by_id("duplicate")
+        assert spec is not None
+        assert spec.id == "duplicate"
+
+    def test_load_registry_with_missing_files(self, tmp_path):
+        """Test when registry references non-existent spec files."""
+        manager = SpecManager(tmp_path)
+
+        # Create a spec
+        spec_metadata = manager.create_spec(
+            title="Test Spec",
+            content="Content",
+            source_command="/promptrek.spec.specify",
+        )
+
+        # Delete the spec file but keep registry
+        spec_file = manager.specs_dir / spec_metadata.path
+        spec_file.unlink()
+
+        # Get content should raise SpecFileError for missing file
+        from promptrek.core.exceptions import SpecFileError
+
+        with pytest.raises(SpecFileError):
+            manager.get_spec_content(spec_metadata.id)
+
+    def test_registry_with_empty_specs_list(self, tmp_path):
+        """Test loading registry with empty specs list."""
+        from promptrek.core.models import UniversalSpecFormat
+
+        manager = SpecManager(tmp_path)
+
+        # Create empty registry
+        usf = UniversalSpecFormat(schema_version="1.0.0", specs=[])
+        manager.save_registry(usf)
+
+        # Should load successfully
+        loaded = manager.load_registry()
+        assert loaded.specs == []
+        assert len(loaded.specs) == 0
+
+    def test_sync_with_files_during_modification(self, tmp_path):
+        """Test syncing when spec files exist but registry is out of sync."""
+        manager = SpecManager(tmp_path)
+
+        # Create specs directory with a file
+        specs_dir = tmp_path / "promptrek" / "specs"
+        specs_dir.mkdir(parents=True, exist_ok=True)
+
+        # Manually create a spec file (not via manager)
+        manual_spec = specs_dir / "manual-spec.md"
+        manual_spec.write_text("# Manual Spec\n\nManually created", encoding="utf-8")
+
+        # Sync should detect the new file
+        new_specs = manager.sync_specs_from_disk()
+
+        # Should have found the manual spec (by filename path, not ID)
+        assert len(new_specs) > 0
+        assert any(spec.path == "manual-spec.md" for spec in new_specs)
+
+    def test_registry_persistence_after_multiple_operations(self, tmp_path):
+        """Test that registry remains consistent after multiple operations."""
+        manager = SpecManager(tmp_path)
+
+        # Create multiple specs
+        spec1 = manager.create_spec(
+            title="Spec 1",
+            content="Content 1",
+            source_command="/promptrek.spec.specify",
+        )
+
+        spec2 = manager.create_spec(
+            title="Spec 2", content="Content 2", source_command="/promptrek.spec.plan"
+        )
+
+        # Update one
+        manager.update_spec(spec1.id, content="Updated content 1")
+
+        # Load registry and verify all specs are present
+        usf = manager.load_registry()
+        assert len(usf.specs) == 2
+
+        ids = {spec.id for spec in usf.specs}
+        assert spec1.id in ids
+        assert spec2.id in ids

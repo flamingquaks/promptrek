@@ -5,352 +5,207 @@ These commands are automatically injected into editor configurations
 when using the spec-driven project documents feature.
 """
 
+from typing import List
+
 from promptrek.core.models import Command
 
 
-def get_spec_commands():
+def _create_spec_command(
+    name: str, description: str, prompt: str, argument_description: str
+) -> Command:
+    """
+    Create a spec command with standard configuration.
+
+    All spec commands share common settings: markdown output format,
+    no approval required, and argument support enabled.
+
+    Args:
+        name: Command name (e.g., 'promptrek.spec.constitution')
+        description: Brief command description
+        prompt: Full prompt template with {{ topic }} placeholder
+        argument_description: Description of the argument's purpose
+
+    Returns:
+        Configured Command object
+    """
+    output_format = "code" if "implement" in name else "markdown"
+
+    return Command(
+        name=name,
+        description=description,
+        prompt=prompt,
+        output_format=output_format,
+        requires_approval=False,
+        supports_arguments=True,
+        argument_description=argument_description,
+    )
+
+
+def get_spec_commands() -> List[Command]:
     """
     Get the default spec-driven project document commands.
+
+    Implements the complete Spec-Kit workflow with 8 commands:
+    - constitution: Project-wide values and agreements
+    - specify: Structured problem specification
+    - plan: Implementation and architecture plan
+    - tasks: Task checklist from the plan
+    - implement: Code generation scoped to task
+    - analyze: Spec consistency review
+    - history: Summarize changes across spec files
+    - feedback: Structured PR feedback on a diff
 
     Returns:
         List of Command objects for spec management
     """
     return [
-        Command(
-            name="promptrek.spec.create",
-            description="Create a new spec-driven project document",
-            prompt="""Create a new spec-driven project document with AI-driven naming.
+        _create_spec_command(
+            name="promptrek.spec.constitution",
+            description="Create or update project constitution",
+            prompt="""# Arguments:
+# - {{ topic }} (optional): context or scope of values/principles
 
-## Instructions
+You are drafting a shared constitution for a project. Include:
 
-1. **Gather Requirements**: Ask the user for the purpose and key details of the spec
-2. **Generate Title**: Create a contextual, descriptive title based on the purpose
-3. **Create Content**: Write comprehensive markdown content including:
-   - Overview and purpose
-   - Requirements or specifications
-   - Technical details
-   - Examples or use cases (if applicable)
-4. **Save to Registry**: Save the spec to `promptrek/specs/` and register it in `promptrek/specs.yaml`
+## Values
+What core values guide the team?
 
-## Output Format
+## Anti-Patterns
+What behaviors or pitfalls should be avoided?
 
-The spec should be saved as a markdown file in `promptrek/specs/` with:
-- Auto-generated filename based on title and unique ID
-- Metadata header (ID, created date, source command, summary, tags)
-- Separator (`---`)
-- Main content in clean markdown
+## Working Agreements
+What are default collaboration expectations?
 
-## Example
-
-```markdown
-# API Authentication Specification
-
-**ID:** a1b2c3d4
-**Created:** 2025-11-06T10:30:00
-**Source:** /promptrek.spec.create
-**Summary:** OAuth 2.0 implementation for API endpoints
-**Tags:** api, auth, oauth
-
----
-
-## Overview
-
-This specification defines the OAuth 2.0 authentication flow for our API...
-
-## Requirements
-
-1. Support authorization code flow
-2. Implement token refresh mechanism
-3. ...
-```
-
-After creating the spec, inform the user of:
-- Spec ID
-- Title
-- File path
-- How to view it with `/promptrek.spec.analyze`
-""",
-            output_format="markdown",
-            requires_approval=False,
+Use structured markdown headings and emphasize brevity and clarity.""",
+            argument_description="Optional context or scope",
         ),
-        Command(
+        _create_spec_command(
+            name="promptrek.spec.specify",
+            description="Create a structured software specification",
+            prompt="""# Arguments:
+# - {{ topic }}: the spec topic (e.g. 'auth-flow')
+
+You are writing a structured software specification for the feature "{{ topic }}".
+Create a new module spec including the following:
+
+## Title
+Give a short, descriptive title.
+
+## Problem
+What problem does this spec solve?
+
+## Goals
+List key outcomes or success criteria.
+
+## Non-Goals
+Clarify what's explicitly out of scope.
+
+## Assumptions
+Any preconditions or requirements that must be met.
+
+Format as clean markdown. Keep each section concise.""",
+            argument_description="Spec topic or feature name",
+        ),
+        _create_spec_command(
             name="promptrek.spec.plan",
-            description="Generate a technical implementation plan from a spec",
-            prompt="""Generate a detailed technical implementation plan from a spec.
+            description="Generate technical implementation plan from spec",
+            prompt="""# Arguments:
+# - {{ topic }}: name of the feature or spec this plan supports
 
-## Instructions
+You are writing a technical implementation plan for "{{ topic }}".
+Reference the related spec in `promptrek/specs/` if it exists.
 
-1. **Select Spec**: Ask the user which spec to create a plan for (or use context)
-2. **Analyze Spec**: Read and understand the spec requirements
-3. **Create Plan**: Generate a structured technical plan including:
-   - Architecture overview
-   - Component breakdown
-   - Implementation phases
-   - Dependencies and prerequisites
-   - Risk assessment
-   - Timeline estimates (if applicable)
-4. **Save as New Spec**: Create a new spec document with the plan (linked to original)
+## Approach
+Describe the strategy and system design.
 
-## Output Format
+## Stack
+What technologies, frameworks, or tools will be used?
 
-Create a new spec with:
-- Title: "[Original Spec Title] - Implementation Plan"
-- Link to original spec ID in metadata
-- Structured markdown plan with sections for architecture, phases, dependencies, etc.
-- Tag with "plan" and original spec tags
+## Milestones
+Break down implementation into 2–4 phases.
 
-## Example Structure
-
-```markdown
-# API Authentication Specification - Implementation Plan
-
-**ID:** e5f6g7h8
-**Created:** 2025-11-06T11:00:00
-**Source:** /promptrek.spec.plan
-**Summary:** Implementation plan for OAuth 2.0 authentication
-**Tags:** plan, api, auth, oauth
-**Linked Specs:** a1b2c3d4
-
----
-
-## Architecture Overview
-
-[Architecture details...]
-
-## Implementation Phases
-
-### Phase 1: Setup & Configuration
-- Set up OAuth 2.0 library
-- Configure environment variables
-- ...
-
-### Phase 2: Core Authentication Flow
-...
-
-## Dependencies
-
-- Library: oauth2-server v4.x
-- Database: PostgreSQL 14+
-...
-```
-
-Inform the user of the new plan spec ID and how to proceed with `/promptrek.spec.tasks`
-""",
-            output_format="markdown",
-            requires_approval=False,
+Use markdown headings. Include bullet lists where helpful.""",
+            argument_description="Feature or spec name",
         ),
-        Command(
+        _create_spec_command(
             name="promptrek.spec.tasks",
-            description="Break down a plan into actionable tasks",
-            prompt="""Break down an implementation plan into concrete, actionable tasks.
+            description="Generate implementation tasks from plan",
+            prompt="""# Arguments:
+# - {{ topic }}: name of the feature or plan to create tasks for
 
-## Instructions
+You are converting the plan for "{{ topic }}" into a checklist of development tasks.
+Use the corresponding `.plan.md` file if available.
 
-1. **Select Plan**: Ask which plan spec to break down (or use context)
-2. **Analyze Plan**: Read the plan and identify all work items
-3. **Create Task List**: Generate a detailed task breakdown including:
-   - Task groups by phase or component
-   - Individual actionable tasks
-   - Dependencies between tasks
-   - Priority/order
-   - Acceptance criteria for each task
-4. **Save as New Spec**: Create a task breakdown spec (linked to plan)
+Output format:
+- [ ] Task 1 (with 1-line description)
+- [ ] Task 2
 
-## Output Format
-
-Create a new spec with:
-- Title: "[Plan Title] - Task Breakdown"
-- Link to plan spec ID in metadata
-- Structured task list with checkboxes, dependencies, and acceptance criteria
-- Tag with "tasks" and related tags
-
-## Example Structure
-
-```markdown
-# API Authentication Implementation Plan - Task Breakdown
-
-**ID:** i9j0k1l2
-**Created:** 2025-11-06T11:30:00
-**Source:** /promptrek.spec.tasks
-**Summary:** Actionable tasks for OAuth 2.0 implementation
-**Tags:** tasks, api, auth, oauth
-**Linked Specs:** e5f6g7h8, a1b2c3d4
-
----
-
-## Phase 1: Setup & Configuration
-
-### Task 1.1: Install OAuth Library
-- [ ] Add oauth2-server to package.json
-- [ ] Run npm install
-- [ ] Verify installation
-
-**Dependencies:** None
-**Acceptance Criteria:** Library imported successfully in code
-
-### Task 1.2: Configure Environment
-- [ ] Add OAuth credentials to .env
-- [ ] Set up callback URLs
-- [ ] Configure token expiration times
-
-**Dependencies:** 1.1
-**Acceptance Criteria:** Environment variables loaded and validated
-
-...
-```
-
-Inform the user they can now use `/promptrek.spec.implement` to start coding
-""",
-            output_format="markdown",
-            requires_approval=False,
+Use clear, atomic task items. Do not nest subtasks.
+Ensure all key plan items are represented.""",
+            argument_description="Feature or plan name",
         ),
-        Command(
+        _create_spec_command(
             name="promptrek.spec.implement",
-            description="Implement code based on tasks and specs",
-            prompt="""Implement code based on spec documents, plans, and tasks.
+            description="Implement production code from tasks",
+            prompt="""# Arguments:
+# - {{ topic }}: the task or module name to implement
 
-## Instructions
+You are writing production-ready code for the task: "{{ topic }}".
+Use the task list and plan as context.
 
-1. **Review Context**: Ask which spec/plan/tasks to implement (or use context)
-2. **Read Specs**: Load and review:
-   - Original specification
-   - Implementation plan (if available)
-   - Task breakdown (if available)
-3. **Generate Code**: Write production-quality code that:
-   - Follows the spec requirements
-   - Implements tasks in order
-   - Adheres to project coding standards
-   - Includes proper error handling
-   - Has comprehensive tests
-4. **Update Tasks**: Mark completed tasks in the task spec
-5. **Document Changes**: Create or update an implementation notes section
-
-## Workflow
-
-1. Confirm which task(s) to implement
-2. Show relevant spec sections
-3. Implement the code
-4. Run tests
-5. Update task spec with completion status
-6. Provide summary of changes
-
-## Example
-
-When implementing Task 1.1 (Install OAuth Library):
-
-```bash
-# Add dependency
-npm install oauth2-server
-
-# Verify import
-node -e "require('oauth2-server')"
-```
-
-Then update the task spec to mark Task 1.1 as complete:
-
-```markdown
-### Task 1.1: Install OAuth Library
-- [x] Add oauth2-server to package.json
-- [x] Run npm install
-- [x] Verified installation
-
-**Status:** ✅ Complete
-**Completed:** 2025-11-06T12:00:00
-```
-
-Continue with the next task or ask user for guidance.
-""",
-            output_format="code",
-            requires_approval=False,
+Output only the code block.
+Respect file and function boundaries. Include docstrings.
+Assume the reader has seen the plan and spec.""",
+            argument_description="Task or module name",
         ),
-        Command(
+        _create_spec_command(
             name="promptrek.spec.analyze",
-            description="Analyze specs for consistency and completeness",
-            prompt="""Analyze spec documents for consistency, completeness, and quality.
+            description="Analyze and review consistency of spec artifacts",
+            prompt="""# Arguments:
+# - {{ topic }} (optional): analyze a specific spec chain if provided
 
-## Instructions
+Review the consistency across the spec, plan, and tasks for "{{ topic }}".
+Identify issues, omissions, or inconsistencies.
 
-1. **Select Specs**: Ask which spec(s) to analyze (or analyze all linked specs)
-2. **Load Specs**: Read spec content and metadata
-3. **Perform Analysis**:
-   - Check for completeness (all required sections present)
-   - Verify consistency across linked specs
-   - Identify gaps or ambiguities
-   - Check for conflicting requirements
-   - Validate links between specs
-   - Assess clarity and detail level
-4. **Generate Report**: Create analysis report with:
-   - Summary of findings
-   - Issues by severity (critical, warning, info)
-   - Recommendations for improvements
-   - Checklist of standards compliance
+Output:
+- Issues (missing pieces, contradictions, unclear terms)
+- Suggested fixes (what should be updated where)
 
-## Analysis Checklist
+Use markdown bullet lists. Keep tone constructive.""",
+            argument_description="Optional: specific spec to analyze",
+        ),
+        _create_spec_command(
+            name="promptrek.spec.history",
+            description="Summarize changes and progress across specs",
+            prompt="""# Arguments:
+# - {{ topic }} (optional): limit summary to a specific spec or module
 
-- [ ] All required sections present?
-- [ ] Clearly defined requirements?
-- [ ] No conflicting specifications?
-- [ ] Linked specs are consistent?
-- [ ] Technical details sufficient?
-- [ ] Examples provided where needed?
-- [ ] Acceptance criteria clear?
-- [ ] Tags appropriate and helpful?
+You are summarizing the history and evolution of all specs.
+Highlight key changes across `*.spec.md`, `*.plan.md`, and `*.tasks.md`.
 
-## Output Format
+Output format:
+- Date / Change summary
+- File(s) affected
 
-Generate a markdown report:
+Use markdown bullet points.""",
+            argument_description="Optional: specific spec or module",
+        ),
+        _create_spec_command(
+            name="promptrek.spec.feedback",
+            description="Generate structured PR feedback on a diff",
+            prompt="""# Arguments:
+# - {{ topic }}: file or diff description (e.g. 'login refactor')
 
-```markdown
-# Spec Analysis Report
+You are reviewing a code or spec diff.
+Summarize key issues, risks, and improvements.
+Provide PR-style feedback.
 
-**Date:** 2025-11-06T13:00:00
-**Analyzed Specs:** a1b2c3d4, e5f6g7h8, i9j0k1l2
+Output format:
+- Summary
+- Suggestions (bullet list)
+- Priority ranking (e.g. High / Medium / Low)
 
-## Summary
-
-✅ 2 specs fully compliant
-⚠️  1 spec has warnings
-❌ 0 critical issues
-
-## Detailed Findings
-
-### Spec a1b2c3d4: API Authentication Specification
-
-**Status:** ✅ Compliant
-
-**Strengths:**
-- Clear requirements
-- Good examples
-- Well-structured
-
-**Suggestions:**
-- Add security considerations section
-- Include error handling scenarios
-
-### Spec e5f6g7h8: Implementation Plan
-
-**Status:** ⚠️ Has Warnings
-
-**Issues:**
-- Missing timeline estimates (Warning)
-- Dependency on external library version not pinned (Warning)
-
-**Recommendations:**
-- Add estimated timelines for each phase
-- Specify exact library versions
-
-...
-
-## Overall Recommendations
-
-1. Add security review section to main spec
-2. Pin dependency versions in plan
-3. Consider adding API usage examples
-```
-
-Offer to create updated versions of specs with improvements if user wants.
-""",
-            output_format="markdown",
-            requires_approval=False,
+Avoid repeating implementation; focus on judgment and clarity.""",
+            argument_description="File or diff description",
         ),
     ]

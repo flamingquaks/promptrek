@@ -102,6 +102,30 @@ class CLIError(PrompTrekError):
     pass
 
 
+class SpecError(PrompTrekError):
+    """Base exception for spec-related errors."""
+
+    pass
+
+
+class SpecNotFoundError(SpecError):
+    """Raised when a spec is not found in the registry."""
+
+    pass
+
+
+class SpecFileError(SpecError):
+    """Raised when spec file operations fail."""
+
+    pass
+
+
+class SpecRegistryError(SpecError):
+    """Raised when spec registry operations fail."""
+
+    pass
+
+
 class DeprecationWarnings:
     """Centralized deprecation warning messages for PrompTrek."""
 
