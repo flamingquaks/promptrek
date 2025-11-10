@@ -99,14 +99,14 @@ class TestYAMLWriter:
         # Check for yaml-language-server comment
         assert "# yaml-language-server: $schema=https://promptrek.ai/schema/v3.0.0.json" in content
 
-        # Check for PrompTrek UPF comment
-        assert "# PrompTrek Universal Prompt Format (UPF)" in content
+        # Check for PrompTrek UPF header comments
+        assert "# Universal Prompt Format (UPF) - PrompTrek Configuration Document" in content
+        assert "# This document is used to centrally manage AI editor prompts & configurations" in content
+        assert "# Learn more about PrompTrek at https://promptrek.ai" in content
 
-        # Check for learn more link
-        assert "# Learn more: https://promptrek.ai" in content
-
-        # Verify comments appear at the beginning of the file
+        # Verify comments appear at the beginning of the file in correct order
         lines = content.split('\n')
         assert lines[0].startswith("# yaml-language-server:")
-        assert lines[1] == "# PrompTrek Universal Prompt Format (UPF)"
-        assert lines[2] == "# Learn more: https://promptrek.ai"
+        assert lines[1] == "# Universal Prompt Format (UPF) - PrompTrek Configuration Document"
+        assert lines[2] == "# This document is used to centrally manage AI editor prompts & configurations"
+        assert lines[3] == "# Learn more about PrompTrek at https://promptrek.ai"
