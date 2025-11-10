@@ -635,7 +635,7 @@ variables:
 
         # Check migrated file
         migrated = yaml.safe_load(v3_file.read_text())
-        assert migrated["schema_version"] == "3.0.0"
+        assert migrated["schema_version"] == "3.1.0"
         assert migrated["metadata"]["title"] == "Old Project"
         assert migrated["content"] == "# Old Project\n\nSome content here.\n"
         assert migrated["variables"]["VAR1"] == "value1"
@@ -671,7 +671,7 @@ plugins:
 
         # Check that nested plugins.mcp_servers was promoted to top-level mcp_servers
         migrated = yaml.safe_load(v3_file.read_text())
-        assert migrated["schema_version"] == "3.0.0"
+        assert migrated["schema_version"] == "3.1.0"
         assert "mcp_servers" in migrated
         assert migrated["mcp_servers"][0]["name"] == "test-server"
         # Old nested plugins field should not exist
