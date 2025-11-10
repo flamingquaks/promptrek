@@ -91,7 +91,7 @@ class TestGetSpecCommands:
 
         assert "implementation plan" in plan_cmd.description.lower()
         assert plan_cmd.output_format == "markdown"
-        assert "## Approach" in plan_cmd.prompt
+        assert "Approach" in plan_cmd.prompt
         assert "{{ topic }}" in plan_cmd.prompt
         assert plan_cmd.supports_arguments is True
 

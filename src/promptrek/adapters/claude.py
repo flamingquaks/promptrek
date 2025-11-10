@@ -503,6 +503,10 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
                         tool_calls=tool_calls,
                     )
 
+                # Skip spec commands (they are auto-injected during generate)
+                if command.name.startswith("promptrek.spec."):
+                    continue
+
                 commands.append(command)
 
             except Exception as e:
