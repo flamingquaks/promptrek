@@ -23,10 +23,10 @@ The Universal Spec Format (USF) is a standardized format for specification docum
 Spec files automatically include a schema directive at the top:
 
 ```html
-<!-- yaml-language-server: $schema=https://promptrek.com/schema/spec/v1.0.0.json -->
+<!-- yaml-language-server: $schema=https://promptrek.ai/schema/spec/v1.0.0.json -->
 <!-- Universal Spec Format (USF) - PrompTrek Spec Document -->
 <!-- This is a specification document managed by PrompTrek -->
-<!-- Learn more about specs: https://docs.promptrek.com/concepts/specs -->
+<!-- Learn more about specs: https://promptrek.ai/user-guide/spec-driven-development -->
 ```
 
 This enables IDE support for:

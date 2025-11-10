@@ -147,7 +147,7 @@ class SpecManager:
             f.write("<!-- Universal Spec Format (USF) - PrompTrek Spec Document -->\n")
             f.write("<!-- This is a specification document managed by PrompTrek -->\n")
             f.write(
-                "<!-- Learn more about specs: https://docs.promptrek.com/concepts/specs -->\n\n"
+                "<!-- Learn more about specs: https://promptrek.ai/user-guide/spec-driven-development -->\n\n"
             )
 
             # Write title and metadata

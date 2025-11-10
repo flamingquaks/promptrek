@@ -412,7 +412,7 @@ content: |-
      <!-- yaml-language-server: $schema=https://promptrek.com/schema/spec/v1.0.0.json -->
      <!-- Universal Spec Format (USF) - PrompTrek Spec Document -->
      <!-- This is a specification document managed by PrompTrek -->
-     <!-- Learn more about specs: https://docs.promptrek.com/concepts/specs -->
+     <!-- Learn more about specs: https://promptrek.ai/user-guide/spec-driven-development -->
      ```
 
   2. **Title**: `# Spec Title`
@@ -473,7 +473,7 @@ content: |-
   <!-- yaml-language-server: $schema=https://promptrek.com/schema/spec/v1.0.0.json -->
   <!-- Universal Spec Format (USF) - PrompTrek Spec Document -->
   <!-- This is a specification document managed by PrompTrek -->
-  <!-- Learn more about specs: https://docs.promptrek.com/concepts/specs -->
+  <!-- Learn more about specs: https://promptrek.ai/user-guide/spec-driven-development -->
 
   # User Authentication API
 
