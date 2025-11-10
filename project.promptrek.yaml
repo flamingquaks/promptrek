@@ -27,7 +27,7 @@ content: |-
 
   ## BEFORE YOU BEGIN!
 
-  - Make sure you've refreshed your context documents by running `promptrek refresh --editor claude` if needed. (Replace claude with the editor you're using, if not Claude!)
+  - Make sure you've refreshed your context documents by running `uvx promptrek sync --editor {{{ EDITOR_NAME }}}` if needed.
 
   ## Development Commands
 

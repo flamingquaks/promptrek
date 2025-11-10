@@ -507,7 +507,7 @@ def _generate_for_editor_multiple(
             # Inject spec commands into prompt
             prompt = _inject_spec_commands(prompt, output_dir)
 
-            # Merge variables: base < prompt.variables < CLI
+            # Merge variables: base < prompt.variables < CLI < EDITOR_NAME (auto-injected)
             merged_vars = {}
             if base_variables:
                 merged_vars.update(base_variables)
@@ -518,6 +518,9 @@ def _generate_for_editor_multiple(
             # Fallback to old 'variables' param for backward compatibility
             if variables and not (base_variables or cli_overrides):
                 merged_vars = variables
+
+            # Auto-inject EDITOR_NAME for dynamic editor references
+            merged_vars["EDITOR_NAME"] = editor
 
             # Check if adapter supports headless parameter
             if _adapter_supports_headless(adapter, "generate"):
@@ -551,6 +554,9 @@ def _generate_for_editor_multiple(
                 merged_vars.update(cli_overrides)
             if variables and not (base_variables or cli_overrides):
                 merged_vars = variables
+
+            # Auto-inject EDITOR_NAME for dynamic editor references
+            merged_vars["EDITOR_NAME"] = editor
 
             # Multiple files - check adapter capabilities
             if hasattr(adapter, "generate_multiple") and registry.has_capability(

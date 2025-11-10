@@ -76,7 +76,10 @@ What behaviors or pitfalls should be avoided?
 ## Working Agreements
 What are default collaboration expectations?
 
-Use structured markdown headings and emphasize brevity and clarity.""",
+Use structured markdown headings and emphasize brevity and clarity.
+
+After creating or updating the constitution file, run:
+`promptrek sync --editor {{{ EDITOR_NAME }}}`""",
             argument_description="Optional context or scope",
         ),
         _create_spec_command(
@@ -103,7 +106,10 @@ Clarify what's explicitly out of scope.
 ## Assumptions
 Any preconditions or requirements that must be met.
 
-Format as clean markdown. Keep each section concise.""",
+Format as clean markdown. Keep each section concise.
+
+After creating the spec file, run:
+`promptrek sync --editor {{{ EDITOR_NAME }}}`""",
             argument_description="Spec topic or feature name",
         ),
         _create_spec_command(
@@ -124,7 +130,10 @@ What technologies, frameworks, or tools will be used?
 ## Milestones
 Break down implementation into 2–4 phases.
 
-Use markdown headings. Include bullet lists where helpful.""",
+Use markdown headings. Include bullet lists where helpful.
+
+After creating the plan file, run:
+`promptrek sync --editor {{{ EDITOR_NAME }}}`""",
             argument_description="Feature or spec name",
         ),
         _create_spec_command(
@@ -141,7 +150,10 @@ Output format:
 - [ ] Task 2
 
 Use clear, atomic task items. Do not nest subtasks.
-Ensure all key plan items are represented.""",
+Ensure all key plan items are represented.
+
+After creating the tasks file, run:
+`promptrek sync --editor {{{ EDITOR_NAME }}}`""",
             argument_description="Feature or plan name",
         ),
         _create_spec_command(
@@ -205,7 +217,10 @@ Output format:
 - Suggestions (bullet list)
 - Priority ranking (e.g. High / Medium / Low)
 
-Avoid repeating implementation; focus on judgment and clarity.""",
+Avoid repeating implementation; focus on judgment and clarity.
+
+After creating the feedback file, run:
+`promptrek sync --editor {{{ EDITOR_NAME }}}`""",
             argument_description="File or diff description",
         ),
     ]
