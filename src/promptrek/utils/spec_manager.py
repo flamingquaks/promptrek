@@ -140,6 +140,17 @@ class SpecManager:
             content: Markdown content to write after header
         """
         with open(file_path, "w", encoding="utf-8") as f:
+            # Write USF documentation comments at the top
+            f.write(
+                "<!-- yaml-language-server: $schema=https://promptrek.com/schema/spec/v1.0.0.json -->\n"
+            )
+            f.write("<!-- Universal Spec Format (USF) - PrompTrek Spec Document -->\n")
+            f.write("<!-- This is a specification document managed by PrompTrek -->\n")
+            f.write(
+                "<!-- Learn more about specs: https://docs.promptrek.com/concepts/specs -->\n\n"
+            )
+
+            # Write title and metadata
             f.write(f"# {metadata.title}\n\n")
             f.write(f"**ID:** {metadata.id}  \n")
             f.write(f"**Created:** {metadata.created}  \n")

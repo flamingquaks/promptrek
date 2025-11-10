@@ -4,6 +4,12 @@ This directory contains JSON Schema files for the Universal Prompt Format (UPF) 
 
 ## Available Schemas
 
+### Universal Spec Format (USF) Schema
+- **Directory**: [`spec/`](spec/)
+- **File**: [`spec/v1.0.0.json`](spec/v1.0.0.json)
+- **Description**: Schema for individual spec documents (markdown files) managed by PrompTrek
+- **Learn More**: [USF Documentation](spec/README.md)
+
 ### Schema v3.1 (Latest Stable)
 - **File**: [`v3.1.0.json`](v3.1.0.json)
 - **Configuration Schema Version**: 3.1.x
