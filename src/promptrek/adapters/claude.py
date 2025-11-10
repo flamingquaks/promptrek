@@ -4,6 +4,9 @@ Claude Code adapter implementation.
 
 import json
 import re
+import shutil
+import subprocess
+import tempfile
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
@@ -28,6 +31,186 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
             description=self._description,
             file_patterns=self._file_patterns,
         )
+
+    def _is_file_committed(self, file_path: Path) -> bool:
+        """
+        Check if a file is committed to git (not just staged).
+
+        Args:
+            file_path: Path to the file to check
+
+        Returns:
+            bool: True if the file is committed in git history
+        """
+        try:
+            # Use git ls-files to check if file is tracked in the repository
+            result = subprocess.run(
+                ["git", "ls-files", "--error-unmatch", str(file_path)],
+                capture_output=True,
+                text=True,
+                check=False,
+                cwd=file_path.parent if file_path.parent.exists() else Path.cwd(),
+            )
+            # Return code 0 means file is tracked (committed)
+            return result.returncode == 0
+        except Exception:
+            return False
+
+    def _show_diff_and_confirm(self, file_path: Path, new_content: str) -> bool:
+        """
+        Show diff between committed version and new content, ask for confirmation.
+
+        Args:
+            file_path: Path to the file
+            new_content: New content to compare against
+
+        Returns:
+            bool: True if user confirms, False otherwise
+        """
+        try:
+            # Get committed version
+            result = subprocess.run(
+                ["git", "show", f"HEAD:{file_path}"],
+                capture_output=True,
+                text=True,
+                check=False,
+                cwd=file_path.parent if file_path.parent.exists() else Path.cwd(),
+            )
+
+            if result.returncode != 0:
+                click.echo(f"⚠️  Could not retrieve committed version of {file_path}")
+                return False
+
+            committed_content = result.stdout
+
+            # Show diff
+            click.echo(f"\n📊 Comparing committed version with new headless version of {file_path}:")
+            click.echo("=" * 80)
+
+            # Create temp files for diff
+            with tempfile.NamedTemporaryFile(mode='w', suffix='.md', delete=False) as f1:
+                f1.write(committed_content)
+                temp_committed = f1.name
+
+            with tempfile.NamedTemporaryFile(mode='w', suffix='.md', delete=False) as f2:
+                f2.write(new_content)
+                temp_new = f2.name
+
+            try:
+                # Show diff
+                diff_result = subprocess.run(
+                    ["git", "diff", "--no-index", "--color=always", temp_committed, temp_new],
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                )
+                click.echo(diff_result.stdout)
+            finally:
+                # Clean up temp files
+                Path(temp_committed).unlink(missing_ok=True)
+                Path(temp_new).unlink(missing_ok=True)
+
+            click.echo("=" * 80)
+
+            # Ask for confirmation
+            return click.confirm("\n⚠️  A committed version exists. Do you want to replace it with the headless version?")
+
+        except Exception as e:
+            click.echo(f"⚠️  Error showing diff: {e}")
+            return False
+
+    def _handle_headless_mode(
+        self, output_file: Path, content: str, dry_run: bool, verbose: bool
+    ) -> None:
+        """
+        Handle headless mode file generation with git operations.
+
+        In headless mode:
+        1. Check if file is committed
+        2. If committed, show diff and ask for confirmation
+        3. If not committed (normal case):
+           - Backup current file if it exists
+           - Write headless version
+           - Force add to git
+           - Restore original version from backup
+
+        Args:
+            output_file: Path to the output file
+            content: Content to write
+            dry_run: Whether this is a dry run
+            verbose: Verbose output
+        """
+        if dry_run:
+            click.echo(f"  📁 Would create headless version: {output_file}")
+            if verbose:
+                click.echo("  📄 Content preview:")
+                preview = content[:200] + "..." if len(content) > 200 else content
+                click.echo(f"    {preview}")
+            return
+
+        # Check if file is committed
+        is_committed = self._is_file_committed(output_file)
+
+        if is_committed:
+            # Show diff and ask for confirmation
+            if not self._show_diff_and_confirm(output_file, content):
+                click.echo(f"⚠️  Skipping {output_file} - user declined replacement")
+                return
+
+        # Normal case: file is not committed (or user confirmed replacement)
+        backup_path = None
+
+        try:
+            # Step 1: Backup current file if it exists
+            if output_file.exists():
+                backup_path = output_file.with_suffix(output_file.suffix + '.backup')
+                shutil.copy2(output_file, backup_path)
+                if verbose:
+                    click.echo(f"  💾 Backed up current file to {backup_path}")
+
+            # Step 2: Write headless version
+            output_file.parent.mkdir(parents=True, exist_ok=True)
+            with open(output_file, "w", encoding="utf-8") as f:
+                f.write(content)
+            if verbose:
+                click.echo(f"  ✍️  Wrote headless version to {output_file}")
+
+            # Step 3: Force add to git
+            try:
+                result = subprocess.run(
+                    ["git", "add", "-f", str(output_file)],
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                    cwd=output_file.parent,
+                )
+                if result.returncode == 0:
+                    click.echo(f"✅ Headless version added to git: {output_file}")
+                else:
+                    click.echo(f"⚠️  Failed to add {output_file} to git: {result.stderr}")
+            except Exception as e:
+                click.echo(f"⚠️  Error adding file to git: {e}")
+
+            # Step 4: Restore original version from backup
+            if backup_path and backup_path.exists():
+                shutil.move(str(backup_path), str(output_file))
+                if verbose:
+                    click.echo(f"  🔄 Restored local version from backup")
+                click.echo(f"✅ Local version restored: {output_file}")
+
+        except Exception as e:
+            click.echo(f"❌ Error in headless mode processing: {e}")
+            # Try to restore from backup if something went wrong
+            if backup_path and backup_path.exists():
+                try:
+                    shutil.move(str(backup_path), str(output_file))
+                    click.echo(f"  🔄 Restored from backup after error")
+                except Exception:
+                    pass
+        finally:
+            # Clean up backup file if it still exists
+            if backup_path and backup_path.exists():
+                backup_path.unlink(missing_ok=True)
 
     def generate(
         self,
@@ -69,18 +252,23 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
             conditional_content = self.process_conditionals(processed_prompt, variables)
             content = self._build_content(processed_prompt, conditional_content)
 
-        if dry_run:
-            click.echo(f"  📁 Would create: {output_file}")
-            if verbose:
-                click.echo("  📄 Content preview:")
-                preview = content[:200] + "..." if len(content) > 200 else content
-                click.echo(f"    {preview}")
+        if headless:
+            # Handle headless mode with git operations
+            self._handle_headless_mode(output_file, content, dry_run, verbose)
         else:
-            # Create directory and file
-            claude_dir.mkdir(exist_ok=True)
-            with open(output_file, "w", encoding="utf-8") as f:
-                f.write(content)
-            click.echo(f"✅ Generated: {output_file}")
+            # Normal mode: just write the file
+            if dry_run:
+                click.echo(f"  📁 Would create: {output_file}")
+                if verbose:
+                    click.echo("  📄 Content preview:")
+                    preview = content[:200] + "..." if len(content) > 200 else content
+                    click.echo(f"    {preview}")
+            else:
+                # Create directory and file
+                claude_dir.mkdir(exist_ok=True)
+                with open(output_file, "w", encoding="utf-8") as f:
+                    f.write(content)
+                click.echo(f"✅ Generated: {output_file}")
 
         generated_files = [output_file]
 
