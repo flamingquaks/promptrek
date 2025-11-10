@@ -41,7 +41,7 @@ agents:
   trust_metadata:
     trusted: true
     trust_level: partial
-    requires_approval: true
+
     source: local
 - name: doc-generator
   prompt: |

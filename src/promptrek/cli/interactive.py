@@ -328,7 +328,7 @@ def workflow_migrate(ctx: click.Context) -> None:
     # Output file path
     output_path = questionary.text(
         "Output file path:",
-        default=f"{existing_config.stem}.v3.1{existing_config.suffix}",
+        default=f"{existing_config.stem}.v3{existing_config.suffix}",
     ).ask()
 
     if not output_path:
