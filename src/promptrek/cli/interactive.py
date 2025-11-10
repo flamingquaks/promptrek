@@ -861,11 +861,12 @@ def workflow_refresh(ctx: click.Context) -> None:
 
     project_file_adapters = registry.get_project_file_adapters()
 
-    # Editor selection
+    # Editor selection (including "all editors" option)
     editor_choice = questionary.select(
         "Select editor to refresh:",
         choices=[
-            Choice("Use last generation settings", value=None),
+            Choice("Use last generation settings", value="__use_last__"),
+            Choice("Refresh all editors", value="__all__"),
             *[
                 questionary.Choice(name.capitalize(), value=name)
                 for name in sorted(project_file_adapters)
@@ -873,21 +874,17 @@ def workflow_refresh(ctx: click.Context) -> None:
         ],
     ).ask()
 
-    if editor_choice is False:
+    if editor_choice is False or editor_choice is None:
         click.echo("Cancelled.")
         return
 
-    # All editors option
+    # Convert special values
     all_editors = False
-    if editor_choice is not None:
-        all_editors = questionary.confirm(
-            "Refresh all editors?",
-            default=False,
-        ).ask()
-
-        if all_editors is None:
-            click.echo("Cancelled.")
-            return
+    if editor_choice == "__use_last__":
+        editor_choice = None
+    elif editor_choice == "__all__":
+        editor_choice = None
+        all_editors = True
 
     # Clear cache option
     clear_cache = questionary.confirm(

@@ -454,8 +454,9 @@ class TestWorkflowPlugins:
 class TestShowHelp:
     """Tests for show_help function."""
 
+    @patch("builtins.input", return_value="")
     @patch("click.echo")
-    def test_show_help_displays_content(self, mock_echo) -> None:
+    def test_show_help_displays_content(self, mock_echo, mock_input) -> None:
         """Test that show_help displays help content."""
         from promptrek.cli.interactive import show_help
 
@@ -467,6 +468,9 @@ class TestShowHelp:
         # Check that it mentions common commands
         output = " ".join(str(call) for call in mock_echo.call_args_list)
         assert "init" in output or "generate" in output
+
+        # Should have called input() for wait_for_return
+        mock_input.assert_called_once()
 
 
 class TestRunInteractiveMode:
