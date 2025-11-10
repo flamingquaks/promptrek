@@ -81,3 +81,32 @@ class TestYAMLWriter:
         content = output_file.read_text()
         assert "documents" in content
         assert "doc1" in content
+
+    def test_write_with_schema_header_comments(self, tmp_path):
+        """Test that PrompTrek UPF header comments are added."""
+        data = {
+            "schema_version": "3.0.0",
+            "metadata": {"title": "Test", "description": "Test"},
+            "content": "# Test",
+        }
+
+        output_file = tmp_path / "test.yaml"
+        write_promptrek_yaml(data, output_file)
+
+        assert output_file.exists()
+        content = output_file.read_text()
+
+        # Check for yaml-language-server comment
+        assert "# yaml-language-server: $schema=https://promptrek.ai/schema/v3.0.0.json" in content
+
+        # Check for PrompTrek UPF comment
+        assert "# PrompTrek Universal Prompt Format (UPF)" in content
+
+        # Check for learn more link
+        assert "# Learn more: https://promptrek.ai" in content
+
+        # Verify comments appear at the beginning of the file
+        lines = content.split('\n')
+        assert lines[0].startswith("# yaml-language-server:")
+        assert lines[1] == "# PrompTrek Universal Prompt Format (UPF)"
+        assert lines[2] == "# Learn more: https://promptrek.ai"

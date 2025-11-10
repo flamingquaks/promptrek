@@ -148,6 +148,8 @@ def write_promptrek_yaml(data: Dict[str, Any], output_path: Path) -> None:
         # Write schema comment if applicable
         if schema_url:
             f.write(f"# yaml-language-server: $schema={schema_url}\n")
+            f.write("# PrompTrek Universal Prompt Format (UPF)\n")
+            f.write("# Learn more: https://promptrek.ai\n")
 
         yaml.dump(
             processed_data,
