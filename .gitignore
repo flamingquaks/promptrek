@@ -165,3 +165,6 @@ test-project/
 .continue/config.yaml
 .continue/mcpServers/*.yaml
 .continue/prompts/*.md
+
+# PrompTrek editor-specific files (generated, not committed)
+.tabnine/prompts/*.md

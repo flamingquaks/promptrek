@@ -6,7 +6,7 @@ metadata:
   version: 1.0.0
   author: PrompTrek Sync
   created: '2025-10-25T09:02:24.919388'
-  updated: '2025-10-25T09:25:20.898771'
+  updated: '2025-11-09T21:46:03.024282'
   tags: [claude-code, synced]
 content: |-
   ## Project Overview
@@ -22,12 +22,13 @@ content: |-
   - **Multi-Format Support**: Works with all major AI editors automatically (no `targets` field needed in v2+)
   - **Variable Substitution**: Use `{{{ VARIABLE_NAME }}}` for dynamic content
   - **Plugin Ecosystem**: Configure MCP servers, custom commands, autonomous agents, and event hooks
+  - **Universal Spec Format (USF)**: Standardized format for spec documents with JSON schema support
 
   **Technology Stack**: Python 3.9+ with Click (CLI), Jinja2 (templating), PyYAML (parsing), Pydantic (validation)
 
   ## BEFORE YOU BEGIN!
 
-  - Make sure you've refreshed your context documents by running `uvx promptrek sync --editor {{{ EDITOR_NAME }}}` if needed.
+  - Make sure you've refreshed your context documents by running `uvx promptrek sync --editor claude` if needed.
 
   ## Development Commands
 
@@ -390,6 +391,116 @@ content: |-
 
   **Version**: Defined in `pyproject.toml` under `[project]` section (currently 0.2.0)
 
+  ## Universal Spec Format (USF)
+
+  PrompTrek supports a standardized **Universal Spec Format (USF)** for specification documents stored in `promptrek/specs/`.
+
+  ### What is USF?
+
+  USF is a standardized markdown format for individual specification documents that capture:
+  - Project requirements and specifications
+  - Design decisions and architecture
+  - Implementation plans and technical documentation
+  - Feature specifications and API designs
+
+  ### USF Spec File Structure
+
+  Every USF spec file automatically includes:
+
+  1. **Schema Directive & Documentation Comments**:
+     ```html
+     <!-- yaml-language-server: $schema=https://promptrek.com/schema/spec/v1.0.0.json -->
+     <!-- Universal Spec Format (USF) - PrompTrek Spec Document -->
+     <!-- This is a specification document managed by PrompTrek -->
+     <!-- Learn more about specs: https://docs.promptrek.com/concepts/specs -->
+     ```
+
+  2. **Title**: `# Spec Title`
+
+  3. **Metadata** (key-value pairs):
+     - **ID**: Unique identifier (8-char UUID prefix)
+     - **Created**: ISO 8601 timestamp
+     - **Updated**: ISO 8601 timestamp (optional)
+     - **Source**: Command that created spec (`spec`, `sync`, etc.)
+     - **Summary**: Brief description (optional)
+     - **Tags**: Categorization tags (optional, e.g., `api, auth, security`)
+
+  4. **Separator**: `---`
+
+  5. **Content**: Markdown body with spec details
+
+  ### USF Commands
+
+  ```bash
+  # Create new spec from AI conversation
+  uv run promptrek spec
+
+  # List all specs
+  uv run promptrek list-specs
+
+  # Export spec to file (without metadata header)
+  uv run promptrek spec export <spec-id> -o output.md
+  ```
+
+  ### USF Schema & IDE Support
+
+  - **Schema Location**: `gh-pages/schema/spec/v1.0.0.json`
+  - **Schema URL**: `https://promptrek.com/schema/spec/v1.0.0.json`
+  - **Documentation**: `gh-pages/schema/spec/README.md`
+
+  The schema directive enables:
+  - ✅ IDE autocomplete for metadata fields
+  - ✅ Schema validation in editors supporting yaml-language-server
+  - ✅ Documentation on hover
+  - ✅ Standardized format across all spec documents
+
+  ### Implementation
+
+  **File**: `src/promptrek/utils/spec_manager.py`
+  - `SpecManager` class handles all spec operations
+  - `_write_spec_file()` method (lines 131-165) generates spec files with USF format
+  - Automatically adds schema directive and documentation comments
+  - Tracks specs in `promptrek/specs.yaml` registry
+
+  **Model**: `src/promptrek/core/models.py`
+  - `SpecMetadata` class defines spec metadata structure
+  - Required fields: `id`, `title`, `path`, `source_command`, `created`
+  - Optional fields: `updated`, `summary`, `tags`, `linked_specs`
+
+  ### Example USF Spec File
+
+  ```markdown
+  <!-- yaml-language-server: $schema=https://promptrek.com/schema/spec/v1.0.0.json -->
+  <!-- Universal Spec Format (USF) - PrompTrek Spec Document -->
+  <!-- This is a specification document managed by PrompTrek -->
+  <!-- Learn more about specs: https://docs.promptrek.com/concepts/specs -->
+
+  # User Authentication API
+
+  **ID:** abc123def
+  **Created:** 2025-11-09T12:00:00
+  **Source:** spec
+  **Summary:** Authentication endpoints and security requirements
+  **Tags:** api, auth, security, oauth
+
+  ---
+
+  # Overview
+
+  This spec defines the authentication endpoints for the user management system.
+
+  ## Requirements
+
+  - OAuth 2.0 support
+  - JWT token generation
+  - Refresh token mechanism
+
+  ## Endpoints
+
+  ### POST /auth/login
+  Authenticate a user and return access token.
+  ```
+
   ## Important Notes
 
   - **V3 Schema is Stable**: Top-level plugin fields, production-ready
@@ -401,6 +512,7 @@ content: |-
   - **Test coverage is enforced**: Minimum 80% coverage required for CI
   - **Type hints are required**: mypy configured with strict settings
   - **Adapter capabilities matter**: Check capabilities when adding features
+  - **USF specs are auto-formatted**: All specs include schema directive and USF comments
 
   ## Schema Quick Reference
 
