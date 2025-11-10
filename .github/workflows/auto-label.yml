@@ -98,7 +98,7 @@ jobs:
 
             ${editorList}
 
-            These labels help us track which editors are impacted by this change.`;
+            These labels help us track which editors and components are impacted by this change.`;
 
             // Check if we already commented
             const { data: comments } = await github.rest.issues.listComments({
