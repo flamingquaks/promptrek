@@ -88,3 +88,96 @@ class TestWindsurfAdapter(TestAdapterBase):
         file_names = [f.name for f in files]
         assert "general.md" in file_names
         assert "code-style.md" in file_names
+
+
+class TestWindsurfSpecInclusion:
+    """Test v3.1+ spec document inclusion."""
+
+    @pytest.fixture
+    def adapter(self):
+        return WindsurfAdapter()
+
+    @pytest.fixture
+    def spec_dir(self, tmp_path):
+        """Create spec directory with sample spec using SpecManager."""
+        from promptrek.utils.spec_manager import SpecManager
+
+        spec_manager = SpecManager(tmp_path)
+        spec_manager.create_spec(
+            title="Test Spec",
+            content="# Test Spec\n\nThis is a test specification.\n\n## Content\n- Item 1\n- Item 2",
+            summary="Test spec for adapter",
+            tags=["test"],
+            source_command="spec",
+        )
+        return tmp_path
+
+    def test_v3_1_generates_spec_files(self, adapter, spec_dir):
+        from promptrek.core.models import UniversalPromptV3
+
+        prompt = UniversalPromptV3(
+            schema_version="3.1.0",
+            metadata=PromptMetadata(
+                title="Test",
+                description="Test",
+                created="2024-01-01",
+                updated="2024-01-01",
+                version="1.0.0",
+                author="test",
+            ),
+            content="# Test",
+            include_specs=True,
+        )
+        adapter.generate(prompt, spec_dir, dry_run=False)
+        # Check that at least one spec file was created
+        spec_files = list((spec_dir / ".windsurf" / "rules").glob("spec-*.md"))
+        assert len(spec_files) > 0
+
+        # Check first spec file has proper frontmatter
+        spec_file = spec_files[0]
+        spec_content = spec_file.read_text()
+        assert "---" in spec_content
+        assert "name:" in spec_content
+
+    def test_v3_1_disabled_no_spec_files(self, adapter, spec_dir):
+        from promptrek.core.models import UniversalPromptV3
+
+        prompt = UniversalPromptV3(
+            schema_version="3.1.0",
+            metadata=PromptMetadata(
+                title="Test",
+                description="Test",
+                created="2024-01-01",
+                updated="2024-01-01",
+                version="1.0.0",
+                author="test",
+            ),
+            content="# Test",
+            include_specs=False,
+        )
+        adapter.generate(prompt, spec_dir, dry_run=False)
+        # Check that no spec files were created
+        if (spec_dir / ".windsurf" / "rules").exists():
+            spec_files = list((spec_dir / ".windsurf" / "rules").glob("spec-*.md"))
+            assert len(spec_files) == 0
+
+    def test_v3_0_no_spec_files(self, adapter, spec_dir):
+        from promptrek.core.models import UniversalPromptV3
+
+        prompt = UniversalPromptV3(
+            schema_version="3.0.0",
+            metadata=PromptMetadata(
+                title="Test",
+                description="Test",
+                created="2024-01-01",
+                updated="2024-01-01",
+                version="1.0.0",
+                author="test",
+            ),
+            content="# Test",
+        )
+        adapter.generate(prompt, spec_dir, dry_run=False)
+        # Check that no spec files were created
+        if (spec_dir / ".windsurf" / "rules").exists():
+            spec_files = list((spec_dir / ".windsurf" / "rules").glob("spec-*.md"))
+            assert len(spec_files) == 0

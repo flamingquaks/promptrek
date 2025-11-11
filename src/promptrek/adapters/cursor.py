@@ -11,10 +11,11 @@ import click
 from ..core.exceptions import DeprecationWarnings, ValidationError
 from ..core.models import UniversalPrompt, UniversalPromptV2, UniversalPromptV3
 from .base import EditorAdapter
+from .spec_mixin import SpecInclusionMixin
 from .sync_mixin import MarkdownSyncMixin
 
 
-class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
+class CursorAdapter(SpecInclusionMixin, MarkdownSyncMixin, EditorAdapter):
     """Adapter for Cursor editor."""
 
     _description = "Cursor (.cursor/rules/index.mdc, .cursor/rules/*.mdc, AGENTS.md)"
@@ -188,6 +189,45 @@ class CursorAdapter(MarkdownSyncMixin, EditorAdapter):
                 merged_vars if merged_vars else None,
             )
             created_files.extend(plugin_files)
+
+        # Add spec documents if v3.1.0+ and enabled
+        if self.should_include_specs(prompt):
+            spec_docs = self.get_spec_documents(output_dir)
+            for spec_doc in spec_docs:
+                # For Cursor, specs get .mdc extension
+                filename = f"spec-{spec_doc['id']}.mdc"
+
+                # Build frontmatter for spec document
+                spec_frontmatter = self._build_cursor_frontmatter(
+                    description=spec_doc["summary"] or spec_doc["title"],
+                    always_apply=False,  # Specs are context-specific
+                    file_globs=None,
+                )
+
+                spec_content = self._build_mdc_file(
+                    frontmatter=spec_frontmatter,
+                    content=spec_doc["content"],
+                    variables=None,  # Specs already processed
+                )
+
+                spec_file = rules_dir / filename
+
+                if dry_run:
+                    click.echo(f"  📁 Would create: {spec_file} (spec)")
+                    if verbose:
+                        preview = (
+                            spec_content[:200] + "..."
+                            if len(spec_content) > 200
+                            else spec_content
+                        )
+                        click.echo(f"    {preview}")
+                    created_files.append(spec_file)
+                else:
+                    rules_dir.mkdir(parents=True, exist_ok=True)
+                    with open(spec_file, "w", encoding="utf-8") as f:
+                        f.write(spec_content)
+                    click.echo(f"✅ Generated: {spec_file} (spec)")
+                    created_files.append(spec_file)
 
         return created_files
 

@@ -412,32 +412,36 @@ def _inject_spec_commands(
     spec_manager = SpecManager(output_dir)
     spec_manager.ensure_specs_directory()
 
-    # Get spec commands
-    spec_commands = get_spec_commands()
-
-    # For V3, inject into top-level commands field
+    # Only inject spec commands for v3.1.0+ (spec support is a v3.1+ feature)
+    should_inject_specs = False
     if isinstance(prompt, UniversalPromptV3):
-        if prompt.commands is None:
-            prompt.commands = []
-        # Only add commands that don't already exist
-        existing_names = {cmd.name for cmd in prompt.commands}
-        for spec_cmd in spec_commands:
-            if spec_cmd.name not in existing_names:
-                prompt.commands.append(spec_cmd)
+        # Parse schema version (format: "major.minor.patch")
+        try:
+            version_parts = prompt.schema_version.split(".")
+            major = int(version_parts[0])
+            minor = int(version_parts[1]) if len(version_parts) > 1 else 0
 
-    # For V2, inject into nested plugins.commands field
-    elif isinstance(prompt, UniversalPromptV2):
-        if prompt.plugins is None:
-            from ...core.models import PluginConfig
+            # Require v3.1.0 or greater
+            if major >= 3 and minor >= 1:
+                should_inject_specs = True
+        except (ValueError, IndexError):
+            # Invalid version format, default to not injecting
+            pass
 
-            prompt.plugins = PluginConfig()
-        if prompt.plugins.commands is None:
-            prompt.plugins.commands = []
-        # Only add commands that don't already exist
-        existing_names = {cmd.name for cmd in prompt.plugins.commands}
-        for spec_cmd in spec_commands:
-            if spec_cmd.name not in existing_names:
-                prompt.plugins.commands.append(spec_cmd)
+    # Inject spec commands if version check passed
+    if should_inject_specs:
+        # Get spec commands
+        spec_commands = get_spec_commands()
+
+        # For V3.1+, inject into top-level commands field
+        if isinstance(prompt, UniversalPromptV3):
+            if prompt.commands is None:
+                prompt.commands = []
+            # Only add commands that don't already exist
+            existing_names = {cmd.name for cmd in prompt.commands}
+            for spec_cmd in spec_commands:
+                if spec_cmd.name not in existing_names:
+                    prompt.commands.append(spec_cmd)
 
     return prompt
 

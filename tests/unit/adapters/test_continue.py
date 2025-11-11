@@ -808,3 +808,154 @@ Text that's not a bullet
         assert synced.mcp_servers[1].name == "gh"
         assert synced.commands[0].name == "cmd1"
         assert synced.commands[1].name == "cmd2"
+
+
+class TestContinueSpecInclusion:
+    """Test v3.1+ spec document inclusion for Continue adapter."""
+
+    @pytest.fixture
+    def adapter(self):
+        """Create Continue adapter instance."""
+        from promptrek.adapters.continue_adapter import ContinueAdapter
+
+        return ContinueAdapter()
+
+    @pytest.fixture
+    def spec_dir_with_specs(self, tmp_path):
+        """Create spec directory with sample spec files using SpecManager."""
+        from promptrek.utils.spec_manager import SpecManager
+
+        spec_manager = SpecManager(tmp_path)
+
+        # Create specs using SpecManager to ensure proper registry
+        spec_manager.create_spec(
+            title="Authentication Spec",
+            content="# Authentication\n\nOAuth 2.0 implementation details.",
+            summary="Authentication requirements",
+            tags=["api", "auth"],
+            source_command="spec",
+        )
+
+        return tmp_path
+
+    def test_generate_v3_1_with_specs_enabled(self, adapter, spec_dir_with_specs):
+        """Test that spec documents are generated as separate files for v3.1.0+."""
+        from promptrek.core.models import PromptMetadata, UniversalPromptV3
+
+        prompt = UniversalPromptV3(
+            schema_version="3.1.0",
+            metadata=PromptMetadata(
+                title="Test Project",
+                description="Test",
+                created="2024-01-01",
+                updated="2024-01-01",
+                version="1.0.0",
+                author="test@example.com",
+            ),
+            content="# Project Instructions\n\nFollow best practices.",
+            include_specs=True,
+        )
+
+        files = adapter.generate(
+            prompt, spec_dir_with_specs, dry_run=False, verbose=False
+        )
+
+        # Should generate general.md + spec file
+        assert len(files) >= 2
+
+        # Check that at least one spec file was created in .continue/rules/
+        rules_dir = spec_dir_with_specs / ".continue" / "rules"
+        spec_files = list(rules_dir.glob("spec-*.md"))
+        assert len(spec_files) > 0
+
+        # Check first spec file has correct structure
+        spec_file = spec_files[0]
+        content = spec_file.read_text()
+
+        # Check for frontmatter with spec metadata
+        assert "---" in content
+        assert "name: Authentication Spec" in content
+        assert "description: Authentication requirements" in content
+        assert "tags:" in content
+        # Check content is included
+        assert "# Authentication" in content
+        assert "OAuth 2.0" in content
+
+    def test_generate_v3_1_with_specs_disabled(self, adapter, spec_dir_with_specs):
+        """Test that spec documents are NOT generated when include_specs=False."""
+        from promptrek.core.models import PromptMetadata, UniversalPromptV3
+
+        prompt = UniversalPromptV3(
+            schema_version="3.1.0",
+            metadata=PromptMetadata(
+                title="Test Project",
+                description="Test",
+                created="2024-01-01",
+                updated="2024-01-01",
+                version="1.0.0",
+                author="test@example.com",
+            ),
+            content="# Project Instructions\n\nFollow best practices.",
+            include_specs=False,
+        )
+
+        files = adapter.generate(
+            prompt, spec_dir_with_specs, dry_run=False, verbose=False
+        )
+
+        # Check that no spec files were created
+        rules_dir = spec_dir_with_specs / ".continue" / "rules"
+        spec_files = list(rules_dir.glob("spec-*.md"))
+        assert len(spec_files) == 0
+
+    def test_generate_v3_0_no_specs(self, adapter, spec_dir_with_specs):
+        """Test that specs are NOT generated for v3.0.0."""
+        from promptrek.core.models import PromptMetadata, UniversalPromptV3
+
+        prompt = UniversalPromptV3(
+            schema_version="3.0.0",
+            metadata=PromptMetadata(
+                title="Test Project",
+                description="Test",
+                created="2024-01-01",
+                updated="2024-01-01",
+                version="1.0.0",
+                author="test@example.com",
+            ),
+            content="# Project Instructions\n\nFollow best practices.",
+        )
+
+        files = adapter.generate(
+            prompt, spec_dir_with_specs, dry_run=False, verbose=False
+        )
+
+        # Check that no spec files were created for v3.0
+        rules_dir = spec_dir_with_specs / ".continue" / "rules"
+        spec_files = list(rules_dir.glob("spec-*.md"))
+        assert len(spec_files) == 0
+
+    def test_generate_v2_no_specs(self, adapter, spec_dir_with_specs):
+        """Test that specs are NOT generated for v2 prompts."""
+        from promptrek.core.models import PromptMetadata, UniversalPromptV2
+
+        prompt = UniversalPromptV2(
+            schema_version="2.0.0",
+            metadata=PromptMetadata(
+                title="Test Project",
+                description="Test",
+                created="2024-01-01",
+                updated="2024-01-01",
+                version="1.0.0",
+                author="test@example.com",
+            ),
+            content="# Project Instructions\n\nFollow best practices.",
+        )
+
+        files = adapter.generate(
+            prompt, spec_dir_with_specs, dry_run=False, verbose=False
+        )
+
+        # Check that no spec files were created for v2
+        rules_dir = spec_dir_with_specs / ".continue" / "rules"
+        spec_files = list(rules_dir.glob("spec-*.md"))
+        assert len(spec_files) == 0

@@ -21,10 +21,13 @@ from ..core.models import (
 )
 from .base import EditorAdapter
 from .mcp_mixin import MCPGenerationMixin
+from .spec_mixin import SpecInclusionMixin
 from .sync_mixin import SingleFileMarkdownSyncMixin
 
 
-class CopilotAdapter(MCPGenerationMixin, SingleFileMarkdownSyncMixin, EditorAdapter):
+class CopilotAdapter(
+    MCPGenerationMixin, SpecInclusionMixin, SingleFileMarkdownSyncMixin, EditorAdapter
+):
     """Adapter for GitHub Copilot."""
 
     _description = (
@@ -152,6 +155,13 @@ class CopilotAdapter(MCPGenerationMixin, SingleFileMarkdownSyncMixin, EditorAdap
                 content,
             ]
             content = "\n".join(lines)
+
+        # Add spec references section if v3.1.0+ and enabled
+        if self.should_include_specs(prompt):
+            spec_docs = self.get_spec_documents(output_dir)
+            spec_section = self.format_spec_references_section(spec_docs)
+            if spec_section:
+                content += spec_section
 
         if dry_run:
             click.echo(f"  📁 Would create: {output_file}")

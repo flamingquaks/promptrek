@@ -18,10 +18,13 @@ from ..core.models import (
 )
 from .base import EditorAdapter
 from .mcp_mixin import MCPGenerationMixin
+from .spec_mixin import SpecInclusionMixin
 from .sync_mixin import MarkdownSyncMixin
 
 
-class ClineAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
+class ClineAdapter(
+    MCPGenerationMixin, SpecInclusionMixin, MarkdownSyncMixin, EditorAdapter
+):
     """Adapter for Cline VSCode AI coding assistant extension."""
 
     _description = "Cline VSCode Extension (.clinerules/*.md)"
@@ -443,6 +446,30 @@ class ClineAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
                     f.write(content)
                 click.echo(f"✅ Generated: {output_file}")
                 created_files.append(output_file)
+
+        # Add spec documents if v3.1.0+ and enabled
+        if self.should_include_specs(prompt):
+            spec_docs = self.get_spec_documents(output_dir)
+            for spec_doc in spec_docs:
+                filename = f"spec-{spec_doc['id']}.md"
+                spec_file = clinerules_dir / filename
+
+                if dry_run:
+                    click.echo(f"  📁 Would create: {spec_file} (spec)")
+                    if verbose:
+                        preview = (
+                            spec_doc["content"][:200] + "..."
+                            if len(spec_doc["content"]) > 200
+                            else spec_doc["content"]
+                        )
+                        click.echo(f"    {preview}")
+                    created_files.append(spec_file)
+                else:
+                    clinerules_dir.mkdir(parents=True, exist_ok=True)
+                    with open(spec_file, "w", encoding="utf-8") as f:
+                        f.write(spec_doc["content"])
+                    click.echo(f"✅ Generated: {spec_file} (spec)")
+                    created_files.append(spec_file)
 
         return created_files
 
@@ -964,7 +991,9 @@ class ClineAdapter(MCPGenerationMixin, MarkdownSyncMixin, EditorAdapter):
                     requires_approval=True,  # Workflows typically require approval
                 )
 
-                workflows.append(workflow)
+                # Skip spec commands (they are auto-injected during generate)
+                if not workflow.name.startswith("promptrek.spec."):
+                    workflows.append(workflow)
 
             except Exception as e:
                 click.echo(

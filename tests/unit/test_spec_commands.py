@@ -219,8 +219,8 @@ class TestInjectSpecCommandsV1:
 class TestInjectSpecCommandsV2:
     """Tests for injecting spec commands into V2 prompts."""
 
-    def test_inject_v2_creates_plugin_config(self, tmp_path):
-        """Test injecting into V2 prompt without plugins."""
+    def test_inject_v2_does_not_inject(self, tmp_path):
+        """Test that V2 prompts do not get spec commands (v3.1+ only feature)."""
         from promptrek.core.models import PromptMetadata
 
         prompt = UniversalPromptV2(
@@ -235,13 +235,38 @@ class TestInjectSpecCommandsV2:
         result = _inject_spec_commands(prompt, tmp_path)
 
         assert isinstance(result, UniversalPromptV2)
-        assert result.plugins is not None
-        assert isinstance(result.plugins, PluginConfig)
-        assert result.plugins.commands is not None
-        assert len(result.plugins.commands) == 8
+        # V2 should not get spec commands (they're a v3.1+ feature)
+        assert (
+            result.plugins is None
+            or result.plugins.commands is None
+            or len(result.plugins.commands) == 0
+        )
 
-    def test_inject_v2_adds_to_existing_plugins(self, tmp_path):
-        """Test injecting into V2 prompt with existing plugins."""
+    def test_inject_v2_creates_plugin_config(self, tmp_path):
+        """Test injecting into V2.1 prompt without plugins."""
+        from promptrek.core.models import PromptMetadata
+
+        prompt = UniversalPromptV2(
+            schema_version="2.1.0",
+            metadata=PromptMetadata(
+                title="Test",
+                description="Test",
+            ),
+            content="Test content",
+        )
+
+        result = _inject_spec_commands(prompt, tmp_path)
+
+        assert isinstance(result, UniversalPromptV2)
+        # Even v2.1 doesn't get spec commands (they're a v3.1+ feature)
+        assert (
+            result.plugins is None
+            or result.plugins.commands is None
+            or len(result.plugins.commands) == 0
+        )
+
+    def test_inject_v2_preserves_existing_commands(self, tmp_path):
+        """Test that V2 prompts with existing commands are not modified."""
         from promptrek.core.models import PromptMetadata
 
         existing_cmd = Command(
@@ -262,77 +287,41 @@ class TestInjectSpecCommandsV2:
 
         result = _inject_spec_commands(prompt, tmp_path)
 
-        assert len(result.plugins.commands) == 9  # 1 existing + 8 spec commands
+        # Should only have the 1 existing command (no spec commands added for v2)
+        assert len(result.plugins.commands) == 1
 
         # Check existing command is preserved
-        names = {cmd.name for cmd in result.plugins.commands}
-        assert "existing.command" in names
-        assert "promptrek.spec.specify" in names
-
-    def test_inject_v2_no_duplicates(self, tmp_path):
-        """Test that duplicate commands are not added."""
-        from promptrek.core.models import PromptMetadata
-
-        spec_commands = get_spec_commands()
-
-        prompt = UniversalPromptV2(
-            schema_version="2.0.0",
-            metadata=PromptMetadata(
-                title="Test",
-                description="Test",
-            ),
-            content="Test content",
-            plugins=PluginConfig(commands=spec_commands),
-        )
-
-        result = _inject_spec_commands(prompt, tmp_path)
-
-        # Should still have 8 commands (no duplicates)
-        assert len(result.plugins.commands) == 8
-
-    def test_inject_v2_partial_overlap(self, tmp_path):
-        """Test injecting with partial overlap of commands."""
-        from promptrek.core.models import PromptMetadata
-
-        existing_specify = Command(
-            name="promptrek.spec.specify",
-            description="Custom specify",
-            prompt="Custom prompt",
-        )
-
-        prompt = UniversalPromptV2(
-            schema_version="2.0.0",
-            metadata=PromptMetadata(
-                title="Test",
-                description="Test",
-            ),
-            content="Test content",
-            plugins=PluginConfig(commands=[existing_specify]),
-        )
-
-        result = _inject_spec_commands(prompt, tmp_path)
-
-        # Should add 7 new commands (specify already exists)
-        assert len(result.plugins.commands) == 8
-
-        # Existing specify command should be preserved (not replaced)
-        specify_cmd = next(
-            cmd
-            for cmd in result.plugins.commands
-            if cmd.name == "promptrek.spec.specify"
-        )
-        assert specify_cmd.description == "Custom specify"
+        assert result.plugins.commands[0].name == "existing.command"
 
 
 class TestInjectSpecCommandsV3:
     """Tests for injecting spec commands into V3 prompts."""
 
-    def test_inject_v3_creates_commands_list(self, tmp_path):
-        """Test injecting into V3 prompt without commands."""
+    def test_inject_v3_0_does_not_inject(self, tmp_path):
+        """Test that V3.0.0 prompts do not get spec commands (v3.1+ only feature)."""
         from promptrek.core.models import PromptMetadata
 
         prompt = UniversalPromptV3(
             schema_version="3.0.0",
+            metadata=PromptMetadata(
+                title="Test",
+                description="Test",
+            ),
+            content="Test content",
+        )
+
+        result = _inject_spec_commands(prompt, tmp_path)
+
+        assert isinstance(result, UniversalPromptV3)
+        # V3.0 should not get spec commands (they're a v3.1+ feature)
+        assert result.commands is None or len(result.commands) == 0
+
+    def test_inject_v3_creates_commands_list(self, tmp_path):
+        """Test injecting into V3.1+ prompt without commands."""
+        from promptrek.core.models import PromptMetadata
+
+        prompt = UniversalPromptV3(
+            schema_version="3.1.0",
             metadata=PromptMetadata(
                 title="Test",
                 description="Test",
@@ -358,7 +347,7 @@ class TestInjectSpecCommandsV3:
         assert "promptrek.spec.feedback" in names
 
     def test_inject_v3_adds_to_existing_commands(self, tmp_path):
-        """Test injecting into V3 prompt with existing commands."""
+        """Test injecting into V3.1+ prompt with existing commands."""
         from promptrek.core.models import PromptMetadata
 
         existing_cmd = Command(
@@ -368,7 +357,7 @@ class TestInjectSpecCommandsV3:
         )
 
         prompt = UniversalPromptV3(
-            schema_version="3.0.0",
+            schema_version="3.1.0",
             metadata=PromptMetadata(
                 title="Test",
                 description="Test",
@@ -386,13 +375,13 @@ class TestInjectSpecCommandsV3:
         assert "promptrek.spec.specify" in names
 
     def test_inject_v3_no_duplicates(self, tmp_path):
-        """Test that duplicate commands are not added in V3."""
+        """Test that duplicate commands are not added in V3.1+."""
         from promptrek.core.models import PromptMetadata
 
         spec_commands = get_spec_commands()
 
         prompt = UniversalPromptV3(
-            schema_version="3.0.0",
+            schema_version="3.1.0",
             metadata=PromptMetadata(
                 title="Test",
                 description="Test",
@@ -407,7 +396,7 @@ class TestInjectSpecCommandsV3:
         assert len(result.commands) == 8
 
     def test_inject_v3_partial_overlap(self, tmp_path):
-        """Test injecting with partial overlap in V3."""
+        """Test injecting with partial overlap in V3.1+."""
         from promptrek.core.models import PromptMetadata
 
         existing_plan = Command(
@@ -417,7 +406,7 @@ class TestInjectSpecCommandsV3:
         )
 
         prompt = UniversalPromptV3(
-            schema_version="3.0.0",
+            schema_version="3.1.0",
             metadata=PromptMetadata(
                 title="Test",
                 description="Test",
@@ -446,7 +435,7 @@ class TestInjectSpecCommandsDirectory:
         from promptrek.core.models import PromptMetadata
 
         prompt = UniversalPromptV3(
-            schema_version="3.0.0",
+            schema_version="3.1.0",
             metadata=PromptMetadata(
                 title="Test",
                 description="Test",
@@ -467,7 +456,7 @@ class TestInjectSpecCommandsDirectory:
         from promptrek.core.models import PromptMetadata
 
         prompt = UniversalPromptV3(
-            schema_version="3.0.0",
+            schema_version="3.1.0",
             metadata=PromptMetadata(
                 title="Test",
                 description="Test",

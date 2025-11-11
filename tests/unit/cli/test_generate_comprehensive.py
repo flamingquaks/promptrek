@@ -990,3 +990,167 @@ class TestGenerateCLIIntegration:
 
         # Should complete without error
         assert result.exit_code == 0
+
+
+class TestSpecCommandInjection:
+    """Test spec command injection with version gating."""
+
+    def test_inject_spec_commands_v3_1_0(self, tmp_path):
+        """Test that spec commands are injected for v3.1.0+."""
+        from promptrek.cli.commands.generate import _inject_spec_commands
+        from promptrek.core.models import Command, PromptMetadata, UniversalPromptV3
+
+        prompt = UniversalPromptV3(
+            schema_version="3.1.0",
+            metadata=PromptMetadata(
+                title="Test",
+                description="Test",
+                created="2024-01-01",
+                updated="2024-01-01",
+                version="1.0.0",
+                author="test",
+            ),
+            content="# Test",
+            commands=[],
+        )
+
+        _inject_spec_commands(prompt, tmp_path)
+
+        # Should have 8 spec commands injected
+        assert prompt.commands is not None
+        assert len(prompt.commands) == 8
+
+        # Check for expected spec commands
+        command_names = {cmd.name for cmd in prompt.commands}
+        assert "promptrek.spec.constitution" in command_names
+        assert "promptrek.spec.specify" in command_names
+        assert "promptrek.spec.plan" in command_names
+
+    def test_inject_spec_commands_v3_2_0(self, tmp_path):
+        """Test that spec commands are injected for v3.2.0+ (future versions)."""
+        from promptrek.cli.commands.generate import _inject_spec_commands
+        from promptrek.core.models import PromptMetadata, UniversalPromptV3
+
+        prompt = UniversalPromptV3(
+            schema_version="3.2.0",
+            metadata=PromptMetadata(
+                title="Test",
+                description="Test",
+                created="2024-01-01",
+                updated="2024-01-01",
+                version="1.0.0",
+                author="test",
+            ),
+            content="# Test",
+            commands=[],
+        )
+
+        _inject_spec_commands(prompt, tmp_path)
+
+        # Should inject commands for v3.2+
+        assert prompt.commands is not None
+        assert len(prompt.commands) == 8
+
+    def test_no_inject_spec_commands_v3_0_0(self, tmp_path):
+        """Test that spec commands are NOT injected for v3.0.0."""
+        from promptrek.cli.commands.generate import _inject_spec_commands
+        from promptrek.core.models import PromptMetadata, UniversalPromptV3
+
+        prompt = UniversalPromptV3(
+            schema_version="3.0.0",
+            metadata=PromptMetadata(
+                title="Test",
+                description="Test",
+                created="2024-01-01",
+                updated="2024-01-01",
+                version="1.0.0",
+                author="test",
+            ),
+            content="# Test",
+            commands=[],
+        )
+
+        _inject_spec_commands(prompt, tmp_path)
+
+        # Should NOT inject commands for v3.0
+        assert prompt.commands == []
+
+    def test_no_inject_spec_commands_v2(self, tmp_path):
+        """Test that spec commands are NOT injected for v2 prompts."""
+        from promptrek.cli.commands.generate import _inject_spec_commands
+        from promptrek.core.models import PromptMetadata, UniversalPromptV2
+
+        prompt = UniversalPromptV2(
+            schema_version="2.0.0",
+            metadata=PromptMetadata(
+                title="Test",
+                description="Test",
+                created="2024-01-01",
+                updated="2024-01-01",
+                version="1.0.0",
+                author="test",
+            ),
+            content="# Test",
+        )
+
+        _inject_spec_commands(prompt, tmp_path)
+
+        # v2 prompts don't have commands field - should not error
+        # Just checking it doesn't crash
+
+    def test_no_inject_spec_commands_v1(self, tmp_path):
+        """Test that spec commands are NOT injected for v1 prompts."""
+        from promptrek.cli.commands.generate import _inject_spec_commands
+        from promptrek.core.models import Instructions, PromptMetadata, UniversalPrompt
+
+        prompt = UniversalPrompt(
+            schema_version="1.0.0",
+            metadata=PromptMetadata(
+                title="Test",
+                description="Test",
+                created="2024-01-01",
+                updated="2024-01-01",
+                version="1.0.0",
+                author="test",
+            ),
+            targets=["claude"],
+            instructions=Instructions(general=["Test"]),
+        )
+
+        _inject_spec_commands(prompt, tmp_path)
+
+        # v1 prompts don't have commands field - should not error
+        # Just checking it doesn't crash
+
+    def test_inject_spec_commands_preserves_existing(self, tmp_path):
+        """Test that injecting spec commands preserves existing commands."""
+        from promptrek.cli.commands.generate import _inject_spec_commands
+        from promptrek.core.models import Command, PromptMetadata, UniversalPromptV3
+
+        prompt = UniversalPromptV3(
+            schema_version="3.1.0",
+            metadata=PromptMetadata(
+                title="Test",
+                description="Test",
+                created="2024-01-01",
+                updated="2024-01-01",
+                version="1.0.0",
+                author="test",
+            ),
+            content="# Test",
+            commands=[
+                Command(name="my-command", description="My command", prompt="Test")
+            ],
+        )
+
+        _inject_spec_commands(prompt, tmp_path)
+
+        # Should have 1 existing + 8 spec commands
+        assert len(prompt.commands) == 9
+
+        # Check existing command is preserved
+        assert any(cmd.name == "my-command" for cmd in prompt.commands)
+
+        # Check spec commands are added
+        command_names = {cmd.name for cmd in prompt.commands}
+        assert "promptrek.spec.plan" in command_names

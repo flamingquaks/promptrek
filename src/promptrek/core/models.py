@@ -471,6 +471,11 @@ class UniversalPromptV3(BaseModel):
         default=None, description="Hook configurations (top-level in v3.0+)"
     )
 
+    include_specs: bool = Field(
+        default=True,
+        description="Include spec documents from promptrek/specs/ (v3.1.0+ only, opt-out)",
+    )
+
     ignore_editor_files: Optional[bool] = Field(
         default=None,
         description="Automatically add editor-specific files to .gitignore (default: True)",

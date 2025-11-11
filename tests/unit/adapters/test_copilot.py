@@ -229,3 +229,72 @@ class TestCopilotAdapter(TestAdapterBase):
         content = instructions_file.read_text()
         assert "HEADLESS INSTRUCTIONS START" in content
         assert "promptrek generate" in content
+
+
+class TestCopilotAdapterSpecInclusion:
+    """Test v3.1+ spec document inclusion."""
+
+    @pytest.fixture
+    def adapter(self):
+        from promptrek.adapters.copilot import CopilotAdapter
+
+        return CopilotAdapter()
+
+    @pytest.fixture
+    def spec_dir(self, tmp_path):
+        """Create spec directory with sample spec using SpecManager."""
+        from promptrek.utils.spec_manager import SpecManager
+
+        spec_manager = SpecManager(tmp_path)
+        spec_manager.create_spec(
+            title="Test Spec",
+            content="# Test Spec\n\nThis is a test specification.\n\n## Content\n- Item 1\n- Item 2",
+            summary="Test spec for adapter",
+            tags=["test"],
+            source_command="spec",
+        )
+        return tmp_path
+
+    def test_v3_1_includes_spec_references(self, adapter, spec_dir):
+        from promptrek.core.models import PromptMetadata, UniversalPromptV3
+
+        prompt = UniversalPromptV3(
+            schema_version="3.1.0",
+            metadata=PromptMetadata(
+                title="Test",
+                description="Test",
+                created="2024-01-01",
+                updated="2024-01-01",
+                version="1.0.0",
+                author="test",
+            ),
+            content="# Test",
+            include_specs=True,
+        )
+        adapter.generate(prompt, spec_dir, dry_run=False)
+        file_path = spec_dir / ".github" / "copilot-instructions.md"
+        assert file_path.exists()
+        content = file_path.read_text()
+        assert "## Project Specifications" in content
+        assert "Test" in content
+
+    def test_v3_1_disabled_no_spec_references(self, adapter, spec_dir):
+        from promptrek.core.models import PromptMetadata, UniversalPromptV3
+
+        prompt = UniversalPromptV3(
+            schema_version="3.1.0",
+            metadata=PromptMetadata(
+                title="Test",
+                description="Test",
+                created="2024-01-01",
+                updated="2024-01-01",
+                version="1.0.0",
+                author="test",
+            ),
+            content="# Test",
+            include_specs=False,
+        )
+        adapter.generate(prompt, spec_dir, dry_run=False)
+        file_path = spec_dir / ".github" / "copilot-instructions.md"
+        content = file_path.read_text()
+        assert "## Project Specifications" not in content

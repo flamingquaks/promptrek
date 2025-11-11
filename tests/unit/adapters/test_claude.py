@@ -923,3 +923,199 @@ class TestClaudeWorkflowsV3:
 
         # But no Workflow Steps section
         assert "## Workflow Steps" not in content
+
+
+class TestClaudeSpecInclusion:
+    """Test v3.1+ spec document inclusion for Claude adapter."""
+
+    @pytest.fixture
+    def adapter(self):
+        """Create Claude adapter instance."""
+        return ClaudeAdapter()
+
+    @pytest.fixture
+    def spec_dir_with_specs(self, tmp_path):
+        """Create spec directory with sample spec files using SpecManager."""
+        from promptrek.utils.spec_manager import SpecManager
+
+        spec_manager = SpecManager(tmp_path)
+
+        # Create specs using SpecManager to ensure proper registry
+        spec_manager.create_spec(
+            title="Authentication Spec",
+            content="# Authentication\n\nOAuth 2.0 implementation details.",
+            summary="Authentication requirements",
+            tags=["api", "auth"],
+            source_command="spec",
+        )
+
+        spec_manager.create_spec(
+            title="Database Spec",
+            content="# Database Schema\n\nUser and session tables.",
+            summary="Database schema design",
+            tags=["database"],
+            source_command="spec",
+        )
+
+        return tmp_path
+
+    def test_generate_v3_1_with_specs_enabled(self, adapter, spec_dir_with_specs):
+        """Test that specs are included in CLAUDE.md for v3.1.0+ with include_specs=True."""
+        prompt = UniversalPromptV3(
+            schema_version="3.1.0",
+            metadata=PromptMetadata(
+                title="Test Project",
+                description="Test",
+                created="2024-01-01",
+                updated="2024-01-01",
+                version="1.0.0",
+                author="test@example.com",
+            ),
+            content="# Project Instructions\n\nFollow best practices.",
+            include_specs=True,
+        )
+
+        files = adapter.generate(
+            prompt, spec_dir_with_specs, dry_run=False, verbose=False
+        )
+
+        assert len(files) == 1
+        claude_md = spec_dir_with_specs / ".claude" / "CLAUDE.md"
+        assert claude_md.exists()
+
+        content = claude_md.read_text()
+
+        # Check that spec references section is included
+        assert "## Project Specifications" in content
+        assert "### Authentication Spec" in content
+        assert "Authentication requirements" in content
+        assert "**Path:**" in content
+        assert "### Database Spec" in content
+        assert "Database schema design" in content
+
+    def test_generate_v3_1_with_specs_disabled(self, adapter, spec_dir_with_specs):
+        """Test that specs are NOT included when include_specs=False."""
+        prompt = UniversalPromptV3(
+            schema_version="3.1.0",
+            metadata=PromptMetadata(
+                title="Test Project",
+                description="Test",
+                created="2024-01-01",
+                updated="2024-01-01",
+                version="1.0.0",
+                author="test@example.com",
+            ),
+            content="# Project Instructions\n\nFollow best practices.",
+            include_specs=False,
+        )
+
+        files = adapter.generate(
+            prompt, spec_dir_with_specs, dry_run=False, verbose=False
+        )
+
+        claude_md = spec_dir_with_specs / ".claude" / "CLAUDE.md"
+        content = claude_md.read_text()
+
+        # Check that spec references section is NOT included
+        assert "## Project Specifications" not in content
+        assert "Authentication Spec" not in content
+        assert "Database Spec" not in content
+
+    def test_generate_v3_0_no_specs(self, adapter, spec_dir_with_specs):
+        """Test that specs are NOT included for v3.0.0 (version gating)."""
+        prompt = UniversalPromptV3(
+            schema_version="3.0.0",
+            metadata=PromptMetadata(
+                title="Test Project",
+                description="Test",
+                created="2024-01-01",
+                updated="2024-01-01",
+                version="1.0.0",
+                author="test@example.com",
+            ),
+            content="# Project Instructions\n\nFollow best practices.",
+            # include_specs not relevant for v3.0
+        )
+
+        files = adapter.generate(
+            prompt, spec_dir_with_specs, dry_run=False, verbose=False
+        )
+
+        claude_md = spec_dir_with_specs / ".claude" / "CLAUDE.md"
+        content = claude_md.read_text()
+
+        # Check that spec references section is NOT included for v3.0
+        assert "## Project Specifications" not in content
+
+    def test_generate_v2_no_specs(self, adapter, spec_dir_with_specs):
+        """Test that specs are NOT included for v2 prompts."""
+        prompt = UniversalPromptV2(
+            schema_version="2.0.0",
+            metadata=PromptMetadata(
+                title="Test Project",
+                description="Test",
+                created="2024-01-01",
+                updated="2024-01-01",
+                version="1.0.0",
+                author="test@example.com",
+            ),
+            content="# Project Instructions\n\nFollow best practices.",
+        )
+
+        files = adapter.generate(
+            prompt, spec_dir_with_specs, dry_run=False, verbose=False
+        )
+
+        claude_md = spec_dir_with_specs / ".claude" / "CLAUDE.md"
+        content = claude_md.read_text()
+
+        # Check that spec references section is NOT included for v2
+        assert "## Project Specifications" not in content
+
+    def test_generate_v3_1_no_spec_files(self, adapter, tmp_path):
+        """Test generation when no spec files exist."""
+        prompt = UniversalPromptV3(
+            schema_version="3.1.0",
+            metadata=PromptMetadata(
+                title="Test Project",
+                description="Test",
+                created="2024-01-01",
+                updated="2024-01-01",
+                version="1.0.0",
+                author="test@example.com",
+            ),
+            content="# Project Instructions\n\nFollow best practices.",
+            include_specs=True,
+        )
+
+        files = adapter.generate(prompt, tmp_path, dry_run=False, verbose=False)
+
+        claude_md = tmp_path / ".claude" / "CLAUDE.md"
+        content = claude_md.read_text()
+
+        # Should not have spec section when no specs exist
+        assert "## Project Specifications" not in content
+
+    def test_generate_v3_1_with_specs_dry_run(self, adapter, spec_dir_with_specs):
+        """Test spec inclusion in dry run mode."""
+        prompt = UniversalPromptV3(
+            schema_version="3.1.0",
+            metadata=PromptMetadata(
+                title="Test Project",
+                description="Test",
+                created="2024-01-01",
+                updated="2024-01-01",
+                version="1.0.0",
+                author="test@example.com",
+            ),
+            content="# Project Instructions",
+            include_specs=True,
+        )
+
+        files = adapter.generate(
+            prompt, spec_dir_with_specs, dry_run=True, verbose=True
+        )
+
+        # Files should not be created in dry run
+        claude_md = spec_dir_with_specs / ".claude" / "CLAUDE.md"
+        assert not claude_md.exists()

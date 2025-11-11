@@ -13,10 +13,11 @@ import yaml
 from ..core.exceptions import DeprecationWarnings, ValidationError
 from ..core.models import Agent, UniversalPrompt, UniversalPromptV2, UniversalPromptV3
 from .base import EditorAdapter
+from .spec_mixin import SpecInclusionMixin
 from .sync_mixin import SingleFileMarkdownSyncMixin
 
 
-class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
+class ClaudeAdapter(SpecInclusionMixin, SingleFileMarkdownSyncMixin, EditorAdapter):
     """Adapter for Claude Code."""
 
     _description = "Claude Code (context-based)"
@@ -60,6 +61,13 @@ class ClaudeAdapter(SingleFileMarkdownSyncMixin, EditorAdapter):
                     # Replace {{{ VAR_NAME }}} with value
                     placeholder = "{{{ " + var_name + " }}}"
                     content = content.replace(placeholder, var_value)
+
+            # Add spec references section if v3.1.0+ and enabled
+            if self.should_include_specs(prompt):
+                spec_docs = self.get_spec_documents(output_dir)
+                spec_section = self.format_spec_references_section(spec_docs)
+                if spec_section:
+                    content += spec_section
         else:
             # V1: Build content from structured fields
             processed_prompt = self.substitute_variables(prompt, variables)

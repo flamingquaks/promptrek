@@ -22,9 +22,10 @@ from ..core.models import (
 )
 from .base import EditorAdapter
 from .mcp_mixin import MCPGenerationMixin
+from .spec_mixin import SpecInclusionMixin
 
 
-class ContinueAdapter(MCPGenerationMixin, EditorAdapter):
+class ContinueAdapter(MCPGenerationMixin, SpecInclusionMixin, EditorAdapter):
     """Adapter for Continue editor."""
 
     _description = "Continue (.continue/rules/)"
@@ -191,6 +192,32 @@ class ContinueAdapter(MCPGenerationMixin, EditorAdapter):
                     f.write(main_content)
                 click.echo(f"✅ Generated: {output_file}")
                 created_files.append(output_file)
+
+        # Add spec documents if v3.1.0+ and enabled
+        if self.should_include_specs(prompt):
+            spec_docs = self.get_spec_documents(output_dir)
+            for spec_doc in spec_docs:
+                filename, spec_content = self.format_spec_as_document_frontmatter(
+                    spec_doc
+                )
+                spec_file = rules_dir / filename
+
+                if dry_run:
+                    click.echo(f"  📁 Would create: {spec_file} (spec)")
+                    if verbose:
+                        preview = (
+                            spec_content[:200] + "..."
+                            if len(spec_content) > 200
+                            else spec_content
+                        )
+                        click.echo(f"    {preview}")
+                    created_files.append(spec_file)
+                else:
+                    rules_dir.mkdir(parents=True, exist_ok=True)
+                    with open(spec_file, "w", encoding="utf-8") as f:
+                        f.write(spec_content)
+                    click.echo(f"✅ Generated: {spec_file} (spec)")
+                    created_files.append(spec_file)
 
         return created_files
 
@@ -1009,13 +1036,15 @@ class ContinueAdapter(MCPGenerationMixin, EditorAdapter):
 
                             from promptrek.core.models import Command
 
-                            commands.append(
-                                Command(
-                                    name=frontmatter.get("name", md_file.stem),
-                                    description=frontmatter.get("description", ""),
-                                    prompt=prompt_content,
-                                )
+                            command = Command(
+                                name=frontmatter.get("name", md_file.stem),
+                                description=frontmatter.get("description", ""),
+                                prompt=prompt_content,
                             )
+
+                            # Skip spec commands (they are auto-injected during generate)
+                            if not command.name.startswith("promptrek.spec."):
+                                commands.append(command)
                 except Exception as e:
                     click.echo(f"Warning: Could not parse {md_file}: {e}")
 
