@@ -37,9 +37,9 @@ EDITOR_PATTERNS = {
     "Editor:ClaudeCode": [
         r"src/promptrek/adapters/claude\.py",
         r"tests/.*test.*claude\.py",
+        r"tests/.*test.*claude_.*\.py",
         r"examples/.*claude",
         r"docs/.*claude",
-        r"\.claude/",
     ],
     "Editor:Continue": [
         r"src/promptrek/adapters/continue",
@@ -76,6 +76,19 @@ EDITOR_PATTERNS = {
         r"examples/.*cursor",
         r"docs/.*cursor",
         r"\.cursor/",
+    ],
+    "Schema:UPF": [
+        r"src/promptrek/core/models\.py",
+        r"src/promptrek/core/parser\.py",
+        r"src/promptrek/core/validator\.py",
+        r"scripts/generate_schemas\.py",
+        r"scripts/generate_v31_schema\.py",
+        r"scripts/test_schemas\.py",
+        r"gh-pages/schema/.*\.json",
+        r"gh-pages/user-guide/upf-specification\.md",
+        r"tests/.*test.*models\.py",
+        r"tests/.*test.*parser\.py",
+        r"tests/.*test.*validator\.py",
     ],
 }
 
