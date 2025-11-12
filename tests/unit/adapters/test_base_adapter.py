@@ -1,15 +1,16 @@
 """Tests for base adapter functionality."""
 
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Union
 
 import pytest
 
 from promptrek.adapters.base import EditorAdapter
 from promptrek.core.models import (
-    Instructions,
     PromptMetadata,
     UniversalPrompt,
     UniversalPromptV2,
+    UniversalPromptV3,
 )
 
 
@@ -23,7 +24,16 @@ class MockAdapter(EditorAdapter):
             file_patterns=["*.mock"],
         )
 
-    def generate(self, prompt, output_dir, **kwargs):
+    def generate(
+        self,
+        prompt: Union[UniversalPrompt, UniversalPromptV2, UniversalPromptV3],
+        output_dir: Path,
+        dry_run: bool = False,
+        verbose: bool = False,
+        variables: Optional[Dict[str, str]] = None,
+        headless: bool = False,
+        **kwargs: Any,
+    ) -> List[Path]:
         return []
 
     def validate(self, prompt):

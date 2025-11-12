@@ -524,6 +524,8 @@ def _generate_for_editor_multiple(
                 merged_vars = variables
 
             # Auto-inject EDITOR_NAME for dynamic editor references
+            # NOTE: The EDITOR_NAME variable is automatically injected for use in spec command prompts.
+            #       This enables prompt templates to reference {{{ EDITOR_NAME }}} for dynamic substitution.
             merged_vars["EDITOR_NAME"] = editor
 
             # Check if adapter supports headless parameter

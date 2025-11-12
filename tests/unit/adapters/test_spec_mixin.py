@@ -2,8 +2,6 @@
 Unit tests for SpecInclusionMixin.
 """
 
-from pathlib import Path
-
 import pytest
 
 from promptrek.adapters.spec_mixin import SpecInclusionMixin

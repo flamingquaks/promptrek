@@ -1,9 +1,5 @@
 """Tests for spec command generation and injection."""
 
-from pathlib import Path
-
-import pytest
-
 from promptrek.cli.commands.generate import _inject_spec_commands
 from promptrek.commands.spec_commands import get_spec_commands
 from promptrek.core.models import (
@@ -288,6 +284,9 @@ class TestInjectSpecCommandsV2:
         result = _inject_spec_commands(prompt, tmp_path)
 
         # Should only have the 1 existing command (no spec commands added for v2)
+        assert isinstance(result, UniversalPromptV2)
+        assert result.plugins is not None
+        assert result.plugins.commands is not None
         assert len(result.plugins.commands) == 1
 
         # Check existing command is preserved
@@ -368,6 +367,8 @@ class TestInjectSpecCommandsV3:
 
         result = _inject_spec_commands(prompt, tmp_path)
 
+        assert isinstance(result, UniversalPromptV3)
+        assert result.commands is not None
         assert len(result.commands) == 9  # 1 existing + 8 spec commands
 
         names = {cmd.name for cmd in result.commands}
@@ -393,6 +394,8 @@ class TestInjectSpecCommandsV3:
         result = _inject_spec_commands(prompt, tmp_path)
 
         # Should still have 8 commands (no duplicates)
+        assert isinstance(result, UniversalPromptV3)
+        assert result.commands is not None
         assert len(result.commands) == 8
 
     def test_inject_v3_partial_overlap(self, tmp_path):
@@ -418,6 +421,8 @@ class TestInjectSpecCommandsV3:
         result = _inject_spec_commands(prompt, tmp_path)
 
         # Should add 7 new commands (plan already exists)
+        assert isinstance(result, UniversalPromptV3)
+        assert result.commands is not None
         assert len(result.commands) == 8
 
         # Existing plan command should be preserved

@@ -735,10 +735,8 @@ def workflow_list_editors(ctx: click.Context) -> None:
             try:
                 info = registry.get_adapter_info(adapter_name)
                 description = info.get("description", "No description")
-                click.echo(
-                    f"   • {adapter_name:12} - Configure through global "
-                    "settings or admin panel"
-                )
+                click.echo(f"   • {adapter_name:12} - {description}")
+                click.echo("     → Configure through global settings or admin panel")
             except Exception:
                 click.echo(f"   • {adapter_name:12} - Global configuration only")
         click.echo()
@@ -750,9 +748,9 @@ def workflow_list_editors(ctx: click.Context) -> None:
         for adapter_name in sorted(ide_plugin_adapters):
             try:
                 info = registry.get_adapter_info(adapter_name)
+                description = info.get("description", "No description")
                 click.echo(
-                    f"   • {adapter_name:12} - Configure through IDE "
-                    "settings/preferences"
+                    f"   • {adapter_name:12} - {description} " "settings/preferences"
                 )
             except Exception:
                 click.echo(f"   • {adapter_name:12} - IDE configuration only")

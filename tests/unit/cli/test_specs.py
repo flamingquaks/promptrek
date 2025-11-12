@@ -28,14 +28,14 @@ class TestListSpecsCommand:
         manager = SpecManager(tmp_path)
 
         # Create some specs
-        spec1 = manager.create_spec(
+        manager.create_spec(
             title="Test Spec 1",
             content="Content 1",
             source_command="/promptrek.spec.create",
             summary="First spec",
             tags=["test", "example"],
         )
-        spec2 = manager.create_spec(
+        manager.create_spec(
             title="Test Spec 2",
             content="Content 2",
             source_command="/promptrek.spec.plan",
@@ -57,7 +57,7 @@ class TestListSpecsCommand:
         """Test listing specs in verbose mode."""
         manager = SpecManager(tmp_path)
 
-        spec = manager.create_spec(
+        manager.create_spec(
             title="Verbose Test",
             content="Content",
             source_command="/test",

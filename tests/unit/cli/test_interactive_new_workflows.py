@@ -2,7 +2,6 @@
 Tests for new interactive CLI workflows.
 """
 
-from pathlib import Path
 from unittest.mock import Mock, patch
 
 from promptrek.core.exceptions import PrompTrekError

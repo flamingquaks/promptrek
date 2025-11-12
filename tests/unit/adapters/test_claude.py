@@ -1037,9 +1037,7 @@ class TestClaudeSpecInclusion:
             # include_specs not relevant for v3.0
         )
 
-        files = adapter.generate(
-            prompt, spec_dir_with_specs, dry_run=False, verbose=False
-        )
+        adapter.generate(prompt, spec_dir_with_specs, dry_run=False, verbose=False)
 
         claude_md = spec_dir_with_specs / ".claude" / "CLAUDE.md"
         content = claude_md.read_text()
@@ -1088,7 +1086,7 @@ class TestClaudeSpecInclusion:
             include_specs=True,
         )
 
-        files = adapter.generate(prompt, tmp_path, dry_run=False, verbose=False)
+        adapter.generate(prompt, tmp_path, dry_run=False, verbose=False)
 
         claude_md = tmp_path / ".claude" / "CLAUDE.md"
         content = claude_md.read_text()
@@ -1112,9 +1110,7 @@ class TestClaudeSpecInclusion:
             include_specs=True,
         )
 
-        files = adapter.generate(
-            prompt, spec_dir_with_specs, dry_run=True, verbose=True
-        )
+        adapter.generate(prompt, spec_dir_with_specs, dry_run=True, verbose=True)
 
         # Files should not be created in dry run
         claude_md = spec_dir_with_specs / ".claude" / "CLAUDE.md"

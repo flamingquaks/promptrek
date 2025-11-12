@@ -87,24 +87,6 @@ class TestContinueAdapter(TestAdapterBase):
 
     def test_parse_files_comprehensive(self, adapter, tmp_path):
         """Test comprehensive parsing of Continue files."""
-        import yaml
-
-        # Create comprehensive test data
-        config_content = {
-            "name": "Full Test Assistant",
-            "version": "2.0.0",
-            "systemMessage": "Full Test Assistant\n\nA comprehensive test configuration",
-            "rules": [
-                "Write comprehensive tests",
-                "Use descriptive names",
-                "Handle errors gracefully",
-            ],
-        }
-
-        config_file = tmp_path / "config.yaml"
-        with open(config_file, "w") as f:
-            yaml.dump(config_content, f)
-
         # Create multiple rule files
         rules_dir = tmp_path / ".continue" / "rules"
         rules_dir.mkdir(parents=True)
@@ -246,7 +228,7 @@ class TestContinueAdapter(TestAdapterBase):
         assert isinstance(parsed, UniversalPromptV3)
 
         # Check that weird was parsed as document, general becomes main content
-        doc_names = [doc.name for doc in parsed.documents]
+        doc_names = [doc.name for doc in (parsed.documents or [])]
         assert "general" not in doc_names  # general.md becomes main content
         assert "weird" in doc_names
 
@@ -925,9 +907,7 @@ class TestContinueSpecInclusion:
             content="# Project Instructions\n\nFollow best practices.",
         )
 
-        files = adapter.generate(
-            prompt, spec_dir_with_specs, dry_run=False, verbose=False
-        )
+        adapter.generate(prompt, spec_dir_with_specs, dry_run=False, verbose=False)
 
         # Check that no spec files were created for v3.0
         rules_dir = spec_dir_with_specs / ".continue" / "rules"
@@ -951,9 +931,7 @@ class TestContinueSpecInclusion:
             content="# Project Instructions\n\nFollow best practices.",
         )
 
-        files = adapter.generate(
-            prompt, spec_dir_with_specs, dry_run=False, verbose=False
-        )
+        adapter.generate(prompt, spec_dir_with_specs, dry_run=False, verbose=False)
 
         # Check that no spec files were created for v2
         rules_dir = spec_dir_with_specs / ".continue" / "rules"

@@ -138,7 +138,7 @@ class SpecInclusionMixin:
             "",
             "## Project Specifications",
             "",
-            "The following specifications define key aspects of this project. "
+            "The following specifications define key aspects of this project. ",
             "Reference these when working on related features:",
             "",
         ]

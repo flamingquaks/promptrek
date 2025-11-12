@@ -3,7 +3,6 @@ Unit tests for Copilot adapter.
 """
 
 import json
-from pathlib import Path
 
 import pytest
 

@@ -280,6 +280,7 @@ class TestSpecManagerUpdate:
         # Verify in registry
         usf = manager.load_registry()
         found = next((s for s in usf.specs if s.id == spec.id), None)
+        assert found is not None
         assert found.title == "New Title"
 
     def test_update_nonexistent_spec(self, tmp_path):
@@ -517,7 +518,7 @@ class TestSpecManagerSync:
         manager = SpecManager(tmp_path)
 
         # Create a spec through the manager
-        existing = manager.create_spec(
+        manager.create_spec(
             title="Existing",
             content="Existing content",
             source_command="/promptrek.spec.create",
@@ -700,7 +701,7 @@ class TestSpecManagerConstitution:
 - Skipping tests
 - No documentation"""
 
-        constitution_path = manager.create_or_update_constitution(constitution_content)
+        manager.create_or_update_constitution(constitution_content)
 
         # Verify constitution exists and is accessible
         assert manager.constitution_exists()
@@ -708,7 +709,7 @@ class TestSpecManagerConstitution:
         assert retrieved_content == constitution_content
 
         # Create a spec - constitution should still be accessible
-        spec_path = manager.create_spec(
+        manager.create_spec(
             title="Feature Spec",
             content="Spec content",
             source_command="/promptrek.spec.specify",
