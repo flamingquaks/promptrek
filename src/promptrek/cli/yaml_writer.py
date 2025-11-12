@@ -151,6 +151,7 @@ def write_promptrek_yaml(data: Dict[str, Any], output_path: Path) -> None:
             f.write("# Universal Prompt Format (UPF) - PrompTrek Configuration Document\n")
             f.write("# This document is used to centrally manage AI editor prompts & configurations\n")
             f.write("# Learn more about PrompTrek at https://promptrek.ai\n")
+            f.write("\n")  # Add blank line for better readability
 
         yaml.dump(
             processed_data,
