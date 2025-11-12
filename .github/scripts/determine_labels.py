@@ -37,7 +37,7 @@ EDITOR_PATTERNS = {
     "Editor:ClaudeCode": [
         r"src/promptrek/adapters/claude\.py",
         r"tests/.*test.*claude\.py",
-        r"tests/.*test.*claude_",
+        r"tests/.*test.*claude_.*\.py",
         r"examples/.*claude",
         r"docs/.*claude",
     ],
