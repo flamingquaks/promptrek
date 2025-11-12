@@ -86,7 +86,7 @@ def workflow_init_project(ctx: click.Context) -> None:
     schema_version = questionary.select(
         "Select schema version:",
         choices=[
-            Choice("v3.0 (Current - Recommended)", value="v3"),
+            Choice("v3.1 (Current - Recommended)", value="v3"),
             Choice("v2.x (Legacy)", value="v2"),
             Choice("v1.0 (Not recommended)", value="v1"),
         ],
@@ -307,7 +307,7 @@ def workflow_migrate(ctx: click.Context) -> None:
 
     # Confirm migration
     proceed = questionary.confirm(
-        "Migrate to v2 format? (v2 uses pure markdown content)",
+        "Migrate to v3.1 format? (v3.1 is the latest schema)",
         default=True,
     ).ask()
 
@@ -328,7 +328,7 @@ def workflow_migrate(ctx: click.Context) -> None:
     # Output file path
     output_path = questionary.text(
         "Output file path:",
-        default=f"{existing_config.stem}.v2{existing_config.suffix}",
+        default=f"{existing_config.stem}.v3{existing_config.suffix}",
     ).ask()
 
     if not output_path:
