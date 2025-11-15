@@ -1,0 +1,284 @@
+site_name: PrompTrek Documentation
+site_description: Universal AI Editor Configuration - Manage prompts, MCP servers, plugins, commands, agents, and hooks across all major AI editors
+site_author: Addie Rudy
+site_url: https://flamingquaks.github.io/promptrek
+
+repo_name: flamingquaks/promptrek
+repo_url: https://github.com/flamingquaks/promptrek
+edit_uri: edit/main/docs/
+
+copyright: Copyright &copy; 2024 Addie Rudy
+
+theme:
+  name: material
+  palette:
+    # Palette toggle for light mode
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    # Palette toggle for dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  font:
+    text: Roboto
+    code: Roboto Mono
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.expand
+    - navigation.path
+    - navigation.top
+    - navigation.footer
+    - navigation.indexes
+    - toc.follow
+    - toc.integrate
+    - search.suggest
+    - search.highlight
+    - search.share
+    - content.tabs.link
+    - content.code.annotation
+    - content.code.copy
+    - content.action.edit
+    - content.action.view
+  logo: assets/promptrek-logo.png
+  favicon: assets/promptrek-logo.png
+  icon:
+    repo: fontawesome/brands/github
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/flamingquaks/promptrek
+    - icon: fontawesome/solid/bug
+      link: https://github.com/flamingquaks/promptrek/issues
+  version:
+    provider: mike
+    default: latest
+  analytics:
+    feedback:
+      title: Was this page helpful?
+      ratings:
+        - icon: material/thumb-up-outline
+          name: This page was helpful
+          data: 1
+          note: >-
+            Thanks for your feedback!
+        - icon: material/thumb-down-outline
+          name: This page could be improved
+          data: 0
+          note: >-
+            Thanks for your feedback! Help us improve by
+            <a href="https://github.com/flamingquaks/promptrek/issues/new/?title=[Feedback]+{title}+-+{url}" target="_blank" rel="noopener">opening an issue</a>.
+
+markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - toc:
+      permalink: true
+      toc_depth: 3
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.snippets:
+      auto_append:
+        - includes/abbreviations.md
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+
+plugins:
+  - search:
+      separator: '[\s\-,:!=\[\]()"/]+|(?!\b)(?=[A-Z][a-z])|\.(?!\d)|&[lg]t;'
+  - minify:
+      minify_html: true
+  - git-revision-date-localized:
+      enable_creation_date: true
+      type: timeago
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
+          options:
+            docstring_style: google
+            docstring_section_style: table
+            show_root_heading: true
+            show_source: true
+            show_symbol_type_heading: true
+            show_symbol_type_toc: true
+            members_order: source
+            group_by_category: true
+            show_category_heading: true
+            show_if_no_docstring: false
+            inherited_members: false
+            filters:
+              - "!^_"
+  - awesome-pages
+  - tags
+
+nav:
+  - Home: index.md
+  - Getting Started:
+      - Quick Start: getting-started/quick-start.md
+      - Installation: getting-started/installation.md
+      - Basic Usage: getting-started/basic-usage.md
+      - Your First Project: getting-started/first-project.md
+  - User Guide:
+      - Overview: user-guide/index.md
+      - UPF Specification: user-guide/upf-specification.md
+      - Configuration:
+          - Schema Versions: user-guide/configuration/schema-versions.md
+          - Schema v3.1 (Latest): user-guide/configuration/schema-v3.1.md
+          - Metadata: user-guide/configuration/metadata.md
+          - Variables: user-guide/configuration/variables.md
+          - Documents: user-guide/configuration/documents.md
+      - Advanced Features:
+          - Variable Substitution: user-guide/advanced/variables.md
+          - Multi-Document Support: user-guide/advanced/multi-document.md
+          - Conditional Instructions: user-guide/advanced/conditionals.md
+          - Templates: user-guide/advanced/templates.md
+      - Editor Adapters:
+          - Overview: user-guide/adapters/index.md
+          - Capabilities Matrix: user-guide/adapters/capabilities.md
+          - GitHub Copilot: user-guide/adapters/copilot.md
+          - Cursor: user-guide/adapters/cursor.md
+          - Claude Code: user-guide/adapters/claude.md
+          - Continue: user-guide/adapters/continue.md
+          - Windsurf: user-guide/adapters/windsurf.md
+          - Cline: user-guide/adapters/cline.md
+          - Kiro: user-guide/adapters/kiro.md
+          - Amazon Q: user-guide/adapters/amazonq.md
+          - JetBrains AI: user-guide/adapters/jetbrains.md
+      - Plugins:
+          - Overview: user-guide/plugins/index.md
+          - MCP Servers: user-guide/plugins/mcp-servers.md
+          - Custom Commands: user-guide/plugins/commands.md
+          - Autonomous Agents: user-guide/plugins/agents.md
+          - Event Hooks: user-guide/plugins/hooks.md
+      - Workflows:
+          - Sync Feature: user-guide/workflows/sync.md
+          - Pre-commit Integration: user-guide/workflows/pre-commit.md
+          - CI/CD Integration: user-guide/workflows/cicd.md
+          - Migration Guide: user-guide/workflows/migration.md
+          - Interactive CLI: user-guide/workflows/interactive.md
+      - .gitignore Management: user-guide/gitignore-management.md
+  - CLI Reference:
+      - Overview: cli/index.md
+      - Commands:
+          - init: cli/commands/init.md
+          - generate: cli/commands/generate.md
+          - validate: cli/commands/validate.md
+          - sync: cli/commands/sync.md
+          - migrate: cli/commands/migrate.md
+          - preview: cli/commands/preview.md
+          - plugins: cli/commands/plugins.md
+          - config-ignores: cli/commands/config-ignores.md
+          - install-hooks: cli/commands/install-hooks.md
+          - list-editors: cli/commands/list-editors.md
+      - Interactive Mode: cli/interactive.md
+  - Examples:
+      - Overview: examples/index.md
+      - Basic Examples:
+          - React TypeScript: examples/basic/react-typescript.md
+          - Node.js API: examples/basic/node-api.md
+      - Advanced Examples:
+          - NX Monorepo: examples/advanced/monorepo.md
+          - Microservices + K8s: examples/advanced/microservices.md
+          - React Native: examples/advanced/react-native.md
+          - FastAPI Backend: examples/advanced/fastapi.md
+          - Next.js Full-Stack: examples/advanced/nextjs.md
+          - Rust CLI: examples/advanced/rust.md
+          - Go Backend: examples/advanced/golang.md
+          - Data Science/ML: examples/advanced/data-science.md
+      - Plugin Examples:
+          - MCP Server Config: examples/plugins/mcp-servers.md
+          - Custom Commands: examples/plugins/custom-commands.md
+          - Autonomous Agents: examples/plugins/agents.md
+          - Complete Example: examples/plugins/complete.md
+  - Developer Guide:
+      - Overview: developer/index.md
+      - Architecture: developer/architecture.md
+      - Project Structure: developer/project-structure.md
+      - Development Setup: developer/setup.md
+      - UV Workflows: developer/uv-workflows.md
+      - Testing: developer/testing.md
+      - Contributing: developer/contributing.md
+      - Changelog Process: developer/changelog-process.md
+      - Pre-commit Implementation: developer/pre-commit-implementation.md
+      - Creating Adapters: developer/creating-adapters.md
+      - Code Style Guide: developer/code-style.md
+  - API Reference:
+      - Overview: api/index.md
+      - Core:
+          - Parser: api/core/parser.md
+          - Validator: api/core/validator.md
+          - Models: api/core/models.md
+          - Exceptions: api/core/exceptions.md
+      - Adapters:
+          - Base Adapter: api/adapters/base.md
+          - Registry: api/adapters/registry.md
+          - MCP Mixin: api/adapters/mcp_mixin.md
+          - Sync Mixin: api/adapters/sync_mixin.md
+      - Utils:
+          - Variables: api/utils/variables.md
+          - Conditionals: api/utils/conditionals.md
+          - Gitignore: api/utils/gitignore.md
+  - Schema Reference:
+      - Overview: schema/index.md
+      - Schema v3.1.0: schema/v3.1.0.md
+      - Schema v3.0.0: schema/v3.0.0.md
+      - Schema v2.1.0: schema/v2.1.0.md
+      - Schema v2.0.0: schema/v2.0.0.md
+      - User Config Schema: schema/user-config.md
+  - Reference:
+      - Changelog: reference/changelog.md
+      - Deprecation Warnings: reference/deprecation.md
+      - FAQ: reference/faq.md
+      - Troubleshooting: reference/troubleshooting.md
+      - Glossary: reference/glossary.md
+      - Tags: reference/tags.md
+  - Community:
+      - Contributing: community/contributing.md
+      - Code of Conduct: community/code-of-conduct.md
+      - Feedback: community/feedback.md
+      - Support: community/support.md
+
+extra_css:
+  - stylesheets/extra.css
+
+extra_javascript:
+  - javascripts/extra.js

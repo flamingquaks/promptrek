@@ -1,0 +1,138 @@
+/* Extra CSS for PrompTrek Documentation */
+
+/* Custom brand colors */
+:root {
+  --promptrek-primary: #667eea;
+  --promptrek-secondary: #764ba2;
+  --promptrek-accent: #f093fb;
+}
+
+/* Custom header styling */
+.md-header {
+  background: linear-gradient(135deg, var(--promptrek-primary) 0%, var(--promptrek-secondary) 100%);
+}
+
+/* Custom link colors */
+.md-typeset a {
+  color: var(--promptrek-primary);
+}
+
+.md-typeset a:hover {
+  color: var(--promptrek-secondary);
+}
+
+/* Custom code block styling */
+.md-typeset code {
+  background-color: rgba(102, 126, 234, 0.1);
+  border-radius: 3px;
+}
+
+/* Custom admonition colors */
+.md-typeset .admonition.tip {
+  border-left-color: var(--promptrek-primary);
+}
+
+.md-typeset .admonition.tip > .admonition-title {
+  background-color: rgba(102, 126, 234, 0.1);
+}
+
+/* Table styling improvements */
+.md-typeset table:not([class]) {
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  border-radius: 4px;
+}
+
+.md-typeset table:not([class]) th {
+  background-color: rgba(102, 126, 234, 0.1);
+  font-weight: 600;
+}
+
+/* Custom button styling */
+.md-button {
+  background: linear-gradient(135deg, var(--promptrek-primary) 0%, var(--promptrek-secondary) 100%);
+  border: none;
+  color: white;
+}
+
+.md-button:hover {
+  background: linear-gradient(135deg, var(--promptrek-secondary) 0%, var(--promptrek-primary) 100%);
+}
+
+/* Card styling for feature highlights */
+.feature-card {
+  padding: 1.5rem;
+  border-radius: 8px;
+  background: rgba(102, 126, 234, 0.05);
+  border-left: 4px solid var(--promptrek-primary);
+  margin-bottom: 1rem;
+}
+
+/* Grid layout for feature cards */
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+/* Syntax highlighting improvements */
+.highlight .hll { background-color: rgba(102, 126, 234, 0.2); }
+.highlight .k { color: var(--promptrek-primary); font-weight: bold; }
+.highlight .s { color: #10b981; }
+.highlight .mi { color: #f59e0b; }
+
+/* Footer styling */
+.md-footer {
+  background: linear-gradient(135deg, var(--promptrek-secondary) 0%, var(--promptrek-primary) 100%);
+}
+
+/* Navigation breadcrumbs */
+.md-nav__link--active {
+  color: var(--promptrek-primary);
+  font-weight: 600;
+}
+
+/* Search box styling */
+.md-search__input {
+  border-radius: 8px;
+}
+
+/* Responsive improvements */
+@media screen and (max-width: 768px) {
+  .feature-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Schema diagram styling */
+.schema-diagram {
+  background: rgba(102, 126, 234, 0.05);
+  padding: 2rem;
+  border-radius: 8px;
+  margin: 2rem 0;
+  border: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+/* Version badge styling */
+.version-badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  background: var(--promptrek-primary);
+  color: white;
+  font-size: 0.85em;
+  font-weight: 600;
+  margin-left: 0.5rem;
+}
+
+/* Editor logo styling */
+.editor-logo {
+  max-width: 40px;
+  vertical-align: middle;
+  margin-right: 0.5rem;
+}
+
+/* Copy button improvements */
+.md-clipboard {
+  border-radius: 4px;
+}

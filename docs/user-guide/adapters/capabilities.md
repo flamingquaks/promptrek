@@ -1,0 +1,376 @@
+# Adapter Capabilities Matrix
+
+This document provides a comprehensive comparison of features supported by each PrompTrek adapter.
+
+## Quick Reference Table
+
+| Editor | Variable Substitution | Multi-Document Support | Sync Support | Project Files | Schema v3.0+ |
+|--------|:--------------------:|:----------------------:|:------------------:|:-------------:|:-------------:|
+| **GitHub Copilot** | ✅ | ✅ | ✅ | ✅  | ✅ |
+| **Cursor** | ✅ | ✅ | ✅ | ✅  | ✅ |
+| **Continue** | ✅ | ✅ | ✅ | ✅  | ✅ |
+| **Kiro** | ✅ | ✅ | ✅ | ✅  | ✅ |
+| **Cline** | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Claude Code** | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Windsurf** | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Amazon Q** | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **JetBrains AI** | ✅ | ✅ | ✅ | ✅ | ✅ |
+
+## Feature Descriptions
+
+### Variable Substitution
+
+Ability to replace template variables (e.g., `{{{ PROJECT_NAME }}}`) with actual values during generation.
+
+**Supported by**: All adapters
+
+**Example**:
+```yaml
+metadata:
+  title: "{{{ PROJECT_NAME }}} Assistant"
+variables:
+  PROJECT_NAME: "MyProject"
+```
+
+### Multi-Document Support
+
+Ability to organize content across multiple documents using the `documents` field.
+
+**Supported by**: All adapters
+
+**Example**:
+```yaml
+schema_version: "3.1.0"
+content: |
+  # Main guidelines
+  - General project rules
+
+documents:
+  - name: "typescript"
+    content: |
+      # TypeScript Guidelines
+      - Use strict TypeScript settings
+      - Prefer interfaces over types
+    description: "TypeScript coding guidelines"
+    file_globs: "**/*.{ts,tsx}"
+    always_apply: false
+
+  - name: "testing"
+    content: |
+      # Testing Standards
+      - Use Jest for unit tests
+      - Maintain 80% coverage
+    # Metadata fields optional - smart defaults used
+```
+
+### Sync Support
+
+Ability to read editor-specific files and create/update PrompTrek configuration from them.
+
+**Supported by**: All adapters
+
+**Command**:
+```bash
+promptrek sync --editor copilot --output project.promptrek.yaml
+promptrek sync --editor claude --output project.promptrek.yaml
+promptrek sync --editor cursor --output project.promptrek.yaml
+```
+
+### Project Files
+
+Generates project-level configuration files that can be committed to version control.
+
+**Supported by**: All adapters
+
+**Examples**:
+
+- `.github/copilot-instructions.md`
+- `.cursor/rules/index.mdc`
+- `.clinerules/*.md`
+
+### Schema v3.0+ Support
+
+Full support for PrompTrek schema v3.0 and later with top-level plugin fields.
+
+**Supported by**: All adapters
+
+**Features**:
+
+- Top-level `mcp_servers`, `commands`, `agents`, `hooks` fields
+- 100% backward compatible with v2.x nested structure
+- Automatic migration for legacy v2.x files
+- Production-ready stable schema
+
+**Learn more**: [Schema v3.0+ Specification](../upf-specification.md#schema-v300-stable)
+
+## Detailed Adapter Capabilities
+
+### GitHub Copilot
+
+**Files Generated**:
+
+- `.github/copilot-instructions.md` (repository-wide)
+- `.github/instructions/*.instructions.md` (path-specific)
+- `.github/prompts/*.prompt.md` (agent prompts)
+- `.vscode/mcp.json` (MCP server configuration)
+
+**Unique Features**:
+
+- ✅ Path-specific instructions with YAML frontmatter (applyTo field)
+- ✅ Round-trip sync (v2 lossless format)
+- ✅ Advanced glob pattern matching
+- ✅ MCP server integration
+- ✅ Schema v3.0+ with top-level plugins
+
+**Best For**: Large teams using GitHub, multi-component projects
+
+---
+
+### Cursor
+
+**Files Generated**:
+
+- `.cursor/rules/index.mdc` (project overview)
+- `.cursor/rules/*.mdc` (category-specific rules)
+- `.cursorignore` (indexing control)
+- `.cursorindexingignore` (indexing control)
+- `AGENTS.md` (agent instructions)
+- `.cursor/mcp.json` (MCP server configuration)
+
+**Unique Features**:
+
+- ✅ Modern `.mdc` rules system with metadata (description, file_globs, always_apply)
+- ✅ Always/Auto Attached rule types via metadata
+- ✅ Technology-specific rule generation with smart defaults
+- ✅ Advanced ignore file support
+- ✅ Round-trip sync
+- ✅ MCP server, commands, and agents support
+- ✅ Schema v3.0+ with top-level plugins
+
+**Best For**: AI-first development workflows, focused coding sessions
+
+---
+
+### Continue
+
+**Files Generated**:
+
+- `.continue/config.yaml` (main configuration with metadata)
+- `.continue/mcpServers/*.yaml` (individual MCP server configurations)
+- `.continue/prompts/*.md` (individual slash command prompts)
+- `.continue/rules/*.md` (rule files with frontmatter)
+
+**Unique Features**:
+
+- ✅ Modular file structure (one file per server/command)
+- ✅ YAML-based configuration following Continue's recommendations
+- ✅ Individual MCP server files with Continue metadata format
+- ✅ Individual prompt markdown files with frontmatter
+- ✅ Round-trip sync
+- ✅ Advanced rules directory
+- ✅ Schema v3.0+ with top-level plugins
+
+**Best For**: VS Code users, customizable AI workflows, modular configuration management
+
+---
+
+### Kiro
+
+**Files Generated**:
+
+- `.kiro/steering/*.md` (steering files)
+- `.kiro/specs/*.md` (specification files)
+- `.kiro/settings/mcp.json` (MCP server configuration)
+
+**Unique Features**:
+
+- ✅ Comprehensive steering system
+- ✅ YAML frontmatter support
+- ✅ Separate specs for features
+- ✅ Structured guidance approach
+- ✅ Round-trip sync
+- ✅ MCP server support
+- ✅ Schema v3.0+ with top-level plugins
+
+**Best For**: Structured development processes, specification-driven projects
+
+---
+
+### Cline
+
+**Files Generated**:
+
+- `.clinerules/*.md` (markdown rules)
+- `.vscode/settings.json` (MCP configuration)
+
+**Unique Features**:
+
+- ✅ Simple markdown format
+- ✅ VSCode-integrated autonomous agent
+- ✅ File creation/editing with user approval
+- ✅ Command execution and browser automation
+- ✅ Round-trip sync
+- ✅ MCP server support (via VSCode settings)
+- ✅ Schema v3.0+ with top-level plugins
+
+**Best For**: VSCode users wanting autonomous AI assistance, task automation workflows
+
+---
+
+### Claude Code
+
+**Files Generated**:
+
+- `.claude/CLAUDE.md` - Main project context and guidelines
+- `.mcp.json` - MCP server configurations (project root)
+- `.claude/commands/*.md` - Custom slash commands
+- `.claude/agents/*.md` - Autonomous agents
+- `.claude/settings.local.json` - Event hooks with tool matchers (Claude Code native format)
+- `.claude/hooks.yaml` - Event hooks without matchers (PrompTrek format)
+
+**Unique Features**:
+
+- ✅ Rich markdown context format
+- ✅ Full plugin ecosystem support (MCP, commands, agents, hooks)
+- ✅ Round-trip sync (v2/v3 lossless format)
+- ✅ Dual hooks format (native + PrompTrek)
+- ✅ Schema v3.0+ with top-level plugins
+- ✅ Autonomous agent support with trust levels
+- ✅ Custom slash command support
+
+**Best For**: Projects using Claude Code, comprehensive context needs, teams requiring full plugin ecosystem (MCP servers, custom commands, autonomous agents, event hooks)
+
+---
+
+### Windsurf
+
+**Files Generated**:
+
+- `.windsurf/rules/*.md`
+- `~/.codeium/windsurf/mcp_config.json` (system-wide MCP)
+
+**Unique Features**:
+
+- ✅ Markdown rules format
+- ✅ Technology-specific rules
+- ✅ Modular rule organization
+- ✅ Round-trip sync
+- ✅ MCP server support (system-wide)
+- ✅ Schema v3.0+ with top-level plugins
+
+**Best For**: Teams using Windsurf, organized AI assistance
+
+---
+
+### Amazon Q
+
+**Files Generated**:
+
+- `.amazonq/rules/*.md`
+- `.amazonq/cli-agents/*.json` (CLI agents)
+- `.amazonq/mcp.json` (MCP server configuration)
+
+**Unique Features**:
+
+- ✅ Rules directory support
+- ✅ CLI agents for code review, security, testing
+- ✅ AWS-integrated workflows
+- ✅ Round-trip sync
+- ✅ MCP server support
+- ✅ Schema v3.0+ with top-level plugins
+
+**Best For**: AWS-centric projects, cloud development
+
+---
+
+### JetBrains AI
+
+**Files Generated**:
+
+- `.assistant/rules/*.md`
+
+**Unique Features**:
+
+- ✅ IDE-integrated configuration
+- ✅ Markdown rules format
+- ✅ Round-trip sync
+- ✅ Schema v3.0+ with top-level plugins
+- ⚠️ MCP/prompts configured via IDE UI
+
+**Best For**: JetBrains IDE users (IntelliJ, PyCharm, etc.)
+
+---
+
+## Migration Guide
+
+### Moving Between Editors
+
+PrompTrek makes it easy to switch between editors while maintaining your prompts:
+
+```bash
+# Generate for your new editor
+promptrek generate project.promptrek.yaml --editor <new-editor>
+
+# Your existing Universal Prompt File works with all editors
+```
+
+### Using Multiple Editors
+
+Generate for all configured editors at once:
+
+```bash
+promptrek generate project.promptrek.yaml --all
+```
+
+### Upgrading to Schema v3.0+
+
+All adapters support schema v3.0 and later with top-level plugin fields:
+
+```bash
+# Migrate schema v2.x to v3.1
+promptrek migrate project.promptrek.yaml -o project-v3.promptrek.yaml
+
+# V2.x files still work with automatic migration
+promptrek generate project-v2.promptrek.yaml --all
+```
+
+## Comparison by Use Case
+
+### Best for Team Collaboration
+
+**GitHub Copilot** - Repository-wide instructions, path-specific rules, version controlled
+
+### Best for Individual Developers
+
+**Cursor** - AI-first interface, modern rules system, smart context management
+
+### Best for Modular Configuration
+
+**Continue** - Separate files for servers/commands, easy to organize
+
+### Best for Structured Projects
+
+**Kiro** - Steering documents, specification-driven development
+
+### Best for Autonomous Workflows
+
+**Cline** - File operations, command execution, browser automation
+
+### Best for Comprehensive Context
+
+**Claude Code** - Rich markdown format, full plugin ecosystem
+
+### Best for AWS Development
+
+**Amazon Q** - CLI agents, AWS-integrated workflows
+
+### Best for JetBrains IDEs
+
+**JetBrains AI** - Native IDE integration
+
+## Related Documentation
+
+- [Editor Adapters](index.md) - Detailed adapter documentation
+- [UPF Specification](../upf-specification.md) - Schema documentation
+- [Sync Feature](../workflows/sync.md) - Round-trip sync guide
+- [Getting Started](../../getting-started/installation.md) - Quick start guide
