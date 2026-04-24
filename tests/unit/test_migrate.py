@@ -48,16 +48,16 @@ instructions:
 
         assert result.exit_code == 0
         assert "✅ Migrated" in result.output
-        assert "1.0.0 → 3.0.0" in result.output
+        assert "1.0.0 → 3.1.0" in result.output
 
         # Check output file was created
         output_file = tmp_path / "test.promptrek.v3.yaml"
         assert output_file.exists()
 
-        # Verify it's valid v3.0
+        # Verify it's valid v3.1
         content = output_file.read_text()
         assert (
-            "schema_version: 3.0.0" in content or 'schema_version: "3.0.0"' in content
+            "schema_version: 3.1.0" in content or 'schema_version: "3.1.0"' in content
         )
         assert "content:" in content
 
@@ -86,8 +86,8 @@ instructions:
         assert result.exit_code == 0
         assert output_file.exists()
 
-    def test_migrate_v20_to_v30(self, tmp_path):
-        """Test migrating v2.0.0 to v3.0.0."""
+    def test_migrate_v20_to_v31(self, tmp_path):
+        """Test migrating v2.0.0 to v3.1.0."""
         v20_file = tmp_path / "test.promptrek.yaml"
         v20_file.write_text(
             """
@@ -106,29 +106,29 @@ content: |
         result = runner.invoke(cli, ["migrate", str(v20_file)])
 
         assert result.exit_code == 0
-        assert "2.0.0 → 3.0.0" in result.output
+        assert "2.0.0 → 3.1.0" in result.output
 
         # Check output file
         output_file = tmp_path / "test.promptrek.v3.yaml"
         assert output_file.exists()
         content = output_file.read_text()
         assert (
-            "schema_version: 3.0.0" in content or 'schema_version: "3.0.0"' in content
+            "schema_version: 3.1.0" in content or 'schema_version: "3.1.0"' in content
         )
 
     def test_migrate_already_v3(self, tmp_path):
-        """Test migrating a file that's already v3.0."""
+        """Test migrating a file that's already v3.1."""
         v3_file = tmp_path / "test.promptrek.yaml"
         v3_file.write_text(
             """
-schema_version: "3.0.0"
+schema_version: "3.1.0"
 metadata:
   title: "Test"
-  description: "Already v3.0"
+  description: "Already v3.1"
   version: "1.0.0"
 content: |
   # Test
-  This is v3.0 format.
+  This is v3.1 format.
 """
         )
 
@@ -353,8 +353,8 @@ instructions:
         new_content = output_file.read_text()
         assert new_content != "existing content"
         assert (
-            "schema_version: 3.0.0" in new_content
-            or 'schema_version: "3.0.0"' in new_content
+            "schema_version: 3.1.0" in new_content
+            or 'schema_version: "3.1.0"' in new_content
         )
 
     def test_migrate_verbose(self, tmp_path):
